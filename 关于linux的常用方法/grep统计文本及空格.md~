@@ -1,0 +1,20 @@
+#grep统计文件
+统计这个文件，总共:
+- grep -rn "" ./ | wc -lwc
+排除掉空行
+- grep -rvn "^$" *c *.h | wc -lwc
+
+PS:
+```
+zbh@zbh-Latitude-E5440:~/test$ grep -rn "" test 
+1:It is a test char.From the 2th line,it is a tab,space,newling,abcABC
+2:	
+3: 
+4:
+5:abcABC
+zbh@zbh-Latitude-E5440:~/test$ grep -rn " " test 
+1:It is a test char.From the 2th line,it is a tab,space,newling,abcABC
+3: 
+zbh@zbh-Latitude-E5440:~/test$ grep -rn "^$" test 
+4:
+```
