@@ -1,0 +1,46 @@
+#关于头文件
+
+1.头文件主要存放的是
+- 函数声明
+- 全局变量
+- 结构体的定义和声明
+
+2.之所以，在每个头文件前面加一个条件包含，是为里防止同一个文件里面，变量重新声明，这样是会报错的，函数声明无所谓。如果是两个文件就无所谓，如main.c和add.c
+
+3.关于管理
+一方面希望每个文件能完成它要的功能，一方面也想尽少地维护头文件。那我们进行了折衷处理。
+中等规模一个头文件就好。
+
+4.如果每个头文件都使用了条件依赖，那我们肯定都能包含进来，而不必头文件的依赖关系。
+
+5.例子，有时候，结构题需要声明，可以这样做
+```
+struct buf;
+struct context;
+struct file;
+struct inode;
+struct pipe;
+struct proc;
+struct rtcdate;
+struct spinlock;
+struct stat;
+struct superblock;
+```
+fs.c文件里面的是有依赖顺序的，后面的基本都依赖前面的
+```
+#include "types.h"
+#include "defs.h"
+#include "param.h"
+#include "stat.h"
+#include "mmu.h"
+#include "proc.h"
+#include "spinlock.h"
+#include "fs.h"
+#include "buf.h"
+#include "file.h"
+```
+
+5.
+gcc -S
+gcc -c
+gcc -o

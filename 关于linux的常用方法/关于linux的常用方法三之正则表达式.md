@@ -74,7 +74,9 @@ abc ABC
 zbh@zbh-Latitude-E5440:~$ grep  "[abcABC]" hello 
 zhang Zhang
 abc ABC
-
+//把括号里面的进行重复
+zbh@zbh-Latitude-E5440:~/test$ grep -rn "\((\*\)\{1,\}\(\*)\)\{1,\}"
+gtest:5:(*(**)*)*)
 
 ```
 这说明，[abc|ABC]和[abcABC]没有区别，也不是扩展正则表达式。

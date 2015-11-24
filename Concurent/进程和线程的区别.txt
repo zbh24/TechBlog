@@ -1,0 +1,109 @@
+#进程和线程的区别
+
+###基本概念
+进程是独立的地址空间的，通过fork，一个进程等待另一个使用waitpid
+线程有很多是共享的，通过pthread，这个通过pthread_join
+
+- 线程共享的数据有：代码段，数据段，堆。
+- 线程独立的是：它们拥有各自独立的**运行栈**，寄存器组，和程序计数器。
+
+饥饿 忙等 死锁
+###多线程程序中的共享变量
+像全局变量就是共享的，所以我们要管理他，提出用信号量解决这个问题。
+P 和 V
+互斥锁
+p(mutext)
+v(mutext)
+
+我实现的那种是自旋锁，是忙等。
+sleep 和 wakeup 是排队的，非自旋，效率比较高。
+
+PV使用的是非自旋锁。
+> P：
+spin_lock();
+s.value=s.value-1;  
+spin_unlock();
+if (s.value<0) asleep(s.queue);
+
+
+先把value减1。然后判断，如果小于0 ，则阻塞。否则进入临界区。
+
+> V:
+spin_lock();
+s.value=s.value+1; 
+spin_unlock();
+if (s.value<=0) wakeup(s.queue);
+
+
+先把value加1，然后判断，如果小于等于0，则表示有县城阻塞，则唤醒这个进程。
+
+#### 生产者和消费者
+```
+p(full)
+P(mutex1)
+fornt = fornt +1
+v(mutext1)
+v(empty)
+
+p(empty)
+P(mutex2)
+fornt = fornt +1
+v(mutext2)
+v(full)
+```
+
+####读者和写者问题
+
+- 假设有多个读者，和写者。 
+- 可以多个读者同时读，但是任何时候只能有一个写者去写。
+- 这里有个读优先还是写优先的问题，就是说：到底是读者排队还是写者去排队。
+PS:无论是读者优先还是写者优先，都可能导致饥饿问题，就是存在无限等待的问题，比如读者优先，假如读者不停止的话，写者就永远等不到。
+
+
+- 读者优先：读者和写者同时在排队，读者不会因为有写者在排队就不进去。
+```
+读者
+P（mutext）
+count++
+if(count == 1)
+	p(w)
+v(mutext)
+
+
+P(mutext)
+count--
+if (count == 0)
+	v(w)
+v(mutext)
+
+写者
+p(w)
+
+v(w)
+```
+
+- 写者优先：读者和写者同时在排队，写者来了，就会限制新的读者进来，直到所有读者离开。
+读者
+```
+p(r)
+P（mutext）
+count++
+if(count == 1)
+	p(w)
+v(mutext)
+v(r)
+....
+P(mutext)
+count--
+if (count == 0)
+	v(w)
+v(mutext)
+
+写者
+P(r)
+p(w)
+
+v(w)
+v(r)
+```
+初了信号量以外，还有其他同步技术，比如监控器，Java线程就是采用这个的。不过，监控器也可以用信号量来实现。

@@ -1,0 +1,6 @@
+Longest common substring problem && Longest common subsequence problem
+
+一个是最长公共自序列，一个是最长公共子串。
+前者包含后者，都可以用动态规划去解决。
+
+diff就是利用LCS来解决的。求最长公共字串，然后前面的是delete，后面的insert。

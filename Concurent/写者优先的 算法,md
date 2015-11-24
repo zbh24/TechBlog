@@ -1,0 +1,38 @@
+加锁的顺序一致，就不会出现死锁。
+写者优先的算法，就需要在读者的基础上进行修改了。
+```
+读者：
+P(r)
+P(mutext)
+r_count++
+if(r_count == 1)
+	P(w)
+V(mutext)
+V(r)
+...
+开始读书
+...
+P(mutext)
+r_count--
+if (r_count == 0)
+	V(w)
+V(mutext)
+
+写者：
+
+p(mutext)
+w_count++
+if(w_count == 1)
+   p(r)
+v(mutext)
+。。。
+P(W)
+开始写
+V（W）
+。。。
+p(mutext)
+w_count--
+if(w_count == 0)
+   V(r)
+v(mutext)
+```

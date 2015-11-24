@@ -90,6 +90,8 @@ diff：比较两个文件，以行为单位
 - B:空行
 - b：一行中的空格
 - i:一行中大小写
+number start ,hash,number start
+diff -B left right:忽略空行
 
 [2]
 cmp是以字节为单位的
@@ -97,4 +99,5 @@ cmp是以字节为单位的
 [3]
 升级就是比较新旧文件的不同，如果把不同的制作成补丁，然后由补丁来升级旧文件。
 patch命令就是diff来生成补丁的。
+
 
