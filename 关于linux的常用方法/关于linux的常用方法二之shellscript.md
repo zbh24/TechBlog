@@ -244,3 +244,7 @@ tcpdump
 [6]xargs
 这个命令就是产生某个命令参数的意思，因为有的命令不支持管道，就需要xargs来帮忙了。
 find / -name "zhang" | xargs ls -l
+
+[7]tar
+tar -cvf dftl.tar deftl /:压缩
+tar -xvf dftl.tar:解压缩

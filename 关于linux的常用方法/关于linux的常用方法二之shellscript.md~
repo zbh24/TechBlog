@@ -44,6 +44,7 @@ shell:就是先fork一个进程出来，然后exec一个程序。
 
 PS:经过研究发现，每个shell进程都会有内存来保存这些命令。shell退出后，会把命令添加到末尾。先退出先添加到末尾。
 shell进程启动以后。应该有两个数组，一个旧历史命令，一个新历史命令，查找历史记录时，如果这个新的没有了，则寻找旧的。
+数据结构就是两个数组。
 
 2.命令别名：
 alias lm="ls -al"，看起来不错，不知道有什么用。
@@ -243,3 +244,7 @@ tcpdump
 [6]xargs
 这个命令就是产生某个命令参数的意思，因为有的命令不支持管道，就需要xargs来帮忙了。
 find / -name "zhang" | xargs ls -l
+
+[7]tar
+tar -cvf dftl.tar deftl /:压缩
+tar -xvf dftl.tar:解压缩
