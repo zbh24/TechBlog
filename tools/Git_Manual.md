@@ -14,7 +14,7 @@ git目录里面有个.git，然后这里面存放的是版本库（Repository）
 -  git checkout -b newbranch
 
 ####撤销修改
-- git diff:如果暂存区有，就是比较工作区和暂存区，否则就是比较工作区和版本库。
+- git diff:如果暂存区有，就是比较工作区和暂存区，否则就是比较工作区和版本库。或者直接用git diff --staged来比较。
 - git diff HEAD -- readme.txt:命令可以查看工作区和版本库里面最新版本的区别
 - git checkout -- file:可以丢弃工作区的修改，先回退带到暂存区，暂存区没有，就回退到版本库
 - git reset HEAD file可以把暂存区的修改撤销掉（unstage），不修改工作区。
