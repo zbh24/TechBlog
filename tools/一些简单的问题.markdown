@@ -1,0 +1,41 @@
+﻿# 一些简单的问题
+
+标签（空格分隔）： 读书笔记
+---
+
+#emacs
+- 在emacs里面*命令*和*函数*的区别不大，就是命令就是通过函数去实现的。command和function。函数详细，命令简单。
+- 直接执行命令M-X COMMAND,比如M-X evav-buffer
+- 很重要的，你不会你可以通过，c-h?去得到帮助。很重要的有以下几个。(SPC是空格键，DEL是）前两个很重要
+[1] c-h a patten:展示那些command符合我们给出的patten.通过command可以去找按键。
+[2] c-h c keys:展示你按键的command，也就是通过按键去找command。（c-h kjkeys 展示详细信息）
+[3] c-h f function：展示这个函数的意思
+[4] c-h F command:on-line dislpy the commnd
+
+- c-x 1：只留一个buffer。c-x c-b:列出缓冲区。c-c b .emacs:打开缓冲区。C-X C-s；保存当前缓冲区。C-x s；保存多个缓冲区
+- c-x,M-x:一个字符扩展，一个命令扩展
+
+
+Emacs 的命令就像天上的星星，数也数不清。把它们都对应到 CONTROL 和 META
+组合键上显然是不可能的。Emacs 用扩展（eXtend）命令来解决这个问题，扩展
+命令有两种风格：
+
+C-x     字符扩展。  
+C-x 之后输入另一个字符或者组合键。
+M-x     命令名扩展。
+M-x 之后输入一个命令名。
+
+- 最底下回显区(echo area),上面的叫做状态栏（mode line)
+
+- 主模式通常会改变一些命令的行为。比方说，不管编辑什么语言的程序代码，你
+都可以用一个相同的命令来添加注释。但是在不同的语言中注释的语法往往是不
+同的，这时不同的主模式就会用各自不同的语法规则来添加注释。主模式都是可
+以用 M-x 启动的扩展命令，M-x fundamental-mode 就可以切换到 Fundamental
+模式。
+
+- C-X 2:划为两个窗格，C-X O：不同的窗格之间进行切换。>> 试试用 C-M-v 滚动下方的窗格。
+   （如果你并没有 META 键，用 ESC C-v 也可以。）
+【向上滚动是 C-M-S-v，也就是同时按住 CONTROL、META 和 SHIFT 再按 v】
+
+
+
