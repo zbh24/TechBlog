@@ -8,7 +8,7 @@
 - 直接执行命令M-X COMMAND,比如M-X evav-buffer
 - 很重要的，你不会你可以通过，c-h?去得到帮助。很重要的有以下几个。(SPC是空格键，DEL是）前两个很重要
 [1] c-h a patten:展示那些command符合我们给出的patten.通过command可以去找按键。
-[2] c-h c keys:展示你按键的command，也就是通过按键去找command。（c-h kjkeys 展示详细信息）
+[2] c-h c keys:展示你按键的command，也就是通过按键去找command。（c-h k keys 展示详细信息）
 [3] c-h f function：展示这个函数的意思
 [4] c-h F command:on-line dislpy the commnd
 
@@ -38,4 +38,4 @@ M-x 之后输入一个命令名。
 【向上滚动是 C-M-S-v，也就是同时按住 CONTROL、META 和 SHIFT 再按 v】
 
 
-
+- C-u 8 c-f:C-u表示重复次数
