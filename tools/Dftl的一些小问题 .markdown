@@ -34,4 +34,13 @@ An SLRU cache is divided into two segments, a probationary segment and a protect
 - 随机替换（random replace)
 - 最少最近使用（Least recently used)
 - 最少频繁使用(Least frenquency used)
-- segment LRU(把整个lru分成两个区，一个保护区，一个暂时区。在保护区里访问只会移动到保护区顶端，不会增加频率.所以，在保护区里面频率都是访问两次的)
+- segment LRU(把整个lrviu分成两个区，一个保护区，一个暂时区。在保护区里访问只会移动到保护区顶端，不会增加频率.所以，在保护区里面频率都是访问两次的)
+
+###我的算法前提
+1.我的算法是从初始块开始执行的，而且不断电，这样就不需要进行扫描建立之类的。
+
+2.这样我的cmt和gtd都在内存里面。我的freeblock开始也在内存里面。cmt肯定为空，那么最开始gtd是不是为空呢.还是一开始就为它建立起来呢。这是个问题。这是这个算法很重要的一个问题。
+
+3.什么时候开始进行gc，这也是个问题。
+
+4.模块化，结构化编程就意味着。这个函数只考虑自己的上面的操作，我需要什么就操作，我不关心它具体是什么。
