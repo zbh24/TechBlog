@@ -246,5 +246,5 @@ tcpdump
 find / -name "zhang" | xargs ls -l
 
 [7]tar
-tar -cvf dftl.tar deftl /:压缩
+tar -cvf dftl.tar deftl :压缩
 tar -xvf dftl.tar:解压缩

@@ -56,3 +56,10 @@ M-x 之后输入一个命令名。
 你不能用 C-g 退出递归编辑，因为 C-g 的作用是取消“本层递归编辑之内”的
 命令和其参数（arguments）。
 
+-----------------------------------------------------------
+Oher command
+- c-k:kill the char
+- kill-whole-line:kill the current char,it bounds to the f12
+- m-w: copy
+- c-y:paste
+- c-w:cut
