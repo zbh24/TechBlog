@@ -1,0 +1,33 @@
+﻿# 每天常识
+
+标签（空格分隔）： 学习笔记
+
+---
+
+###技巧
+1.find / -name sf 2> /dev/null:这个那么包括文件夹的名字
+
+2.find / -name sf 2> /dev/null | xargs ls -l
+
+3.find / -name *.v 2>/dev/null | xargs grep -rn presburg
+
+4.
+上面和这个区别在哪儿
+find /home/zbh -name *.v 2> /dev/null | grep -rn presburg:
+答案：cat ftl.c | grep -rn gc。
+测试证明，grep的确是不支持管道的，所以前面要加上xargs。
+
+5.
+- 这个不支持，find的输出无法给到grep,那么grep就直接在本目录下应用。
+所以对于find的命令，还是要用xargs
+- 第二个，find的-name是占位符，不是正则表达式，而且那么包括目录名字
+- find /home/zbh -name *.v 2> /dev/null | xargs grep -rn presb
+
+6.
+实践证明了很好用的搜索方案。
+find ~/ -name *.v 2>/dev/null | xargs grep -rn presbu 2>/dev/null
+解释：对于find的每行，每行是个输出结果，然后对每行执行一次grep。这就是这个命令的作用。
+
+
+
+
