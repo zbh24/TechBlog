@@ -26,7 +26,23 @@ find /home/zbh -name *.v 2> /dev/null | grep -rn presburg:
 6.
 实践证明了很好用的搜索方案。
 find ~/ -name *.v 2>/dev/null | xargs grep -rn presbu 2>/dev/null
-解释：对于find的每行，每行是个输出结果，然后对每行执行一次grep。这就是这个命令的作用。
+解释：对于find的每行，每行是个输出结果，然后对每行执行一次grep。这就是这个命令的作用
+
+-----------------------------------------
+补充说明以下:
+1.xargs：是用来使那些不支持管道命令的来实现管道，它通过空格或者换行来产生参数（arguments).
+
+2.如 find / -name sf | ls -l是不会详细说明的找到的那些 文件，因为ls不支持管道命令。正确写法。
+find / -name sf | xargs ls -l
+
+3.grep本身就支持管道命令，那我们为什么要用xargs，那是因为我们需要它的产生参数的形式。
+find / -name *.v 2>/dev/null | grep -rn presburg 这个会把这些结果当作字符串，直接处理。
+
+find / -name *.v 2>/dev/null | xargs grep -rn presburg
+这个呢会通过xargs的换行产生参数，然后给grep，这样就达到了我们的目的。
+
+
+
 
 
 
