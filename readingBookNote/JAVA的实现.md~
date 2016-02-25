@@ -96,5 +96,3 @@ Objects that persist longer are moved to the old generation (also called the ten
 The permanent generation (or permgen) was used for class definitions and associated metadata prior to Java 8. Permanent generation was not part of the heap.[23][24] The permanent generation was removed from Java 8.[25]
 Originally there was no permanent generation, and objects and classes were stored together in the same area. But as class unloading occurs much more rarely than objects are collected, moving class structures to a specific area allowed significant performance improvements.[23]
 
-Generational collection:就是现在HOTSPOT里面采用的吧。
-

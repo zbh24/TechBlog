@@ -32,6 +32,10 @@ lbn pbn lsns
 可以认为data block是block-level，而log是sector-level的。
 通常这些映射表是放在 SRAM里面。
 
+Merge:有这几种，
+1）switch：直接交换
+2）合并，merge
+
 
 
 ##FAST
@@ -56,13 +60,13 @@ log block：是sector—level,然后分为全相连还是组相连
 4）
 - 地址匹配算法，Address Translation
 - 垃圾回收算法，Garbage Collection
--
-5）读，没问题
-6）那写和update呢
-- write algoithm: For write requests, DFTL allocates the next available free page in the Current Data Block, writes to it and then updates the map entry in the CMT.
-- update algorithm: 
-translation block  data block free block
-- gc里面有个lazy更新。
+
+5）另外两个block：current data block和current translation block。
+- 读：那个算法1，地址转换完成就可以读了。
+- 写和更新是一样的：直接写current data block，然后更新CMT，这是个lazy算法。
+- GC：分两种块儿。：
+- 如果是translation black，那么就直接拷贝到current translation block，然后更心不甘GTD。
+- 如果是data blck，我们只更新CMT。
 
 ##other
 1）为什么要有逻辑地址到物理地址的映射？

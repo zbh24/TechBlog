@@ -1,0 +1,88 @@
+#经典算法回溯：深度搜索+剪枝
+暴力破解法一般什么问题都能解决，但是你要是用这个来解决问题，基本上都不是正确答案，无论是空间还是时间上都很不理想。比如一个8皇后，它的空间树与有8的8次方这么大。所以，就考虑提前检测条件，如果不符合，就直接返回，不必尝试到最后一层，这样进行剪枝。（关键是：每进行一步，就检测条件，不返回符合，而不是把所有条件都填上才进行检测）。
+回溯法的算法思想伪代码大概如下：
+
+```
+int a[n]; // 答案空间
+void try(int i) {
+    if(i >= n) // n代表深度，
+       输出结果;
+    else {
+       for(j = 下界; j <= 上界; j=j+1)  // 枚举每个节点所有可能的选择
+       {    a[i] = j;
+            if(check(j))                 // 满足限界函数和约束条件
+            {     
+                   try(i+1);  // 进入下一层
+            }
+        }
+        a[i] = -1; // 回溯前的清理工作（如a[i]置空值等）;
+    }
+}
+```
+一般的解题思路都是先画出解空间树，然后按照上面的框架进行求解。
+下面附上我写的N皇后代码：
+```
+#include<stdio.h>
+#include<stdlib.h>
+
+int a[100];
+int N; // backtrace‘s deep
+int M; // backtrace's span
+int count;
+
+int print() {
+    int i;
+    printf("The %d's answer is:\n",count);
+    for(i = 0;i < N;i++) {
+        printf("%d ",a[i]);
+    }
+    printf("\n");
+}
+
+// evary time check the new add element with all the exists elements
+int check(int i) {
+    int j;
+    for(j = 0;j < i;j++) { // The Vertif 
+        if(a[i] == a[j] || abs(i-j) == abs(a[i]-a[j]))
+            return 0;
+    }
+    return 1;
+
+}
+
+void try (int i) {
+    int j;
+    
+    if(i >= N) {
+        count++;
+        print();
+        return;
+    }
+    for(j = 0;j < M; j++) { // The span
+        a[i] = j;
+        if(check(i)) {
+            if(i < N) { // The deep 
+                try(i+1);
+            }
+        }
+    }
+    a[i] = -1; // The deafult value is -1.
+}
+
+void init() {
+    int i;
+    for(i = 0;i < 100;i++)
+        a[i] = -1;
+    count = 0;
+}
+
+
+int main(){
+    int value;
+    printf("Please input the number of the queue\n");
+    scanf("%d",&value);
+    M = N = value;
+    init();
+    try(0);
+}
+```

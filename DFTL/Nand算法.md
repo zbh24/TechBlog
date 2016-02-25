@@ -32,6 +32,10 @@ lbn pbn lsns
 可以认为data block是block-level，而log是sector-level的。
 通常这些映射表是放在 SRAM里面。
 
+Merge:有这几种，
+1）switch：直接交换
+2）合并，merge
+
 
 
 ##FAST
