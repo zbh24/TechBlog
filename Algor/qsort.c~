@@ -1,0 +1,7 @@
+
+void qsort(int A[],int low,int high) {
+    if(low < high) {
+        privoloc = part(A[]
+
+    }
+}
