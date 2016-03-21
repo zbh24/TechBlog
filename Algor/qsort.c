@@ -3,12 +3,12 @@ int part(int A[],int low,int high) {
   int key = A[low];
 
   while(low < high) {
-    while(low < high && A[high] > key) {
+    while(low < high && A[high] >= key) {
       high--;
     }
     swap(A[low],A[high]);
     
-    while(low < high && A[low] < key) {
+    while(low < high && A[low] <= key) {
       low++;
     }
     swap(A[low],A[high]);
