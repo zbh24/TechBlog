@@ -20,11 +20,13 @@ parse() {
     } else if(token == a){
         lex();
         if(token == b) {
-            return;
+             parse();
+             return;
         }
     } else if(token == a'){
         lex();
         if(token == b') {
+	    parse();
             return;
         }
     }
