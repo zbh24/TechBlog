@@ -1,0 +1,67 @@
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <math.h>
+#include <iostream>
+#include <string>
+#include <set>
+#include <vector>
+#include <algorithm>
+ 
+using namespace std;
+
+struct {
+	int w;
+	int v;
+} list[100];
+
+int dp[100][100];
+
+
+//most sub structure
+//dp[i][j]:represtings the the nth packget 
+//when the v is j,the max is:
+
+// state and state transform
+int main() {
+	int n,w;
+	int i,j;
+	
+	while (cin>>n>>w) {
+	  
+	        // input the weight and v 
+		for(i=1; i <= n; i++)
+			cin>>list[i].w>>list[i].v;
+		
+		//the nth food v max = 0  
+		for (i = 0; i <= w; i++)
+			dp[0][i] = 0;
+			
+		for (i = 1; i<= n; i++) {
+		        //1) j big than the nth packet
+			for (j = w; j >= list[i].w ;j--)
+			        // Put or not Put
+				dp[i][j] = max(dp[i-1][j-list[i].w]+list[i].v,dp[i-1][j]);
+			//2) because it can;t put in ,so equal the last
+			for (j = list[i].w - 1; j>=0 ;j--)
+				dp[i][j] = dp[i-1][j];
+		}
+		//output the answer
+		for(i = 0; i <= n; i++) {
+			for (j=0; j <= w; j++)
+				cout<<dp[i][j]<<" ";
+			cout<<"\n"<<endl;
+		}
+	}
+}
+
+int dp() {
+  int i,j;
+
+  for (i = 1; i<= n; i++) {
+    for (j = w; j >= list[i].w ;j--)
+      dp[j] = max(dp[j-list[i].w]+list[i].v,dp[j]);
+  }
+
+  return dp[w];
+}

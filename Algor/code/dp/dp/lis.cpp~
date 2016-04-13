@@ -1,0 +1,54 @@
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <math.h>
+#include <iostream>
+#include <string>
+#include <set>
+#include <vector>
+#include <algorithm>
+ 
+using namespace std;
+
+
+// longest increasing sequence
+
+
+vector<int> input;
+vector<int> res;
+int dp[100];
+int count;
+
+//dp[i]:
+//in the first n element,the lis is i:
+//so the transformis :
+//if(a[i] > a[i-1] then dp[i-1] + 1 else max(dp[i-1],1)
+int lis() {
+  int len;
+  int i;
+  
+  len = input.size();
+  dp[0] = 1;
+  for(i = 1;i < len ;i++) {
+    for(j = 0;j < i;j ++)
+      if(input[i] > input[j])
+	
+  }
+  return 0;
+}
+
+
+int main() {
+  int n;
+  int i;
+  int temp;
+
+  while(cin >> n) {
+    for(i = 0; i < n; i++) {
+      cin >> temp;
+      input.push_back(temp);
+    }
+    lis();
+    cout<<dp[n-1]<<endl;
+  } 
+}
