@@ -40,5 +40,23 @@ int gennext(string s) {
   return 0;
 }
 ```
+
+前缀和后缀：
+ABCDAB：
+前缀为：A，AB，ABC，ABCD，ABCDA
+后缀为：BCDAB，CDAB，DAB，AB，B
+所以最大长度为2,即是AB。
+
+
+举个例子证明为什么不回退是正确的。
+主串：ABAzzzzzzzzzzzzzzzz
+模串：ABAxxxxxxxxxxxxxx
+
+现在匹配到z和x不匹配了，我们主串没有回退，而是直接停留在那儿？为什么可以这样作呢。
+因为我们要用到我们已经匹配到的信息，我们证明了前三个字母是相等的，假设反问一下，如果我们要是回到主串第二个BAzzzzzzzzzzzz
+开始匹配并在z位置之前匹配成功，要求是什么，要求模串前两个是BA。但是，根据已经匹配到的信息，模串的后缀即后两个BA肯定是相等的，但根据NEXT数组，
+没有这样前缀的存在，所以，回退是没有用的，多余的，所以不用回退那儿。
+
+
 参考july算法：
 http://wiki.jikexueyuan.com/project/kmp-algorithm/define.html
