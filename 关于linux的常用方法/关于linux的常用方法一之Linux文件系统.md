@@ -121,7 +121,7 @@ find /home -name “ping*”
 find / -type s
 
 **tar**
-打包： tar -cvf src dst
+打包： tar -cvf dst src
 解包：tar -xvf filename
 
 ####查找内容
