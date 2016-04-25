@@ -13,6 +13,14 @@ using namespace std;
 
 #define maxvalue 1000000
 
+ template <typename T>
+  T StringToNumber ( const string &Text )
+  {
+     istringstream ss(Text);
+     T result;
+     return ss >> result ? result : 0;
+  }
+
 int stonum(const string &text)
 {
      istringstream ss(text);
