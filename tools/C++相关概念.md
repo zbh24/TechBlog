@@ -51,7 +51,7 @@ T Store<T> ::GetElem(void) {
     
 }
 
-template<class <T>
+template<class T>
 void Store<T> ::PutElam(T x) {
 }
 

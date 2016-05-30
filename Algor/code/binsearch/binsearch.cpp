@@ -2,12 +2,12 @@
 int binsearch(int A[],int low ,int high,int key) {
 
   int mid; 
-  while(low < high) {
+  while(low <= high) {
     mid = (low + high) / 2;
     if(A[mid] > key)
       high = mid - 1;
     else if(A[mid] < key)
-      low = mid +1;
+      low = mid + 1;
     else
       return mid;
   }
@@ -24,7 +24,7 @@ int binsearch(int A[],int low ,int high,int key) {
   int max_value;
 
   max_mid = max_value = 0;
-  while(low < high) {
+  while(low <= high) {
     mid = (low + high) / 2;
     value = dosomething(A[mid]);
 
