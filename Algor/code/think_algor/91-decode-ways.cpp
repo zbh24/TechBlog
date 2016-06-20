@@ -38,6 +38,14 @@ public:
   }
 };
 
+/*
+1. dfs(len,count+1);
+   dfs(len,++count);
+   Mind the difference
+
+2.
+
+ */
 
 class Solution {
 public:
