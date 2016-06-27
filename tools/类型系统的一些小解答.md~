@@ -1,4 +1,4 @@
-# 类型系统的一些小解答
+﻿# 类型系统的一些小解答
 
 标签（空格分隔）： 未分类
 
@@ -22,22 +22,6 @@ Monad就是一种数据结构，要求符合一些性质，就是Monad，比如�
 1）需要都是类似的option
 2)需要有绑定和返回的
 3）比如我自己的定义的 do 和 ret结合一起就是一种Monad.
-A monad is created by defining a type constructor M and two operations, bind and return (where return is often also called unit).
-就这三个条件，不如Haskell的Maybe Monad
-```
-data Maybe t = Just t | Nothing
-
-x // y = 
-   x >>= (\a -> 
-     y >>= (\b -> 
-       if b == 0 then Nothing else Just (a / b)))
-
--- Example usages
-Just 10 // Just 5 -- This expression returns Just 2
-Just 10 // Just 0 -- This expression returns Nothing
-(Just 10 // Just 0) // Just 2 -- This expression (a pipeline of two composed "//" calls) returns Nothing
-
-```
 
 4.列表 元组 记录 序对
 list tuple record pair
@@ -83,18 +67,6 @@ t t
      (+ n m))
    
 ((lambda (m n) (+ m n)) (+ 1 2) (+ 3 4))
-```
-其实，let的表达式是这样的，lambda表示是这样的。
-```
-(let ((<var1> <exp1>)
-      (<var2> <exp2>)
-      ...
-      (<varn> <expn>))
-   <body>)
-   
-   ((lambda (p1 p2...) body) v1 v2...)
-   
-   (let ((p1 v1) (p2 v2)...) body)
 ```
 
 
