@@ -1,0 +1,663 @@
+DIGEST 55bbd4180e41b8143141853f58a9784f
+FStlc
+R64:67 Maps <> <> lib
+R85:93 Smallstep <> <> lib
+R111:115 Types <> <> lib
+mod 5127:5130 <> STLC
+ind 5204:5205 STLC ty
+constr 5221:5225 STLC TBool
+constr 5237:5242 STLC TArrow
+R5230:5231 Stlc <> ty ind
+R5258:5259 Stlc <> ty ind
+R5252:5253 Stlc <> ty ind
+R5246:5247 Stlc <> ty ind
+ind 5333:5334 STLC tm
+constr 5350:5353 STLC tvar
+constr 5370:5373 STLC tapp
+constr 5396:5399 STLC tabs
+constr 5428:5432 STLC ttrue
+constr 5443:5448 STLC tfalse
+constr 5459:5461 STLC tif
+R5363:5364 Stlc <> tm ind
+R5357:5358 Maps <> id ind
+R5389:5390 Stlc <> tm ind
+R5383:5384 Stlc <> tm ind
+R5377:5378 Stlc <> tm ind
+R5421:5422 Stlc <> tm ind
+R5415:5416 Stlc <> tm ind
+R5409:5410 Stlc STLC ty ind
+R5403:5404 Maps <> id ind
+R5436:5437 Stlc <> tm ind
+R5452:5453 Stlc <> tm ind
+R5483:5484 Stlc <> tm ind
+R5477:5478 Stlc <> tm ind
+R5471:5472 Stlc <> tm ind
+R5465:5466 Stlc <> tm ind
+def 5865:5865 STLC x
+R5871:5872 Maps <> Id constr
+def 5889:5889 STLC y
+R5895:5896 Maps <> Id constr
+def 5913:5913 STLC z
+R5919:5920 Maps <> Id constr
+R5938:5938 Stlc STLC x def
+R5953:5953 Stlc STLC y def
+R5968:5968 Stlc STLC z def
+syndef 6008:6010 STLC idB
+R6018:6021 Stlc STLC tabs constr
+R6032:6035 Stlc STLC tvar constr
+R6037:6037 Stlc STLC x def
+R6025:6029 Stlc STLC TBool constr
+R6023:6023 Stlc STLC x def
+syndef 6086:6089 STLC idBB
+R6097:6100 Stlc STLC tabs constr
+R6126:6129 Stlc STLC tvar constr
+R6131:6131 Stlc STLC x def
+R6105:6110 Stlc STLC TArrow constr
+R6118:6122 Stlc STLC TBool constr
+R6112:6116 Stlc STLC TBool constr
+R6102:6102 Stlc STLC x def
+syndef 6200:6205 STLC idBBBB
+R6213:6216 Stlc STLC tabs constr
+R6298:6301 Stlc STLC tvar constr
+R6303:6303 Stlc STLC x def
+R6221:6226 Stlc STLC TArrow constr
+R6272:6277 Stlc STLC TArrow constr
+R6285:6289 Stlc STLC TBool constr
+R6279:6283 Stlc STLC TBool constr
+R6229:6234 Stlc STLC TArrow constr
+R6242:6246 Stlc STLC TBool constr
+R6236:6240 Stlc STLC TBool constr
+R6218:6218 Stlc STLC x def
+syndef 6352:6352 STLC k
+R6358:6361 Stlc STLC tabs constr
+R6372:6375 Stlc STLC tabs constr
+R6386:6389 Stlc STLC tvar constr
+R6391:6391 Stlc STLC x def
+R6379:6383 Stlc STLC TBool constr
+R6377:6377 Stlc STLC y def
+R6365:6369 Stlc STLC TBool constr
+R6363:6363 Stlc STLC x def
+syndef 6459:6462 STLC notB
+R6468:6471 Stlc STLC tabs constr
+R6482:6484 Stlc STLC tif constr
+R6502:6506 Stlc STLC ttrue constr
+R6495:6500 Stlc STLC tfalse constr
+R6487:6490 Stlc STLC tvar constr
+R6492:6492 Stlc STLC x def
+R6475:6479 Stlc STLC TBool constr
+R6473:6473 Stlc STLC x def
+ind 8381:8385 STLC value
+constr 8407:8411 STLC v_abs
+constr 8458:8463 STLC v_true
+constr 8489:8495 STLC v_false
+R8389:8390 Stlc STLC tm ind
+R8435:8439 Stlc <> value ind
+R8442:8445 Stlc STLC tabs constr
+R8451:8451 Stlc <> t var
+R8449:8449 Stlc <> T var
+R8447:8447 Stlc <> x var
+R8473:8477 Stlc <> value ind
+R8479:8483 Stlc STLC ttrue constr
+R8505:8509 Stlc <> value ind
+R8511:8516 Stlc STLC tfalse constr
+R8538:8542 Stlc <> value ind
+def 11466:11470 STLC subst
+R11475:11476 Maps <> id ind
+R11482:11483 Stlc STLC tm ind
+R11489:11490 Stlc STLC tm ind
+R11495:11496 Stlc STLC tm ind
+R11853:11857 Stlc <> subst def
+R11509:11509 Stlc <> t var
+R11520:11523 Stlc STLC tvar constr
+R11540:11545 Maps <> beq_id def
+R11547:11547 Stlc <> x var
+R11564:11564 Stlc <> t var
+R11557:11557 Stlc <> s var
+R11570:11573 Stlc STLC tabs constr
+R11592:11595 Stlc STLC tabs constr
+R11606:11611 Maps <> beq_id def
+R11613:11613 Stlc <> x var
+R11632:11632 Stlc STLC ::'['_x_':='_x_']'_x not
+R11634:11635 Stlc STLC ::'['_x_':='_x_']'_x not
+R11637:11638 Stlc STLC ::'['_x_':='_x_']'_x not
+R11633:11633 Stlc <> x var
+R11636:11636 Stlc <> s var
+R11648:11651 Stlc STLC tapp constr
+R11668:11671 Stlc STLC tapp constr
+R11686:11686 Stlc STLC ::'['_x_':='_x_']'_x not
+R11688:11689 Stlc STLC ::'['_x_':='_x_']'_x not
+R11691:11692 Stlc STLC ::'['_x_':='_x_']'_x not
+R11687:11687 Stlc <> x var
+R11690:11690 Stlc <> s var
+R11674:11674 Stlc STLC ::'['_x_':='_x_']'_x not
+R11676:11677 Stlc STLC ::'['_x_':='_x_']'_x not
+R11679:11680 Stlc STLC ::'['_x_':='_x_']'_x not
+R11675:11675 Stlc <> x var
+R11678:11678 Stlc <> s var
+R11701:11705 Stlc STLC ttrue constr
+R11716:11720 Stlc STLC ttrue constr
+R11726:11731 Stlc STLC tfalse constr
+R11742:11747 Stlc STLC tfalse constr
+R11753:11755 Stlc STLC tif constr
+R11775:11777 Stlc STLC tif constr
+R11804:11804 Stlc STLC ::'['_x_':='_x_']'_x not
+R11806:11807 Stlc STLC ::'['_x_':='_x_']'_x not
+R11809:11810 Stlc STLC ::'['_x_':='_x_']'_x not
+R11805:11805 Stlc <> x var
+R11808:11808 Stlc <> s var
+R11792:11792 Stlc STLC ::'['_x_':='_x_']'_x not
+R11794:11795 Stlc STLC ::'['_x_':='_x_']'_x not
+R11797:11798 Stlc STLC ::'['_x_':='_x_']'_x not
+R11793:11793 Stlc <> x var
+R11796:11796 Stlc <> s var
+R11780:11780 Stlc STLC ::'['_x_':='_x_']'_x not
+R11782:11783 Stlc STLC ::'['_x_':='_x_']'_x not
+R11785:11786 Stlc STLC ::'['_x_':='_x_']'_x not
+R11781:11781 Stlc <> x var
+R11784:11784 Stlc <> s var
+R11853:11857 Stlc STLC subst def
+not 11828 STLC ::'['_x_':='_x_']'_x
+ind 12798:12803 STLC substi
+constr 12845:12850 STLC s_var1
+R12808:12809 Stlc STLC tm ind
+R12815:12816 Maps <> id ind
+R12827:12828 Stlc STLC tm ind
+R12821:12822 Stlc STLC tm ind
+R12860:12865 Stlc <> substi ind
+R12872:12875 Stlc STLC tvar constr
+R12924:12929 Stlc <> substi ind
+prf 12941:12954 STLC substi_correct
+R12989:12993 Coq.Init.Logic <> :type_scope:x_'<->'_x not
+R12984:12986 Coq.Init.Logic <> :type_scope:x_'='_x not
+R12977:12977 Stlc STLC ::'['_x_':='_x_']'_x not
+R12979:12980 Stlc STLC ::'['_x_':='_x_']'_x not
+R12982:12982 Stlc STLC ::'['_x_':='_x_']'_x not
+R12978:12978 Stlc <> x var
+R12981:12981 Stlc <> s var
+R12983:12983 Stlc <> t var
+R12987:12988 Stlc <> t' var
+R12994:12999 Stlc STLC substi ind
+R13007:13008 Stlc <> t' var
+R13005:13005 Stlc <> t var
+R13003:13003 Stlc <> x var
+R13001:13001 Stlc <> s var
+ind 14774:14777 STLC step
+constr 14805:14813 STLC ST_AppAbs
+constr 14910:14916 STLC ST_App1
+constr 15001:15007 STLC ST_App2
+constr 15114:15122 STLC ST_IfTrue
+constr 15175:15184 STLC ST_IfFalse
+constr 15238:15242 STLC ST_If
+R14787:14788 Stlc STLC tm ind
+R14781:14782 Stlc STLC tm ind
+R15353:15356 Stlc <> step ind
+R14866:14866 Stlc STLC ::x_'==>'_x not
+R14889:14894 Stlc STLC ::x_'==>'_x not
+R14867:14870 Stlc STLC tapp constr
+R14887:14888 Stlc <> v2 var
+R14873:14876 Stlc STLC tabs constr
+R14882:14884 Stlc <> t12 var
+R14880:14880 Stlc <> T var
+R14878:14878 Stlc <> x var
+R14895:14895 Stlc STLC ::'['_x_':='_x_']'_x not
+R14897:14898 Stlc STLC ::'['_x_':='_x_']'_x not
+R14901:14901 Stlc STLC ::'['_x_':='_x_']'_x not
+R14896:14896 Stlc <> x var
+R14899:14900 Stlc <> v2 var
+R14902:14904 Stlc <> t12 var
+R14845:14849 Stlc STLC value ind
+R14851:14852 Stlc <> v2 var
+R14980:14984 Stlc STLC ::x_'==>'_x not
+R14970:14973 Stlc STLC tapp constr
+R14978:14979 Stlc <> t2 var
+R14975:14976 Stlc <> t1 var
+R14985:14988 Stlc STLC tapp constr
+R14994:14995 Stlc <> t2 var
+R14990:14992 Stlc <> t1' var
+R14949:14953 Stlc STLC ::x_'==>'_x not
+R14947:14948 Stlc <> t1 var
+R14954:14956 Stlc <> t1' var
+R15092:15096 Stlc STLC ::x_'==>'_x not
+R15082:15085 Stlc STLC tapp constr
+R15090:15091 Stlc <> t2 var
+R15087:15088 Stlc <> v1 var
+R15097:15100 Stlc STLC tapp constr
+R15106:15108 Stlc <> t2' var
+R15102:15103 Stlc <> v1 var
+R15061:15065 Stlc STLC ::x_'==>'_x not
+R15059:15060 Stlc <> t2 var
+R15066:15068 Stlc <> t2' var
+R15038:15042 Stlc STLC value ind
+R15044:15045 Stlc <> v1 var
+R15146:15146 Stlc STLC ::x_'==>'_x not
+R15162:15167 Stlc STLC ::x_'==>'_x not
+R15147:15149 Stlc STLC tif constr
+R15160:15161 Stlc <> t2 var
+R15157:15158 Stlc <> t1 var
+R15151:15155 Stlc STLC ttrue constr
+R15168:15169 Stlc <> t1 var
+R15208:15208 Stlc STLC ::x_'==>'_x not
+R15225:15230 Stlc STLC ::x_'==>'_x not
+R15209:15211 Stlc STLC tif constr
+R15223:15224 Stlc <> t2 var
+R15220:15221 Stlc <> t1 var
+R15213:15218 Stlc STLC tfalse constr
+R15231:15232 Stlc <> t2 var
+R15293:15293 Stlc STLC ::x_'==>'_x not
+R15306:15312 Stlc STLC ::x_'==>'_x not
+R15326:15326 Stlc STLC ::x_'==>'_x not
+R15294:15296 Stlc STLC tif constr
+R15304:15305 Stlc <> t3 var
+R15301:15302 Stlc <> t2 var
+R15298:15299 Stlc <> t1 var
+R15313:15315 Stlc STLC tif constr
+R15324:15325 Stlc <> t3 var
+R15321:15322 Stlc <> t2 var
+R15317:15319 Stlc <> t1' var
+R15275:15279 Stlc STLC ::x_'==>'_x not
+R15273:15274 Stlc <> t1 var
+R15280:15282 Stlc <> t1' var
+R15353:15356 Stlc STLC step ind
+not 15335 STLC ::x_'==>'_x
+R15385:15388 Stlc <> step ind
+syndef 15401:15409 STLC multistep
+R15415:15419 Smallstep <> multi ind
+R15421:15424 Stlc STLC step ind
+R15456:15464 Stlc STLC multistep syndef
+not 15437 STLC ::x_'==>*'_x
+prf 15712:15724 STLC step_example1
+R15730:15730 Stlc STLC ::x_'==>*'_x not
+R15744:15750 Stlc STLC ::x_'==>*'_x not
+R15731:15734 Stlc STLC tapp constr
+R15741:15743 Stlc STLC idB syndef
+R15736:15739 Stlc STLC idBB syndef
+R15751:15753 Stlc STLC idB syndef
+R15772:15781 Smallstep <> multi_step constr
+R15772:15781 Smallstep <> multi_step constr
+R15794:15802 Stlc STLC ST_AppAbs constr
+R15794:15802 Stlc STLC ST_AppAbs constr
+R15815:15819 Stlc STLC v_abs constr
+R15815:15819 Stlc STLC v_abs constr
+R15839:15848 Smallstep <> multi_refl constr
+R15839:15848 Smallstep <> multi_refl constr
+prf 15996:16008 STLC step_example2
+R16014:16014 Stlc STLC ::x_'==>*'_x not
+R16040:16046 Stlc STLC ::x_'==>*'_x not
+R16015:16018 Stlc STLC tapp constr
+R16026:16029 Stlc STLC tapp constr
+R16036:16038 Stlc STLC idB syndef
+R16031:16034 Stlc STLC idBB syndef
+R16020:16023 Stlc STLC idBB syndef
+R16047:16049 Stlc STLC idB syndef
+R16068:16077 Smallstep <> multi_step constr
+R16068:16077 Smallstep <> multi_step constr
+R16090:16096 Stlc STLC ST_App2 constr
+R16090:16096 Stlc STLC ST_App2 constr
+R16115:16123 Stlc STLC ST_AppAbs constr
+R16115:16123 Stlc STLC ST_AppAbs constr
+R16141:16150 Smallstep <> multi_step constr
+R16141:16150 Smallstep <> multi_step constr
+R16163:16171 Stlc STLC ST_AppAbs constr
+R16163:16171 Stlc STLC ST_AppAbs constr
+R16202:16211 Smallstep <> multi_refl constr
+R16202:16211 Smallstep <> multi_refl constr
+prf 16396:16408 STLC step_example3
+R16441:16446 Stlc STLC ::x_'==>*'_x not
+R16414:16417 Stlc STLC tapp constr
+R16436:16440 Stlc STLC ttrue constr
+R16420:16423 Stlc STLC tapp constr
+R16430:16433 Stlc STLC notB syndef
+R16425:16428 Stlc STLC idBB syndef
+R16447:16452 Stlc STLC tfalse constr
+R16471:16480 Smallstep <> multi_step constr
+R16471:16480 Smallstep <> multi_step constr
+R16493:16499 Stlc STLC ST_App1 constr
+R16493:16499 Stlc STLC ST_App1 constr
+R16508:16516 Stlc STLC ST_AppAbs constr
+R16508:16516 Stlc STLC ST_AppAbs constr
+R16541:16550 Smallstep <> multi_step constr
+R16541:16550 Smallstep <> multi_step constr
+R16563:16571 Stlc STLC ST_AppAbs constr
+R16563:16571 Stlc STLC ST_AppAbs constr
+R16596:16605 Smallstep <> multi_step constr
+R16596:16605 Smallstep <> multi_step constr
+R16618:16626 Stlc STLC ST_IfTrue constr
+R16618:16626 Stlc STLC ST_IfTrue constr
+R16635:16644 Smallstep <> multi_refl constr
+R16635:16644 Smallstep <> multi_refl constr
+prf 16833:16845 STLC step_example4
+R16878:16883 Stlc STLC ::x_'==>*'_x not
+R16851:16854 Stlc STLC tapp constr
+R16862:16865 Stlc STLC tapp constr
+R16872:16876 Stlc STLC ttrue constr
+R16867:16870 Stlc STLC notB syndef
+R16856:16859 Stlc STLC idBB syndef
+R16884:16889 Stlc STLC tfalse constr
+R16908:16917 Smallstep <> multi_step constr
+R16908:16917 Smallstep <> multi_step constr
+R16930:16936 Stlc STLC ST_App2 constr
+R16930:16936 Stlc STLC ST_App2 constr
+R16955:16963 Stlc STLC ST_AppAbs constr
+R16955:16963 Stlc STLC ST_AppAbs constr
+R16988:16997 Smallstep <> multi_step constr
+R16988:16997 Smallstep <> multi_step constr
+R17010:17016 Stlc STLC ST_App2 constr
+R17010:17016 Stlc STLC ST_App2 constr
+R17035:17043 Stlc STLC ST_IfTrue constr
+R17035:17043 Stlc STLC ST_IfTrue constr
+R17055:17064 Smallstep <> multi_step constr
+R17055:17064 Smallstep <> multi_step constr
+R17077:17085 Stlc STLC ST_AppAbs constr
+R17077:17085 Stlc STLC ST_AppAbs constr
+R17109:17118 Smallstep <> multi_refl constr
+R17109:17118 Smallstep <> multi_refl constr
+prf 17166:17179 STLC step_example1'
+R17185:17185 Stlc STLC ::x_'==>*'_x not
+R17199:17205 Stlc STLC ::x_'==>*'_x not
+R17186:17189 Stlc STLC tapp constr
+R17196:17198 Stlc STLC idB syndef
+R17191:17194 Stlc STLC idBB syndef
+R17206:17208 Stlc STLC idB syndef
+prf 17329:17342 STLC step_example2'
+R17348:17348 Stlc STLC ::x_'==>*'_x not
+R17374:17380 Stlc STLC ::x_'==>*'_x not
+R17349:17352 Stlc STLC tapp constr
+R17360:17363 Stlc STLC tapp constr
+R17370:17372 Stlc STLC idB syndef
+R17365:17368 Stlc STLC idBB syndef
+R17354:17357 Stlc STLC idBB syndef
+R17381:17383 Stlc STLC idB syndef
+prf 17418:17431 STLC step_example3'
+R17464:17469 Stlc STLC ::x_'==>*'_x not
+R17437:17440 Stlc STLC tapp constr
+R17459:17463 Stlc STLC ttrue constr
+R17443:17446 Stlc STLC tapp constr
+R17453:17456 Stlc STLC notB syndef
+R17448:17451 Stlc STLC idBB syndef
+R17470:17475 Stlc STLC tfalse constr
+prf 17509:17522 STLC step_example4'
+R17555:17560 Stlc STLC ::x_'==>*'_x not
+R17528:17531 Stlc STLC tapp constr
+R17539:17542 Stlc STLC tapp constr
+R17549:17553 Stlc STLC ttrue constr
+R17544:17547 Stlc STLC notB syndef
+R17533:17536 Stlc STLC idBB syndef
+R17561:17566 Stlc STLC tfalse constr
+prf 17709:17721 STLC step_example5
+R17732:17732 Stlc STLC ::x_'==>*'_x not
+R17760:17768 Stlc STLC ::x_'==>*'_x not
+R17733:17736 Stlc STLC tapp constr
+R17757:17759 Stlc STLC idB syndef
+R17739:17742 Stlc STLC tapp constr
+R17751:17754 Stlc STLC idBB syndef
+R17744:17749 Stlc STLC idBBBB syndef
+R17769:17771 Stlc STLC idB syndef
+def 18644:18650 STLC context
+R18655:18665 Maps <> partial_map def
+R18667:18668 Stlc STLC ty ind
+ind 20069:20076 STLC has_type
+constr 20115:20119 STLC T_Var
+constr 20199:20203 STLC T_Abs
+constr 20331:20335 STLC T_App
+constr 20474:20479 STLC T_True
+constr 20533:20539 STLC T_False
+constr 20594:20597 STLC T_If
+R20097:20098 Stlc STLC ty ind
+R20091:20092 Stlc STLC tm ind
+R20080:20086 Stlc STLC context def
+R20783:20790 Stlc <> has_type ind
+R20178:20181 Stlc STLC ::x_'|-'_x_'\in'_x not
+R20188:20192 Stlc STLC ::x_'|-'_x_'\in'_x not
+R20173:20177 Stlc <> Gamma var
+R20182:20185 Stlc STLC tvar constr
+R20187:20187 Stlc <> x var
+R20193:20193 Stlc <> T var
+R20154:20156 Coq.Init.Logic <> :type_scope:x_'='_x not
+R20147:20151 Stlc <> Gamma var
+R20153:20153 Stlc <> x var
+R20157:20160 Coq.Init.Datatypes <> Some constr
+R20162:20162 Stlc <> T var
+R20289:20292 Stlc STLC ::x_'|-'_x_'\in'_x not
+R20307:20311 Stlc STLC ::x_'|-'_x_'\in'_x not
+R20284:20288 Stlc <> Gamma var
+R20293:20296 Stlc STLC tabs constr
+R20304:20306 Stlc <> t12 var
+R20300:20302 Stlc <> T11 var
+R20298:20298 Stlc <> x var
+R20312:20317 Stlc STLC TArrow constr
+R20323:20325 Stlc <> T12 var
+R20319:20321 Stlc <> T11 var
+R20259:20262 Stlc STLC ::x_'|-'_x_'\in'_x not
+R20266:20270 Stlc STLC ::x_'|-'_x_'\in'_x not
+R20241:20246 Maps <> update def
+R20256:20258 Stlc <> T11 var
+R20254:20254 Stlc <> x var
+R20248:20252 Stlc <> Gamma var
+R20263:20265 Stlc <> t12 var
+R20271:20273 Stlc <> T12 var
+R20447:20450 Stlc STLC ::x_'|-'_x_'\in'_x not
+R20461:20465 Stlc STLC ::x_'|-'_x_'\in'_x not
+R20442:20446 Stlc <> Gamma var
+R20451:20454 Stlc STLC tapp constr
+R20459:20460 Stlc <> t2 var
+R20456:20457 Stlc <> t1 var
+R20466:20468 Stlc <> T12 var
+R20418:20421 Stlc STLC ::x_'|-'_x_'\in'_x not
+R20424:20428 Stlc STLC ::x_'|-'_x_'\in'_x not
+R20413:20417 Stlc <> Gamma var
+R20422:20423 Stlc <> t2 var
+R20429:20431 Stlc <> T11 var
+R20378:20381 Stlc STLC ::x_'|-'_x_'\in'_x not
+R20384:20388 Stlc STLC ::x_'|-'_x_'\in'_x not
+R20373:20377 Stlc <> Gamma var
+R20382:20383 Stlc <> t1 var
+R20389:20394 Stlc STLC TArrow constr
+R20400:20402 Stlc <> T12 var
+R20396:20398 Stlc <> T11 var
+R20509:20512 Stlc STLC ::x_'|-'_x_'\in'_x not
+R20518:20522 Stlc STLC ::x_'|-'_x_'\in'_x not
+R20504:20508 Stlc <> Gamma var
+R20513:20517 Stlc STLC ttrue constr
+R20523:20527 Stlc STLC TBool constr
+R20569:20572 Stlc STLC ::x_'|-'_x_'\in'_x not
+R20579:20583 Stlc STLC ::x_'|-'_x_'\in'_x not
+R20564:20568 Stlc <> Gamma var
+R20573:20578 Stlc STLC tfalse constr
+R20584:20588 Stlc STLC TBool constr
+R20726:20729 Stlc STLC ::x_'|-'_x_'\in'_x not
+R20742:20746 Stlc STLC ::x_'|-'_x_'\in'_x not
+R20721:20725 Stlc <> Gamma var
+R20730:20732 Stlc STLC tif constr
+R20740:20741 Stlc <> t3 var
+R20737:20738 Stlc <> t2 var
+R20734:20735 Stlc <> t1 var
+R20747:20747 Stlc <> T var
+R20698:20701 Stlc STLC ::x_'|-'_x_'\in'_x not
+R20704:20708 Stlc STLC ::x_'|-'_x_'\in'_x not
+R20693:20697 Stlc <> Gamma var
+R20702:20703 Stlc <> t3 var
+R20709:20709 Stlc <> T var
+R20670:20673 Stlc STLC ::x_'|-'_x_'\in'_x not
+R20676:20680 Stlc STLC ::x_'|-'_x_'\in'_x not
+R20665:20669 Stlc <> Gamma var
+R20674:20675 Stlc <> t2 var
+R20681:20681 Stlc <> T var
+R20638:20641 Stlc STLC ::x_'|-'_x_'\in'_x not
+R20644:20648 Stlc STLC ::x_'|-'_x_'\in'_x not
+R20633:20637 Stlc <> Gamma var
+R20642:20643 Stlc <> t1 var
+R20649:20653 Stlc STLC TBool constr
+R20783:20790 Stlc STLC has_type ind
+not 20756 STLC ::x_'|-'_x_'\in'_x
+R20823:20830 Stlc <> has_type ind
+def 20905:20920 STLC typing_example_1
+R20931:20934 Stlc STLC ::x_'|-'_x_'\in'_x not
+R20956:20960 Stlc STLC ::x_'|-'_x_'\in'_x not
+R20926:20930 Maps <> empty def
+R20935:20938 Stlc STLC tabs constr
+R20949:20952 Stlc STLC tvar constr
+R20954:20954 Stlc STLC x def
+R20942:20946 Stlc STLC TBool constr
+R20940:20940 Stlc STLC x def
+R20961:20966 Stlc STLC TArrow constr
+R20974:20978 Stlc STLC TBool constr
+R20968:20972 Stlc STLC TBool constr
+R20996:21000 Stlc STLC T_Abs constr
+R20996:21000 Stlc STLC T_Abs constr
+R21009:21013 Stlc STLC T_Var constr
+R21009:21013 Stlc STLC T_Var constr
+def 21178:21194 STLC typing_example_1'
+R21205:21208 Stlc STLC ::x_'|-'_x_'\in'_x not
+R21230:21234 Stlc STLC ::x_'|-'_x_'\in'_x not
+R21200:21204 Maps <> empty def
+R21209:21212 Stlc STLC tabs constr
+R21223:21226 Stlc STLC tvar constr
+R21228:21228 Stlc STLC x def
+R21216:21220 Stlc STLC TBool constr
+R21214:21214 Stlc STLC x def
+R21235:21240 Stlc STLC TArrow constr
+R21248:21252 Stlc STLC TBool constr
+R21242:21246 Stlc STLC TBool constr
+def 21379:21394 STLC typing_example_2
+R21405:21413 Stlc STLC ::x_'|-'_x_'\in'_x not
+R21514:21524 Stlc STLC ::x_'|-'_x_'\in'_x not
+R21573:21573 Stlc STLC ::x_'|-'_x_'\in'_x not
+R21400:21404 Maps <> empty def
+R21414:21417 Stlc STLC tabs constr
+R21435:21438 Stlc STLC tabs constr
+R21474:21477 Stlc STLC tapp constr
+R21489:21492 Stlc STLC tapp constr
+R21504:21507 Stlc STLC tvar constr
+R21509:21509 Stlc STLC x def
+R21495:21498 Stlc STLC tvar constr
+R21500:21500 Stlc STLC y def
+R21480:21483 Stlc STLC tvar constr
+R21485:21485 Stlc STLC y def
+R21443:21448 Stlc STLC TArrow constr
+R21456:21460 Stlc STLC TBool constr
+R21450:21454 Stlc STLC TBool constr
+R21440:21440 Stlc STLC y def
+R21421:21425 Stlc STLC TBool constr
+R21419:21419 Stlc STLC x def
+R21525:21530 Stlc STLC TArrow constr
+R21539:21544 Stlc STLC TArrow constr
+R21567:21571 Stlc STLC TBool constr
+R21547:21552 Stlc STLC TArrow constr
+R21560:21564 Stlc STLC TBool constr
+R21554:21558 Stlc STLC TBool constr
+R21532:21536 Stlc STLC TBool constr
+R21617:21621 Stlc STLC T_Abs constr
+R21617:21621 Stlc STLC T_Abs constr
+R21632:21636 Stlc STLC T_Abs constr
+R21632:21636 Stlc STLC T_Abs constr
+R21648:21652 Stlc STLC T_App constr
+R21648:21652 Stlc STLC T_App constr
+R21661:21665 Stlc STLC T_Var constr
+R21661:21665 Stlc STLC T_Var constr
+R21598:21606 Maps <> update_eq thm
+R21598:21606 Maps <> update_eq thm
+R21679:21683 Stlc STLC T_App constr
+R21679:21683 Stlc STLC T_App constr
+R21692:21696 Stlc STLC T_Var constr
+R21692:21696 Stlc STLC T_Var constr
+R21598:21606 Maps <> update_eq thm
+R21598:21606 Maps <> update_eq thm
+R21709:21713 Stlc STLC T_Var constr
+R21709:21713 Stlc STLC T_Var constr
+R21598:21606 Maps <> update_eq thm
+R21598:21606 Maps <> update_eq thm
+def 21875:21895 STLC typing_example_2_full
+R21906:21914 Stlc STLC ::x_'|-'_x_'\in'_x not
+R22015:22025 Stlc STLC ::x_'|-'_x_'\in'_x not
+R22074:22074 Stlc STLC ::x_'|-'_x_'\in'_x not
+R21901:21905 Maps <> empty def
+R21915:21918 Stlc STLC tabs constr
+R21936:21939 Stlc STLC tabs constr
+R21975:21978 Stlc STLC tapp constr
+R21990:21993 Stlc STLC tapp constr
+R22005:22008 Stlc STLC tvar constr
+R22010:22010 Stlc STLC x def
+R21996:21999 Stlc STLC tvar constr
+R22001:22001 Stlc STLC y def
+R21981:21984 Stlc STLC tvar constr
+R21986:21986 Stlc STLC y def
+R21944:21949 Stlc STLC TArrow constr
+R21957:21961 Stlc STLC TBool constr
+R21951:21955 Stlc STLC TBool constr
+R21941:21941 Stlc STLC y def
+R21922:21926 Stlc STLC TBool constr
+R21920:21920 Stlc STLC x def
+R22026:22031 Stlc STLC TArrow constr
+R22040:22045 Stlc STLC TArrow constr
+R22068:22072 Stlc STLC TBool constr
+R22048:22053 Stlc STLC TArrow constr
+R22061:22065 Stlc STLC TBool constr
+R22055:22059 Stlc STLC TBool constr
+R22033:22037 Stlc STLC TBool constr
+def 22341:22356 STLC typing_example_3
+R22362:22368 Coq.Init.Logic <> :type_scope:'exists'_x_'..'_x_','_x not
+R22370:22375 Coq.Init.Logic <> :type_scope:'exists'_x_'..'_x_','_x not
+R22381:22391 Stlc STLC ::x_'|-'_x_'\in'_x not
+R22541:22552 Stlc STLC ::x_'|-'_x_'\in'_x not
+R22376:22380 Maps <> empty def
+R22392:22395 Stlc STLC tabs constr
+R22430:22433 Stlc STLC tabs constr
+R22471:22474 Stlc STLC tabs constr
+R22500:22503 Stlc STLC tapp constr
+R22515:22518 Stlc STLC tapp constr
+R22530:22533 Stlc STLC tvar constr
+R22535:22535 Stlc STLC z def
+R22521:22524 Stlc STLC tvar constr
+R22526:22526 Stlc STLC x def
+R22506:22509 Stlc STLC tvar constr
+R22511:22511 Stlc STLC y def
+R22478:22482 Stlc STLC TBool constr
+R22476:22476 Stlc STLC z def
+R22438:22443 Stlc STLC TArrow constr
+R22451:22455 Stlc STLC TBool constr
+R22445:22449 Stlc STLC TBool constr
+R22435:22435 Stlc STLC y def
+R22400:22405 Stlc STLC TArrow constr
+R22413:22417 Stlc STLC TBool constr
+R22407:22411 Stlc STLC TBool constr
+R22397:22397 Stlc STLC x def
+R22553:22553 Stlc <> T var
+def 22878:22896 STLC typing_nonexample_1
+R22902:22903 Coq.Init.Logic <> :type_scope:'~'_x not
+R22904:22910 Coq.Init.Logic <> :type_scope:'exists'_x_'..'_x_','_x not
+R22912:22919 Coq.Init.Logic <> :type_scope:'exists'_x_'..'_x_','_x not
+R22925:22937 Stlc STLC ::x_'|-'_x_'\in'_x not
+R23017:23030 Stlc STLC ::x_'|-'_x_'\in'_x not
+R22920:22924 Maps <> empty def
+R22938:22941 Stlc STLC tabs constr
+R22964:22967 Stlc STLC tabs constr
+R22993:22996 Stlc STLC tapp constr
+R23008:23011 Stlc STLC tvar constr
+R23013:23013 Stlc STLC y def
+R22999:23002 Stlc STLC tvar constr
+R23004:23004 Stlc STLC x def
+R22971:22975 Stlc STLC TBool constr
+R22969:22969 Stlc STLC y def
+R22945:22949 Stlc STLC TBool constr
+R22943:22943 Stlc STLC x def
+R23031:23031 Stlc <> T var
+def 23535:23553 STLC typing_nonexample_3
+R23559:23561 Coq.Init.Logic <> :type_scope:'~'_x not
+R23673:23673 Coq.Init.Logic <> :type_scope:'~'_x not
+R23562:23568 Coq.Init.Logic <> :type_scope:'exists'_x_'..'_x_','_x not
+R23570:23571 Coq.Init.Logic <> :type_scope:'exists'_x_'..'_x_','_x not
+R23572:23578 Coq.Init.Logic <> :type_scope:'exists'_x_'..'_x_','_x not
+R23580:23589 Coq.Init.Logic <> :type_scope:'exists'_x_'..'_x_','_x not
+R23595:23609 Stlc STLC ::x_'|-'_x_'\in'_x not
+R23656:23671 Stlc STLC ::x_'|-'_x_'\in'_x not
+R23590:23594 Maps <> empty def
+R23610:23613 Stlc STLC tabs constr
+R23633:23636 Stlc STLC tapp constr
+R23648:23651 Stlc STLC tvar constr
+R23653:23653 Stlc STLC x def
+R23639:23642 Stlc STLC tvar constr
+R23644:23644 Stlc STLC x def
+R23617:23617 Stlc <> S var
+R23615:23615 Stlc STLC x def
+R23672:23672 Stlc <> T var
+R23731:23734 Stlc <> <> mod
