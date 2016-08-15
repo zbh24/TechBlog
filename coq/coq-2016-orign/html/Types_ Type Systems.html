@@ -1,0 +1,806 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!-- saved from url=(0055)http://www.seas.upenn.edu/~cis500/current/sf/Types.html -->
+<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<link href="./Types_ Type Systems_files/coqdoc.css" rel="stylesheet" type="text/css">
+<title>Types: Type Systems</title>
+<script type="text/javascript" src="./Types_ Type Systems_files/jquery-1.8.3.js"></script>
+<script type="text/javascript" src="./Types_ Type Systems_files/main.js"></script>
+</head>
+
+<body>
+
+<div id="page">
+
+<div id="header">
+</div>
+
+<div id="main">
+
+<h1 class="libtitle">Types<span class="subtitle">Type Systems</span></h1>
+
+<div class="code code-tight">
+</div>
+
+<div class="doc">
+
+</div>
+<div class="code code-tight">
+
+<br>
+<span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="http://coq.inria.fr/library/Coq.Arith.Arith.html#"><span class="id" type="library">Coq.Arith.Arith</span></a>.<br>
+
+<br>
+<span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/SfLib.html#"><span class="id" type="library">SfLib</span></a>.<br>
+<span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Maps.html#"><span class="id" type="library">Maps</span></a>.<br>
+<span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Imp.html#"><span class="id" type="library">Imp</span></a>.<br>
+<span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Smallstep.html#"><span class="id" type="library">Smallstep</span></a>.<br>
+
+<br>
+<span class="id" type="keyword">Hint</span> <span class="id" type="var">Constructors</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#multi"><span class="id" type="inductive">multi</span></a>.<br>
+
+<br>
+</div>
+
+<div class="doc">
+Our next major topic is <i>type systems</i> — static program
+    analyses that classify expressions according to the "shapes" of
+    their results.  We'll begin with a typed version of a very simple
+    language with just booleans and numbers, to introduce the basic
+    ideas of types, typing rules, and the fundamental theorems about
+    type systems: <i>type preservation</i> and <i>progress</i>.  In the next
+    chapter we'll move on to the <i>simply typed lambda-calculus</i>, which
+    lives at the core of every modern functional programming
+    language (including Coq). 
+</div>
+<div class="code code-tight">
+
+<br>
+</div>
+
+<div class="doc">
+<a name="lab521"></a><h1 class="section">Typed Arithmetic Expressions</h1>
+
+<div class="paragraph"> </div>
+
+ To motivate the discussion of type systems, let's begin as
+    usual with an extremely simple toy language.  We want it to have
+    the potential for programs going wrong because of runtime type
+    errors, so we need something a tiny bit more complex than the
+    language of constants and addition that we used in chapter
+    <span class="inlinecode"><span class="id" type="var">Smallstep</span></span>: a single kind of data (e.g., numbers) is too simple,
+    but just two kinds (numbers and booleans) gives us enough material
+    to tell an interesting story.
+
+<div class="paragraph"> </div>
+
+    The language definition is completely routine.  
+</div>
+<div class="code code-tight">
+
+<br>
+</div>
+
+<div class="doc">
+<a name="lab522"></a><h2 class="section">Syntax</h2>
+
+<div class="paragraph"> </div>
+
+ Informally:
+
+<div class="paragraph"> </div>
+
+<div class="code code-tight">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">t</span>&nbsp;::=&nbsp;<span class="id" type="var">true</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;<span class="id" type="var">false</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;<span class="id" type="keyword">if</span>&nbsp;<span class="id" type="var">t</span>&nbsp;<span class="id" type="keyword">then</span>&nbsp;<span class="id" type="var">t</span>&nbsp;<span class="id" type="keyword">else</span>&nbsp;<span class="id" type="var">t</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;0<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;<span class="id" type="var">succ</span>&nbsp;<span class="id" type="var">t</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;<span class="id" type="var">pred</span>&nbsp;<span class="id" type="var">t</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;<span class="id" type="var">iszero</span>&nbsp;<span class="id" type="var">t</span>
+<div class="paragraph"> </div>
+
+</div>
+    Formally:
+
+</div>
+<div class="code code-tight">
+
+<br>
+<span class="id" type="keyword">Inductive</span> <a name="tm"><span class="id" type="inductive">tm</span></a> : <span class="id" type="keyword">Type</span> :=<br>
+&nbsp;&nbsp;| <a name="ttrue"><span class="id" type="constructor">ttrue</span></a> : <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#tm"><span class="id" type="inductive">tm</span></a><br>
+&nbsp;&nbsp;| <a name="tfalse"><span class="id" type="constructor">tfalse</span></a> : <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#tm"><span class="id" type="inductive">tm</span></a><br>
+&nbsp;&nbsp;| <a name="tif"><span class="id" type="constructor">tif</span></a> : <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#tm"><span class="id" type="inductive">tm</span></a> <span style="font-family: arial;">→</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#tm"><span class="id" type="inductive">tm</span></a> <span style="font-family: arial;">→</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#tm"><span class="id" type="inductive">tm</span></a> <span style="font-family: arial;">→</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#tm"><span class="id" type="inductive">tm</span></a><br>
+&nbsp;&nbsp;| <a name="tzero"><span class="id" type="constructor">tzero</span></a> : <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#tm"><span class="id" type="inductive">tm</span></a><br>
+&nbsp;&nbsp;| <a name="tsucc"><span class="id" type="constructor">tsucc</span></a> : <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#tm"><span class="id" type="inductive">tm</span></a> <span style="font-family: arial;">→</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#tm"><span class="id" type="inductive">tm</span></a><br>
+&nbsp;&nbsp;| <a name="tpred"><span class="id" type="constructor">tpred</span></a> : <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#tm"><span class="id" type="inductive">tm</span></a> <span style="font-family: arial;">→</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#tm"><span class="id" type="inductive">tm</span></a><br>
+&nbsp;&nbsp;| <a name="tiszero"><span class="id" type="constructor">tiszero</span></a> : <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#tm"><span class="id" type="inductive">tm</span></a> <span style="font-family: arial;">→</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#tm"><span class="id" type="inductive">tm</span></a>.<br>
+
+<br>
+</div>
+
+<div class="doc">
+<i>Values</i> are <span class="inlinecode"><span class="id" type="var">true</span></span>, <span class="inlinecode"><span class="id" type="var">false</span></span>, and numeric values... 
+</div>
+<div class="code code-tight">
+
+<br>
+<span class="id" type="keyword">Inductive</span> <a name="bvalue"><span class="id" type="inductive">bvalue</span></a> : <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#tm"><span class="id" type="inductive">tm</span></a> <span style="font-family: arial;">→</span> <span class="id" type="keyword">Prop</span> :=<br>
+&nbsp;&nbsp;| <a name="bv_true"><span class="id" type="constructor">bv_true</span></a> : <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#bvalue"><span class="id" type="inductive">bvalue</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#ttrue"><span class="id" type="constructor">ttrue</span></a><br>
+&nbsp;&nbsp;| <a name="bv_false"><span class="id" type="constructor">bv_false</span></a> : <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#bvalue"><span class="id" type="inductive">bvalue</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#tfalse"><span class="id" type="constructor">tfalse</span></a>.<br>
+
+<br>
+<span class="id" type="keyword">Inductive</span> <a name="nvalue"><span class="id" type="inductive">nvalue</span></a> : <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#tm"><span class="id" type="inductive">tm</span></a> <span style="font-family: arial;">→</span> <span class="id" type="keyword">Prop</span> :=<br>
+&nbsp;&nbsp;| <a name="nv_zero"><span class="id" type="constructor">nv_zero</span></a> : <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#nvalue"><span class="id" type="inductive">nvalue</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#tzero"><span class="id" type="constructor">tzero</span></a><br>
+&nbsp;&nbsp;| <a name="nv_succ"><span class="id" type="constructor">nv_succ</span></a> : <span style="font-family: arial;">∀</span><span class="id" type="var">t</span>, <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#nvalue"><span class="id" type="inductive">nvalue</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#t"><span class="id" type="variable">t</span></a> <span style="font-family: arial;">→</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#nvalue"><span class="id" type="inductive">nvalue</span></a> (<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#tsucc"><span class="id" type="constructor">tsucc</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#t"><span class="id" type="variable">t</span></a>).<br>
+
+<br>
+<span class="id" type="keyword">Definition</span> <a name="value"><span class="id" type="definition">value</span></a> (<span class="id" type="var">t</span>:<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#tm"><span class="id" type="inductive">tm</span></a>) := <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#bvalue"><span class="id" type="inductive">bvalue</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#t"><span class="id" type="variable">t</span></a> <span style="font-family: arial;">∨</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#nvalue"><span class="id" type="inductive">nvalue</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#t"><span class="id" type="variable">t</span></a>.<br>
+
+<br>
+<div class="togglescript" id="proofcontrol1" onclick="toggleDisplay(&#39;proof1&#39;);toggleDisplay(&#39;proofcontrol1&#39;)"><span class="show"></span></div>
+<div class="proofscript" id="proof1" onclick="toggleDisplay(&#39;proof1&#39;);toggleDisplay(&#39;proofcontrol1&#39;)">
+<span class="id" type="keyword">Hint</span> <span class="id" type="var">Constructors</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#bvalue"><span class="id" type="inductive">bvalue</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#nvalue"><span class="id" type="inductive">nvalue</span></a>.<br>
+<span class="id" type="keyword">Hint</span> <span class="id" type="keyword">Unfold</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#value"><span class="id" type="definition">value</span></a>.<br>
+<span class="id" type="keyword">Hint</span> <span class="id" type="keyword">Unfold</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Maps.html#update"><span class="id" type="definition">update</span></a>.<br>
+</div>
+
+<br>
+</div>
+
+<div class="doc">
+<a name="lab523"></a><h2 class="section">Operational Semantics</h2>
+
+<div class="paragraph"> </div>
+
+ Informally: 
+<div class="paragraph"> </div>
+
+<center><table class="infrule">
+<tbody><tr class="infruleassumption">
+  <td class="infrule">&nbsp;&nbsp;</td>
+  <td class="infrulenamecol" rowspan="3">
+    (ST_IfTrue) &nbsp;
+  </td></tr>
+<tr class="infrulemiddle">
+  <td class="infrule"><hr></td>
+</tr>
+<tr class="infruleassumption">
+  <td class="infrule">if&nbsp;true&nbsp;then&nbsp;t<sub>1</sub>&nbsp;else&nbsp;t<sub>2</sub>&nbsp;<span style="font-family: arial;">⇒</span>&nbsp;t<sub>1</sub></td>
+  <td></td>
+
+</tr></tbody></table></center><center><table class="infrule">
+<tbody><tr class="infruleassumption">
+  <td class="infrule">&nbsp;&nbsp;</td>
+  <td class="infrulenamecol" rowspan="3">
+    (ST_IfFalse) &nbsp;
+  </td></tr>
+<tr class="infrulemiddle">
+  <td class="infrule"><hr></td>
+</tr>
+<tr class="infruleassumption">
+  <td class="infrule">if&nbsp;false&nbsp;then&nbsp;t<sub>1</sub>&nbsp;else&nbsp;t<sub>2</sub>&nbsp;<span style="font-family: arial;">⇒</span>&nbsp;t<sub>2</sub></td>
+  <td></td>
+
+</tr></tbody></table></center><center><table class="infrule">
+<tbody><tr class="infruleassumption">
+  <td class="infrule">t<sub>1</sub>&nbsp;<span style="font-family: arial;">⇒</span>&nbsp;t<sub>1</sub>'</td>
+  <td class="infrulenamecol" rowspan="3">
+    (ST_If) &nbsp;
+  </td></tr>
+<tr class="infrulemiddle">
+  <td class="infrule"><hr></td>
+</tr>
+<tr class="infruleassumption">
+  <td class="infrule">if&nbsp;t<sub>1</sub>&nbsp;then&nbsp;t<sub>2</sub>&nbsp;else&nbsp;t<sub>3</sub>&nbsp;<span style="font-family: arial;">⇒</span></td>
+  <td></td>
+
+</tr><tr class="infruleassumption">
+  <td class="infrule">if&nbsp;t<sub>1</sub>'&nbsp;then&nbsp;t<sub>2</sub>&nbsp;else&nbsp;t<sub>3</sub></td>
+  <td></td>
+
+</tr></tbody></table></center><center><table class="infrule">
+<tbody><tr class="infruleassumption">
+  <td class="infrule">t<sub>1</sub>&nbsp;<span style="font-family: arial;">⇒</span>&nbsp;t<sub>1</sub>'</td>
+  <td class="infrulenamecol" rowspan="3">
+    (ST_Succ) &nbsp;
+  </td></tr>
+<tr class="infrulemiddle">
+  <td class="infrule"><hr></td>
+</tr>
+<tr class="infruleassumption">
+  <td class="infrule">succ&nbsp;t<sub>1</sub>&nbsp;<span style="font-family: arial;">⇒</span>&nbsp;succ&nbsp;t<sub>1</sub>'</td>
+  <td></td>
+
+</tr></tbody></table></center><center><table class="infrule">
+<tbody><tr class="infruleassumption">
+  <td class="infrule">&nbsp;&nbsp;</td>
+  <td class="infrulenamecol" rowspan="3">
+    (ST_PredZero) &nbsp;
+  </td></tr>
+<tr class="infrulemiddle">
+  <td class="infrule"><hr></td>
+</tr>
+<tr class="infruleassumption">
+  <td class="infrule">pred&nbsp;0&nbsp;<span style="font-family: arial;">⇒</span>&nbsp;0</td>
+  <td></td>
+
+</tr></tbody></table></center><center><table class="infrule">
+<tbody><tr class="infruleassumption">
+  <td class="infrule">numeric&nbsp;value&nbsp;v<sub>1</sub></td>
+  <td class="infrulenamecol" rowspan="3">
+    (ST_PredSucc) &nbsp;
+  </td></tr>
+<tr class="infrulemiddle">
+  <td class="infrule"><hr></td>
+</tr>
+<tr class="infruleassumption">
+  <td class="infrule">pred&nbsp;(succ&nbsp;v<sub>1</sub>)&nbsp;<span style="font-family: arial;">⇒</span>&nbsp;v<sub>1</sub></td>
+  <td></td>
+
+</tr></tbody></table></center><center><table class="infrule">
+<tbody><tr class="infruleassumption">
+  <td class="infrule">t<sub>1</sub>&nbsp;<span style="font-family: arial;">⇒</span>&nbsp;t<sub>1</sub>'</td>
+  <td class="infrulenamecol" rowspan="3">
+    (ST_Pred) &nbsp;
+  </td></tr>
+<tr class="infrulemiddle">
+  <td class="infrule"><hr></td>
+</tr>
+<tr class="infruleassumption">
+  <td class="infrule">pred&nbsp;t<sub>1</sub>&nbsp;<span style="font-family: arial;">⇒</span>&nbsp;pred&nbsp;t<sub>1</sub>'</td>
+  <td></td>
+
+</tr></tbody></table></center><center><table class="infrule">
+<tbody><tr class="infruleassumption">
+  <td class="infrule">&nbsp;&nbsp;</td>
+  <td class="infrulenamecol" rowspan="3">
+    (ST_IszeroZero) &nbsp;
+  </td></tr>
+<tr class="infrulemiddle">
+  <td class="infrule"><hr></td>
+</tr>
+<tr class="infruleassumption">
+  <td class="infrule">iszero&nbsp;0&nbsp;<span style="font-family: arial;">⇒</span>&nbsp;true</td>
+  <td></td>
+
+</tr></tbody></table></center><center><table class="infrule">
+<tbody><tr class="infruleassumption">
+  <td class="infrule">numeric&nbsp;value&nbsp;v<sub>1</sub></td>
+  <td class="infrulenamecol" rowspan="3">
+    (ST_IszeroSucc) &nbsp;
+  </td></tr>
+<tr class="infrulemiddle">
+  <td class="infrule"><hr></td>
+</tr>
+<tr class="infruleassumption">
+  <td class="infrule">iszero&nbsp;(succ&nbsp;v<sub>1</sub>)&nbsp;<span style="font-family: arial;">⇒</span>&nbsp;false</td>
+  <td></td>
+
+</tr></tbody></table></center><center><table class="infrule">
+<tbody><tr class="infruleassumption">
+  <td class="infrule">t<sub>1</sub>&nbsp;<span style="font-family: arial;">⇒</span>&nbsp;t<sub>1</sub>'</td>
+  <td class="infrulenamecol" rowspan="3">
+    (ST_Iszero) &nbsp;
+  </td></tr>
+<tr class="infrulemiddle">
+  <td class="infrule"><hr></td>
+</tr>
+<tr class="infruleassumption">
+  <td class="infrule">iszero&nbsp;t<sub>1</sub>&nbsp;<span style="font-family: arial;">⇒</span>&nbsp;iszero&nbsp;t<sub>1</sub>'</td>
+  <td></td>
+
+</tr></tbody></table></center>
+<div class="paragraph"> </div>
+
+ Formally: 
+</div>
+<div class="code code-tight">
+
+<br>
+<span class="id" type="keyword">Reserved Notation</span> "t<sub>1</sub> '<span style="font-family: arial;">⇒</span>' t<sub>2</sub>" (<span class="id" type="tactic">at</span> <span class="id" type="var">level</span> 40).<br>
+
+<br>
+<span class="id" type="keyword">Inductive</span> <a name="step"><span class="id" type="inductive">step</span></a> : <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#tm"><span class="id" type="inductive">tm</span></a> <span style="font-family: arial;">→</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#tm"><span class="id" type="inductive">tm</span></a> <span style="font-family: arial;">→</span> <span class="id" type="keyword">Prop</span> :=<br>
+&nbsp;&nbsp;| <a name="ST_IfTrue"><span class="id" type="constructor">ST_IfTrue</span></a> : <span style="font-family: arial;">∀</span><span class="id" type="var">t<sub>1</sub></span> <span class="id" type="var">t<sub>2</sub></span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#tif"><span class="id" type="constructor">tif</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#ttrue"><span class="id" type="constructor">ttrue</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#t<sub>1</sub>"><span class="id" type="variable">t<sub>1</sub></span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#t<sub>2</sub>"><span class="id" type="variable">t<sub>2</sub></span></a>) <span style="font-family: arial;">⇒</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#t<sub>1</sub>"><span class="id" type="variable">t<sub>1</sub></span></a><br>
+&nbsp;&nbsp;| <a name="ST_IfFalse"><span class="id" type="constructor">ST_IfFalse</span></a> : <span style="font-family: arial;">∀</span><span class="id" type="var">t<sub>1</sub></span> <span class="id" type="var">t<sub>2</sub></span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#tif"><span class="id" type="constructor">tif</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#tfalse"><span class="id" type="constructor">tfalse</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#t<sub>1</sub>"><span class="id" type="variable">t<sub>1</sub></span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#t<sub>2</sub>"><span class="id" type="variable">t<sub>2</sub></span></a>) <span style="font-family: arial;">⇒</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#t<sub>2</sub>"><span class="id" type="variable">t<sub>2</sub></span></a><br>
+&nbsp;&nbsp;| <a name="ST_If"><span class="id" type="constructor">ST_If</span></a> : <span style="font-family: arial;">∀</span><span class="id" type="var">t<sub>1</sub></span> <span class="id" type="var">t<sub>1</sub>'</span> <span class="id" type="var">t<sub>2</sub></span> <span class="id" type="var">t<sub>3</sub></span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#t<sub>1</sub>"><span class="id" type="variable">t<sub>1</sub></span></a> <span style="font-family: arial;">⇒</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#t<sub>1</sub>'"><span class="id" type="variable">t<sub>1</sub>'</span></a> <span style="font-family: arial;">→</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#tif"><span class="id" type="constructor">tif</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#t<sub>1</sub>"><span class="id" type="variable">t<sub>1</sub></span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#t<sub>2</sub>"><span class="id" type="variable">t<sub>2</sub></span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#t<sub>3</sub>"><span class="id" type="variable">t<sub>3</sub></span></a>) <span style="font-family: arial;">⇒</span> (<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#tif"><span class="id" type="constructor">tif</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#t<sub>1</sub>'"><span class="id" type="variable">t<sub>1</sub>'</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#t<sub>2</sub>"><span class="id" type="variable">t<sub>2</sub></span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#t<sub>3</sub>"><span class="id" type="variable">t<sub>3</sub></span></a>)<br>
+&nbsp;&nbsp;| <a name="ST_Succ"><span class="id" type="constructor">ST_Succ</span></a> : <span style="font-family: arial;">∀</span><span class="id" type="var">t<sub>1</sub></span> <span class="id" type="var">t<sub>1</sub>'</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#t<sub>1</sub>"><span class="id" type="variable">t<sub>1</sub></span></a> <span style="font-family: arial;">⇒</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#t<sub>1</sub>'"><span class="id" type="variable">t<sub>1</sub>'</span></a> <span style="font-family: arial;">→</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#tsucc"><span class="id" type="constructor">tsucc</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#t<sub>1</sub>"><span class="id" type="variable">t<sub>1</sub></span></a>) <span style="font-family: arial;">⇒</span> (<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#tsucc"><span class="id" type="constructor">tsucc</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#t<sub>1</sub>'"><span class="id" type="variable">t<sub>1</sub>'</span></a>)<br>
+&nbsp;&nbsp;| <a name="ST_PredZero"><span class="id" type="constructor">ST_PredZero</span></a> :<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#tpred"><span class="id" type="constructor">tpred</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#tzero"><span class="id" type="constructor">tzero</span></a>) <span style="font-family: arial;">⇒</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#tzero"><span class="id" type="constructor">tzero</span></a><br>
+&nbsp;&nbsp;| <a name="ST_PredSucc"><span class="id" type="constructor">ST_PredSucc</span></a> : <span style="font-family: arial;">∀</span><span class="id" type="var">t<sub>1</sub></span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#nvalue"><span class="id" type="inductive">nvalue</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#t<sub>1</sub>"><span class="id" type="variable">t<sub>1</sub></span></a> <span style="font-family: arial;">→</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#tpred"><span class="id" type="constructor">tpred</span></a> (<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#tsucc"><span class="id" type="constructor">tsucc</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#t<sub>1</sub>"><span class="id" type="variable">t<sub>1</sub></span></a>)) <span style="font-family: arial;">⇒</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#t<sub>1</sub>"><span class="id" type="variable">t<sub>1</sub></span></a><br>
+&nbsp;&nbsp;| <a name="ST_Pred"><span class="id" type="constructor">ST_Pred</span></a> : <span style="font-family: arial;">∀</span><span class="id" type="var">t<sub>1</sub></span> <span class="id" type="var">t<sub>1</sub>'</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#t<sub>1</sub>"><span class="id" type="variable">t<sub>1</sub></span></a> <span style="font-family: arial;">⇒</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#t<sub>1</sub>'"><span class="id" type="variable">t<sub>1</sub>'</span></a> <span style="font-family: arial;">→</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#tpred"><span class="id" type="constructor">tpred</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#t<sub>1</sub>"><span class="id" type="variable">t<sub>1</sub></span></a>) <span style="font-family: arial;">⇒</span> (<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#tpred"><span class="id" type="constructor">tpred</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#t<sub>1</sub>'"><span class="id" type="variable">t<sub>1</sub>'</span></a>)<br>
+&nbsp;&nbsp;| <a name="ST_IszeroZero"><span class="id" type="constructor">ST_IszeroZero</span></a> :<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#tiszero"><span class="id" type="constructor">tiszero</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#tzero"><span class="id" type="constructor">tzero</span></a>) <span style="font-family: arial;">⇒</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#ttrue"><span class="id" type="constructor">ttrue</span></a><br>
+&nbsp;&nbsp;| <a name="ST_IszeroSucc"><span class="id" type="constructor">ST_IszeroSucc</span></a> : <span style="font-family: arial;">∀</span><span class="id" type="var">t<sub>1</sub></span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#nvalue"><span class="id" type="inductive">nvalue</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#t<sub>1</sub>"><span class="id" type="variable">t<sub>1</sub></span></a> <span style="font-family: arial;">→</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#tiszero"><span class="id" type="constructor">tiszero</span></a> (<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#tsucc"><span class="id" type="constructor">tsucc</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#t<sub>1</sub>"><span class="id" type="variable">t<sub>1</sub></span></a>)) <span style="font-family: arial;">⇒</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#tfalse"><span class="id" type="constructor">tfalse</span></a><br>
+&nbsp;&nbsp;| <a name="ST_Iszero"><span class="id" type="constructor">ST_Iszero</span></a> : <span style="font-family: arial;">∀</span><span class="id" type="var">t<sub>1</sub></span> <span class="id" type="var">t<sub>1</sub>'</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#t<sub>1</sub>"><span class="id" type="variable">t<sub>1</sub></span></a> <span style="font-family: arial;">⇒</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#t<sub>1</sub>'"><span class="id" type="variable">t<sub>1</sub>'</span></a> <span style="font-family: arial;">→</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#tiszero"><span class="id" type="constructor">tiszero</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#t<sub>1</sub>"><span class="id" type="variable">t<sub>1</sub></span></a>) <span style="font-family: arial;">⇒</span> (<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#tiszero"><span class="id" type="constructor">tiszero</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#t<sub>1</sub>'"><span class="id" type="variable">t<sub>1</sub>'</span></a>)<br>
+<br>
+<span class="id" type="keyword">where</span> "t<sub>1</sub> '<span style="font-family: arial;">⇒</span>' t<sub>2</sub>" := (<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#step"><span class="id" type="inductive">step</span></a> <span class="id" type="var">t<sub>1</sub></span> <span class="id" type="var">t<sub>2</sub></span>).<br>
+
+<br>
+<span class="id" type="keyword">Hint</span> <span class="id" type="var">Constructors</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#step"><span class="id" type="inductive">step</span></a>.<br>
+
+<br>
+</div>
+
+<div class="doc">
+Notice that the <span class="inlinecode"><span class="id" type="var">step</span></span> relation doesn't care about whether
+    expressions make global sense — it just checks that the operation
+    in the <i>next</i> reduction step is being applied to the right kinds
+    of operands.
+
+<div class="paragraph"> </div>
+
+    For example, the term <span class="inlinecode"><span class="id" type="var">succ</span></span> <span class="inlinecode"><span class="id" type="var">true</span></span> (i.e., <span class="inlinecode"><span class="id" type="var">tsucc</span></span> <span class="inlinecode"><span class="id" type="var">ttrue</span></span> in the
+    formal syntax) cannot take a step, but the almost-as-obviously
+    nonsensical term
+
+<div class="paragraph"> </div>
+
+<div class="code code-tight">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">succ</span>&nbsp;(<span class="id" type="keyword">if</span>&nbsp;<span class="id" type="var">true</span>&nbsp;<span class="id" type="keyword">then</span>&nbsp;<span class="id" type="var">true</span>&nbsp;<span class="id" type="keyword">else</span>&nbsp;<span class="id" type="var">true</span>)
+<div class="paragraph"> </div>
+
+</div>
+    can take a step (once, before becoming stuck). 
+</div>
+<div class="code code-tight">
+
+<br>
+</div>
+
+<div class="doc">
+<a name="lab524"></a><h2 class="section">Normal Forms and Values</h2>
+
+<div class="paragraph"> </div>
+
+ The first interesting thing to notice about the <span class="inlinecode"><span class="id" type="var">step</span></span> relation in
+    this language is that the strong progress theorem from the
+    Smallstep chapter fails.  That is, there are terms that are normal
+    forms (they can't take a step) but not values (because we have not
+    included them in our definition of possible "results of
+    evaluation").  Such terms are <i>stuck</i>. 
+</div>
+<div class="code code-tight">
+
+<br>
+<span class="id" type="keyword">Notation</span> <a name="step_normal_form"><span class="id" type="abbreviation">step_normal_form</span></a> := (<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Smallstep.html#normal_form"><span class="id" type="definition">normal_form</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#step"><span class="id" type="inductive">step</span></a>).<br>
+
+<br>
+<span class="id" type="keyword">Definition</span> <a name="stuck"><span class="id" type="definition">stuck</span></a> (<span class="id" type="var">t</span>:<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#tm"><span class="id" type="inductive">tm</span></a>) : <span class="id" type="keyword">Prop</span> :=<br>
+&nbsp;&nbsp;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#step_normal_form"><span class="id" type="abbreviation">step_normal_form</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#t"><span class="id" type="variable">t</span></a> <span style="font-family: arial;">∧</span> ¬ <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#value"><span class="id" type="definition">value</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#t"><span class="id" type="variable">t</span></a>.<br>
+
+<br>
+<span class="id" type="keyword">Hint</span> <span class="id" type="keyword">Unfold</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#stuck"><span class="id" type="definition">stuck</span></a>.<br>
+
+<br>
+</div>
+
+<div class="doc">
+<a name="lab525"></a><h4 class="section">Exercise: 2 stars (some_term_is_stuck)</h4>
+
+</div>
+<div class="code code-space">
+<span class="id" type="keyword">Example</span> <a name="some_term_is_stuck"><span class="id" type="definition">some_term_is_stuck</span></a> :<br>
+&nbsp;&nbsp;<span style="font-family: arial;">∃</span><span class="id" type="var">t</span>, <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#stuck"><span class="id" type="definition">stuck</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#t"><span class="id" type="variable">t</span></a>.<br>
+<span class="id" type="keyword">Proof</span>.<br>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br>
+</div>
+
+<div class="doc">
+<font size="-2">☐</font> 
+<div class="paragraph"> </div>
+
+ However, although values and normal forms are not the same in this
+    language, the set of values is included in the set of normal
+    forms.  This is important because it shows we did not accidentally
+    define things so that some value could still take a step. 
+<div class="paragraph"> </div>
+
+<a name="lab526"></a><h4 class="section">Exercise: 3 stars, advanced (value_is_nf)</h4>
+ (Hint: You will reach a point in this proof where you need to
+    use an induction to reason about a term that is known to be a
+    numeric value.  This induction can be performed either over the
+    term itself or over the evidence that it is a numeric value.  The
+    proof goes through in either case, but you will find that one way
+    is quite a bit shorter than the other.  For the sake of the
+    exercise, try to complete the proof both ways.) 
+</div>
+<div class="code code-tight">
+
+<br>
+<span class="id" type="keyword">Lemma</span> <a name="value_is_nf"><span class="id" type="lemma">value_is_nf</span></a> : <span style="font-family: arial;">∀</span><span class="id" type="var">t</span>,<br>
+&nbsp;&nbsp;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#value"><span class="id" type="definition">value</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#t"><span class="id" type="variable">t</span></a> <span style="font-family: arial;">→</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#step_normal_form"><span class="id" type="abbreviation">step_normal_form</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#t"><span class="id" type="variable">t</span></a>.<br>
+<div class="togglescript" id="proofcontrol2" onclick="toggleDisplay(&#39;proof2&#39;);toggleDisplay(&#39;proofcontrol2&#39;)"><span class="show"></span></div>
+<div class="proofscript" id="proof2" onclick="toggleDisplay(&#39;proof2&#39;);toggleDisplay(&#39;proofcontrol2&#39;)">
+<span class="id" type="keyword">Proof</span>.<br>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br>
+</div>
+</div>
+
+<div class="doc">
+<font size="-2">☐</font> 
+<div class="paragraph"> </div>
+
+<a name="lab527"></a><h4 class="section">Exercise: 3 stars, optional (step_deterministic)</h4>
+ Use <span class="inlinecode"><span class="id" type="var">value_is_nf</span></span> to show that the <span class="inlinecode"><span class="id" type="var">step</span></span> relation is also
+    deterministic. 
+</div>
+<div class="code code-tight">
+
+<br>
+<span class="id" type="keyword">Theorem</span> <a name="step_deterministic"><span class="id" type="lemma">step_deterministic</span></a>:<br>
+&nbsp;&nbsp;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Smallstep.html#deterministic"><span class="id" type="definition">deterministic</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#step"><span class="id" type="inductive">step</span></a>.<br>
+<span class="id" type="keyword">Proof</span> <span class="id" type="keyword">with</span> <span class="id" type="tactic">eauto</span>.<br>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br>
+</div>
+
+<div class="doc">
+<font size="-2">☐</font> 
+</div>
+<div class="code code-tight">
+
+<br>
+</div>
+
+<div class="doc">
+<a name="lab528"></a><h2 class="section">Typing</h2>
+
+<div class="paragraph"> </div>
+
+ The next critical observation is that, although this
+    language has stuck terms, they are all "nonsensical," mixing
+    booleans and numbers in a way that we don't even <i>want</i> to have a
+    meaning.  We can easily exclude such ill-typed terms by defining a
+    <i>typing relation</i> that relates terms to the types (either numeric
+    or boolean) of their final results.  
+</div>
+<div class="code code-tight">
+
+<br>
+<span class="id" type="keyword">Inductive</span> <a name="ty"><span class="id" type="inductive">ty</span></a> : <span class="id" type="keyword">Type</span> :=<br>
+&nbsp;&nbsp;| <a name="TBool"><span class="id" type="constructor">TBool</span></a> : <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#ty"><span class="id" type="inductive">ty</span></a><br>
+&nbsp;&nbsp;| <a name="TNat"><span class="id" type="constructor">TNat</span></a> : <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#ty"><span class="id" type="inductive">ty</span></a>.<br>
+
+<br>
+</div>
+
+<div class="doc">
+In informal notation, the typing relation is often written
+    <span class="inlinecode"><span style="font-family: arial;">⊢</span></span> <span class="inlinecode"><span class="id" type="var">t</span></span> <span class="inlinecode">∈</span> <span class="inlinecode"><span class="id" type="var">T</span></span> and pronounced "<span class="inlinecode"><span class="id" type="var">t</span></span> has type <span class="inlinecode"><span class="id" type="var">T</span></span>."  The <span class="inlinecode"><span style="font-family: arial;">⊢</span></span> symbol is
+    called a "turnstile".  Below, we're going to see richer typing
+    relations where an additional "context" argument is written to the
+    left of the turnstile.  Here, the context is always empty.  <center><table class="infrule">
+<tbody><tr class="infruleassumption">
+  <td class="infrule">&nbsp;&nbsp;</td>
+  <td class="infrulenamecol" rowspan="3">
+    (T_True) &nbsp;
+  </td></tr>
+<tr class="infrulemiddle">
+  <td class="infrule"><hr></td>
+</tr>
+<tr class="infruleassumption">
+  <td class="infrule"><span style="font-family: arial;">⊢</span>&nbsp;true&nbsp;∈&nbsp;Bool</td>
+  <td></td>
+
+</tr></tbody></table></center><center><table class="infrule">
+<tbody><tr class="infruleassumption">
+  <td class="infrule">&nbsp;&nbsp;</td>
+  <td class="infrulenamecol" rowspan="3">
+    (T_False) &nbsp;
+  </td></tr>
+<tr class="infrulemiddle">
+  <td class="infrule"><hr></td>
+</tr>
+<tr class="infruleassumption">
+  <td class="infrule"><span style="font-family: arial;">⊢</span>&nbsp;false&nbsp;∈&nbsp;Bool</td>
+  <td></td>
+
+</tr></tbody></table></center><center><table class="infrule">
+<tbody><tr class="infruleassumption">
+  <td class="infrule"><span style="font-family: arial;">⊢</span>&nbsp;t<sub>1</sub>&nbsp;∈&nbsp;Bool&nbsp;&nbsp;&nbsp;&nbsp;<span style="font-family: arial;">⊢</span>&nbsp;t<sub>2</sub>&nbsp;∈&nbsp;T&nbsp;&nbsp;&nbsp;&nbsp;<span style="font-family: arial;">⊢</span>&nbsp;t<sub>3</sub>&nbsp;∈&nbsp;T</td>
+  <td class="infrulenamecol" rowspan="3">
+    (T_If) &nbsp;
+  </td></tr>
+<tr class="infrulemiddle">
+  <td class="infrule"><hr></td>
+</tr>
+<tr class="infruleassumption">
+  <td class="infrule"><span style="font-family: arial;">⊢</span>&nbsp;if&nbsp;t<sub>1</sub>&nbsp;then&nbsp;t<sub>2</sub>&nbsp;else&nbsp;t<sub>3</sub>&nbsp;∈&nbsp;T</td>
+  <td></td>
+
+</tr></tbody></table></center><center><table class="infrule">
+<tbody><tr class="infruleassumption">
+  <td class="infrule">&nbsp;&nbsp;</td>
+  <td class="infrulenamecol" rowspan="3">
+    (T_Zero) &nbsp;
+  </td></tr>
+<tr class="infrulemiddle">
+  <td class="infrule"><hr></td>
+</tr>
+<tr class="infruleassumption">
+  <td class="infrule"><span style="font-family: arial;">⊢</span>&nbsp;0&nbsp;∈&nbsp;Nat</td>
+  <td></td>
+
+</tr></tbody></table></center><center><table class="infrule">
+<tbody><tr class="infruleassumption">
+  <td class="infrule"><span style="font-family: arial;">⊢</span>&nbsp;t<sub>1</sub>&nbsp;∈&nbsp;Nat</td>
+  <td class="infrulenamecol" rowspan="3">
+    (T_Succ) &nbsp;
+  </td></tr>
+<tr class="infrulemiddle">
+  <td class="infrule"><hr></td>
+</tr>
+<tr class="infruleassumption">
+  <td class="infrule"><span style="font-family: arial;">⊢</span>&nbsp;succ&nbsp;t<sub>1</sub>&nbsp;∈&nbsp;Nat</td>
+  <td></td>
+
+</tr></tbody></table></center><center><table class="infrule">
+<tbody><tr class="infruleassumption">
+  <td class="infrule"><span style="font-family: arial;">⊢</span>&nbsp;t<sub>1</sub>&nbsp;∈&nbsp;Nat</td>
+  <td class="infrulenamecol" rowspan="3">
+    (T_Pred) &nbsp;
+  </td></tr>
+<tr class="infrulemiddle">
+  <td class="infrule"><hr></td>
+</tr>
+<tr class="infruleassumption">
+  <td class="infrule"><span style="font-family: arial;">⊢</span>&nbsp;pred&nbsp;t<sub>1</sub>&nbsp;∈&nbsp;Nat</td>
+  <td></td>
+
+</tr></tbody></table></center><center><table class="infrule">
+<tbody><tr class="infruleassumption">
+  <td class="infrule"><span style="font-family: arial;">⊢</span>&nbsp;t<sub>1</sub>&nbsp;∈&nbsp;Nat</td>
+  <td class="infrulenamecol" rowspan="3">
+    (T_IsZero) &nbsp;
+  </td></tr>
+<tr class="infrulemiddle">
+  <td class="infrule"><hr></td>
+</tr>
+<tr class="infruleassumption">
+  <td class="infrule"><span style="font-family: arial;">⊢</span>&nbsp;iszero&nbsp;t<sub>1</sub>&nbsp;∈&nbsp;Bool</td>
+  <td></td>
+
+</tr></tbody></table></center>
+</div>
+<div class="code code-tight">
+
+<br>
+<span class="id" type="keyword">Reserved Notation</span> "'<span style="font-family: arial;">⊢</span>' t '∈' T" (<span class="id" type="tactic">at</span> <span class="id" type="var">level</span> 40).<br>
+
+<br>
+<span class="id" type="keyword">Inductive</span> <a name="has_type"><span class="id" type="inductive">has_type</span></a> : <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#tm"><span class="id" type="inductive">tm</span></a> <span style="font-family: arial;">→</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#ty"><span class="id" type="inductive">ty</span></a> <span style="font-family: arial;">→</span> <span class="id" type="keyword">Prop</span> :=<br>
+&nbsp;&nbsp;| <a name="T_True"><span class="id" type="constructor">T_True</span></a> :<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="font-family: arial;">⊢</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#ttrue"><span class="id" type="constructor">ttrue</span></a> ∈ <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#TBool"><span class="id" type="constructor">TBool</span></a><br>
+&nbsp;&nbsp;| <a name="T_False"><span class="id" type="constructor">T_False</span></a> :<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="font-family: arial;">⊢</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#tfalse"><span class="id" type="constructor">tfalse</span></a> ∈ <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#TBool"><span class="id" type="constructor">TBool</span></a><br>
+&nbsp;&nbsp;| <a name="T_If"><span class="id" type="constructor">T_If</span></a> : <span style="font-family: arial;">∀</span><span class="id" type="var">t<sub>1</sub></span> <span class="id" type="var">t<sub>2</sub></span> <span class="id" type="var">t<sub>3</sub></span> <span class="id" type="var">T</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="font-family: arial;">⊢</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#t<sub>1</sub>"><span class="id" type="variable">t<sub>1</sub></span></a> ∈ <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#TBool"><span class="id" type="constructor">TBool</span></a> <span style="font-family: arial;">→</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="font-family: arial;">⊢</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#t<sub>2</sub>"><span class="id" type="variable">t<sub>2</sub></span></a> ∈ <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#T"><span class="id" type="variable">T</span></a> <span style="font-family: arial;">→</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="font-family: arial;">⊢</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#t<sub>3</sub>"><span class="id" type="variable">t<sub>3</sub></span></a> ∈ <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#T"><span class="id" type="variable">T</span></a> <span style="font-family: arial;">→</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="font-family: arial;">⊢</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#tif"><span class="id" type="constructor">tif</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#t<sub>1</sub>"><span class="id" type="variable">t<sub>1</sub></span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#t<sub>2</sub>"><span class="id" type="variable">t<sub>2</sub></span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#t<sub>3</sub>"><span class="id" type="variable">t<sub>3</sub></span></a> ∈ <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#T"><span class="id" type="variable">T</span></a><br>
+&nbsp;&nbsp;| <a name="T_Zero"><span class="id" type="constructor">T_Zero</span></a> :<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="font-family: arial;">⊢</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#tzero"><span class="id" type="constructor">tzero</span></a> ∈ <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#TNat"><span class="id" type="constructor">TNat</span></a><br>
+&nbsp;&nbsp;| <a name="T_Succ"><span class="id" type="constructor">T_Succ</span></a> : <span style="font-family: arial;">∀</span><span class="id" type="var">t<sub>1</sub></span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="font-family: arial;">⊢</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#t<sub>1</sub>"><span class="id" type="variable">t<sub>1</sub></span></a> ∈ <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#TNat"><span class="id" type="constructor">TNat</span></a> <span style="font-family: arial;">→</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="font-family: arial;">⊢</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#tsucc"><span class="id" type="constructor">tsucc</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#t<sub>1</sub>"><span class="id" type="variable">t<sub>1</sub></span></a> ∈ <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#TNat"><span class="id" type="constructor">TNat</span></a><br>
+&nbsp;&nbsp;| <a name="T_Pred"><span class="id" type="constructor">T_Pred</span></a> : <span style="font-family: arial;">∀</span><span class="id" type="var">t<sub>1</sub></span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="font-family: arial;">⊢</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#t<sub>1</sub>"><span class="id" type="variable">t<sub>1</sub></span></a> ∈ <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#TNat"><span class="id" type="constructor">TNat</span></a> <span style="font-family: arial;">→</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="font-family: arial;">⊢</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#tpred"><span class="id" type="constructor">tpred</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#t<sub>1</sub>"><span class="id" type="variable">t<sub>1</sub></span></a> ∈ <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#TNat"><span class="id" type="constructor">TNat</span></a><br>
+&nbsp;&nbsp;| <a name="T_Iszero"><span class="id" type="constructor">T_Iszero</span></a> : <span style="font-family: arial;">∀</span><span class="id" type="var">t<sub>1</sub></span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="font-family: arial;">⊢</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#t<sub>1</sub>"><span class="id" type="variable">t<sub>1</sub></span></a> ∈ <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#TNat"><span class="id" type="constructor">TNat</span></a> <span style="font-family: arial;">→</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="font-family: arial;">⊢</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#tiszero"><span class="id" type="constructor">tiszero</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#t<sub>1</sub>"><span class="id" type="variable">t<sub>1</sub></span></a> ∈ <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#TBool"><span class="id" type="constructor">TBool</span></a><br>
+<br>
+<span class="id" type="keyword">where</span> "'<span style="font-family: arial;">⊢</span>' t '∈' T" := (<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#has_type"><span class="id" type="inductive">has_type</span></a> <span class="id" type="var">t</span> <span class="id" type="var">T</span>).<br>
+
+<br>
+<div class="togglescript" id="proofcontrol3" onclick="toggleDisplay(&#39;proof3&#39;);toggleDisplay(&#39;proofcontrol3&#39;)"><span class="show"></span></div>
+<div class="proofscript" id="proof3" onclick="toggleDisplay(&#39;proof3&#39;);toggleDisplay(&#39;proofcontrol3&#39;)">
+<span class="id" type="keyword">Hint</span> <span class="id" type="var">Constructors</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#has_type"><span class="id" type="inductive">has_type</span></a>.<br>
+</div>
+
+<br>
+</div>
+
+<div class="doc">
+<a name="lab529"></a><h3 class="section">Examples</h3>
+
+<div class="paragraph"> </div>
+
+ It's important to realize that the typing relation is a
+    <i>conservative</i> (or <i>static</i>) approximation: it does not calculate
+    the type of the normal form of a term. 
+</div>
+<div class="code code-tight">
+
+<br>
+<span class="id" type="keyword">Example</span> <a name="has_type_1"><span class="id" type="definition">has_type_1</span></a> :<br>
+&nbsp;&nbsp;<span style="font-family: arial;">⊢</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#tif"><span class="id" type="constructor">tif</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#tfalse"><span class="id" type="constructor">tfalse</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#tzero"><span class="id" type="constructor">tzero</span></a> (<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#tsucc"><span class="id" type="constructor">tsucc</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#tzero"><span class="id" type="constructor">tzero</span></a>) ∈ <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#TNat"><span class="id" type="constructor">TNat</span></a>.<br>
+<span class="id" type="keyword">Proof</span>.<br>
+&nbsp;&nbsp;<span class="id" type="tactic">apply</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#T_If"><span class="id" type="constructor">T_If</span></a>.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id" type="tactic">apply</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#T_False"><span class="id" type="constructor">T_False</span></a>.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id" type="tactic">apply</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#T_Zero"><span class="id" type="constructor">T_Zero</span></a>.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id" type="tactic">apply</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#T_Succ"><span class="id" type="constructor">T_Succ</span></a>.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" type="tactic">apply</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#T_Zero"><span class="id" type="constructor">T_Zero</span></a>.<br>
+<span class="id" type="keyword">Qed</span>.<br>
+
+<br>
+</div>
+
+<div class="doc">
+(Since we've included all the constructors of the typing relation
+    in the hint database, the <span class="inlinecode"><span class="id" type="tactic">auto</span></span> tactic can actually find this
+    proof automatically.) 
+</div>
+<div class="code code-tight">
+
+<br>
+<span class="id" type="keyword">Example</span> <a name="has_type_not"><span class="id" type="definition">has_type_not</span></a> :<br>
+&nbsp;&nbsp;¬ (<span style="font-family: arial;">⊢</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#tif"><span class="id" type="constructor">tif</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#tfalse"><span class="id" type="constructor">tfalse</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#tzero"><span class="id" type="constructor">tzero</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#ttrue"><span class="id" type="constructor">ttrue</span></a> ∈ <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#TBool"><span class="id" type="constructor">TBool</span></a>).<br>
+<div class="togglescript" id="proofcontrol4" onclick="toggleDisplay(&#39;proof4&#39;);toggleDisplay(&#39;proofcontrol4&#39;)"><span class="show"></span></div>
+<div class="proofscript" id="proof4" onclick="toggleDisplay(&#39;proof4&#39;);toggleDisplay(&#39;proofcontrol4&#39;)">
+<span class="id" type="keyword">Proof</span>.<br>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">Contra</span>. <span class="id" type="var">solve</span> <span class="id" type="tactic">by</span> <span class="id" type="tactic">inversion</span> 2. <span class="id" type="keyword">Qed</span>.<br>
+</div>
+
+<br>
+</div>
+
+<div class="doc">
+<a name="lab530"></a><h4 class="section">Exercise: 1 star, optional (succ_hastype_nat__hastype_nat)</h4>
+
+</div>
+<div class="code code-space">
+<span class="id" type="keyword">Example</span> <a name="succ_hastype_nat__hastype_nat"><span class="id" type="definition">succ_hastype_nat__hastype_nat</span></a> : <span style="font-family: arial;">∀</span><span class="id" type="var">t</span>,<br>
+&nbsp;&nbsp;<span style="font-family: arial;">⊢</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#tsucc"><span class="id" type="constructor">tsucc</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#t"><span class="id" type="variable">t</span></a> ∈ <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#TNat"><span class="id" type="constructor">TNat</span></a> <span style="font-family: arial;">→</span><br>
+&nbsp;&nbsp;<span style="font-family: arial;">⊢</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#t"><span class="id" type="variable">t</span></a> ∈ <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#TNat"><span class="id" type="constructor">TNat</span></a>.<br>
+<span class="id" type="keyword">Proof</span>.<br>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br>
+</div>
+
+<div class="doc">
+<font size="-2">☐</font> 
+</div>
+<div class="code code-tight">
+
+<br>
+</div>
+
+<div class="doc">
+<a name="lab531"></a><h3 class="section">Canonical forms</h3>
+
+<div class="paragraph"> </div>
+
+ The following two lemmas capture the basic property that defines
+    the shape of well-typed values.  They say that the definition of value
+    and the typing relation agree. 
+</div>
+<div class="code code-tight">
+
+<br>
+<span class="id" type="keyword">Lemma</span> <a name="bool_canonical"><span class="id" type="lemma">bool_canonical</span></a> : <span style="font-family: arial;">∀</span><span class="id" type="var">t</span>,<br>
+&nbsp;&nbsp;<span style="font-family: arial;">⊢</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#t"><span class="id" type="variable">t</span></a> ∈ <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#TBool"><span class="id" type="constructor">TBool</span></a> <span style="font-family: arial;">→</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#value"><span class="id" type="definition">value</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#t"><span class="id" type="variable">t</span></a> <span style="font-family: arial;">→</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#bvalue"><span class="id" type="inductive">bvalue</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#t"><span class="id" type="variable">t</span></a>.<br>
+<div class="togglescript" id="proofcontrol5" onclick="toggleDisplay(&#39;proof5&#39;);toggleDisplay(&#39;proofcontrol5&#39;)"><span class="show"></span></div>
+<div class="proofscript" id="proof5" onclick="toggleDisplay(&#39;proof5&#39;);toggleDisplay(&#39;proofcontrol5&#39;)">
+<span class="id" type="keyword">Proof</span>.<br>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">t</span> <span class="id" type="var">HT</span> <span class="id" type="var">HV</span>.<br>
+&nbsp;&nbsp;<span class="id" type="tactic">inversion</span> <span class="id" type="var">HV</span>; <span class="id" type="tactic">auto</span>.<br>
+
+<br>
+&nbsp;&nbsp;<span class="id" type="tactic">induction</span> <span class="id" type="var">H</span>; <span class="id" type="tactic">inversion</span> <span class="id" type="var">HT</span>; <span class="id" type="tactic">auto</span>.<br>
+<span class="id" type="keyword">Qed</span>.<br>
+</div>
+
+<br>
+<span class="id" type="keyword">Lemma</span> <a name="nat_canonical"><span class="id" type="lemma">nat_canonical</span></a> : <span style="font-family: arial;">∀</span><span class="id" type="var">t</span>,<br>
+&nbsp;&nbsp;<span style="font-family: arial;">⊢</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#t"><span class="id" type="variable">t</span></a> ∈ <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#TNat"><span class="id" type="constructor">TNat</span></a> <span style="font-family: arial;">→</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#value"><span class="id" type="definition">value</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#t"><span class="id" type="variable">t</span></a> <span style="font-family: arial;">→</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#nvalue"><span class="id" type="inductive">nvalue</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#t"><span class="id" type="variable">t</span></a>.<br>
+<div class="togglescript" id="proofcontrol6" onclick="toggleDisplay(&#39;proof6&#39;);toggleDisplay(&#39;proofcontrol6&#39;)"><span class="show"></span></div>
+<div class="proofscript" id="proof6" onclick="toggleDisplay(&#39;proof6&#39;);toggleDisplay(&#39;proofcontrol6&#39;)">
+<span class="id" type="keyword">Proof</span>.<br>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">t</span> <span class="id" type="var">HT</span> <span class="id" type="var">HV</span>.<br>
+&nbsp;&nbsp;<span class="id" type="tactic">inversion</span> <span class="id" type="var">HV</span>.<br>
+&nbsp;&nbsp;<span class="id" type="tactic">inversion</span> <span class="id" type="var">H</span>; <span class="id" type="tactic">subst</span>; <span class="id" type="tactic">inversion</span> <span class="id" type="var">HT</span>.<br>
+
+<br>
+&nbsp;&nbsp;<span class="id" type="tactic">auto</span>.<br>
+<span class="id" type="keyword">Qed</span>.<br>
+</div>
+
+<br>
+</div>
+
+<div class="doc">
+<a name="lab532"></a><h2 class="section">Progress</h2>
+
+<div class="paragraph"> </div>
+
+ The typing relation enjoys two critical properties.  The first is
+    that well-typed normal forms are values (i.e., not stuck). 
+</div>
+<div class="code code-tight">
+
+<br>
+<span class="id" type="keyword">Theorem</span> <a name="progress"><span class="id" type="lemma">progress</span></a> : <span style="font-family: arial;">∀</span><span class="id" type="var">t</span> <span class="id" type="var">T</span>,<br>
+&nbsp;&nbsp;<span style="font-family: arial;">⊢</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#t"><span class="id" type="variable">t</span></a> ∈ <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#T"><span class="id" type="variable">T</span></a> <span style="font-family: arial;">→</span><br>
+&nbsp;&nbsp;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#value"><span class="id" type="definition">value</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#t"><span class="id" type="variable">t</span></a> <span style="font-family: arial;">∨</span> <span style="font-family: arial;">∃</span><span class="id" type="var">t'</span>, <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#t"><span class="id" type="variable">t</span></a> <span style="font-family: arial;">⇒</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#t'"><span class="id" type="variable">t'</span></a>.<br>
+
+<br>
+</div>
+
+<div class="doc">
+<a name="lab533"></a><h4 class="section">Exercise: 3 stars (finish_progress)</h4>
+ Complete the formal proof of the <span class="inlinecode"><span class="id" type="tactic">progress</span></span> property.  (Make sure
+    you understand the informal proof fragment in the following
+    exercise before starting — this will save you a lot of time.) 
+</div>
+<div class="code code-tight">
+
+<br>
+<div class="togglescript" id="proofcontrol7" onclick="toggleDisplay(&#39;proof7&#39;);toggleDisplay(&#39;proofcontrol7&#39;)"><span class="show"></span></div>
+<div class="proofscript" id="proof7" onclick="toggleDisplay(&#39;proof7&#39;);toggleDisplay(&#39;proofcontrol7&#39;)">
+<span class="id" type="keyword">Proof</span> <span class="id" type="keyword">with</span> <span class="id" type="tactic">auto</span>.<br>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">t</span> <span class="id" type="var">T</span> <span class="id" type="var">HT</span>.<br>
+&nbsp;&nbsp;<span class="id" type="tactic">induction</span> <span class="id" type="var">HT</span>...<br>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;The&nbsp;cases&nbsp;that&nbsp;were&nbsp;obviously&nbsp;values,&nbsp;like&nbsp;T_True&nbsp;and<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;T_False,&nbsp;were&nbsp;eliminated&nbsp;immediately&nbsp;by&nbsp;auto&nbsp;*)</span><br>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;T_If&nbsp;*)</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">right</span>. <span class="id" type="tactic">inversion</span> <span class="id" type="var">IHHT1</span>; <span class="id" type="tactic">clear</span> <span class="id" type="var">IHHT1</span>.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;t<sub>1</sub>&nbsp;is&nbsp;a&nbsp;value&nbsp;*)</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">apply</span> (<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#bool_canonical"><span class="id" type="lemma">bool_canonical</span></a> <span class="id" type="var">t<sub>1</sub></span> <span class="id" type="var">HT<sub>1</sub></span>) <span class="id" type="keyword">in</span> <span class="id" type="var">H</span>.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">inversion</span> <span class="id" type="var">H</span>; <span class="id" type="tactic">subst</span>; <span class="id" type="tactic">clear</span> <span class="id" type="var">H</span>.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="font-family: arial;">∃</span><span class="id" type="var">t<sub>2</sub></span>...<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="font-family: arial;">∃</span><span class="id" type="var">t<sub>3</sub></span>...<br>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;t<sub>1</sub>&nbsp;can&nbsp;take&nbsp;a&nbsp;step&nbsp;*)</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">inversion</span> <span class="id" type="var">H</span> <span class="id" type="keyword">as</span> [<span class="id" type="var">t<sub>1</sub>'</span> <span class="id" type="var">H<sub>1</sub></span>].<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="font-family: arial;">∃</span>(<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Types.html#tif"><span class="id" type="constructor">tif</span></a> <span class="id" type="var">t<sub>1</sub>'</span> <span class="id" type="var">t<sub>2</sub></span> <span class="id" type="var">t<sub>3</sub></span>)...<br>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br>
+</div>
+
+<div class="doc">
+<font size="-2">☐</font> 
+</div>
+<div class="code code-tight">
+</div>
+
+<br>
+</div>
+
+<div class="doc">
+<a name="lab534"></a><h4 class="section">Exercise: 3 stars, advanced (finish_progress_informal)</h4>
+ Complete the corresponding informal proof: 
+<div class="paragraph"> </div>
+
+ <i>Theorem</i>: If <span class="inlinecode"><span style="font-family: arial;">⊢</span></span> <span class="inlinecode"><span class="id" type="var">t</span></span> <span class="inlinecode">∈</span> <span class="inlinecode"><span class="id" type="var">T</span></span>, then either <span class="inlinecode"><span class="id" type="var">t</span></span> is a value or else
+    <span class="inlinecode"><span class="id" type="var">t</span></span> <span class="inlinecode"><span style="font-family: arial;">⇒</span></span> <span class="inlinecode"><span class="id" type="var">t'</span></span> for some <span class="inlinecode"><span class="id" type="var">t'</span></span>. 
+<div class="paragraph"> </div>
+
+ <i>Proof</i>: By induction on a derivation of <span class="inlinecode"><span style="font-family: arial;">⊢</span></span> <span class="inlinecode"><span class="id" type="var">t</span></span> <span class="inlinecode">∈</span> <span class="inlinecode"><span class="id" type="var">T</span></span>.
+
+<div class="paragraph"> </div>
+
+<ul class="doclist">
+<li> If the last rule in the derivation is <span class="inlinecode"><span class="id" type="var">T_If</span></span>, then <span class="inlinecode"><span class="id" type="var">t</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="keyword">if</span></span> <span class="inlinecode"><span class="id" type="var">t<sub>1</sub></span></span>
+        <span class="inlinecode"><span class="id" type="keyword">then</span></span> <span class="inlinecode"><span class="id" type="var">t<sub>2</sub></span></span> <span class="inlinecode"><span class="id" type="keyword">else</span></span> <span class="inlinecode"><span class="id" type="var">t<sub>3</sub></span></span>, with <span class="inlinecode"><span style="font-family: arial;">⊢</span></span> <span class="inlinecode"><span class="id" type="var">t<sub>1</sub></span></span> <span class="inlinecode">∈</span> <span class="inlinecode"><span class="id" type="var">Bool</span></span>, <span class="inlinecode"><span style="font-family: arial;">⊢</span></span> <span class="inlinecode"><span class="id" type="var">t<sub>2</sub></span></span> <span class="inlinecode">∈</span> <span class="inlinecode"><span class="id" type="var">T</span></span> and <span class="inlinecode"><span style="font-family: arial;">⊢</span></span> <span class="inlinecode"><span class="id" type="var">t<sub>3</sub></span></span>
+        <span class="inlinecode">∈</span> <span class="inlinecode"><span class="id" type="var">T</span></span>.  By the IH, either <span class="inlinecode"><span class="id" type="var">t<sub>1</sub></span></span> is a value or else <span class="inlinecode"><span class="id" type="var">t<sub>1</sub></span></span> can step
+        to some <span class="inlinecode"><span class="id" type="var">t<sub>1</sub>'</span></span>.
+
+<div class="paragraph"> </div>
+
+<ul class="doclist">
+<li> If <span class="inlinecode"><span class="id" type="var">t<sub>1</sub></span></span> is a value, then by the canonical forms lemmas
+              and the fact that <span class="inlinecode"><span style="font-family: arial;">⊢</span></span> <span class="inlinecode"><span class="id" type="var">t<sub>1</sub></span></span> <span class="inlinecode">∈</span> <span class="inlinecode"><span class="id" type="var">Bool</span></span> we have that <span class="inlinecode"><span class="id" type="var">t<sub>1</sub></span></span>
+              is a <span class="inlinecode"><span class="id" type="var">bvalue</span></span> — i.e., it is either </li></ul></li></ul></div></div></div><audio controls="controls" style="display: none;"></audio></body><style type="text/css">#yddContainer{display:block;font-family:Microsoft YaHei;position:relative;width:100%;height:100%;top:-4px;left:-4px;font-size:12px;border:1px solid}#yddTop{display:block;height:22px}#yddTopBorderlr{display:block;position:static;height:17px;padding:2px 28px;line-height:17px;font-size:12px;color:#5079bb;font-weight:bold;border-style:none solid;border-width:1px}#yddTopBorderlr .ydd-sp{position:absolute;top:2px;height:0;overflow:hidden}.ydd-icon{left:5px;width:17px;padding:0px 0px 0px 0px;padding-top:17px;background-position:-16px -44px}.ydd-close{right:5px;width:16px;padding-top:16px;background-position:left -44px}#yddKeyTitle{float:left;text-decoration:none}#yddMiddle{display:block;margin-bottom:10px}.ydd-tabs{display:block;margin:5px 0;padding:0 5px;height:18px;border-bottom:1px solid}.ydd-tab{display:block;float:left;height:18px;margin:0 5px -1px 0;padding:0 4px;line-height:18px;border:1px solid;border-bottom:none}.ydd-trans-container{display:block;line-height:160%}.ydd-trans-container a{text-decoration:none;}#yddBottom{position:absolute;bottom:0;left:0;width:100%;height:22px;line-height:22px;overflow:hidden;background-position:left -22px}.ydd-padding010{padding:0 10px}#yddWrapper{color:#252525;z-index:10001;background:url(chrome-extension://eopjamdnofihpioajgfdikhhbobonhbb/ab20.png);}#yddContainer{background:#fff;border-color:#4b7598}#yddTopBorderlr{border-color:#f0f8fc}#yddWrapper .ydd-sp{background-image:url(chrome-extension://eopjamdnofihpioajgfdikhhbobonhbb/ydd-sprite.png)}#yddWrapper a,#yddWrapper a:hover,#yddWrapper a:visited{color:#50799b}#yddWrapper .ydd-tabs{color:#959595}.ydd-tabs,.ydd-tab{background:#fff;border-color:#d5e7f3}#yddBottom{color:#363636}#yddWrapper{min-width:250px;max-width:400px;}</style></html>

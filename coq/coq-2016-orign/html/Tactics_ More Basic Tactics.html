@@ -1,0 +1,1152 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!-- saved from url=(0057)http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html -->
+<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<link href="./Tactics_ More Basic Tactics_files/coqdoc.css" rel="stylesheet" type="text/css">
+<title>Tactics: More Basic Tactics</title>
+<script type="text/javascript" src="./Tactics_ More Basic Tactics_files/jquery-1.8.3.js"></script>
+<script type="text/javascript" src="./Tactics_ More Basic Tactics_files/main.js"></script>
+</head>
+
+<body>
+
+<div id="page">
+
+<div id="header">
+</div>
+
+<div id="main">
+
+<h1 class="libtitle">Tactics<span class="subtitle">More Basic Tactics</span></h1>
+
+<div class="code code-tight">
+</div>
+
+<div class="doc">
+
+</div>
+<div class="code code-tight">
+
+<br>
+<span class="id" type="keyword">Require</span> <span class="id" type="keyword">Export</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Poly.html#"><span class="id" type="library">Poly</span></a>.<br>
+
+<br>
+</div>
+
+<div class="doc">
+This chapter introduces several more proof strategies and
+    tactics that allow us to prove more interesting properties of
+    functional programs.  We will see:
+
+<div class="paragraph"> </div>
+
+<ul class="doclist">
+<li> how to use auxiliary lemmas in both "forward-style" and
+      "backward-style" proofs;
+
+</li>
+<li> how to reason about data constructors (in particular, how to use
+      the fact that they are injective and disjoint);
+
+</li>
+<li> how to create a strong induction hypothesis (and when such
+      strengthening is required); and
+
+</li>
+<li> more details on how to reason by case analysis.
+
+</li>
+</ul>
+ 
+</div>
+<div class="code code-tight">
+
+<br>
+</div>
+
+<div class="doc">
+<a name="lab124"></a><h1 class="section">The <span class="inlinecode"><span class="id" type="tactic">apply</span></span> Tactic</h1>
+
+<div class="paragraph"> </div>
+
+ We often encounter situations where the goal to be proved is
+    exactly the same as some hypothesis in the context or some
+    previously proved lemma. 
+</div>
+<div class="code code-tight">
+
+<br>
+<span class="id" type="keyword">Theorem</span> <a name="silly1"><span class="id" type="lemma">silly1</span></a> : <span style="font-family: arial;">∀</span>(<span class="id" type="var">n</span> <span class="id" type="var">m</span> <span class="id" type="var">o</span> <span class="id" type="var">p</span> : <a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#nat"><span class="id" type="inductive">nat</span></a>),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#n"><span class="id" type="variable">n</span></a> = <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#m"><span class="id" type="variable">m</span></a>  <span style="font-family: arial;">→</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#n"><span class="id" type="variable">n</span></a>;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#o"><span class="id" type="variable">o</span></a>] = [<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#n"><span class="id" type="variable">n</span></a>;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#p"><span class="id" type="variable">p</span></a>] <span style="font-family: arial;">→</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#n"><span class="id" type="variable">n</span></a>;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#o"><span class="id" type="variable">o</span></a>] = [<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#m"><span class="id" type="variable">m</span></a>;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#p"><span class="id" type="variable">p</span></a>].<br>
+<span class="id" type="keyword">Proof</span>.<br>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">n</span> <span class="id" type="var">m</span> <span class="id" type="var">o</span> <span class="id" type="var">p</span> <span class="id" type="var">eq<sub>1</sub></span> <span class="id" type="var">eq<sub>2</sub></span>.<br>
+&nbsp;&nbsp;<span class="id" type="tactic">rewrite</span> <span style="font-family: arial;">←</span> <span class="id" type="var">eq<sub>1</sub></span>.<br>
+
+<br>
+</div>
+
+<div class="doc">
+At this point, we could finish with "<span class="inlinecode"><span class="id" type="tactic">rewrite</span></span> <span class="inlinecode"><span style="font-family: arial;">→</span></span> <span class="inlinecode"><span class="id" type="var">eq<sub>2</sub></span>.</span>
+    <span class="inlinecode"><span class="id" type="tactic">reflexivity</span>.</span>" as we have done several times before.  We can
+    achieve the same effect in a single step by using the <span class="inlinecode"><span class="id" type="tactic">apply</span></span>
+    tactic instead: 
+</div>
+<div class="code code-tight">
+
+<br>
+&nbsp;&nbsp;<span class="id" type="tactic">apply</span> <span class="id" type="var">eq<sub>2</sub></span>. <span class="id" type="keyword">Qed</span>.<br>
+
+<br>
+</div>
+
+<div class="doc">
+The <span class="inlinecode"><span class="id" type="tactic">apply</span></span> tactic also works with <i>conditional</i> hypotheses
+    and lemmas: if the statement being applied is an implication, then
+    the premises of this implication will be added to the list of
+    subgoals needing to be proved. 
+</div>
+<div class="code code-tight">
+
+<br>
+<span class="id" type="keyword">Theorem</span> <a name="silly2"><span class="id" type="lemma">silly2</span></a> : <span style="font-family: arial;">∀</span>(<span class="id" type="var">n</span> <span class="id" type="var">m</span> <span class="id" type="var">o</span> <span class="id" type="var">p</span> : <a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#nat"><span class="id" type="inductive">nat</span></a>),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#n"><span class="id" type="variable">n</span></a> = <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#m"><span class="id" type="variable">m</span></a>  <span style="font-family: arial;">→</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span style="font-family: arial;">∀</span>(<span class="id" type="var">q</span> <span class="id" type="var">r</span> : <a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#nat"><span class="id" type="inductive">nat</span></a>), <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#q"><span class="id" type="variable">q</span></a> = <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#r"><span class="id" type="variable">r</span></a> <span style="font-family: arial;">→</span> [<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#q"><span class="id" type="variable">q</span></a>;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#o"><span class="id" type="variable">o</span></a>] = [<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#r"><span class="id" type="variable">r</span></a>;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#p"><span class="id" type="variable">p</span></a>]) <span style="font-family: arial;">→</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#n"><span class="id" type="variable">n</span></a>;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#o"><span class="id" type="variable">o</span></a>] = [<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#m"><span class="id" type="variable">m</span></a>;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#p"><span class="id" type="variable">p</span></a>].<br>
+<span class="id" type="keyword">Proof</span>.<br>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">n</span> <span class="id" type="var">m</span> <span class="id" type="var">o</span> <span class="id" type="var">p</span> <span class="id" type="var">eq<sub>1</sub></span> <span class="id" type="var">eq<sub>2</sub></span>.<br>
+&nbsp;&nbsp;<span class="id" type="tactic">apply</span> <span class="id" type="var">eq<sub>2</sub></span>. <span class="id" type="tactic">apply</span> <span class="id" type="var">eq<sub>1</sub></span>. <span class="id" type="keyword">Qed</span>.<br>
+
+<br>
+</div>
+
+<div class="doc">
+You may find it instructive to experiment with this proof
+    and see if there is a way to complete it using just <span class="inlinecode"><span class="id" type="tactic">rewrite</span></span>
+    instead of <span class="inlinecode"><span class="id" type="tactic">apply</span></span>. 
+<div class="paragraph"> </div>
+
+ Typically, when we use <span class="inlinecode"><span class="id" type="tactic">apply</span></span> <span class="inlinecode"><span class="id" type="var">H</span></span>, the statement <span class="inlinecode"><span class="id" type="var">H</span></span> will
+    begin with a <span class="inlinecode"><span style="font-family: arial;">∀</span></span> that binds some <i>universal variables</i>.  When
+    Coq matches the current goal against the conclusion of <span class="inlinecode"><span class="id" type="var">H</span></span>, it
+    will try to find appropriate values for these variables.  For
+    example, when we do <span class="inlinecode"><span class="id" type="tactic">apply</span></span> <span class="inlinecode"><span class="id" type="var">eq<sub>2</sub></span></span> in the following proof, the
+    universal variable <span class="inlinecode"><span class="id" type="var">q</span></span> in <span class="inlinecode"><span class="id" type="var">eq<sub>2</sub></span></span> gets instantiated with <span class="inlinecode"><span class="id" type="var">n</span></span> and <span class="inlinecode"><span class="id" type="var">r</span></span>
+    gets instantiated with <span class="inlinecode"><span class="id" type="var">m</span></span>. 
+</div>
+<div class="code code-tight">
+
+<br>
+<span class="id" type="keyword">Theorem</span> <a name="silly2a"><span class="id" type="lemma">silly2a</span></a> : <span style="font-family: arial;">∀</span>(<span class="id" type="var">n</span> <span class="id" type="var">m</span> : <a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#nat"><span class="id" type="inductive">nat</span></a>),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#n"><span class="id" type="variable">n</span></a>,<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#n"><span class="id" type="variable">n</span></a>) = (<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#m"><span class="id" type="variable">m</span></a>,<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#m"><span class="id" type="variable">m</span></a>)  <span style="font-family: arial;">→</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span style="font-family: arial;">∀</span>(<span class="id" type="var">q</span> <span class="id" type="var">r</span> : <a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#nat"><span class="id" type="inductive">nat</span></a>), (<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#q"><span class="id" type="variable">q</span></a>,<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#q"><span class="id" type="variable">q</span></a>) = (<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#r"><span class="id" type="variable">r</span></a>,<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#r"><span class="id" type="variable">r</span></a>) <span style="font-family: arial;">→</span> [<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#q"><span class="id" type="variable">q</span></a>] = [<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#r"><span class="id" type="variable">r</span></a>]) <span style="font-family: arial;">→</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#n"><span class="id" type="variable">n</span></a>] = [<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#m"><span class="id" type="variable">m</span></a>].<br>
+<span class="id" type="keyword">Proof</span>.<br>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">n</span> <span class="id" type="var">m</span> <span class="id" type="var">eq<sub>1</sub></span> <span class="id" type="var">eq<sub>2</sub></span>.<br>
+&nbsp;&nbsp;<span class="id" type="tactic">apply</span> <span class="id" type="var">eq<sub>2</sub></span>. <span class="id" type="tactic">apply</span> <span class="id" type="var">eq<sub>1</sub></span>. <span class="id" type="keyword">Qed</span>.<br>
+
+<br>
+</div>
+
+<div class="doc">
+<a name="lab125"></a><h4 class="section">Exercise: 2 stars, optional (silly_ex)</h4>
+ Complete the following proof without using <span class="inlinecode"><span class="id" type="tactic">simpl</span></span>. 
+</div>
+<div class="code code-tight">
+
+<br>
+<span class="id" type="keyword">Theorem</span> <a name="silly_ex"><span class="id" type="lemma">silly_ex</span></a> :<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span style="font-family: arial;">∀</span><span class="id" type="var">n</span>, <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#evenb"><span class="id" type="definition">evenb</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#n"><span class="id" type="variable">n</span></a> = <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#true"><span class="id" type="constructor">true</span></a> <span style="font-family: arial;">→</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#oddb"><span class="id" type="definition">oddb</span></a> (<a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#S"><span class="id" type="constructor">S</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#n"><span class="id" type="variable">n</span></a>) = <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#true"><span class="id" type="constructor">true</span></a>) <span style="font-family: arial;">→</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#evenb"><span class="id" type="definition">evenb</span></a> 3 = <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#true"><span class="id" type="constructor">true</span></a> <span style="font-family: arial;">→</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#oddb"><span class="id" type="definition">oddb</span></a> 4 = <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#true"><span class="id" type="constructor">true</span></a>.<br>
+<span class="id" type="keyword">Proof</span>.<br>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br>
+</div>
+
+<div class="doc">
+<font size="-2">☐</font> 
+<div class="paragraph"> </div>
+
+ To use the <span class="inlinecode"><span class="id" type="tactic">apply</span></span> tactic, the (conclusion of the) fact
+    being applied must match the goal exactly — for example, <span class="inlinecode"><span class="id" type="tactic">apply</span></span>
+    will not work if the left and right sides of the equality are
+    swapped. 
+</div>
+<div class="code code-tight">
+
+<br>
+<span class="id" type="keyword">Theorem</span> <a name="silly3_firsttry"><span class="id" type="lemma">silly3_firsttry</span></a> : <span style="font-family: arial;">∀</span>(<span class="id" type="var">n</span> : <a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#nat"><span class="id" type="inductive">nat</span></a>),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#true"><span class="id" type="constructor">true</span></a> = <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#beq_nat"><span class="id" type="definition">beq_nat</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#n"><span class="id" type="variable">n</span></a> 5  <span style="font-family: arial;">→</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#beq_nat"><span class="id" type="definition">beq_nat</span></a> (<a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#S"><span class="id" type="constructor">S</span></a> (<a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#S"><span class="id" type="constructor">S</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#n"><span class="id" type="variable">n</span></a>)) 7 = <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#true"><span class="id" type="constructor">true</span></a>.<br>
+<span class="id" type="keyword">Proof</span>.<br>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">n</span> <span class="id" type="var">H</span>.<br>
+&nbsp;&nbsp;<span class="id" type="tactic">simpl</span>.<br>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;Here&nbsp;we&nbsp;cannot&nbsp;use&nbsp;<span class="inlinecode"><span class="id" type="tactic">apply</span></span>&nbsp;directly&nbsp;*)</span><br>
+<span class="id" type="keyword">Abort</span>.<br>
+
+<br>
+</div>
+
+<div class="doc">
+In this case we can use the <span class="inlinecode"><span class="id" type="tactic">symmetry</span></span> tactic, which switches the
+    left and right sides of an equality in the goal. 
+</div>
+<div class="code code-tight">
+
+<br>
+<span class="id" type="keyword">Theorem</span> <a name="silly3"><span class="id" type="lemma">silly3</span></a> : <span style="font-family: arial;">∀</span>(<span class="id" type="var">n</span> : <a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#nat"><span class="id" type="inductive">nat</span></a>),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#true"><span class="id" type="constructor">true</span></a> = <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#beq_nat"><span class="id" type="definition">beq_nat</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#n"><span class="id" type="variable">n</span></a> 5  <span style="font-family: arial;">→</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#beq_nat"><span class="id" type="definition">beq_nat</span></a> (<a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#S"><span class="id" type="constructor">S</span></a> (<a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#S"><span class="id" type="constructor">S</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#n"><span class="id" type="variable">n</span></a>)) 7 = <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#true"><span class="id" type="constructor">true</span></a>.<br>
+<span class="id" type="keyword">Proof</span>.<br>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">n</span> <span class="id" type="var">H</span>.<br>
+&nbsp;&nbsp;<span class="id" type="tactic">symmetry</span>.<br>
+&nbsp;&nbsp;<span class="id" type="tactic">simpl</span>. <span class="comment">(*&nbsp;Actually,&nbsp;this&nbsp;<span class="inlinecode"><span class="id" type="tactic">simpl</span></span>&nbsp;is&nbsp;unnecessary,&nbsp;since<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="inlinecode"><span class="id" type="tactic">apply</span></span>&nbsp;will&nbsp;perform&nbsp;simplification&nbsp;first.&nbsp;*)</span><br>
+&nbsp;&nbsp;<span class="id" type="tactic">apply</span> <span class="id" type="var">H</span>. <span class="id" type="keyword">Qed</span>.<br>
+
+<br>
+</div>
+
+<div class="doc">
+<a name="lab126"></a><h4 class="section">Exercise: 3 stars (apply_exercise1)</h4>
+ (<i>Hint</i>: You can use <span class="inlinecode"><span class="id" type="tactic">apply</span></span> with previously defined lemmas, not
+    just hypotheses in the context.  Remember that <span class="inlinecode"><span class="id" type="var">SearchAbout</span></span> is
+    your friend.) 
+</div>
+<div class="code code-tight">
+
+<br>
+<span class="id" type="keyword">Theorem</span> <a name="rev_exercise1"><span class="id" type="lemma">rev_exercise1</span></a> : <span style="font-family: arial;">∀</span>(<span class="id" type="var">l</span> <span class="id" type="var">l'</span> : <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Poly.html#list"><span class="id" type="inductive">list</span></a> <a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#nat"><span class="id" type="inductive">nat</span></a>),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#l"><span class="id" type="variable">l</span></a> = <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Poly.html#rev"><span class="id" type="definition">rev</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#l'"><span class="id" type="variable">l'</span></a> <span style="font-family: arial;">→</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#l'"><span class="id" type="variable">l'</span></a> = <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Poly.html#rev"><span class="id" type="definition">rev</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#l"><span class="id" type="variable">l</span></a>.<br>
+<span class="id" type="keyword">Proof</span>.<br>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br>
+</div>
+
+<div class="doc">
+<font size="-2">☐</font> 
+<div class="paragraph"> </div>
+
+<a name="lab127"></a><h4 class="section">Exercise: 1 star, optional (apply_rewrite)</h4>
+ Briefly explain the difference between the tactics <span class="inlinecode"><span class="id" type="tactic">apply</span></span> and
+    <span class="inlinecode"><span class="id" type="tactic">rewrite</span></span>.  What are the situations where both can usefully be
+    applied?
+
+<div class="paragraph"> </div>
+
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span><br>
+ <font size="-2">☐</font> 
+</div>
+<div class="code code-tight">
+
+<br>
+</div>
+
+<div class="doc">
+<a name="lab128"></a><h1 class="section">The <span class="inlinecode"><span class="id" type="tactic">apply</span></span> <span class="inlinecode">...</span> <span class="inlinecode"><span class="id" type="keyword">with</span></span> <span class="inlinecode">...</span> Tactic</h1>
+
+<div class="paragraph"> </div>
+
+ The following silly example uses two rewrites in a row to
+    get from <span class="inlinecode">[<span class="id" type="var">a</span>,<span class="id" type="var">b</span>]</span> to <span class="inlinecode">[<span class="id" type="var">e</span>,<span class="id" type="var">f</span>]</span>. 
+</div>
+<div class="code code-tight">
+
+<br>
+<span class="id" type="keyword">Example</span> <a name="trans_eq_example"><span class="id" type="definition">trans_eq_example</span></a> : <span style="font-family: arial;">∀</span>(<span class="id" type="var">a</span> <span class="id" type="var">b</span> <span class="id" type="var">c</span> <span class="id" type="var">d</span> <span class="id" type="var">e</span> <span class="id" type="var">f</span> : <a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#nat"><span class="id" type="inductive">nat</span></a>),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#a"><span class="id" type="variable">a</span></a>;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#b"><span class="id" type="variable">b</span></a>] = [<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#c"><span class="id" type="variable">c</span></a>;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#d"><span class="id" type="variable">d</span></a>] <span style="font-family: arial;">→</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#c"><span class="id" type="variable">c</span></a>;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#d"><span class="id" type="variable">d</span></a>] = [<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#e"><span class="id" type="variable">e</span></a>;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#f"><span class="id" type="variable">f</span></a>] <span style="font-family: arial;">→</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#a"><span class="id" type="variable">a</span></a>;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#b"><span class="id" type="variable">b</span></a>] = [<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#e"><span class="id" type="variable">e</span></a>;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#f"><span class="id" type="variable">f</span></a>].<br>
+<span class="id" type="keyword">Proof</span>.<br>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">a</span> <span class="id" type="var">b</span> <span class="id" type="var">c</span> <span class="id" type="var">d</span> <span class="id" type="var">e</span> <span class="id" type="var">f</span> <span class="id" type="var">eq<sub>1</sub></span> <span class="id" type="var">eq<sub>2</sub></span>.<br>
+&nbsp;&nbsp;<span class="id" type="tactic">rewrite</span> <span style="font-family: arial;">→</span> <span class="id" type="var">eq<sub>1</sub></span>. <span class="id" type="tactic">rewrite</span> <span style="font-family: arial;">→</span> <span class="id" type="var">eq<sub>2</sub></span>. <span class="id" type="tactic">reflexivity</span>. <span class="id" type="keyword">Qed</span>.<br>
+
+<br>
+</div>
+
+<div class="doc">
+Since this is a common pattern, we might like to pull it out
+    as a lemma recording, once and for all, the fact that equality is
+    transitive. 
+</div>
+<div class="code code-tight">
+
+<br>
+<span class="id" type="keyword">Theorem</span> <a name="trans_eq"><span class="id" type="lemma">trans_eq</span></a> : <span style="font-family: arial;">∀</span>(<span class="id" type="var">X</span>:<span class="id" type="keyword">Type</span>) (<span class="id" type="var">n</span> <span class="id" type="var">m</span> <span class="id" type="var">o</span> : <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#X"><span class="id" type="variable">X</span></a>),<br>
+&nbsp;&nbsp;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#n"><span class="id" type="variable">n</span></a> = <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#m"><span class="id" type="variable">m</span></a> <span style="font-family: arial;">→</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#m"><span class="id" type="variable">m</span></a> = <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#o"><span class="id" type="variable">o</span></a> <span style="font-family: arial;">→</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#n"><span class="id" type="variable">n</span></a> = <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#o"><span class="id" type="variable">o</span></a>.<br>
+<span class="id" type="keyword">Proof</span>.<br>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">X</span> <span class="id" type="var">n</span> <span class="id" type="var">m</span> <span class="id" type="var">o</span> <span class="id" type="var">eq<sub>1</sub></span> <span class="id" type="var">eq<sub>2</sub></span>. <span class="id" type="tactic">rewrite</span> <span style="font-family: arial;">→</span> <span class="id" type="var">eq<sub>1</sub></span>. <span class="id" type="tactic">rewrite</span> <span style="font-family: arial;">→</span> <span class="id" type="var">eq<sub>2</sub></span>.<br>
+&nbsp;&nbsp;<span class="id" type="tactic">reflexivity</span>. <span class="id" type="keyword">Qed</span>.<br>
+
+<br>
+</div>
+
+<div class="doc">
+Now, we should be able to use <span class="inlinecode"><span class="id" type="var">trans_eq</span></span> to prove the above
+    example.  However, to do this we need a slight refinement of the
+    <span class="inlinecode"><span class="id" type="tactic">apply</span></span> tactic. 
+</div>
+<div class="code code-tight">
+
+<br>
+<span class="id" type="keyword">Example</span> <a name="trans_eq_example&#39;"><span class="id" type="definition">trans_eq_example'</span></a> : <span style="font-family: arial;">∀</span>(<span class="id" type="var">a</span> <span class="id" type="var">b</span> <span class="id" type="var">c</span> <span class="id" type="var">d</span> <span class="id" type="var">e</span> <span class="id" type="var">f</span> : <a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#nat"><span class="id" type="inductive">nat</span></a>),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#a"><span class="id" type="variable">a</span></a>;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#b"><span class="id" type="variable">b</span></a>] = [<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#c"><span class="id" type="variable">c</span></a>;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#d"><span class="id" type="variable">d</span></a>] <span style="font-family: arial;">→</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#c"><span class="id" type="variable">c</span></a>;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#d"><span class="id" type="variable">d</span></a>] = [<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#e"><span class="id" type="variable">e</span></a>;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#f"><span class="id" type="variable">f</span></a>] <span style="font-family: arial;">→</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#a"><span class="id" type="variable">a</span></a>;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#b"><span class="id" type="variable">b</span></a>] = [<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#e"><span class="id" type="variable">e</span></a>;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#f"><span class="id" type="variable">f</span></a>].<br>
+<span class="id" type="keyword">Proof</span>.<br>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">a</span> <span class="id" type="var">b</span> <span class="id" type="var">c</span> <span class="id" type="var">d</span> <span class="id" type="var">e</span> <span class="id" type="var">f</span> <span class="id" type="var">eq<sub>1</sub></span> <span class="id" type="var">eq<sub>2</sub></span>.<br>
+
+<br>
+</div>
+
+<div class="doc">
+If we simply tell Coq <span class="inlinecode"><span class="id" type="tactic">apply</span></span> <span class="inlinecode"><span class="id" type="var">trans_eq</span></span> at this point, it can
+    tell (by matching the goal against the conclusion of the lemma)
+    that it should instantiate <span class="inlinecode"><span class="id" type="var">X</span></span> with <span class="inlinecode">[<span class="id" type="var">nat</span>]</span>, <span class="inlinecode"><span class="id" type="var">n</span></span> with <span class="inlinecode">[<span class="id" type="var">a</span>,<span class="id" type="var">b</span>]</span>, and
+    <span class="inlinecode"><span class="id" type="var">o</span></span> with <span class="inlinecode">[<span class="id" type="var">e</span>,<span class="id" type="var">f</span>]</span>.  However, the matching process doesn't determine
+    an instantiation for <span class="inlinecode"><span class="id" type="var">m</span></span>: we have to supply one explicitly by
+    adding <span class="inlinecode"><span class="id" type="keyword">with</span></span> <span class="inlinecode">(<span class="id" type="var">m</span>:=[<span class="id" type="var">c</span>,<span class="id" type="var">d</span>])</span> to the invocation of <span class="inlinecode"><span class="id" type="tactic">apply</span></span>. 
+</div>
+<div class="code code-tight">
+
+<br>
+&nbsp;&nbsp;<span class="id" type="tactic">apply</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#trans_eq"><span class="id" type="lemma">trans_eq</span></a> <span class="id" type="keyword">with</span> (<span class="id" type="var">m</span>:=[<span class="id" type="var">c</span>;<span class="id" type="var">d</span>]). <span class="id" type="tactic">apply</span> <span class="id" type="var">eq<sub>1</sub></span>. <span class="id" type="tactic">apply</span> <span class="id" type="var">eq<sub>2</sub></span>. <span class="id" type="keyword">Qed</span>.<br>
+
+<br>
+</div>
+
+<div class="doc">
+Actually, we usually don't have to include the name <span class="inlinecode"><span class="id" type="var">m</span></span> in
+    the <span class="inlinecode"><span class="id" type="keyword">with</span></span> clause; Coq is often smart enough to figure out which
+    instantiation we're giving. We could instead write: <span class="inlinecode"><span class="id" type="tactic">apply</span></span>
+    <span class="inlinecode"><span class="id" type="var">trans_eq</span></span> <span class="inlinecode"><span class="id" type="keyword">with</span></span> <span class="inlinecode">[<span class="id" type="var">c</span>;<span class="id" type="var">d</span>]</span>. 
+<div class="paragraph"> </div>
+
+<a name="lab129"></a><h4 class="section">Exercise: 3 stars, optional (apply_with_exercise)</h4>
+
+</div>
+<div class="code code-space">
+<span class="id" type="keyword">Example</span> <a name="trans_eq_exercise"><span class="id" type="definition">trans_eq_exercise</span></a> : <span style="font-family: arial;">∀</span>(<span class="id" type="var">n</span> <span class="id" type="var">m</span> <span class="id" type="var">o</span> <span class="id" type="var">p</span> : <a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#nat"><span class="id" type="inductive">nat</span></a>),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#m"><span class="id" type="variable">m</span></a> = (<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#minustwo"><span class="id" type="definition">minustwo</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#o"><span class="id" type="variable">o</span></a>) <span style="font-family: arial;">→</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#n"><span class="id" type="variable">n</span></a> + <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#p"><span class="id" type="variable">p</span></a>) = <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#m"><span class="id" type="variable">m</span></a> <span style="font-family: arial;">→</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#n"><span class="id" type="variable">n</span></a> + <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#p"><span class="id" type="variable">p</span></a>) = (<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#minustwo"><span class="id" type="definition">minustwo</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#o"><span class="id" type="variable">o</span></a>).<br>
+<span class="id" type="keyword">Proof</span>.<br>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br>
+</div>
+
+<div class="doc">
+<font size="-2">☐</font> 
+</div>
+<div class="code code-tight">
+
+<br>
+</div>
+
+<div class="doc">
+<a name="lab130"></a><h1 class="section">The <span class="inlinecode"><span class="id" type="tactic">inversion</span></span> tactic</h1>
+
+<div class="paragraph"> </div>
+
+ Recall the definition of natural numbers:
+
+<div class="paragraph"> </div>
+
+<div class="code code-tight">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="keyword">Inductive</span>&nbsp;<span class="id" type="var">nat</span>&nbsp;:&nbsp;<span class="id" type="keyword">Type</span>&nbsp;:=<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;<span class="id" type="var">O</span>&nbsp;:&nbsp;<span class="id" type="var">nat</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;<span class="id" type="var">S</span>&nbsp;:&nbsp;<span class="id" type="var">nat</span>&nbsp;<span style="font-family: arial;">→</span>&nbsp;<span class="id" type="var">nat</span>.
+<div class="paragraph"> </div>
+
+</div>
+    It is obvious from this definition that every number has one of
+    two forms: either it is the constructor <span class="inlinecode"><span class="id" type="var">O</span></span> or it is built by
+    applying the constructor <span class="inlinecode"><span class="id" type="var">S</span></span> to another number.  But there is more
+    here than meets the eye: implicit in the definition (and in our
+    informal understanding of how datatype declarations work in other
+    programming languages) are two more facts:
+
+<div class="paragraph"> </div>
+
+<ul class="doclist">
+<li> The constructor <span class="inlinecode"><span class="id" type="var">S</span></span> is <i>injective</i>.  That is, if <span class="inlinecode"><span class="id" type="var">S</span></span> <span class="inlinecode"><span class="id" type="var">n</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">S</span></span> <span class="inlinecode"><span class="id" type="var">m</span></span>, it
+      must be the case that <span class="inlinecode"><span class="id" type="var">n</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">m</span></span>.
+
+<div class="paragraph"> </div>
+
+
+</li>
+<li> The constructors <span class="inlinecode"><span class="id" type="var">O</span></span> and <span class="inlinecode"><span class="id" type="var">S</span></span> are <i>disjoint</i>.  That is, <span class="inlinecode"><span class="id" type="var">O</span></span> is not
+      equal to <span class="inlinecode"><span class="id" type="var">S</span></span> <span class="inlinecode"><span class="id" type="var">n</span></span> for any <span class="inlinecode"><span class="id" type="var">n</span></span>. 
+</li>
+</ul>
+
+<div class="paragraph"> </div>
+
+ Similar principles apply to all inductively defined types: all
+    constructors are injective, and the values built from distinct
+    constructors are never equal.  For lists, the <span class="inlinecode"><span class="id" type="var">cons</span></span> constructor
+    is injective and <span class="inlinecode"><span class="id" type="var">nil</span></span> is different from every non-empty list.
+    For booleans, <span class="inlinecode"><span class="id" type="var">true</span></span> and <span class="inlinecode"><span class="id" type="var">false</span></span> are different.  (Since neither
+    <span class="inlinecode"><span class="id" type="var">true</span></span> nor <span class="inlinecode"><span class="id" type="var">false</span></span> take any arguments, their injectivity is not an
+    issue.)  And so on. 
+<div class="paragraph"> </div>
+
+ Coq provides a tactic called <span class="inlinecode"><span class="id" type="tactic">inversion</span></span> that allows us to
+    exploit these principles in proofs. To see how to use it, let's
+    show explicitly that the <span class="inlinecode"><span class="id" type="var">S</span></span> constructor is injective: 
+</div>
+<div class="code code-tight">
+
+<br>
+<span class="id" type="keyword">Theorem</span> <a name="S_injective"><span class="id" type="lemma">S_injective</span></a> : <span style="font-family: arial;">∀</span>(<span class="id" type="var">n</span> <span class="id" type="var">m</span> : <a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#nat"><span class="id" type="inductive">nat</span></a>),<br>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#S"><span class="id" type="constructor">S</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#n"><span class="id" type="variable">n</span></a> = <a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#S"><span class="id" type="constructor">S</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#m"><span class="id" type="variable">m</span></a> <span style="font-family: arial;">→</span><br>
+&nbsp;&nbsp;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#n"><span class="id" type="variable">n</span></a> = <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#m"><span class="id" type="variable">m</span></a>.<br>
+<span class="id" type="keyword">Proof</span>.<br>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">n</span> <span class="id" type="var">m</span> <span class="id" type="var">H</span>.<br>
+
+<br>
+</div>
+
+<div class="doc">
+By writing <span class="inlinecode"><span class="id" type="tactic">inversion</span></span> <span class="inlinecode"><span class="id" type="var">H</span></span> at this point, we ask Coq to
+    generate all equations that it can infer from <span class="inlinecode"><span class="id" type="var">H</span></span> as additional
+    hypotheses, replacing variables in the goal as it goes. In the
+    present example, this amounts to adding a new hypothesis <span class="inlinecode"><span class="id" type="var">H<sub>1</sub></span></span> <span class="inlinecode">:</span> <span class="inlinecode"><span class="id" type="var">n</span></span> <span class="inlinecode">=</span>
+    <span class="inlinecode"><span class="id" type="var">m</span></span> and replacing <span class="inlinecode"><span class="id" type="var">n</span></span> by <span class="inlinecode"><span class="id" type="var">m</span></span> in the goal. 
+</div>
+<div class="code code-tight">
+
+<br>
+&nbsp;&nbsp;<span class="id" type="tactic">inversion</span> <span class="id" type="var">H</span>. <span class="id" type="tactic">reflexivity</span>. <span class="id" type="keyword">Qed</span>.<br>
+
+<br>
+</div>
+
+<div class="doc">
+Here's a more interesting example that shows how multiple
+    equations can be derived at once. 
+</div>
+<div class="code code-tight">
+
+<br>
+<span class="id" type="keyword">Theorem</span> <a name="inversion_ex&lt;sub&gt;1&lt;/sub&gt;"><span class="id" type="lemma">inversion_ex<sub>1</sub></span></a> : <span style="font-family: arial;">∀</span>(<span class="id" type="var">n</span> <span class="id" type="var">m</span> <span class="id" type="var">o</span> : <a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#nat"><span class="id" type="inductive">nat</span></a>),<br>
+&nbsp;&nbsp;[<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#n"><span class="id" type="variable">n</span></a>; <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#m"><span class="id" type="variable">m</span></a>] = [<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#o"><span class="id" type="variable">o</span></a>; <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#o"><span class="id" type="variable">o</span></a>] <span style="font-family: arial;">→</span><br>
+&nbsp;&nbsp;[<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#n"><span class="id" type="variable">n</span></a>] = [<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#m"><span class="id" type="variable">m</span></a>].<br>
+<span class="id" type="keyword">Proof</span>.<br>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">n</span> <span class="id" type="var">m</span> <span class="id" type="var">o</span> <span class="id" type="var">H</span>. <span class="id" type="tactic">inversion</span> <span class="id" type="var">H</span>. <span class="id" type="tactic">reflexivity</span>. <span class="id" type="keyword">Qed</span>.<br>
+
+<br>
+</div>
+
+<div class="doc">
+It is possible to name the equations that <span class="inlinecode"><span class="id" type="tactic">inversion</span></span>
+    generates with an <span class="inlinecode"><span class="id" type="keyword">as</span></span> <span class="inlinecode">...</span> clause: 
+</div>
+<div class="code code-tight">
+
+<br>
+<span class="id" type="keyword">Theorem</span> <a name="inversion_ex&lt;sub&gt;2&lt;/sub&gt;"><span class="id" type="lemma">inversion_ex<sub>2</sub></span></a> : <span style="font-family: arial;">∀</span>(<span class="id" type="var">n</span> <span class="id" type="var">m</span> : <a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#nat"><span class="id" type="inductive">nat</span></a>),<br>
+&nbsp;&nbsp;[<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#n"><span class="id" type="variable">n</span></a>] = [<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#m"><span class="id" type="variable">m</span></a>] <span style="font-family: arial;">→</span><br>
+&nbsp;&nbsp;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#n"><span class="id" type="variable">n</span></a> = <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#m"><span class="id" type="variable">m</span></a>.<br>
+<span class="id" type="keyword">Proof</span>.<br>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">n</span> <span class="id" type="var">o</span> <span class="id" type="var">H</span>. <span class="id" type="tactic">inversion</span> <span class="id" type="var">H</span> <span class="id" type="keyword">as</span> [<span class="id" type="var">Hno</span>]. <span class="id" type="tactic">reflexivity</span>. <span class="id" type="keyword">Qed</span>.<br>
+
+<br>
+</div>
+
+<div class="doc">
+<a name="lab131"></a><h4 class="section">Exercise: 1 star (inversion_ex<sub>3</sub>)</h4>
+
+</div>
+<div class="code code-space">
+<span class="id" type="keyword">Example</span> <a name="inversion_ex&lt;sub&gt;3&lt;/sub&gt;"><span class="id" type="definition">inversion_ex<sub>3</sub></span></a> : <span style="font-family: arial;">∀</span>(<span class="id" type="var">X</span> : <span class="id" type="keyword">Type</span>) (<span class="id" type="var">x</span> <span class="id" type="var">y</span> <span class="id" type="var">z</span> : <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#X"><span class="id" type="variable">X</span></a>) (<span class="id" type="var">l</span> <span class="id" type="var">j</span> : <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Poly.html#list"><span class="id" type="inductive">list</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#X"><span class="id" type="variable">X</span></a>),<br>
+&nbsp;&nbsp;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#x"><span class="id" type="variable">x</span></a> :: <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#y"><span class="id" type="variable">y</span></a> :: <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#l"><span class="id" type="variable">l</span></a> = <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#z"><span class="id" type="variable">z</span></a> :: <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#j"><span class="id" type="variable">j</span></a> <span style="font-family: arial;">→</span><br>
+&nbsp;&nbsp;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#y"><span class="id" type="variable">y</span></a> :: <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#l"><span class="id" type="variable">l</span></a> = <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#x"><span class="id" type="variable">x</span></a> :: <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#j"><span class="id" type="variable">j</span></a> <span style="font-family: arial;">→</span><br>
+&nbsp;&nbsp;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#x"><span class="id" type="variable">x</span></a> = <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#y"><span class="id" type="variable">y</span></a>.<br>
+<span class="id" type="keyword">Proof</span>.<br>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br>
+</div>
+
+<div class="doc">
+<font size="-2">☐</font> 
+<div class="paragraph"> </div>
+
+ While the injectivity of constructors allows us to reason
+    that <span class="inlinecode"><span style="font-family: arial;">∀</span></span> <span class="inlinecode">(<span class="id" type="var">n</span></span> <span class="inlinecode"><span class="id" type="var">m</span></span> <span class="inlinecode">:</span> <span class="inlinecode"><span class="id" type="var">nat</span>),</span> <span class="inlinecode"><span class="id" type="var">S</span></span> <span class="inlinecode"><span class="id" type="var">n</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">S</span></span> <span class="inlinecode"><span class="id" type="var">m</span></span> <span class="inlinecode"><span style="font-family: arial;">→</span></span> <span class="inlinecode"><span class="id" type="var">n</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">m</span></span>, the converse of
+    this implication is an instance of a more general fact about
+    constructors and functions, which we will find useful below: 
+</div>
+<div class="code code-tight">
+
+<br>
+<span class="id" type="keyword">Theorem</span> <a name="f_equal"><span class="id" type="lemma">f_equal</span></a> : <span style="font-family: arial;">∀</span>(<span class="id" type="var">A</span> <span class="id" type="var">B</span> : <span class="id" type="keyword">Type</span>) (<span class="id" type="var">f</span>: <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#A"><span class="id" type="variable">A</span></a> <span style="font-family: arial;">→</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#B"><span class="id" type="variable">B</span></a>) (<span class="id" type="var">x</span> <span class="id" type="var">y</span>: <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#A"><span class="id" type="variable">A</span></a>),<br>
+&nbsp;&nbsp;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#x"><span class="id" type="variable">x</span></a> = <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#y"><span class="id" type="variable">y</span></a> <span style="font-family: arial;">→</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#f"><span class="id" type="variable">f</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#x"><span class="id" type="variable">x</span></a> = <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#f"><span class="id" type="variable">f</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#y"><span class="id" type="variable">y</span></a>.<br>
+<span class="id" type="keyword">Proof</span>. <span class="id" type="tactic">intros</span> <span class="id" type="var">A</span> <span class="id" type="var">B</span> <span class="id" type="var">f</span> <span class="id" type="var">x</span> <span class="id" type="var">y</span> <span class="id" type="var">eq</span>. <span class="id" type="tactic">rewrite</span> <span class="id" type="var">eq</span>. <span class="id" type="tactic">reflexivity</span>. <span class="id" type="keyword">Qed</span>.<br>
+
+<br>
+</div>
+
+<div class="doc">
+When used on a hypothesis involving an equality between
+    <i>different</i> constructors (e.g., <span class="inlinecode"><span class="id" type="var">S</span></span> <span class="inlinecode"><span class="id" type="var">n</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">O</span></span>), <span class="inlinecode"><span class="id" type="tactic">inversion</span></span> solves the
+    goal immediately. To see why this makes sense, consider the
+    following proof: 
+</div>
+<div class="code code-tight">
+
+<br>
+<span class="id" type="keyword">Theorem</span> <a name="beq_nat_0_l"><span class="id" type="lemma">beq_nat_0_l</span></a> : <span style="font-family: arial;">∀</span><span class="id" type="var">n</span>,<br>
+&nbsp;&nbsp;&nbsp;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#beq_nat"><span class="id" type="definition">beq_nat</span></a> 0 <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#n"><span class="id" type="variable">n</span></a> = <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#true"><span class="id" type="constructor">true</span></a> <span style="font-family: arial;">→</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#n"><span class="id" type="variable">n</span></a> = 0.<br>
+<span class="id" type="keyword">Proof</span>.<br>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">n</span>.<br>
+
+<br>
+</div>
+
+<div class="doc">
+We can proceed by case analysis on <span class="inlinecode"><span class="id" type="var">n</span></span>. The first case is
+    trivial. 
+</div>
+<div class="code code-tight">
+
+<br>
+&nbsp;&nbsp;<span class="id" type="tactic">destruct</span> <span class="id" type="var">n</span> <span class="id" type="keyword">as</span> [| <span class="id" type="var">n'</span>].<br>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;n&nbsp;=&nbsp;0&nbsp;*)</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">H</span>. <span class="id" type="tactic">reflexivity</span>.<br>
+
+<br>
+</div>
+
+<div class="doc">
+However, the second one doesn't look so simple: assuming
+    <span class="inlinecode"><span class="id" type="var">beq_nat</span></span> <span class="inlinecode">0</span> <span class="inlinecode">(<span class="id" type="var">S</span></span> <span class="inlinecode"><span class="id" type="var">n'</span>)</span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">true</span></span>, we must show <span class="inlinecode"><span class="id" type="var">S</span></span> <span class="inlinecode"><span class="id" type="var">n'</span></span> <span class="inlinecode">=</span> <span class="inlinecode">0</span>, but the latter
+    clearly contradictory!  The way forward lies in the assumption.
+    After simplifying the goal state, we see that <span class="inlinecode"><span class="id" type="var">beq_nat</span></span> <span class="inlinecode">0</span> <span class="inlinecode">(<span class="id" type="var">S</span></span> <span class="inlinecode"><span class="id" type="var">n'</span>)</span> <span class="inlinecode">=</span>
+    <span class="inlinecode"><span class="id" type="var">true</span></span> has become <span class="inlinecode"><span class="id" type="var">false</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">true</span></span>: 
+</div>
+<div class="code code-tight">
+
+<br>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;n&nbsp;=&nbsp;S&nbsp;n'&nbsp;*)</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">simpl</span>.<br>
+
+<br>
+</div>
+
+<div class="doc">
+If we use <span class="inlinecode"><span class="id" type="tactic">inversion</span></span> on this hypothesis, Coq notices that
+    the subgoal we are working on is impossible, and therefore removes
+    it from further consideration. 
+</div>
+<div class="code code-tight">
+
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">H</span>. <span class="id" type="tactic">inversion</span> <span class="id" type="var">H</span>. <span class="id" type="keyword">Qed</span>.<br>
+
+<br>
+</div>
+
+<div class="doc">
+This is an instance of a general logical principle known as
+    the <i>principle of explosion</i>, which asserts that a contradiction
+    entails anything, even false things.  For instance: 
+</div>
+<div class="code code-tight">
+
+<br>
+<span class="id" type="keyword">Theorem</span> <a name="inversion_ex&lt;sub&gt;4&lt;/sub&gt;"><span class="id" type="lemma">inversion_ex<sub>4</sub></span></a> : <span style="font-family: arial;">∀</span>(<span class="id" type="var">n</span> : <a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#nat"><span class="id" type="inductive">nat</span></a>),<br>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#S"><span class="id" type="constructor">S</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#n"><span class="id" type="variable">n</span></a> = <a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#O"><span class="id" type="constructor">O</span></a> <span style="font-family: arial;">→</span><br>
+&nbsp;&nbsp;2 + 2 = 5.<br>
+<span class="id" type="keyword">Proof</span>.<br>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">n</span> <span class="id" type="var">contra</span>. <span class="id" type="tactic">inversion</span> <span class="id" type="var">contra</span>. <span class="id" type="keyword">Qed</span>.<br>
+
+<br>
+<span class="id" type="keyword">Theorem</span> <a name="inversion_ex&lt;sub&gt;5&lt;/sub&gt;"><span class="id" type="lemma">inversion_ex<sub>5</sub></span></a> : <span style="font-family: arial;">∀</span>(<span class="id" type="var">n</span> <span class="id" type="var">m</span> : <a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#nat"><span class="id" type="inductive">nat</span></a>),<br>
+&nbsp;&nbsp;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#false"><span class="id" type="constructor">false</span></a> = <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#true"><span class="id" type="constructor">true</span></a> <span style="font-family: arial;">→</span><br>
+&nbsp;&nbsp;[<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#n"><span class="id" type="variable">n</span></a>] = [<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#m"><span class="id" type="variable">m</span></a>].<br>
+<span class="id" type="keyword">Proof</span>.<br>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">n</span> <span class="id" type="var">m</span> <span class="id" type="var">contra</span>. <span class="id" type="tactic">inversion</span> <span class="id" type="var">contra</span>. <span class="id" type="keyword">Qed</span>.<br>
+
+<br>
+</div>
+
+<div class="doc">
+If you find the principle of explosion confusing, remember
+    that these proofs are not actually showing that the conclusion of
+    the statement holds.  Rather, they are arguing that the situation
+    described by the premise can never arise, so the implication is
+    vacuous.  We'll explore the principle of explosion of more detail
+    in the next chapter. 
+<div class="paragraph"> </div>
+
+<a name="lab132"></a><h4 class="section">Exercise: 1 star (inversion_ex<sub>6</sub>)</h4>
+
+</div>
+<div class="code code-space">
+<span class="id" type="keyword">Example</span> <a name="inversion_ex&lt;sub&gt;6&lt;/sub&gt;"><span class="id" type="definition">inversion_ex<sub>6</sub></span></a> : <span style="font-family: arial;">∀</span>(<span class="id" type="var">X</span> : <span class="id" type="keyword">Type</span>)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" type="var">x</span> <span class="id" type="var">y</span> <span class="id" type="var">z</span> : <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#X"><span class="id" type="variable">X</span></a>) (<span class="id" type="var">l</span> <span class="id" type="var">j</span> : <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Poly.html#list"><span class="id" type="inductive">list</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#X"><span class="id" type="variable">X</span></a>),<br>
+&nbsp;&nbsp;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#x"><span class="id" type="variable">x</span></a> :: <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#y"><span class="id" type="variable">y</span></a> :: <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#l"><span class="id" type="variable">l</span></a> = [] <span style="font-family: arial;">→</span><br>
+&nbsp;&nbsp;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#y"><span class="id" type="variable">y</span></a> :: <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#l"><span class="id" type="variable">l</span></a> = <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#z"><span class="id" type="variable">z</span></a> :: <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#j"><span class="id" type="variable">j</span></a> <span style="font-family: arial;">→</span><br>
+&nbsp;&nbsp;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#x"><span class="id" type="variable">x</span></a> = <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#z"><span class="id" type="variable">z</span></a>.<br>
+<span class="id" type="keyword">Proof</span>.<br>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br>
+</div>
+
+<div class="doc">
+<font size="-2">☐</font> 
+<div class="paragraph"> </div>
+
+ To summarize this discussion, suppose <span class="inlinecode"><span class="id" type="var">H</span></span> is a hypothesis in the
+    context or a previously proven lemma of the form
+
+<div class="paragraph"> </div>
+
+<div class="code code-tight">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">c</span>&nbsp;<span class="id" type="var">a<sub>1</sub></span>&nbsp;<span class="id" type="var">a<sub>2</sub></span>&nbsp;... <span class="id" type="var">an</span>&nbsp;=&nbsp;<span class="id" type="var">d</span>&nbsp;<span class="id" type="var">b<sub>1</sub></span>&nbsp;<span class="id" type="var">b<sub>2</sub></span>&nbsp;... <span class="id" type="var">bm</span>
+<div class="paragraph"> </div>
+
+</div>
+    for some constructors <span class="inlinecode"><span class="id" type="var">c</span></span> and <span class="inlinecode"><span class="id" type="var">d</span></span> and arguments <span class="inlinecode"><span class="id" type="var">a<sub>1</sub></span></span> <span class="inlinecode">...</span> <span class="inlinecode"><span class="id" type="var">an</span></span> and
+    <span class="inlinecode"><span class="id" type="var">b<sub>1</sub></span></span> <span class="inlinecode">...</span> <span class="inlinecode"><span class="id" type="var">bm</span></span>.  Then <span class="inlinecode"><span class="id" type="tactic">inversion</span></span> <span class="inlinecode"><span class="id" type="var">H</span></span> has the following effect:
+
+<div class="paragraph"> </div>
+
+<ul class="doclist">
+<li> If <span class="inlinecode"><span class="id" type="var">c</span></span> and <span class="inlinecode"><span class="id" type="var">d</span></span> are the same constructor, then, by the
+      injectivity of this constructor, we know that <span class="inlinecode"><span class="id" type="var">a<sub>1</sub></span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">b<sub>1</sub></span></span>, <span class="inlinecode"><span class="id" type="var">a<sub>2</sub></span></span> <span class="inlinecode">=</span>
+      <span class="inlinecode"><span class="id" type="var">b<sub>2</sub></span></span>, etc.; <span class="inlinecode"><span class="id" type="tactic">inversion</span></span> <span class="inlinecode"><span class="id" type="var">H</span></span> adds these facts to the context, and
+      tries to use them to rewrite the goal.
+
+<div class="paragraph"> </div>
+
+
+</li>
+<li> If <span class="inlinecode"><span class="id" type="var">c</span></span> and <span class="inlinecode"><span class="id" type="var">d</span></span> are different constructors, then the hypothesis
+      <span class="inlinecode"><span class="id" type="var">H</span></span> is contradictory, and the current goal doesn't have to be
+      considered. In this case, <span class="inlinecode"><span class="id" type="tactic">inversion</span></span> <span class="inlinecode"><span class="id" type="var">H</span></span> marks the current goal
+      as completed and pops it off the goal stack. 
+</li>
+</ul>
+
+</div>
+<div class="code code-tight">
+
+<br>
+</div>
+
+<div class="doc">
+<a name="lab133"></a><h1 class="section">Using Tactics on Hypotheses</h1>
+
+<div class="paragraph"> </div>
+
+ By default, most tactics work on the goal formula and leave
+    the context unchanged.  However, most tactics also have a variant
+    that performs a similar operation on a statement in the context.
+
+<div class="paragraph"> </div>
+
+    For example, the tactic <span class="inlinecode"><span class="id" type="tactic">simpl</span></span> <span class="inlinecode"><span class="id" type="keyword">in</span></span> <span class="inlinecode"><span class="id" type="var">H</span></span> performs simplification in
+    the hypothesis named <span class="inlinecode"><span class="id" type="var">H</span></span> in the context. 
+</div>
+<div class="code code-tight">
+
+<br>
+<span class="id" type="keyword">Theorem</span> <a name="S_inj"><span class="id" type="lemma">S_inj</span></a> : <span style="font-family: arial;">∀</span>(<span class="id" type="var">n</span> <span class="id" type="var">m</span> : <a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#nat"><span class="id" type="inductive">nat</span></a>) (<span class="id" type="var">b</span> : <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#bool"><span class="id" type="inductive">bool</span></a>),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#beq_nat"><span class="id" type="definition">beq_nat</span></a> (<a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#S"><span class="id" type="constructor">S</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#n"><span class="id" type="variable">n</span></a>) (<a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#S"><span class="id" type="constructor">S</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#m"><span class="id" type="variable">m</span></a>) = <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#b"><span class="id" type="variable">b</span></a>  <span style="font-family: arial;">→</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#beq_nat"><span class="id" type="definition">beq_nat</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#n"><span class="id" type="variable">n</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#m"><span class="id" type="variable">m</span></a> = <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#b"><span class="id" type="variable">b</span></a>.<br>
+<span class="id" type="keyword">Proof</span>.<br>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">n</span> <span class="id" type="var">m</span> <span class="id" type="var">b</span> <span class="id" type="var">H</span>. <span class="id" type="tactic">simpl</span> <span class="id" type="keyword">in</span> <span class="id" type="var">H</span>. <span class="id" type="tactic">apply</span> <span class="id" type="var">H</span>. <span class="id" type="keyword">Qed</span>.<br>
+
+<br>
+</div>
+
+<div class="doc">
+Similarly, <span class="inlinecode"><span class="id" type="tactic">apply</span></span> <span class="inlinecode"><span class="id" type="var">L</span></span> <span class="inlinecode"><span class="id" type="keyword">in</span></span> <span class="inlinecode"><span class="id" type="var">H</span></span> matches some conditional statement
+    <span class="inlinecode"><span class="id" type="var">L</span></span> (of the form <span class="inlinecode"><span class="id" type="var">L<sub>1</sub></span></span> <span class="inlinecode"><span style="font-family: arial;">→</span></span> <span class="inlinecode"><span class="id" type="var">L<sub>2</sub></span></span>, say) against a hypothesis <span class="inlinecode"><span class="id" type="var">H</span></span> in the
+    context.  However, unlike ordinary <span class="inlinecode"><span class="id" type="tactic">apply</span></span> (which rewrites a goal
+    matching <span class="inlinecode"><span class="id" type="var">L<sub>2</sub></span></span> into a subgoal <span class="inlinecode"><span class="id" type="var">L<sub>1</sub></span></span>), <span class="inlinecode"><span class="id" type="tactic">apply</span></span> <span class="inlinecode"><span class="id" type="var">L</span></span> <span class="inlinecode"><span class="id" type="keyword">in</span></span> <span class="inlinecode"><span class="id" type="var">H</span></span> matches <span class="inlinecode"><span class="id" type="var">H</span></span>
+    against <span class="inlinecode"><span class="id" type="var">L<sub>1</sub></span></span> and, if successful, replaces it with <span class="inlinecode"><span class="id" type="var">L<sub>2</sub></span></span>.
+
+<div class="paragraph"> </div>
+
+    In other words, <span class="inlinecode"><span class="id" type="tactic">apply</span></span> <span class="inlinecode"><span class="id" type="var">L</span></span> <span class="inlinecode"><span class="id" type="keyword">in</span></span> <span class="inlinecode"><span class="id" type="var">H</span></span> gives us a form of "forward
+    reasoning": from <span class="inlinecode"><span class="id" type="var">L<sub>1</sub></span></span> <span class="inlinecode"><span style="font-family: arial;">→</span></span> <span class="inlinecode"><span class="id" type="var">L<sub>2</sub></span></span> and a hypothesis matching <span class="inlinecode"><span class="id" type="var">L<sub>1</sub></span></span>, it
+    produces a hypothesis matching <span class="inlinecode"><span class="id" type="var">L<sub>2</sub></span></span>.  By contrast, <span class="inlinecode"><span class="id" type="tactic">apply</span></span> <span class="inlinecode"><span class="id" type="var">L</span></span> is
+    "backward reasoning": it says that if we know <span class="inlinecode"><span class="id" type="var">L<sub>1</sub></span><span style="font-family: arial;">→</span><span class="id" type="var">L<sub>2</sub></span></span> and we are
+    trying to prove <span class="inlinecode"><span class="id" type="var">L<sub>2</sub></span></span>, it suffices to prove <span class="inlinecode"><span class="id" type="var">L<sub>1</sub></span></span>.
+
+<div class="paragraph"> </div>
+
+    Here is a variant of a proof from above, using forward reasoning
+    throughout instead of backward reasoning. 
+</div>
+<div class="code code-tight">
+
+<br>
+<span class="id" type="keyword">Theorem</span> <a name="silly3&#39;"><span class="id" type="lemma">silly3'</span></a> : <span style="font-family: arial;">∀</span>(<span class="id" type="var">n</span> : <a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#nat"><span class="id" type="inductive">nat</span></a>),<br>
+&nbsp;&nbsp;(<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#beq_nat"><span class="id" type="definition">beq_nat</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#n"><span class="id" type="variable">n</span></a> 5 = <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#true"><span class="id" type="constructor">true</span></a> <span style="font-family: arial;">→</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#beq_nat"><span class="id" type="definition">beq_nat</span></a> (<a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#S"><span class="id" type="constructor">S</span></a> (<a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#S"><span class="id" type="constructor">S</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#n"><span class="id" type="variable">n</span></a>)) 7 = <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#true"><span class="id" type="constructor">true</span></a>) <span style="font-family: arial;">→</span><br>
+&nbsp;&nbsp;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#true"><span class="id" type="constructor">true</span></a> = <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#beq_nat"><span class="id" type="definition">beq_nat</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#n"><span class="id" type="variable">n</span></a> 5  <span style="font-family: arial;">→</span><br>
+&nbsp;&nbsp;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#true"><span class="id" type="constructor">true</span></a> = <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#beq_nat"><span class="id" type="definition">beq_nat</span></a> (<a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#S"><span class="id" type="constructor">S</span></a> (<a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#S"><span class="id" type="constructor">S</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#n"><span class="id" type="variable">n</span></a>)) 7.<br>
+<span class="id" type="keyword">Proof</span>.<br>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">n</span> <span class="id" type="var">eq</span> <span class="id" type="var">H</span>.<br>
+&nbsp;&nbsp;<span class="id" type="tactic">symmetry</span> <span class="id" type="keyword">in</span> <span class="id" type="var">H</span>. <span class="id" type="tactic">apply</span> <span class="id" type="var">eq</span> <span class="id" type="keyword">in</span> <span class="id" type="var">H</span>. <span class="id" type="tactic">symmetry</span> <span class="id" type="keyword">in</span> <span class="id" type="var">H</span>.<br>
+&nbsp;&nbsp;<span class="id" type="tactic">apply</span> <span class="id" type="var">H</span>. <span class="id" type="keyword">Qed</span>.<br>
+
+<br>
+</div>
+
+<div class="doc">
+Forward reasoning starts from what is <i>given</i> (premises,
+    previously proven theorems) and iteratively draws conclusions from
+    them until the goal is reached.  Backward reasoning starts from
+    the <i>goal</i>, and iteratively reasons about what would imply the
+    goal, until premises or previously proven theorems are reached.
+    If you've seen informal proofs before (for example, in a math or
+    computer science class), they probably used forward reasoning.  In
+    general, idiomatic use of Coq tends to favor backward reasoning,
+    but in some situations the forward style can be easier to think
+    about.  
+<div class="paragraph"> </div>
+
+<a name="lab134"></a><h4 class="section">Exercise: 3 stars, recommended (plus_n_n_injective)</h4>
+ Practice using "in" variants in this exercise.  (Hint: use
+    <span class="inlinecode"><span class="id" type="var">plus_n_Sm</span></span>.) 
+</div>
+<div class="code code-tight">
+
+<br>
+<span class="id" type="keyword">Theorem</span> <a name="plus_n_n_injective"><span class="id" type="lemma">plus_n_n_injective</span></a> : <span style="font-family: arial;">∀</span><span class="id" type="var">n</span> <span class="id" type="var">m</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#n"><span class="id" type="variable">n</span></a> + <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#n"><span class="id" type="variable">n</span></a> = <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#m"><span class="id" type="variable">m</span></a> + <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#m"><span class="id" type="variable">m</span></a> <span style="font-family: arial;">→</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#n"><span class="id" type="variable">n</span></a> = <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#m"><span class="id" type="variable">m</span></a>.<br>
+<span class="id" type="keyword">Proof</span>.<br>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">n</span>. <span class="id" type="tactic">induction</span> <span class="id" type="var">n</span> <span class="id" type="keyword">as</span> [| <span class="id" type="var">n'</span>].<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br>
+</div>
+
+<div class="doc">
+<font size="-2">☐</font> 
+</div>
+<div class="code code-tight">
+
+<br>
+</div>
+
+<div class="doc">
+<a name="lab135"></a><h1 class="section">Varying the Induction Hypothesis</h1>
+
+<div class="paragraph"> </div>
+
+ Sometimes it is important to control the exact form of the
+    induction hypothesis when carrying out inductive proofs in Coq.
+    In particular, we need to be careful about which of the
+    assumptions we move (using <span class="inlinecode"><span class="id" type="tactic">intros</span></span>) from the goal to the context
+    before invoking the <span class="inlinecode"><span class="id" type="tactic">induction</span></span> tactic.  For example, suppose
+    we want to show that the <span class="inlinecode"><span class="id" type="var">double</span></span> function is injective — i.e.,
+    that it always maps different arguments to different results:
+
+<div class="paragraph"> </div>
+
+<div class="code code-tight">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="keyword">Theorem</span>&nbsp;<span class="id" type="var">double_injective</span>:&nbsp;<span style="font-family: arial;">∀</span><span class="id" type="var">n</span>&nbsp;<span class="id" type="var">m</span>,&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">double</span>&nbsp;<span class="id" type="var">n</span>&nbsp;=&nbsp;<span class="id" type="var">double</span>&nbsp;<span class="id" type="var">m</span>&nbsp;<span style="font-family: arial;">→</span>&nbsp;<span class="id" type="var">n</span>&nbsp;=&nbsp;<span class="id" type="var">m</span>.
+<div class="paragraph"> </div>
+
+</div>
+    The way we <i>start</i> this proof is a bit delicate: if we begin with
+
+<div class="paragraph"> </div>
+
+<div class="code code-tight">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">intros</span>&nbsp;<span class="id" type="var">n</span>. <span class="id" type="tactic">induction</span>&nbsp;<span class="id" type="var">n</span>.
+<div class="paragraph"> </div>
+
+</div>
+    all is well.  But if we begin it with
+
+<div class="paragraph"> </div>
+
+<div class="code code-tight">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">intros</span>&nbsp;<span class="id" type="var">n</span>&nbsp;<span class="id" type="var">m</span>. <span class="id" type="tactic">induction</span>&nbsp;<span class="id" type="var">n</span>.
+<div class="paragraph"> </div>
+
+</div>
+    we get stuck in the middle of the inductive case... 
+</div>
+<div class="code code-tight">
+
+<br>
+<span class="id" type="keyword">Theorem</span> <a name="double_injective_FAILED"><span class="id" type="lemma">double_injective_FAILED</span></a> : <span style="font-family: arial;">∀</span><span class="id" type="var">n</span> <span class="id" type="var">m</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Induction.html#double"><span class="id" type="definition">double</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#n"><span class="id" type="variable">n</span></a> = <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Induction.html#double"><span class="id" type="definition">double</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#m"><span class="id" type="variable">m</span></a> <span style="font-family: arial;">→</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#n"><span class="id" type="variable">n</span></a> = <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#m"><span class="id" type="variable">m</span></a>.<br>
+<span class="id" type="keyword">Proof</span>.<br>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">n</span> <span class="id" type="var">m</span>. <span class="id" type="tactic">induction</span> <span class="id" type="var">n</span> <span class="id" type="keyword">as</span> [| <span class="id" type="var">n'</span>].<br>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;n&nbsp;=&nbsp;O&nbsp;*)</span> <span class="id" type="tactic">simpl</span>. <span class="id" type="tactic">intros</span> <span class="id" type="var">eq</span>. <span class="id" type="tactic">destruct</span> <span class="id" type="var">m</span> <span class="id" type="keyword">as</span> [| <span class="id" type="var">m'</span>].<br>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;m&nbsp;=&nbsp;O&nbsp;*)</span> <span class="id" type="tactic">reflexivity</span>.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;m&nbsp;=&nbsp;S&nbsp;m'&nbsp;*)</span> <span class="id" type="tactic">inversion</span> <span class="id" type="var">eq</span>.<br>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;n&nbsp;=&nbsp;S&nbsp;n'&nbsp;*)</span> <span class="id" type="tactic">intros</span> <span class="id" type="var">eq</span>. <span class="id" type="tactic">destruct</span> <span class="id" type="var">m</span> <span class="id" type="keyword">as</span> [| <span class="id" type="var">m'</span>].<br>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;m&nbsp;=&nbsp;O&nbsp;*)</span> <span class="id" type="tactic">inversion</span> <span class="id" type="var">eq</span>.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;m&nbsp;=&nbsp;S&nbsp;m'&nbsp;*)</span>  <span class="id" type="tactic">apply</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#f_equal"><span class="id" type="lemma">f_equal</span></a>.<br>
+
+<br>
+</div>
+
+<div class="doc">
+At this point, the induction hypothesis, <span class="inlinecode"><span class="id" type="var">IHn'</span></span>, does not give us
+    <span class="inlinecode"><span class="id" type="var">n'</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">m'</span></span> — there is an extra <span class="inlinecode"><span class="id" type="var">S</span></span> in the way — so the goal is
+    not provable. 
+</div>
+<div class="code code-tight">
+
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="keyword">Abort</span>.<br>
+
+<br>
+</div>
+
+<div class="doc">
+What went wrong? 
+<div class="paragraph"> </div>
+
+ The problem is that, at the point we invoke the induction
+    hypothesis, we have already introduced <span class="inlinecode"><span class="id" type="var">m</span></span> into the context —
+    intuitively, we have told Coq, "Let's consider some particular <span class="inlinecode"><span class="id" type="var">n</span></span>
+    and <span class="inlinecode"><span class="id" type="var">m</span></span>..." and we now have to prove that, if <span class="inlinecode"><span class="id" type="var">double</span></span> <span class="inlinecode"><span class="id" type="var">n</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">double</span></span>
+    <span class="inlinecode"><span class="id" type="var">m</span></span> for <i>these particular</i> <span class="inlinecode"><span class="id" type="var">n</span></span> and <span class="inlinecode"><span class="id" type="var">m</span></span>, then <span class="inlinecode"><span class="id" type="var">n</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">m</span></span>.
+
+<div class="paragraph"> </div>
+
+    The next tactic, <span class="inlinecode"><span class="id" type="tactic">induction</span></span> <span class="inlinecode"><span class="id" type="var">n</span></span> says to Coq: We are going to show
+    the goal by induction on <span class="inlinecode"><span class="id" type="var">n</span></span>.  That is, we are going to prove, for
+    <i>all</i> <span class="inlinecode"><span class="id" type="var">n</span></span>, that the proposition
+
+<div class="paragraph"> </div>
+
+<ul class="doclist">
+<li> <span class="inlinecode"><span class="id" type="var">P</span></span> <span class="inlinecode"><span class="id" type="var">n</span></span> = "if <span class="inlinecode"><span class="id" type="var">double</span></span> <span class="inlinecode"><span class="id" type="var">n</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">double</span></span> <span class="inlinecode"><span class="id" type="var">m</span></span>, then <span class="inlinecode"><span class="id" type="var">n</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">m</span></span>"
+
+</li>
+</ul>
+
+<div class="paragraph"> </div>
+
+    holds, by showing
+
+<div class="paragraph"> </div>
+
+<ul class="doclist">
+<li> <span class="inlinecode"><span class="id" type="var">P</span></span> <span class="inlinecode"><span class="id" type="var">O</span></span>
+
+<div class="paragraph"> </div>
+
+         (i.e., "if <span class="inlinecode"><span class="id" type="var">double</span></span> <span class="inlinecode"><span class="id" type="var">O</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">double</span></span> <span class="inlinecode"><span class="id" type="var">m</span></span> then <span class="inlinecode"><span class="id" type="var">O</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">m</span></span>") and
+
+<div class="paragraph"> </div>
+
+
+</li>
+<li> <span class="inlinecode"><span class="id" type="var">P</span></span> <span class="inlinecode"><span class="id" type="var">n</span></span> <span class="inlinecode"><span style="font-family: arial;">→</span></span> <span class="inlinecode"><span class="id" type="var">P</span></span> <span class="inlinecode">(<span class="id" type="var">S</span></span> <span class="inlinecode"><span class="id" type="var">n</span>)</span>
+
+<div class="paragraph"> </div>
+
+        (i.e., "if <span class="inlinecode"><span class="id" type="var">double</span></span> <span class="inlinecode"><span class="id" type="var">n</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">double</span></span> <span class="inlinecode"><span class="id" type="var">m</span></span> then <span class="inlinecode"><span class="id" type="var">n</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">m</span></span>" implies "if
+        <span class="inlinecode"><span class="id" type="var">double</span></span> <span class="inlinecode">(<span class="id" type="var">S</span></span> <span class="inlinecode"><span class="id" type="var">n</span>)</span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">double</span></span> <span class="inlinecode"><span class="id" type="var">m</span></span> then <span class="inlinecode"><span class="id" type="var">S</span></span> <span class="inlinecode"><span class="id" type="var">n</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">m</span></span>").
+
+</li>
+</ul>
+
+<div class="paragraph"> </div>
+
+    If we look closely at the second statement, it is saying something
+    rather strange: it says that, for a <i>particular</i> <span class="inlinecode"><span class="id" type="var">m</span></span>, if we know
+
+<div class="paragraph"> </div>
+
+<ul class="doclist">
+<li> "if <span class="inlinecode"><span class="id" type="var">double</span></span> <span class="inlinecode"><span class="id" type="var">n</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">double</span></span> <span class="inlinecode"><span class="id" type="var">m</span></span> then <span class="inlinecode"><span class="id" type="var">n</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">m</span></span>"
+
+</li>
+</ul>
+
+<div class="paragraph"> </div>
+
+    then we can prove
+
+<div class="paragraph"> </div>
+
+<ul class="doclist">
+<li> "if <span class="inlinecode"><span class="id" type="var">double</span></span> <span class="inlinecode">(<span class="id" type="var">S</span></span> <span class="inlinecode"><span class="id" type="var">n</span>)</span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">double</span></span> <span class="inlinecode"><span class="id" type="var">m</span></span> then <span class="inlinecode"><span class="id" type="var">S</span></span> <span class="inlinecode"><span class="id" type="var">n</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">m</span></span>".
+
+</li>
+</ul>
+
+<div class="paragraph"> </div>
+
+    To see why this is strange, let's think of a particular <span class="inlinecode"><span class="id" type="var">m</span></span> —
+    say, <span class="inlinecode">5</span>.  The statement is then saying that, if we know
+
+<div class="paragraph"> </div>
+
+<ul class="doclist">
+<li> <span class="inlinecode"><span class="id" type="var">Q</span></span> = "if <span class="inlinecode"><span class="id" type="var">double</span></span> <span class="inlinecode"><span class="id" type="var">n</span></span> <span class="inlinecode">=</span> <span class="inlinecode">10</span> then <span class="inlinecode"><span class="id" type="var">n</span></span> <span class="inlinecode">=</span> <span class="inlinecode">5</span>"
+
+</li>
+</ul>
+
+<div class="paragraph"> </div>
+
+    then we can prove
+
+<div class="paragraph"> </div>
+
+<ul class="doclist">
+<li> <span class="inlinecode"><span class="id" type="var">R</span></span> = "if <span class="inlinecode"><span class="id" type="var">double</span></span> <span class="inlinecode">(<span class="id" type="var">S</span></span> <span class="inlinecode"><span class="id" type="var">n</span>)</span> <span class="inlinecode">=</span> <span class="inlinecode">10</span> then <span class="inlinecode"><span class="id" type="var">S</span></span> <span class="inlinecode"><span class="id" type="var">n</span></span> <span class="inlinecode">=</span> <span class="inlinecode">5</span>".
+
+</li>
+</ul>
+
+<div class="paragraph"> </div>
+
+    But knowing <span class="inlinecode"><span class="id" type="var">Q</span></span> doesn't give us any help at all with proving
+    <span class="inlinecode"><span class="id" type="var">R</span></span>!  (If we tried to prove <span class="inlinecode"><span class="id" type="var">R</span></span> from <span class="inlinecode"><span class="id" type="var">Q</span></span>, we would start with
+    something like "Suppose <span class="inlinecode"><span class="id" type="var">double</span></span> <span class="inlinecode">(<span class="id" type="var">S</span></span> <span class="inlinecode"><span class="id" type="var">n</span>)</span> <span class="inlinecode">=</span> <span class="inlinecode">10</span>..." but then we'd be
+    stuck: knowing that <span class="inlinecode"><span class="id" type="var">double</span></span> <span class="inlinecode">(<span class="id" type="var">S</span></span> <span class="inlinecode"><span class="id" type="var">n</span>)</span> is <span class="inlinecode">10</span> tells us nothing about
+    whether <span class="inlinecode"><span class="id" type="var">double</span></span> <span class="inlinecode"><span class="id" type="var">n</span></span> is <span class="inlinecode">10</span>, so <span class="inlinecode"><span class="id" type="var">Q</span></span> is useless.) 
+<div class="paragraph"> </div>
+
+ To summarize: Trying to carry out this proof by induction on <span class="inlinecode"><span class="id" type="var">n</span></span>
+    when <span class="inlinecode"><span class="id" type="var">m</span></span> is already in the context doesn't work because we are
+    then trying to prove a relation involving <i>every</i> <span class="inlinecode"><span class="id" type="var">n</span></span> but just a
+    <i>single</i> <span class="inlinecode"><span class="id" type="var">m</span></span>. 
+<div class="paragraph"> </div>
+
+ The good proof of <span class="inlinecode"><span class="id" type="var">double_injective</span></span> leaves <span class="inlinecode"><span class="id" type="var">m</span></span> in the goal
+    statement at the point where the <span class="inlinecode"><span class="id" type="tactic">induction</span></span> tactic is invoked on
+    <span class="inlinecode"><span class="id" type="var">n</span></span>: 
+</div>
+<div class="code code-tight">
+
+<br>
+<span class="id" type="keyword">Theorem</span> <a name="double_injective"><span class="id" type="lemma">double_injective</span></a> : <span style="font-family: arial;">∀</span><span class="id" type="var">n</span> <span class="id" type="var">m</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Induction.html#double"><span class="id" type="definition">double</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#n"><span class="id" type="variable">n</span></a> = <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Induction.html#double"><span class="id" type="definition">double</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#m"><span class="id" type="variable">m</span></a> <span style="font-family: arial;">→</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#n"><span class="id" type="variable">n</span></a> = <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#m"><span class="id" type="variable">m</span></a>.<br>
+<span class="id" type="keyword">Proof</span>.<br>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">n</span>. <span class="id" type="tactic">induction</span> <span class="id" type="var">n</span> <span class="id" type="keyword">as</span> [| <span class="id" type="var">n'</span>].<br>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;n&nbsp;=&nbsp;O&nbsp;*)</span> <span class="id" type="tactic">simpl</span>. <span class="id" type="tactic">intros</span> <span class="id" type="var">m</span> <span class="id" type="var">eq</span>. <span class="id" type="tactic">destruct</span> <span class="id" type="var">m</span> <span class="id" type="keyword">as</span> [| <span class="id" type="var">m'</span>].<br>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;m&nbsp;=&nbsp;O&nbsp;*)</span> <span class="id" type="tactic">reflexivity</span>.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;m&nbsp;=&nbsp;S&nbsp;m'&nbsp;*)</span> <span class="id" type="tactic">inversion</span> <span class="id" type="var">eq</span>.<br>
+
+<br>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;n&nbsp;=&nbsp;S&nbsp;n'&nbsp;*)</span> <span class="id" type="tactic">simpl</span>.<br>
+
+<br>
+</div>
+
+<div class="doc">
+Notice that both the goal and the induction hypothesis are
+    different this time: the goal asks us to prove something more
+    general (i.e., to prove the statement for <i>every</i> <span class="inlinecode"><span class="id" type="var">m</span></span>), but the IH
+    is correspondingly more flexible, allowing us to choose any <span class="inlinecode"><span class="id" type="var">m</span></span> we
+    like when we apply the IH. 
+</div>
+<div class="code code-tight">
+
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">m</span> <span class="id" type="var">eq</span>.<br>
+
+<br>
+</div>
+
+<div class="doc">
+Now we've chosen a particular <span class="inlinecode"><span class="id" type="var">m</span></span> and introduced the assumption
+    that <span class="inlinecode"><span class="id" type="var">double</span></span> <span class="inlinecode"><span class="id" type="var">n</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">double</span></span> <span class="inlinecode"><span class="id" type="var">m</span></span>.  Since we are doing a case analysis on
+    <span class="inlinecode"><span class="id" type="var">n</span></span>, we also need a case analysis on <span class="inlinecode"><span class="id" type="var">m</span></span> to keep the two "in sync." 
+</div>
+<div class="code code-tight">
+
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">destruct</span> <span class="id" type="var">m</span> <span class="id" type="keyword">as</span> [| <span class="id" type="var">m'</span>].<br>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;m&nbsp;=&nbsp;O&nbsp;*)</span> <span class="id" type="tactic">simpl</span>.<br>
+
+<br>
+</div>
+
+<div class="doc">
+The 0 case is trivial: 
+</div>
+<div class="code code-tight">
+
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">inversion</span> <span class="id" type="var">eq</span>.<br>
+
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;m&nbsp;=&nbsp;S&nbsp;m'&nbsp;*)</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">apply</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#f_equal"><span class="id" type="lemma">f_equal</span></a>.<br>
+
+<br>
+</div>
+
+<div class="doc">
+At this point, since we are in the second branch of the <span class="inlinecode"><span class="id" type="tactic">destruct</span></span>
+    <span class="inlinecode"><span class="id" type="var">m</span></span>, the <span class="inlinecode"><span class="id" type="var">m'</span></span> mentioned in the context is the predecessor of the
+    <span class="inlinecode"><span class="id" type="var">m</span></span> we started out talking about.  Since we are also in the <span class="inlinecode"><span class="id" type="var">S</span></span>
+    branch of the induction, this is perfect: if we instantiate the
+    generic <span class="inlinecode"><span class="id" type="var">m</span></span> in the IH with the current <span class="inlinecode"><span class="id" type="var">m'</span></span> (this instantiation is
+    performed automatically by the <span class="inlinecode"><span class="id" type="tactic">apply</span></span> in the next step), then
+    <span class="inlinecode"><span class="id" type="var">IHn'</span></span> gives us exactly what we need to finish the proof. 
+</div>
+<div class="code code-tight">
+
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">apply</span> <span class="id" type="var">IHn'</span>. <span class="id" type="tactic">inversion</span> <span class="id" type="var">eq</span>. <span class="id" type="tactic">reflexivity</span>. <span class="id" type="keyword">Qed</span>.<br>
+
+<br>
+</div>
+
+<div class="doc">
+What you should take away from all this is that we need to be
+    careful about using induction to try to prove something too
+    specific: If we're proving a property of <span class="inlinecode"><span class="id" type="var">n</span></span> and <span class="inlinecode"><span class="id" type="var">m</span></span> by induction
+    on <span class="inlinecode"><span class="id" type="var">n</span></span>, we may need to leave <span class="inlinecode"><span class="id" type="var">m</span></span> generic. 
+<div class="paragraph"> </div>
+
+ The following exercise requires the same pattern. 
+<div class="paragraph"> </div>
+
+<a name="lab136"></a><h4 class="section">Exercise: 2 stars (beq_nat_true)</h4>
+
+</div>
+<div class="code code-space">
+<span class="id" type="keyword">Theorem</span> <a name="beq_nat_true"><span class="id" type="lemma">beq_nat_true</span></a> : <span style="font-family: arial;">∀</span><span class="id" type="var">n</span> <span class="id" type="var">m</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#beq_nat"><span class="id" type="definition">beq_nat</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#n"><span class="id" type="variable">n</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#m"><span class="id" type="variable">m</span></a> = <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#true"><span class="id" type="constructor">true</span></a> <span style="font-family: arial;">→</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#n"><span class="id" type="variable">n</span></a> = <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#m"><span class="id" type="variable">m</span></a>.<br>
+<span class="id" type="keyword">Proof</span>.<br>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br>
+</div>
+
+<div class="doc">
+<font size="-2">☐</font> 
+<div class="paragraph"> </div>
+
+<a name="lab137"></a><h4 class="section">Exercise: 2 stars, advanced (beq_nat_true_informal)</h4>
+ Give a careful informal proof of <span class="inlinecode"><span class="id" type="var">beq_nat_true</span></span>, being as explicit
+    as possible about quantifiers. 
+</div>
+<div class="code code-tight">
+
+<br>
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span><br>
+</div>
+
+<div class="doc">
+<font size="-2">☐</font> 
+<div class="paragraph"> </div>
+
+ The strategy of doing fewer <span class="inlinecode"><span class="id" type="tactic">intros</span></span> before an <span class="inlinecode"><span class="id" type="tactic">induction</span></span> to
+    obtain a more general IH doesn't always work by itself; sometimes
+    a little <i>rearrangement</i> of quantified variables is needed.
+    Suppose, for example, that we wanted to prove <span class="inlinecode"><span class="id" type="var">double_injective</span></span>
+    by induction on <span class="inlinecode"><span class="id" type="var">m</span></span> instead of <span class="inlinecode"><span class="id" type="var">n</span></span>. 
+</div>
+<div class="code code-tight">
+
+<br>
+<span class="id" type="keyword">Theorem</span> <a name="double_injective_take2_FAILED"><span class="id" type="lemma">double_injective_take2_FAILED</span></a> : <span style="font-family: arial;">∀</span><span class="id" type="var">n</span> <span class="id" type="var">m</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Induction.html#double"><span class="id" type="definition">double</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#n"><span class="id" type="variable">n</span></a> = <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Induction.html#double"><span class="id" type="definition">double</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#m"><span class="id" type="variable">m</span></a> <span style="font-family: arial;">→</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#n"><span class="id" type="variable">n</span></a> = <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#m"><span class="id" type="variable">m</span></a>.<br>
+<span class="id" type="keyword">Proof</span>.<br>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">n</span> <span class="id" type="var">m</span>. <span class="id" type="tactic">induction</span> <span class="id" type="var">m</span> <span class="id" type="keyword">as</span> [| <span class="id" type="var">m'</span>].<br>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;m&nbsp;=&nbsp;O&nbsp;*)</span> <span class="id" type="tactic">simpl</span>. <span class="id" type="tactic">intros</span> <span class="id" type="var">eq</span>. <span class="id" type="tactic">destruct</span> <span class="id" type="var">n</span> <span class="id" type="keyword">as</span> [| <span class="id" type="var">n'</span>].<br>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;n&nbsp;=&nbsp;O&nbsp;*)</span> <span class="id" type="tactic">reflexivity</span>.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;n&nbsp;=&nbsp;S&nbsp;n'&nbsp;*)</span> <span class="id" type="tactic">inversion</span> <span class="id" type="var">eq</span>.<br>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;m&nbsp;=&nbsp;S&nbsp;m'&nbsp;*)</span> <span class="id" type="tactic">intros</span> <span class="id" type="var">eq</span>. <span class="id" type="tactic">destruct</span> <span class="id" type="var">n</span> <span class="id" type="keyword">as</span> [| <span class="id" type="var">n'</span>].<br>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;n&nbsp;=&nbsp;O&nbsp;*)</span> <span class="id" type="tactic">inversion</span> <span class="id" type="var">eq</span>.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;n&nbsp;=&nbsp;S&nbsp;n'&nbsp;*)</span>  <span class="id" type="tactic">apply</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#f_equal"><span class="id" type="lemma">f_equal</span></a>.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;Stuck&nbsp;again&nbsp;here,&nbsp;just&nbsp;like&nbsp;before.&nbsp;*)</span><br>
+<span class="id" type="keyword">Abort</span>.<br>
+
+<br>
+</div>
+
+<div class="doc">
+The problem here is that, to do induction on <span class="inlinecode"><span class="id" type="var">m</span></span>, we must first
+    introduce <span class="inlinecode"><span class="id" type="var">n</span></span>.  (If we simply say <span class="inlinecode"><span class="id" type="tactic">induction</span></span> <span class="inlinecode"><span class="id" type="var">m</span></span> without
+    introducing anything first, Coq will automatically introduce <span class="inlinecode"><span class="id" type="var">n</span></span>
+    for us!)  
+<div class="paragraph"> </div>
+
+ What can we do about this?  One possibility is to rewrite the
+    statement of the lemma so that <span class="inlinecode"><span class="id" type="var">m</span></span> is quantified before <span class="inlinecode"><span class="id" type="var">n</span></span>.  This
+    will work, but it's not nice: We don't want to have to twist the
+    statements of lemmas to fit the needs of a particular strategy for
+    proving them — we want to state them in the most clear and
+    natural way. 
+<div class="paragraph"> </div>
+
+ What we can do instead is to first introduce all the quantified
+    variables and then <i>re-generalize</i> one or more of them,
+    selectively taking variables out of the context and putting them
+    back at the beginning of the goal.  The <span class="inlinecode"><span class="id" type="tactic">generalize</span></span> <span class="inlinecode"><span class="id" type="tactic">dependent</span></span>
+    tactic does this. 
+</div>
+<div class="code code-tight">
+
+<br>
+<span class="id" type="keyword">Theorem</span> <a name="double_injective_take2"><span class="id" type="lemma">double_injective_take2</span></a> : <span style="font-family: arial;">∀</span><span class="id" type="var">n</span> <span class="id" type="var">m</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Induction.html#double"><span class="id" type="definition">double</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#n"><span class="id" type="variable">n</span></a> = <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Induction.html#double"><span class="id" type="definition">double</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#m"><span class="id" type="variable">m</span></a> <span style="font-family: arial;">→</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#n"><span class="id" type="variable">n</span></a> = <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#m"><span class="id" type="variable">m</span></a>.<br>
+<span class="id" type="keyword">Proof</span>.<br>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">n</span> <span class="id" type="var">m</span>.<br>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;<span class="inlinecode"><span class="id" type="var">n</span></span>&nbsp;and&nbsp;<span class="inlinecode"><span class="id" type="var">m</span></span>&nbsp;are&nbsp;both&nbsp;in&nbsp;the&nbsp;context&nbsp;*)</span><br>
+&nbsp;&nbsp;<span class="id" type="tactic">generalize</span> <span class="id" type="tactic">dependent</span> <span class="id" type="var">n</span>.<br>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;Now&nbsp;<span class="inlinecode"><span class="id" type="var">n</span></span>&nbsp;is&nbsp;back&nbsp;in&nbsp;the&nbsp;goal&nbsp;and&nbsp;we&nbsp;can&nbsp;do&nbsp;induction&nbsp;on<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="inlinecode"><span class="id" type="var">m</span></span>&nbsp;and&nbsp;get&nbsp;a&nbsp;sufficiently&nbsp;general&nbsp;IH.&nbsp;*)</span><br>
+&nbsp;&nbsp;<span class="id" type="tactic">induction</span> <span class="id" type="var">m</span> <span class="id" type="keyword">as</span> [| <span class="id" type="var">m'</span>].<br>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;m&nbsp;=&nbsp;O&nbsp;*)</span> <span class="id" type="tactic">simpl</span>. <span class="id" type="tactic">intros</span> <span class="id" type="var">n</span> <span class="id" type="var">eq</span>. <span class="id" type="tactic">destruct</span> <span class="id" type="var">n</span> <span class="id" type="keyword">as</span> [| <span class="id" type="var">n'</span>].<br>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;n&nbsp;=&nbsp;O&nbsp;*)</span> <span class="id" type="tactic">reflexivity</span>.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;n&nbsp;=&nbsp;S&nbsp;n'&nbsp;*)</span> <span class="id" type="tactic">inversion</span> <span class="id" type="var">eq</span>.<br>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;m&nbsp;=&nbsp;S&nbsp;m'&nbsp;*)</span> <span class="id" type="tactic">intros</span> <span class="id" type="var">n</span> <span class="id" type="var">eq</span>. <span class="id" type="tactic">destruct</span> <span class="id" type="var">n</span> <span class="id" type="keyword">as</span> [| <span class="id" type="var">n'</span>].<br>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;n&nbsp;=&nbsp;O&nbsp;*)</span> <span class="id" type="tactic">inversion</span> <span class="id" type="var">eq</span>.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;n&nbsp;=&nbsp;S&nbsp;n'&nbsp;*)</span> <span class="id" type="tactic">apply</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Tactics.html#f_equal"><span class="id" type="lemma">f_equal</span></a>.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">apply</span> <span class="id" type="var">IHm'</span>. <span class="id" type="tactic">inversion</span> <span class="id" type="var">eq</span>. <span class="id" type="tactic">reflexivity</span>. <span class="id" type="keyword">Qed</span>.<br>
+
+<br>
+</div>
+
+<div class="doc">
+Let's look at an informal proof of this theorem.  Note that
+    the proposition we prove by induction leaves <span class="inlinecode"><span class="id" type="var">n</span></span> quantified,
+    corresponding to the use of generalize dependent in our formal
+    proof.
+
+<div class="paragraph"> </div>
+
+    <i>Theorem</i>: For any nats <span class="inlinecode"><span class="id" type="var">n</span></span> and <span class="inlinecode"><span class="id" type="var">m</span></span>, if <span class="inlinecode"><span class="id" type="var">double</span></span> <span class="inlinecode"><span class="id" type="var">n</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">double</span></span> <span class="inlinecode"><span class="id" type="var">m</span></span>, then
+      <span class="inlinecode"><span class="id" type="var">n</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">m</span></span>.
+
+<div class="paragraph"> </div>
+
+    <i>Proof</i>: Let <span class="inlinecode"><span class="id" type="var">m</span></span> be a <span class="inlinecode"><span class="id" type="var">nat</span></span>. We prove by induction on <span class="inlinecode"><span class="id" type="var">m</span></span> that, for
+      any <span class="inlinecode"><span class="id" type="var">n</span></span>, if <span class="inlinecode"><span class="id" type="var">double</span></span> <span class="inlinecode"><span class="id" type="var">n</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">double</span></span> <span class="inlinecode"><span class="id" type="var">m</span></span> then <span class="inlinecode"><span class="id" type="var">n</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">m</span></span>.
+
+<div class="paragraph"> </div>
+
+<ul class="doclist">
+<li> First, suppose <span class="inlinecode"><span class="id" type="var">m</span></span> <span class="inlinecode">=</span> <span class="inlinecode">0</span>, and suppose <span class="inlinecode"><span class="id" type="var">n</span></span> is a number such
+        that <span class="inlinecode"><span class="id" type="var">double</span></span> <span class="inlinecode"><span class="id" type="var">n</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">double</span></span> <span class="inlinecode"><span class="id" type="var">m</span></span>.  We must show that <span class="inlinecode"><span class="id" type="var">n</span></span> <span class="inlinecode">=</span> <span class="inlinecode">0</span>.
+
+<div class="paragraph"> </div>
+
+        Since <span class="inlinecode"><span class="id" type="var">m</span></span> <span class="inlinecode">=</span> <span class="inlinecode">0</span>, by the definition of <span class="inlinecode"><span class="id" type="var">double</span></span> we have <span class="inlinecode"><span class="id" type="var">double</span></span> <span class="inlinecode"><span class="id" type="var">n</span></span> <span class="inlinecode">=</span>
+        <span class="inlinecode">0</span>.  There are two cases to consider for <span class="inlinecode"><span class="id" type="var">n</span></span>.  If <span class="inlinecode"><span class="id" type="var">n</span></span> <span class="inlinecode">=</span> <span class="inlinecode">0</span> we are
+        done, since <span class="inlinecode"><span class="id" type="var">m</span></span> <span class="inlinecode">=</span> <span class="inlinecode">0</span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">n</span></span>, as required.  Otherwise, if <span class="inlinecode"><span class="id" type="var">n</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">S</span></span> <span class="inlinecode"><span class="id" type="var">n'</span></span>
+        for some <span class="inlinecode"><span class="id" type="var">n'</span></span>, we derive a contradiction: by the definition of
+        <span class="inlinecode"><span class="id" type="var">double</span></span>, we can calculate <span class="inlinecode"><span class="id" type="var">double</span></span> <span class="inlinecode"><span class="id" type="var">n</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">S</span></span> <span class="inlinecode">(<span class="id" type="var">S</span></span> <span class="inlinecode">(<span class="id" type="var">double</span></span> <span class="inlinecode"><span class="id" type="var">n'</span>))</span>, but
+        this contradicts the assumption that <span class="inlinecode"><span class="id" type="var">double</span></span> <span class="inlinecode"><span class="id" type="var">n</span></span> <span class="inlinecode">=</span> <span class="inlinecode">0</span>.
+
+<div class="paragraph"> </div>
+
+
+</li>
+<li> Second, suppose <span class="inlinecode"><span class="id" type="var">m</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">S</span></span> <span class="inlinecode"><span class="id" type="var">m'</span></span> and that <span class="inlinecode"><span class="id" type="var">n</span></span> is again a number such
+        that <span class="inlinecode"><span class="id" type="var">double</span></span> <span class="inlinecode"><span class="id" type="var">n</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">double</span></span> <span class="inlinecode"><span class="id" type="var">m</span></span>.  We must show that <span class="inlinecode"><span class="id" type="var">n</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">S</span></span> <span class="inlinecode"><span class="id" type="var">m'</span></span>, with
+        the induction hypothesis that for every number <span class="inlinecode"><span class="id" type="var">s</span></span>, if <span class="inlinecode"><span class="id" type="var">double</span></span> </li></ul></div></div></div><audio controls="controls" style="display: none;"></audio></body><style type="text/css">#yddContainer{display:block;font-family:Microsoft YaHei;position:relative;width:100%;height:100%;top:-4px;left:-4px;font-size:12px;border:1px solid}#yddTop{display:block;height:22px}#yddTopBorderlr{display:block;position:static;height:17px;padding:2px 28px;line-height:17px;font-size:12px;color:#5079bb;font-weight:bold;border-style:none solid;border-width:1px}#yddTopBorderlr .ydd-sp{position:absolute;top:2px;height:0;overflow:hidden}.ydd-icon{left:5px;width:17px;padding:0px 0px 0px 0px;padding-top:17px;background-position:-16px -44px}.ydd-close{right:5px;width:16px;padding-top:16px;background-position:left -44px}#yddKeyTitle{float:left;text-decoration:none}#yddMiddle{display:block;margin-bottom:10px}.ydd-tabs{display:block;margin:5px 0;padding:0 5px;height:18px;border-bottom:1px solid}.ydd-tab{display:block;float:left;height:18px;margin:0 5px -1px 0;padding:0 4px;line-height:18px;border:1px solid;border-bottom:none}.ydd-trans-container{display:block;line-height:160%}.ydd-trans-container a{text-decoration:none;}#yddBottom{position:absolute;bottom:0;left:0;width:100%;height:22px;line-height:22px;overflow:hidden;background-position:left -22px}.ydd-padding010{padding:0 10px}#yddWrapper{color:#252525;z-index:10001;background:url(chrome-extension://eopjamdnofihpioajgfdikhhbobonhbb/ab20.png);}#yddContainer{background:#fff;border-color:#4b7598}#yddTopBorderlr{border-color:#f0f8fc}#yddWrapper .ydd-sp{background-image:url(chrome-extension://eopjamdnofihpioajgfdikhhbobonhbb/ydd-sprite.png)}#yddWrapper a,#yddWrapper a:hover,#yddWrapper a:visited{color:#50799b}#yddWrapper .ydd-tabs{color:#959595}.ydd-tabs,.ydd-tab{background:#fff;border-color:#d5e7f3}#yddBottom{color:#363636}#yddWrapper{min-width:250px;max-width:400px;}</style></html>

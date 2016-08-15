@@ -77,7 +77,7 @@ Compute  (test10 ( fun (x:id) => 3) (Id 4)).
 (* Check (total_map (Id 4)). *)
 
 Definition t_update (m : total_map)
-                    (x : id) (v :nat) :=
+                    (x : id) (v :nat):total_map :=
   fun x' => if beq_id x x' then v else m x'.
 
 Definition examplemap :=
@@ -86,7 +86,6 @@ Definition examplemap :=
 
 Compute ((t_update (t_update (t_empty 0) (Id 1) 100)
            (Id 3) 200) (Id 1)).
-
 
 Compute ((t_update (t_empty 0) (Id 1) 100)
            (Id 1)). 

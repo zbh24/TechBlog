@@ -1,0 +1,441 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!-- saved from url=(0056)http://www.seas.upenn.edu/~cis500/current/sf/Basics.html -->
+<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<link href="./Basics_ Functional Programming in Coq_files/coqdoc.css" rel="stylesheet" type="text/css">
+<title>Basics: Functional Programming in Coq</title>
+<script type="text/javascript" src="./Basics_ Functional Programming in Coq_files/jquery-1.8.3.js"></script>
+<script type="text/javascript" src="./Basics_ Functional Programming in Coq_files/main.js"></script>
+</head>
+
+<body>
+
+<div id="page">
+
+<div id="header">
+</div>
+
+<div id="main">
+
+<h1 class="libtitle">Basics<span class="subtitle">Functional Programming in Coq</span></h1>
+
+<div class="code code-tight">
+</div>
+
+<div class="doc">
+
+</div>
+<div class="code code-tight">
+
+<br>
+
+<br>
+
+<br>
+</div>
+
+<div class="doc">
+<a name="lab15"></a><h1 class="section">Introduction</h1>
+
+<div class="paragraph"> </div>
+
+ The functional programming style brings programming closer to
+    simple, everyday mathematics: If a procedure or method has no side
+    effects, then (ignoring efficiency) all we need to understand
+    about it is how it maps inputs to outputs — that is, we can think
+    of it as just a concrete method for computing a mathematical
+    function.  This is one sense of the word "functional" in
+    "functional programming."  The direct connection between programs
+    and simple mathematical objects supports both formal correctness
+    proofs and sound informal reasoning about program behavior.
+
+<div class="paragraph"> </div>
+
+    The other sense in which functional programming is "functional" is
+    that it emphasizes the use of functions (or methods) as
+    <i>first-class</i> values — i.e., values that can be passed as
+    arguments to other functions, returned as results, included in
+    data structures, etc.  The recognition that functions can be
+    treated as data in this way enables a host of useful and powerful
+    idioms.
+
+<div class="paragraph"> </div>
+
+    Other common features of functional languages include <i>algebraic
+    data types</i> and <i>pattern matching</i>, which make it easy to
+    construct and manipulate rich data structures, and sophisticated
+    <i>polymorphic type systems</i> supporting abstraction and code reuse.
+    Coq shares all of these features.
+
+<div class="paragraph"> </div>
+
+    The first half of this chapter introduces the most essential
+    elements of Coq's functional programming language.  The second
+    half introduces some basic <i>tactics</i> that can be used to prove
+    simple properties of Coq programs. 
+</div>
+<div class="code code-tight">
+
+<br>
+</div>
+
+<div class="doc">
+<a name="lab16"></a><h1 class="section">Enumerated Types</h1>
+
+<div class="paragraph"> </div>
+
+ One unusual aspect of Coq is that its set of built-in
+    features is <i>extremely</i> small.  For example, instead of providing
+    the usual palette of atomic data types (booleans, integers,
+    strings, etc.), Coq offers a powerful mechanism for defining new
+    data types from scratch, from which all these familiar types arise
+    as instances.
+
+<div class="paragraph"> </div>
+
+    Naturally, the Coq distribution comes with an extensive standard
+    library providing definitions of booleans, numbers, and many
+    common data structures like lists and hash tables.  But there is
+    nothing magic or primitive about these library definitions.  To
+    illustrate this, we will explicitly recapitulate all the
+    definitions we need in this course, rather than just getting them
+    implicitly from the library.
+
+<div class="paragraph"> </div>
+
+    To see how this definition mechanism works, let's start with a
+    very simple example. 
+</div>
+<div class="code code-tight">
+
+<br>
+</div>
+
+<div class="doc">
+<a name="lab17"></a><h2 class="section">Days of the Week</h2>
+
+<div class="paragraph"> </div>
+
+ The following declaration tells Coq that we are defining
+    a new set of data values — a <i>type</i>. 
+</div>
+<div class="code code-tight">
+
+<br>
+<span class="id" type="keyword">Inductive</span> <a name="day"><span class="id" type="inductive">day</span></a> : <span class="id" type="keyword">Type</span> :=<br>
+&nbsp;&nbsp;| <a name="monday"><span class="id" type="constructor">monday</span></a> : <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#day"><span class="id" type="inductive">day</span></a><br>
+&nbsp;&nbsp;| <a name="tuesday"><span class="id" type="constructor">tuesday</span></a> : <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#day"><span class="id" type="inductive">day</span></a><br>
+&nbsp;&nbsp;| <a name="wednesday"><span class="id" type="constructor">wednesday</span></a> : <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#day"><span class="id" type="inductive">day</span></a><br>
+&nbsp;&nbsp;| <a name="thursday"><span class="id" type="constructor">thursday</span></a> : <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#day"><span class="id" type="inductive">day</span></a><br>
+&nbsp;&nbsp;| <a name="friday"><span class="id" type="constructor">friday</span></a> : <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#day"><span class="id" type="inductive">day</span></a><br>
+&nbsp;&nbsp;| <a name="saturday"><span class="id" type="constructor">saturday</span></a> : <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#day"><span class="id" type="inductive">day</span></a><br>
+&nbsp;&nbsp;| <a name="sunday"><span class="id" type="constructor">sunday</span></a> : <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#day"><span class="id" type="inductive">day</span></a>.<br>
+
+<br>
+</div>
+
+<div class="doc">
+The type is called <span class="inlinecode"><span class="id" type="var">day</span></span>, and its members are <span class="inlinecode"><span class="id" type="var">monday</span></span>,
+    <span class="inlinecode"><span class="id" type="var">tuesday</span></span>, etc.  The second and following lines of the definition
+    can be read "<span class="inlinecode"><span class="id" type="var">monday</span></span> is a <span class="inlinecode"><span class="id" type="var">day</span></span>, <span class="inlinecode"><span class="id" type="var">tuesday</span></span> is a <span class="inlinecode"><span class="id" type="var">day</span></span>, etc."
+
+<div class="paragraph"> </div>
+
+    Having defined <span class="inlinecode"><span class="id" type="var">day</span></span>, we can write functions that operate on
+    days. 
+</div>
+<div class="code code-tight">
+
+<br>
+<span class="id" type="keyword">Definition</span> <a name="next_weekday"><span class="id" type="definition">next_weekday</span></a> (<span class="id" type="var">d</span>:<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#day"><span class="id" type="inductive">day</span></a>) : <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#day"><span class="id" type="inductive">day</span></a> :=<br>
+&nbsp;&nbsp;<span class="id" type="keyword">match</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#d"><span class="id" type="variable">d</span></a> <span class="id" type="keyword">with</span><br>
+&nbsp;&nbsp;| <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#monday"><span class="id" type="constructor">monday</span></a>    ⇒ <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#tuesday"><span class="id" type="constructor">tuesday</span></a><br>
+&nbsp;&nbsp;| <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#tuesday"><span class="id" type="constructor">tuesday</span></a>   ⇒ <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#wednesday"><span class="id" type="constructor">wednesday</span></a><br>
+&nbsp;&nbsp;| <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#wednesday"><span class="id" type="constructor">wednesday</span></a> ⇒ <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#thursday"><span class="id" type="constructor">thursday</span></a><br>
+&nbsp;&nbsp;| <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#thursday"><span class="id" type="constructor">thursday</span></a>  ⇒ <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#friday"><span class="id" type="constructor">friday</span></a><br>
+&nbsp;&nbsp;| <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#friday"><span class="id" type="constructor">friday</span></a>    ⇒ <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#monday"><span class="id" type="constructor">monday</span></a><br>
+&nbsp;&nbsp;| <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#saturday"><span class="id" type="constructor">saturday</span></a>  ⇒ <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#monday"><span class="id" type="constructor">monday</span></a><br>
+&nbsp;&nbsp;| <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#sunday"><span class="id" type="constructor">sunday</span></a>    ⇒ <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#monday"><span class="id" type="constructor">monday</span></a><br>
+&nbsp;&nbsp;<span class="id" type="keyword">end</span>.<br>
+
+<br>
+</div>
+
+<div class="doc">
+One thing to note is that the argument and return types of
+    this function are explicitly declared.  Like most functional
+    programming languages, Coq can often figure out these types for
+    itself when they are not given explicitly — i.e., it performs
+    <i>type inference</i> — but we'll include them to make reading
+    easier. 
+<div class="paragraph"> </div>
+
+ Having defined a function, we should check that it works on
+    some examples.  There are actually three different ways to do this
+    in Coq.
+
+<div class="paragraph"> </div>
+
+    First, we can use the command <span class="inlinecode"><span class="id" type="var">Compute</span></span> to evaluate a compound
+    expression involving <span class="inlinecode"><span class="id" type="var">next_weekday</span></span>. 
+</div>
+<div class="code code-tight">
+
+<br>
+<span class="id" type="var">Compute</span> (<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#next_weekday"><span class="id" type="definition">next_weekday</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#friday"><span class="id" type="constructor">friday</span></a>).<br>
+<span class="comment">(*&nbsp;==&gt;&nbsp;monday&nbsp;:&nbsp;day&nbsp;*)</span><br>
+
+<br>
+<span class="id" type="var">Compute</span> (<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#next_weekday"><span class="id" type="definition">next_weekday</span></a> (<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#next_weekday"><span class="id" type="definition">next_weekday</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#saturday"><span class="id" type="constructor">saturday</span></a>)).<br>
+<span class="comment">(*&nbsp;==&gt;&nbsp;tuesday&nbsp;:&nbsp;day&nbsp;*)</span><br>
+
+<br>
+</div>
+
+<div class="doc">
+(We show Coq's responses in comments, but, if you have a
+    computer handy, this would be an excellent moment to fire up the
+    Coq interpreter under your favorite IDE — either CoqIde or Proof
+    General — and try this for yourself.  Load this file, <span class="inlinecode"><span class="id" type="var">Basics.v</span></span>,
+    from the book's accompanying Coq sources, find the above example,
+    submit it to Coq, and observe the result.)
+
+<div class="paragraph"> </div>
+
+    Second, we can record what we <i>expect</i> the result to be in the
+    form of a Coq example: 
+</div>
+<div class="code code-tight">
+
+<br>
+<span class="id" type="keyword">Example</span> <a name="test_next_weekday"><span class="id" type="definition">test_next_weekday</span></a>:<br>
+&nbsp;&nbsp;(<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#next_weekday"><span class="id" type="definition">next_weekday</span></a> (<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#next_weekday"><span class="id" type="definition">next_weekday</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#saturday"><span class="id" type="constructor">saturday</span></a>)) = <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#tuesday"><span class="id" type="constructor">tuesday</span></a>.<br>
+
+<br>
+</div>
+
+<div class="doc">
+This declaration does two things: it makes an
+    assertion (that the second weekday after <span class="inlinecode"><span class="id" type="var">saturday</span></span> is <span class="inlinecode"><span class="id" type="var">tuesday</span></span>),
+    and it gives the assertion a name that can be used to refer to it
+    later.
+
+<div class="paragraph"> </div>
+
+    Having made the assertion, we can also ask Coq to verify it, like
+    this: 
+</div>
+<div class="code code-tight">
+
+<br>
+<span class="id" type="keyword">Proof</span>. <span class="id" type="tactic">simpl</span>. <span class="id" type="tactic">reflexivity</span>. <span class="id" type="keyword">Qed</span>.<br>
+
+<br>
+</div>
+
+<div class="doc">
+The details are not important for now (we'll come back to
+    them in a bit), but essentially this can be read as "The assertion
+    we've just made can be proved by observing that both sides of the
+    equality evaluate to the same thing, after some simplification."
+
+<div class="paragraph"> </div>
+
+    Third, we can ask Coq to <i>extract</i>, from our <span class="inlinecode"><span class="id" type="keyword">Definition</span></span>, a
+    program in some other, more conventional, programming
+    language (OCaml, Scheme, or Haskell) with a high-performance
+    compiler.  This facility is very interesting, since it gives us a
+    way to construct <i>fully certified</i> programs in mainstream
+    languages.  Indeed, this is one of the main uses for which Coq was
+    developed.  We'll come back to this topic in later chapters. 
+</div>
+<div class="code code-tight">
+
+<br>
+</div>
+
+<div class="doc">
+<a name="lab18"></a><h2 class="section">Booleans</h2>
+
+<div class="paragraph"> </div>
+
+ In a similar way, we can define the standard type <span class="inlinecode"><span class="id" type="var">bool</span></span> of
+    booleans, with members <span class="inlinecode"><span class="id" type="var">true</span></span> and <span class="inlinecode"><span class="id" type="var">false</span></span>. 
+</div>
+<div class="code code-tight">
+
+<br>
+<span class="id" type="keyword">Inductive</span> <a name="bool"><span class="id" type="inductive">bool</span></a> : <span class="id" type="keyword">Type</span> :=<br>
+&nbsp;&nbsp;| <a name="true"><span class="id" type="constructor">true</span></a> : <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#bool"><span class="id" type="inductive">bool</span></a><br>
+&nbsp;&nbsp;| <a name="false"><span class="id" type="constructor">false</span></a> : <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#bool"><span class="id" type="inductive">bool</span></a>.<br>
+
+<br>
+</div>
+
+<div class="doc">
+Although we are rolling our own booleans here for the sake
+    of building up everything from scratch, Coq does, of course,
+    provide a default implementation of the booleans in its standard
+    library, together with a multitude of useful functions and
+    lemmas.  (Take a look at <span class="inlinecode"><span class="id" type="var">Coq.Init.Datatypes</span></span> in the Coq library
+    documentation if you're interested.)  Whenever possible, we'll
+    name our own definitions and theorems so that they exactly
+    coincide with the ones in the standard library.
+
+<div class="paragraph"> </div>
+
+    Functions over booleans can be defined in the same way as
+    above: 
+</div>
+<div class="code code-tight">
+
+<br>
+<span class="id" type="keyword">Definition</span> <a name="negb"><span class="id" type="definition">negb</span></a> (<span class="id" type="var">b</span>:<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#bool"><span class="id" type="inductive">bool</span></a>) : <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#bool"><span class="id" type="inductive">bool</span></a> :=<br>
+&nbsp;&nbsp;<span class="id" type="keyword">match</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#b"><span class="id" type="variable">b</span></a> <span class="id" type="keyword">with</span><br>
+&nbsp;&nbsp;| <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#true"><span class="id" type="constructor">true</span></a> ⇒ <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#false"><span class="id" type="constructor">false</span></a><br>
+&nbsp;&nbsp;| <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#false"><span class="id" type="constructor">false</span></a> ⇒ <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#true"><span class="id" type="constructor">true</span></a><br>
+&nbsp;&nbsp;<span class="id" type="keyword">end</span>.<br>
+
+<br>
+<span class="id" type="keyword">Definition</span> <a name="andb"><span class="id" type="definition">andb</span></a> (<span class="id" type="var">b<sub>1</sub></span>:<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#bool"><span class="id" type="inductive">bool</span></a>) (<span class="id" type="var">b<sub>2</sub></span>:<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#bool"><span class="id" type="inductive">bool</span></a>) : <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#bool"><span class="id" type="inductive">bool</span></a> :=<br>
+&nbsp;&nbsp;<span class="id" type="keyword">match</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#b<sub>1</sub>"><span class="id" type="variable">b<sub>1</sub></span></a> <span class="id" type="keyword">with</span><br>
+&nbsp;&nbsp;| <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#true"><span class="id" type="constructor">true</span></a> ⇒ <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#b<sub>2</sub>"><span class="id" type="variable">b<sub>2</sub></span></a><br>
+&nbsp;&nbsp;| <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#false"><span class="id" type="constructor">false</span></a> ⇒ <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#false"><span class="id" type="constructor">false</span></a><br>
+&nbsp;&nbsp;<span class="id" type="keyword">end</span>.<br>
+
+<br>
+<span class="id" type="keyword">Definition</span> <a name="orb"><span class="id" type="definition">orb</span></a> (<span class="id" type="var">b<sub>1</sub></span>:<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#bool"><span class="id" type="inductive">bool</span></a>) (<span class="id" type="var">b<sub>2</sub></span>:<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#bool"><span class="id" type="inductive">bool</span></a>) : <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#bool"><span class="id" type="inductive">bool</span></a> :=<br>
+&nbsp;&nbsp;<span class="id" type="keyword">match</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#b<sub>1</sub>"><span class="id" type="variable">b<sub>1</sub></span></a> <span class="id" type="keyword">with</span><br>
+&nbsp;&nbsp;| <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#true"><span class="id" type="constructor">true</span></a> ⇒ <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#true"><span class="id" type="constructor">true</span></a><br>
+&nbsp;&nbsp;| <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#false"><span class="id" type="constructor">false</span></a> ⇒ <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#b<sub>2</sub>"><span class="id" type="variable">b<sub>2</sub></span></a><br>
+&nbsp;&nbsp;<span class="id" type="keyword">end</span>.<br>
+
+<br>
+</div>
+
+<div class="doc">
+The last two illustrate Coq's syntax for multi-argument
+    function definitions.  The corresponding multi-argument
+    application syntax is illustrated by the following four "unit
+    tests," which constitute a complete specification — a truth
+    table — for the <span class="inlinecode"><span class="id" type="var">orb</span></span> function: 
+</div>
+<div class="code code-tight">
+
+<br>
+<span class="id" type="keyword">Example</span> <a name="test_orb1"><span class="id" type="definition">test_orb1</span></a>:  (<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#orb"><span class="id" type="definition">orb</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#true"><span class="id" type="constructor">true</span></a>  <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#false"><span class="id" type="constructor">false</span></a>) = <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#true"><span class="id" type="constructor">true</span></a>.<br>
+<span class="id" type="keyword">Proof</span>. <span class="id" type="tactic">simpl</span>. <span class="id" type="tactic">reflexivity</span>. <span class="id" type="keyword">Qed</span>.<br>
+<span class="id" type="keyword">Example</span> <a name="test_orb2"><span class="id" type="definition">test_orb2</span></a>:  (<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#orb"><span class="id" type="definition">orb</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#false"><span class="id" type="constructor">false</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#false"><span class="id" type="constructor">false</span></a>) = <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#false"><span class="id" type="constructor">false</span></a>.<br>
+<span class="id" type="keyword">Proof</span>. <span class="id" type="tactic">simpl</span>. <span class="id" type="tactic">reflexivity</span>. <span class="id" type="keyword">Qed</span>.<br>
+<span class="id" type="keyword">Example</span> <a name="test_orb3"><span class="id" type="definition">test_orb3</span></a>:  (<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#orb"><span class="id" type="definition">orb</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#false"><span class="id" type="constructor">false</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#true"><span class="id" type="constructor">true</span></a>)  = <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#true"><span class="id" type="constructor">true</span></a>.<br>
+<span class="id" type="keyword">Proof</span>. <span class="id" type="tactic">simpl</span>. <span class="id" type="tactic">reflexivity</span>. <span class="id" type="keyword">Qed</span>.<br>
+<span class="id" type="keyword">Example</span> <a name="test_orb4"><span class="id" type="definition">test_orb4</span></a>:  (<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#orb"><span class="id" type="definition">orb</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#true"><span class="id" type="constructor">true</span></a>  <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#true"><span class="id" type="constructor">true</span></a>)  = <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#true"><span class="id" type="constructor">true</span></a>.<br>
+<span class="id" type="keyword">Proof</span>. <span class="id" type="tactic">simpl</span>. <span class="id" type="tactic">reflexivity</span>. <span class="id" type="keyword">Qed</span>.<br>
+
+<br>
+</div>
+
+<div class="doc">
+We can also introduce some familiar syntax for the boolean
+    operations we have just defined. The <span class="inlinecode"><span class="id" type="keyword">Infix</span></span> command defines new,
+    infix notation for an existing definition. 
+</div>
+<div class="code code-tight">
+
+<br>
+<span class="id" type="keyword">Infix</span> "&amp;&amp;" := <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#andb"><span class="id" type="definition">andb</span></a>.<br>
+<span class="id" type="keyword">Infix</span> "||" := <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#orb"><span class="id" type="definition">orb</span></a>.<br>
+
+<br>
+<span class="id" type="keyword">Example</span> <a name="test_orb5"><span class="id" type="definition">test_orb5</span></a>:  <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#false"><span class="id" type="constructor">false</span></a> || <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#false"><span class="id" type="constructor">false</span></a> || <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#true"><span class="id" type="constructor">true</span></a> = <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#true"><span class="id" type="constructor">true</span></a>.<br>
+<span class="id" type="keyword">Proof</span>. <span class="id" type="tactic">simpl</span>. <span class="id" type="tactic">reflexivity</span>. <span class="id" type="keyword">Qed</span>.<br>
+
+<br>
+</div>
+
+<div class="doc">
+<i>A note on notation</i>: In <span class="inlinecode">.<span class="id" type="var">v</span></span> files, we use square brackets to
+    delimit fragments of Coq code within comments; this convention,
+    also used by the <span class="inlinecode"><span class="id" type="var">coqdoc</span></span> documentation tool, keeps them visually
+    separate from the surrounding text.  In the html version of the
+    files, these pieces of text appear in a <span class="inlinecode"><span class="id" type="var">different</span></span> <span class="inlinecode"><span class="id" type="var">font</span></span>.
+
+<div class="paragraph"> </div>
+
+    The special phrases <span class="inlinecode"><span class="id" type="var">Admitted</span></span> and <span class="inlinecode"><span class="id" type="var">admit</span></span> can be used as a
+    placeholder for an incomplete definition or proof.  We'll use them
+    in exercises, to indicate the parts that we're leaving for you —
+    i.e., your job is to replace <span class="inlinecode"><span class="id" type="var">admit</span></span> or <span class="inlinecode"><span class="id" type="var">Admitted</span></span> with real
+    definitions or proofs. 
+<div class="paragraph"> </div>
+
+<a name="lab19"></a><h4 class="section">Exercise: 1 star (nandb)</h4>
+ Remove <span class="inlinecode"><span class="id" type="var">admit</span></span> and complete the definition of the following
+    function; then make sure that the <span class="inlinecode"><span class="id" type="keyword">Example</span></span> assertions below can
+    each be verified by Coq.  (Remove "<span class="inlinecode"><span class="id" type="var">Admitted</span>.</span>" and fill in each
+    proof, following the model of the <span class="inlinecode"><span class="id" type="var">orb</span></span> tests above.) The function
+    should return <span class="inlinecode"><span class="id" type="var">true</span></span> if either or both of its inputs are
+    <span class="inlinecode"><span class="id" type="var">false</span></span>. 
+</div>
+<div class="code code-tight">
+
+<br>
+<span class="id" type="keyword">Definition</span> <a name="nandb"><span class="id" type="definition">nandb</span></a> (<span class="id" type="var">b<sub>1</sub></span>:<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#bool"><span class="id" type="inductive">bool</span></a>) (<span class="id" type="var">b<sub>2</sub></span>:<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#bool"><span class="id" type="inductive">bool</span></a>) : <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#bool"><span class="id" type="inductive">bool</span></a> :=<br>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#admit"><span class="id" type="axiom">admit</span></a>.<br>
+
+<br>
+<span class="id" type="keyword">Example</span> <a name="test_nandb1"><span class="id" type="definition">test_nandb1</span></a>:               (<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#nandb"><span class="id" type="definition">nandb</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#true"><span class="id" type="constructor">true</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#false"><span class="id" type="constructor">false</span></a>) = <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#true"><span class="id" type="constructor">true</span></a>.<br>
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br>
+<span class="id" type="keyword">Example</span> <a name="test_nandb2"><span class="id" type="definition">test_nandb2</span></a>:               (<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#nandb"><span class="id" type="definition">nandb</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#false"><span class="id" type="constructor">false</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#false"><span class="id" type="constructor">false</span></a>) = <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#true"><span class="id" type="constructor">true</span></a>.<br>
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br>
+<span class="id" type="keyword">Example</span> <a name="test_nandb3"><span class="id" type="definition">test_nandb3</span></a>:               (<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#nandb"><span class="id" type="definition">nandb</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#false"><span class="id" type="constructor">false</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#true"><span class="id" type="constructor">true</span></a>) = <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#true"><span class="id" type="constructor">true</span></a>.<br>
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br>
+<span class="id" type="keyword">Example</span> <a name="test_nandb4"><span class="id" type="definition">test_nandb4</span></a>:               (<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#nandb"><span class="id" type="definition">nandb</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#true"><span class="id" type="constructor">true</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#true"><span class="id" type="constructor">true</span></a>) = <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#false"><span class="id" type="constructor">false</span></a>.<br>
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br>
+</div>
+
+<div class="doc">
+<font size="-2">☐</font> 
+<div class="paragraph"> </div>
+
+<a name="lab20"></a><h4 class="section">Exercise: 1 star (andb3)</h4>
+ Do the same for the <span class="inlinecode"><span class="id" type="var">andb3</span></span> function below. This function should
+    return <span class="inlinecode"><span class="id" type="var">true</span></span> when all of its inputs are <span class="inlinecode"><span class="id" type="var">true</span></span>, and <span class="inlinecode"><span class="id" type="var">false</span></span>
+    otherwise. 
+</div>
+<div class="code code-tight">
+
+<br>
+<span class="id" type="keyword">Definition</span> <a name="andb3"><span class="id" type="definition">andb3</span></a> (<span class="id" type="var">b<sub>1</sub></span>:<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#bool"><span class="id" type="inductive">bool</span></a>) (<span class="id" type="var">b<sub>2</sub></span>:<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#bool"><span class="id" type="inductive">bool</span></a>) (<span class="id" type="var">b<sub>3</sub></span>:<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#bool"><span class="id" type="inductive">bool</span></a>) : <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#bool"><span class="id" type="inductive">bool</span></a> :=<br>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#admit"><span class="id" type="axiom">admit</span></a>.<br>
+
+<br>
+<span class="id" type="keyword">Example</span> <a name="test_andb31"><span class="id" type="definition">test_andb31</span></a>:                 (<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#andb3"><span class="id" type="definition">andb3</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#true"><span class="id" type="constructor">true</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#true"><span class="id" type="constructor">true</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#true"><span class="id" type="constructor">true</span></a>) = <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#true"><span class="id" type="constructor">true</span></a>.<br>
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br>
+<span class="id" type="keyword">Example</span> <a name="test_andb32"><span class="id" type="definition">test_andb32</span></a>:                 (<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#andb3"><span class="id" type="definition">andb3</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#false"><span class="id" type="constructor">false</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#true"><span class="id" type="constructor">true</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#true"><span class="id" type="constructor">true</span></a>) = <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#false"><span class="id" type="constructor">false</span></a>.<br>
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br>
+<span class="id" type="keyword">Example</span> <a name="test_andb33"><span class="id" type="definition">test_andb33</span></a>:                 (<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#andb3"><span class="id" type="definition">andb3</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#true"><span class="id" type="constructor">true</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#false"><span class="id" type="constructor">false</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#true"><span class="id" type="constructor">true</span></a>) = <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#false"><span class="id" type="constructor">false</span></a>.<br>
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br>
+<span class="id" type="keyword">Example</span> <a name="test_andb34"><span class="id" type="definition">test_andb34</span></a>:                 (<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#andb3"><span class="id" type="definition">andb3</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#true"><span class="id" type="constructor">true</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#true"><span class="id" type="constructor">true</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#false"><span class="id" type="constructor">false</span></a>) = <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Basics.html#false"><span class="id" type="constructor">false</span></a>.<br>
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br>
+</div>
+
+<div class="doc">
+<font size="-2">☐</font> 
+</div>
+<div class="code code-tight">
+
+<br>
+</div>
+
+<div class="doc">
+<a name="lab21"></a><h2 class="section">Function Types</h2>
+
+<div class="paragraph"> </div>
+
+ Every expression in Coq has a type, describing what sort of
+    thing it computes. The <span class="inlinecode"><span class="id" type="keyword">Check</span></span> command asks Coq to print the type
+    of an expression. 
+<div class="paragraph"> </div>
+
+ For example, the type of <span class="inlinecode"><span class="id" type="var">negb</span></span> <span class="inlinecode"><span class="id" type="var">true</span></span> is <span class="inlinecode"><span class="id" type="var">bool</span></span></div></div></div><audio controls="controls" style="display: none;"></audio></body><style type="text/css">#yddContainer{display:block;font-family:Microsoft YaHei;position:relative;width:100%;height:100%;top:-4px;left:-4px;font-size:12px;border:1px solid}#yddTop{display:block;height:22px}#yddTopBorderlr{display:block;position:static;height:17px;padding:2px 28px;line-height:17px;font-size:12px;color:#5079bb;font-weight:bold;border-style:none solid;border-width:1px}#yddTopBorderlr .ydd-sp{position:absolute;top:2px;height:0;overflow:hidden}.ydd-icon{left:5px;width:17px;padding:0px 0px 0px 0px;padding-top:17px;background-position:-16px -44px}.ydd-close{right:5px;width:16px;padding-top:16px;background-position:left -44px}#yddKeyTitle{float:left;text-decoration:none}#yddMiddle{display:block;margin-bottom:10px}.ydd-tabs{display:block;margin:5px 0;padding:0 5px;height:18px;border-bottom:1px solid}.ydd-tab{display:block;float:left;height:18px;margin:0 5px -1px 0;padding:0 4px;line-height:18px;border:1px solid;border-bottom:none}.ydd-trans-container{display:block;line-height:160%}.ydd-trans-container a{text-decoration:none;}#yddBottom{position:absolute;bottom:0;left:0;width:100%;height:22px;line-height:22px;overflow:hidden;background-position:left -22px}.ydd-padding010{padding:0 10px}#yddWrapper{color:#252525;z-index:10001;background:url(chrome-extension://eopjamdnofihpioajgfdikhhbobonhbb/ab20.png);}#yddContainer{background:#fff;border-color:#4b7598}#yddTopBorderlr{border-color:#f0f8fc}#yddWrapper .ydd-sp{background-image:url(chrome-extension://eopjamdnofihpioajgfdikhhbobonhbb/ydd-sprite.png)}#yddWrapper a,#yddWrapper a:hover,#yddWrapper a:visited{color:#50799b}#yddWrapper .ydd-tabs{color:#959595}.ydd-tabs,.ydd-tab{background:#fff;border-color:#d5e7f3}#yddBottom{color:#363636}#yddWrapper{min-width:250px;max-width:400px;}</style></html>
