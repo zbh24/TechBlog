@@ -1,0 +1,15 @@
+all : 
+	coq_makefile\
+	chap15.v \
+        bdiv.v bdivspec.v merge.v sqrt.v \
+	btreewf.v inclusionwf.v not_decreasing.v forloops.v \
+	parsing2.v exo_15_13.v exo_15_14.v\
+        fib_log.v  cubic.v div_it_companion2.v factZ.v factZ_it.v fib_log.v \
+        log2.v log2_it.v log_domain_well_spec.v \
+         sqrt_nat_wf.v > makefile
+	touch .depend
+	make depend
+	make all
+
+
+

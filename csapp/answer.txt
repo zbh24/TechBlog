@@ -1,0 +1,16 @@
+1.
+Public speaking is very easy.
+
+2.
+1 2 6 24 120 720
+
+3.
+0 q 777
+many answer
+
+4.
+9
+the fun(x) = fun(x-1) + fun(x-2);
+
+5.
+ans:opekma

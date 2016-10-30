@@ -1,0 +1,559 @@
+\documentclass{article}
+\title {Comments on the sort program}
+\author{Yves Bertot and Pierre Cast\'eran}
+\usepackage[latin1]{inputenc}
+\usepackage[T1]{fontenc}
+%\usepackage{isolatin1}
+\usepackage{makeidx}
+\usepackage{alltt}
+\usepackage{verbatim}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{theorem}
+\usepackage{t1enc}
+\usepackage[dvips]{epsfig}
+\usepackage{epic}
+\usepackage{eepic}
+\usepackage{ecltree}
+\usepackage{moreverb} 
+\usepackage{color}
+\usepackage{pifont}
+\usepackage{xr}
+\usepackage{url}
+
+\newcommand{\ifocho}{\iffalse}
+\newcommand{\ifsiete}{\iftrue}
+
+\newcommand{\appli}[2]{\mbox{\tt{(#1 #2)}}}
+\newcommand{\applis}[1]{\mbox{\texttt{(#1)}}}
+\newcommand{\abst}[3]{\mbox{\tt[#1:#2]#3}}
+\newcommand{\prodep}[3]{\mbox{\tt(#1:#2)#3}}
+
+\newcommand{\letin}[3]{\mbox{\tt[#1:=#2]#3}}
+
+\newcommand{\coqversion}{}
+
+\newcommand{\tab}{{\null\hskip1cm}}
+\newcommand{\Ltac}{\mbox{\emph{$\cal L$}tac}}
+\newcommand{\coq}{\mbox{\emph{Coq}}}
+\newcommand{\lcf}{\mbox{\emph{LCF}}}
+\newcommand{\hol}{\mbox{\emph{HOL}}}
+\newcommand{\pvs}{\mbox{\emph{PVS}}}
+\newcommand{\isabelle}{\mbox{\emph{Isabelle}}}
+\newcommand{\prolog}{\mbox{\emph{Prolog}}}
+\newcommand{\goalbar}{{\tt{}============================}}
+\newcommand{\gallina}{\mbox{\emph{Gallina}}}
+\newcommand{\ocaml}{\mbox{\emph{OCAML}}}
+\newcommand{\haskell}{\mbox{\emph{Haskell}}}
+
+\newcommand{\ml}{\mbox{\emph{ML}}}
+
+\newcommand{\scheme}{\mbox{\emph{Scheme}}}
+\newcommand{\lisp}{\mbox{\emph{Lisp}}}
+
+\newcommand{\fleche}{\mbox{$\rightarrow$}}
+\newcommand{\coqnot}{\mbox{\(\neg\)}}
+% si Yves B. OK.  
+\newcommand{\coqand}{\mbox{\(\wedge\)}}
+\newcommand{\coqor}{\mbox{\(\vee\)}}
+%\newcommand{\coqor}{\disj}
+%\newcommand{\coqand}{\conj}
+
+%modifications par PC
+%\renewcommand{\Longrightarrow}{\fleche}
+%\renewcommand{\Rightarrow}{\fleche}
+\renewcommand{\neg}{\sim}
+
+\addtocounter{secnumdepth}{1}
+\providecommand{\og}{«}
+\providecommand{\fg}{»}
+
+
+%%% Environnements
+
+
+\newcommand{\Fzero}{\mbox{${\cal F}_0$}}
+
+
+\definecolor{setcolor}{rgb}{0.2,0,0}
+\newcommand{\citeset}[1]{#1}
+\newcommand{\variant}[1]{}
+\newcommand{\hide}[1]{}
+\newcommand{\hidedots}[1]{}
+\definecolor{propcolor}{rgb}{0,0,0.2}
+\newcommand{\citeprop}[1]{#1}
+\definecolor{typecolor}{rgb}{0,0,0}
+\newcommand{\citeterm}[1]{\textcolor{typecolor}{#1}}
+
+\newcommand{\citecoq}[1]{\mbox{\texttt{#1}}}
+\newcommand{\citetype}[1]{\citeterm{#1}}
+
+\definecolor{light}{rgb}{0.9,0.9,0.9}
+
+\newcommand{\meta}[1]{\mbox{$\langle$\textit{#1}$\rangle$}}
+%%% Commandes pour le developpement
+
+
+\newcommand{\brouillon}{\emph{(Brouillon du \today)}}
+\newcommand{\ici}{\textbf{Je suis ici : \today}}
+
+\newenvironment{agenda}{\em À faire :\begin{itemize}}{\end{itemize}}
+\newenvironment{coqtt}{\noindent}{\noindent}
+%%% Operateurs, etc.
+
+\newcommand{\impl}{\mbox{$\rightarrow$}}
+
+
+\newcommand{\sumbool}[2]{\mbox{\tt\{#1\}+\{#2\}}}
+
+\newcommand{\subst}[3]{\mbox{#1\{#2/#3\}}}
+
+\newcommand{\prodplus}[2]{\mbox{\tt(#1)#2}}
+\newcommand{\dom}[1]{\textrm{dom}(#1)} % domaine d'un contexte (log function)
+\newcommand{\norm}[1]{\textrm{n}(#1)} % forme normale (log function)
+\newcommand{\coqnat}[1]{\mbox{\tt{(#1)}}}
+\newcommand{\coqz}[1]{\mbox{\tt{`#1`}}}
+\newcommand{\coqcart}[2]{\mbox{\tt{#1*#2}}}
+\newcommand{\incoqcomment}[1]{{\tt (* #1 *)}}
+
+
+\newcommand{\alphacong}{\mbox{$\,\cong_{\!\alpha}\,$}} % alpha-congruence
+\newcommand{\betareduc}{\mbox{$\,\rightsquigarrow_{\!\beta}$}\,} % beta reduction
+%\newcommand{\betastar}{\mbox{$\,\Rightarrow_{\!\beta}^{*}\,$}} % beta reduction
+\newcommand{\deltareduc}{\mbox{$\,\rightsquigarrow_{\!\delta}$}\,} % delta reduction
+\newcommand{\dbreduc}{\mbox{$\,\rightsquigarrow_{\!\delta\beta}$}\,} % delta,beta reduction
+\newcommand{\ireduc}{\mbox{$\,\rightsquigarrow_{\!\iota}$}\,} % delta,beta reduction
+
+
+% jugement de typage
+\newcommand{\these}{\boldsymbol{\large \vdash}}
+\newcommand{\disj}{\mbox{$\backslash/$}}
+\newcommand{\conj}{\mbox{$/\backslash$}}
+%\newcommand{\juge}[3]{\mbox{$#1 \boldsymbol{\vdash} #2 : #3 $}}
+\newcommand{\juge}[4]{\mbox{$#1,#2 \these #3 \boldsymbol{:} #4 $}}
+\newcommand{\smalljuge}[3]{\mbox{$#1 \these #2 \boldsymbol{:} #3 $}}
+\newcommand{\goal}[3]{\mbox{$#1,#2 \these^{\!\!\!?} #3  $}}
+\newcommand{\sgoal}[2]{\mbox{$#1\these^{\!\!\!\!?} #2 $}}
+\newcommand{\reduc}[5]{\mbox{$#1,#2 \these #3 \rhd_{#4}#5 $}}
+\newcommand{\convert}[5]{\mbox{$#1,#2 \these #3 =_{#4}#5 $}}
+\newcommand{\convorder}[5]{\mbox{$#1,#2 \these #3\leq _{#4}#5 $}}
+\newcommand{\wouff}[2]{\mbox{$\emph{WF}(#1)[#2]$}}
+
+
+%\newcommand{\mthese}{\underset{M}{\vdash}}
+\newcommand{\mthese}{\boldsymbol{\vdash}_{\!\!M}}
+\newcommand{\type}{\boldsymbol{:}}
+
+% jugement absolu
+
+%\newcommand{\ajuge}[2]{\mbox{$ \boldsymbol{\vdash} #1 : #2 $}}
+\newcommand{\ajuge}[2]{\mbox{$\these #1 \boldsymbol{:} #2 $}}
+
+%%% logique minimale
+\newcommand{\propzero}{\mbox{$P_0$}} % types de Fzero
+
+%%% logique propositionnelle classique
+\newcommand {\ff}{\boldsymbol{f}} % faux
+\newcommand {\vv}{\boldsymbol{v}} % vrai
+
+\newcommand{\verite}{\mbox{$\cal{B}$}} % {\ff,\vv}
+\newcommand{\sequ}[2]{\mbox{$#1 \vdash #2 $}} % sequent
+\newcommand{\strip}[1]{#1^o} % enlever les variables d'un contexte
+
+
+
+%%% tactiques
+\newcommand{\decomp}{\delta} % decomposition
+\newcommand{\recomp}{\rho} % recomposition
+
+%%% divers
+\newcommand{\cqfd}{\mbox{\textbf{cqfd}}}
+\newcommand{\fail}{\mbox{\textbf{F}}}
+\newcommand{\succes}{\mbox{$\blacksquare$}}
+%%% Environnements
+
+
+%% Fzero
+\newcommand{\con}{\mbox{$\cal C$}}
+\newcommand{\var}{\mbox{$\cal V$}}
+
+\newcommand{\atomzero}{\mbox{${\cal A}_0$}} % types de base de Fzero
+\newcommand{\typezero}{\mbox{${\cal T}_0$}} % types de Fzero
+\newcommand{\termzero}{\mbox{$\Lambda_0$}} % termes de Fzero 
+\newcommand{\conzero}{\mbox{$\cal C_0$}} % contextes de Fzero 
+
+\newcommand{\buts}{\mbox{$\cal B$}} % buts
+
+%%% for drawing terms
+% abstraction [x:t]e
+\newcommand{\PicAbst}[3]{\begin{bundle}{\bf abst}\chunk{#1}\chunk{#2}\chunk{#3}%
+                        \end{bundle}}
+
+% the same in DeBruijn form
+\newcommand{\PicDbj}[2]{\begin{bundle}{\bf abst}\chunk{#1}\chunk{#2}
+                       \end{bundle}}
+
+
+% applications
+\newcommand{\PicAppl}[2]{\begin{bundle}{\bf appl}\chunk{#1}\chunk{#2}%
+                         \end{bundle}}
+
+% variables
+\newcommand{\PicVar}[1]{\begin{bundle}{\bf var}\chunk{#1}
+                          \end{bundle}}
+
+% constantes
+\newcommand{\PicCon}[1]{\begin{bundle}{\bf const}\chunk{#1}\end{bundle}}
+
+% fleches
+\newcommand{\PicImpl}[2]{\begin{bundle}{\impl}\chunk{#1}\chunk{#2}%
+                         \end{bundle}}
+
+
+
+%%%% scripts coq
+\newcommand{\prompt}{\mbox{\sl Coq $<\;$}}
+
+
+\begin{document}
+
+\maketitle
+% jugement de typage
+We give some comments on a little developement in {\coq}~: a
+certified sort program on lists of integers.
+
+\section{Importing modules}
+
+Our program will work on lists of integers. The modules \texttt{PolyList}
+and \citecoq{ZArith} of {\coq}'s standard library 
+contain the definition and some functions and already proved theorems 
+on (respectively) polymorphic lists and integers.
+
+
+\begin{verbatim}
+Require PolyList.
+Require ZArith.
+\end{verbatim}
+
+The type of lists of integers is now \appli{list}{Z}.
+
+\section{List equivalence}
+A sorting function working on lists must return a list which has
+the same elements (with the same order of multiplicity) as its argument.
+\subsection{Counting occurrences in a list}
+
+In order to specify this constraint, we first define a function
+which counts the number of occurences of some integer $z$ in a list
+$l$. This function is defined recursively and uses a comparison function
+for integers named \texttt{Z\_eq\_dec} (which we found in module
+\texttt{ZArith}).
+
+\begin{verbatim}
+Fixpoint nb_occurences[z:Z; l:(list Z)]:nat :=
+  Cases l of
+    nil => O
+  | (cons z' l') =>
+     Cases (Z_eq_dec z z') of
+       (left _) => (S (nb_occurences z l'))
+     | (right _) => (nb_occurences z l')
+     end
+  end.
+\end{verbatim}
+
+We can test this function, for instance by computing the number of
+occurences of $3$ in the list $(3,7,3)$. Notice we use a \emph{Lisp}-like
+notation of lists.
+\begin{alltt}
+Eval Compute in 
+  (nb_occurences `3` (cons `3` (cons `7` (cons `3` (nil ?))))).
+\it
+  = (2)
+     : nat
+\end{alltt}
+
+\subsection{An equivalence relation on lists}
+We can now define a binary relationship on \appli{list}{Z}.
+Lists $l$ and $l'$ are related if they have the same number of
+occurrenes of $z$, for any $z$.
+
+\begin{verbatim}
+Definition equiv[l,l':(list Z)]:=
+     (z:Z)(nb_occurences z l)=(nb_occurences z l').
+\end{verbatim}
+
+\subsection{Some proofs}
+
+The correctness proof of our sorting functions relies on some
+properties of the \texttt{equiv} relationship. These properties
+are interactively proved within the system {\coq}.
+
+Each lemma or theorem is announced with its name and statement.
+One can find between the keywords \texttt{Proof} and \citecoq{Qed} 
+a sequence of commands for guiding the proof with the help of
+\emph{tactics}. Instead of reading passively  such \emph{proof scripts},
+you should \emph{replay} them on your computer, and watch the
+answers of the system.
+
+\subsubsection{The empty list is equivalent to itself}
+
+The following proof is very simple. In few words, one computes the number
+of occurrences of any number $z$ in the empty list, and the statement we 
+want to proves reduces to the trivial equality $0=0$.
+
+\begin{verbatim}
+Lemma equiv_nil : (equiv (nil ?) (nil ?)).             
+Proof.
+  Intro z;Simpl;Auto.
+Qed.
+\end{verbatim}
+
+\subsubsection{The \texttt{equiv} relation is a congruence \emph{wrt} 
+\texttt{cons}}
+
+We have to prove that, if $l$ and $l'$ are equivalent, and if we insert
+the same $z$ in front of $l$ and $l'$, the resulting lists are equivalent too.
+
+The proof is quite simple. We count the number of occurrences of 
+some $z'$ in both resulting lists.  We have to consider the cases
+where $z=z'$ and $z\not=z'$.
+
+The statement of theorem \citecoq{equiv\_cons} 
+must be read as follows~:
+\begin{quote}
+For each $z$ of type \texttt{Z}, for each $l$ and $l'$ of type
+\appli{list}{Z}, if $l$ is equivalent to $l'$, then
+\applis{cons $z$ $l$} is equivalent to \applis{cons $z$ $l'$}.
+\end{quote}
+
+\begin{verbatim}
+Lemma equiv_cons : (z:Z;l,l':(list Z)) (equiv l l')->
+                                       (equiv (cons z l) (cons z l')).
+Proof.
+ Intros z l l' H z';Simpl;Auto.
+ Case (Z_eq_dec z' z);Simpl;Auto.
+Qed.
+\end{verbatim}
+
+\subsubsection{More properties of \texttt{equiv}}
+The relationship  \emph{equiv} is reflexive and transitive.
+
+Proofs of both statement are quite easy. Notice the proof of
+reflexivity, which is done by induction on lists, and uses
+the lemma \emph{equiv\_cons}.
+
+\begin{verbatim}
+Lemma equiv_refl : (l:(list Z))(equiv l l).
+Proof.
+ Induction l;Intro z;Simpl;Auto.
+ Intros;Apply equiv_cons;Auto.
+Qed.
+
+Lemma equiv_trans : (l,l',l'':(list Z))(equiv l l')->
+                                       (equiv l' l'')->
+                                       (equiv l l'').
+Proof.
+ Intros l l' l'' H H0 z.
+ Transitivity  (nb_occurrences z l').
+ Apply H;Auto.
+ Apply H0;Auto.
+Qed.
+\end{verbatim}
+
+Finally, we prove that our equivalence relation is compatible
+with the permutation of the two first items of a list.
+\begin{verbatim}
+Lemma equiv_perm : (a,b:Z; l,l':(list Z))
+                    (equiv l l')->
+                    (equiv (cons a (cons b l))
+                                   (cons b (cons a l'))).
+Proof.
+ Intros a b l l' H z;Simpl.
+ Case (Z_eq_dec z a);Case (Z_eq_dec z b);Simpl;Case (H z);Auto.
+Qed.
+
+\end{verbatim}
+
+\subsubsection{Helping {\coq} to help yourself}
+
+The following command adds the four lemmas 
+\texttt{equiv\_nil}, \texttt{equiv\_cons}, \texttt{equiv\_refl}
+and \texttt{equiv\_perm} to a base of theorems which can be used
+by the \texttt{Auto} tactics.
+
+For instance, the foolowing goal (\emph{i.e.} prove that the
+lists $(a,b,c,d)$ and $(b,a,d,c)$ are always equivalents ) is
+solved in one automatic interaction.
+
+
+\begin{verbatim}
+Lemma abcd : (a,b,c,d:Z)
+  (equiv (cons a (cons b (cons c (cons d (nil ?)))))
+         (cons b (cons a (cons d (cons c (nil ?)))))).
+Proof.
+ Auto.
+Qed.
+\end{verbatim}
+
+
+\subsection{ordered lists}
+
+ The following piece of code defines the predicate `` to be
+sorted '' on lists of integers.
+ There are wo base cases, corresponding to lists with $0$ or $1$ item.
+The recursive case corresponds to lists of the form 
+$z_1z_2.l$ . Such a list is sorted if $z_1\leq z_2$ and the list $z_2.l$
+ is sorted.
+Definitions like the following one are called \emph{inductive definitions}
+and are close -- but much more powerful -- to \emph{Prolog}'s clauses.
+
+
+\begin{verbatim}
+Inductive sorted : (list Z)-> Prop :=
+ sorted0 : (sorted (nil Z))
+|sorted1 : (z:Z)(sorted (cons z (nil ?)))
+|sorted2 : (z1,z2:Z;l:(list Z))`z1<=z2` -> (sorted (cons z2 l))->
+                                           (sorted (cons z1 (cons z2 l))).
+Hints Resolve sorted0 sorted1 sorted2.
+\end{verbatim}
+
+The following interaction shows how to get automatically
+a proof that some list is already sorted.
+Note that the command ``\texttt{Auto with zarith}'' loads the
+hints from the base of theorems about arithmetics on integers.
+
+\begin{verbatim}
+Lemma sorted_1135 : (sorted 
+    (cons `1` (cons `1` (cons `3` (cons `5`  (nil ?)))))).
+Proof.
+ Auto  with zarith.
+Qed.
+\end{verbatim}
+
+\section{Inserting in a sorted list}
+The kernel of an insertion sort is a function which inserts
+some item at the right place in an already sorted list.
+
+\subsection{An insertion function}
+
+Let us define a function for inserting some integer $z$ in a list 
+$l$. This function is defined by a simple recursion on $l$.
+
+\begin{itemize}
+\item If $l$ is empty, we return the list compsed of a single
+    occurrence of $z$,
+\item If $l$ is of the form $a.l'$,
+            \begin{itemize}
+             \item if $z\leq a$, then we return $za.l$,
+             \item if $a<z$, we return $a\applis{insert z l'}$.
+
+\end{itemize}
+\end{itemize}
+
+\begin{verbatim}
+Fixpoint insert[z:Z;l:(list Z)]:(list Z) :=
+  Cases l of
+          nil => (cons z (nil ?))
+         |(cons a l') => Cases (Z_le_gt_dec z a) of
+                          (left _)=>(cons z (cons a l'))
+                         |(right _) =>(cons a (insert z l'))
+                        end
+  end.
+\end{verbatim}
+
+\begin{alltt}
+Eval Compute in (insert `4` (cons `2` (cons `5` (nil ?)))).\it
+     = (cons `2` (cons `4` (cons `5` (nil Z))))
+     : (list Z)
+\end{alltt}
+
+\subsection{Some properties of \texttt{insert}}
+
+The function \texttt{insert} has some properties, which will be used
+in the validation of our sorting program.
+
+\subsubsection{}
+ We first prove that \applis{insert $x$ $l$} has exactly the same
+elements as $x.l$.
+
+\begin{verbatim}
+Lemma insert_equiv : (l:(list Z);x:Z)(equiv (cons x l) (insert x l)).
+Proof.
+ Induction l ; Simpl ; Auto.
+ Intros a l0 Hrec x.
+ Case (Z_le_gt_dec x a);Simpl;Auto.
+ Intro ;  Apply equiv_trans with (cons a (cons x l0)); Auto.
+Qed.
+\end{verbatim}
+
+\subsubsection{}
+ The following lemma is a justification for using
+ \texttt{insert} in a sort : if $l$ is sorted, then
+   \applis{insert $x$ $l$} returns a sorted list.
+
+\begin{verbatim}
+Lemma insert_sorted : (l:(list Z);x:Z)(sorted l)->(sorted (insert x l)).
+Proof.
+ Induction 1 ;  Simpl; Auto.
+ Intro z; Case (Z_le_gt_dec x z);Simpl ; Auto with zarith.
+ Intros z1 z2 ;Case (Z_le_gt_dec x z2);Simpl;Intros.
+ Case (Z_le_gt_dec x z1);Simpl;Auto with zarith.
+ Case (Z_le_gt_dec x z1);Simpl;Auto with zarith.
+Qed.
+\end{verbatim}
+
+\section{A certified sorting program}
+\subsection{From specification to realization}
+
+We are now able to define a sorting function.
+Instead of defining it as a plain recursive function like \texttt{insert},
+we choose to ensure that the function we define has all the required
+properties of a sort.
+
+The following definition of the constant \texttt{sort} specifies its type,
+not as the type of any function from \appli{list}{Z} to itself, but as 
+the type of any function taking as argument a list $l$, and
+returning a list $l'$ \emph{which has the same elements as $l$ and is
+sorted too}.
+
+Because of the constraints in its specification, it is easier to
+define \texttt{sort} interactively, in the same style as the
+preceding proofs.
+
+
+\begin{verbatim}
+Definition sort : (l:(list Z)){l':(list Z)|(equiv l l')/\(sorted l')}.
+ Intro l;Induction l. 
+ Exists (nil Z);Split;Auto.
+ Case Hrecl;Intros l' [H0 H1].
+ Exists (insert a l').
+ Split.
+ Apply equiv_trans with (cons a l') ; Auto.
+ Apply insert_equiv.
+ Apply insert_sorted ; Auto.
+Defined.
+\end{verbatim}
+
+\subsection{Extraction to \emph{ML} code}
+The command \texttt{Extraction "insert" insert sort} writes an
+{\ocaml} module containing code extracted from the development above.
+This code can be compiled, then executed or called from another
+{\ocaml} program.
+
+
+The theoretical principles on which {\coq} has been built ensure us
+that this program is conform with its specification.
+
+
+\section{Conclusion}
+This little example shows some of the main features of {\coq}~:
+possibility of defining datatypes and programs, proving properties
+of programs with a reasonable degree of automation, and deriving 
+correct programs from their specification.
+
+
+The reader will learn to develop and certify more complex programs,
+including imperative programs, polymorphic functions, and even 
+entire modules. \coq's field of application includes mathematics,
+logic, and many other domains (look at the users contributons).
+
+\end{document}

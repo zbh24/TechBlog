@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<!-- saved from url=(0043)http://www.cnblogs.com/ccdev/p/3341234.html -->
+<html lang="zh-cn"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<title>高并发服务端分布式系统设计概要（下） - Jone Zhang - 博客园</title>
+<link type="text/css" rel="stylesheet" href="./高并发服务端分布式系统设计概要（下） - Jone Zhang - 博客园_files/blog-common.css">
+<link id="MainCss" type="text/css" rel="stylesheet" href="./高并发服务端分布式系统设计概要（下） - Jone Zhang - 博客园_files/bundle-ThinkInside.css">
+<link title="RSS" type="application/rss+xml" rel="alternate" href="http://www.cnblogs.com/ccdev/rss">
+<link title="RSD" type="application/rsd+xml" rel="EditURI" href="http://www.cnblogs.com/ccdev/rsd.xml">
+<link type="application/wlwmanifest+xml" rel="wlwmanifest" href="http://www.cnblogs.com/ccdev/wlwmanifest.xml">
+<script src="./高并发服务端分布式系统设计概要（下） - Jone Zhang - 博客园_files/jquery.js" type="text/javascript"></script>  
+<script type="text/javascript">var currentBlogApp = 'ccdev', cb_enable_mathjax=false;var isLogined=false;</script>
+<script src="./高并发服务端分布式系统设计概要（下） - Jone Zhang - 博客园_files/blog-common.js" type="text/javascript"></script>
+</head>
+<body>
+<a name="top"></a>
+
+<!--done-->
+<div id="home">
+<div id="header">
+	<div id="blogTitle">
+	<a id="lnkBlogLogo" href="http://www.cnblogs.com/ccdev/"><img id="blogLogo" src="./高并发服务端分布式系统设计概要（下） - Jone Zhang - 博客园_files/logo.gif" alt="返回主页"></a>			
+		
+<!--done-->
+<h1><a id="Header1_HeaderTitle" class="headermaintitle" href="http://www.cnblogs.com/ccdev/">Jone Zhang's Blog</a></h1>
+<h2></h2>
+
+
+
+		
+	</div><!--end: blogTitle 博客的标题和副标题 -->
+	<div id="navigator">
+		
+<ul id="navList">
+<li><a id="blog_nav_sitehome" class="menu" href="http://www.cnblogs.com/">博客园</a></li>
+<li><a id="blog_nav_myhome" class="menu" href="http://www.cnblogs.com/ccdev/">首页</a></li>
+<li><a id="blog_nav_newpost" class="menu" rel="nofollow" href="https://i.cnblogs.com/EditPosts.aspx?opt=1">新随笔</a></li>
+<li><a id="blog_nav_contact" class="menu" rel="nofollow" href="https://msg.cnblogs.com/send/Jone%20Zhang">联系</a></li>
+<li><a id="blog_nav_rss" class="menu" href="http://www.cnblogs.com/ccdev/rss">订阅</a>
+<!--<a id="blog_nav_rss_image" class="aHeaderXML" href="http://www.cnblogs.com/ccdev/rss"><img src="//www.cnblogs.com/images/xml.gif" alt="订阅" /></a>--></li>
+<li><a id="blog_nav_admin" class="menu" rel="nofollow" href="https://i.cnblogs.com/">管理</a></li>
+</ul>
+		<div class="blogStats">
+			
+			
+<span id="stats_post_count">随笔 - 29&nbsp; </span>
+<span id="stats_article_count">文章 - 0&nbsp; </span>
+<span id="stats-comment_count">评论 - 198</span>
+
+			
+		</div><!--end: blogStats -->
+	</div><!--end: navigator 博客导航栏 -->
+</div><!--end: header 头部 -->
+
+<div id="main">
+	<div id="mainContent">
+	<div class="forFlow">
+		
+<div id="post_detail">
+<!--done-->
+<div id="topics">
+	<div class="post">
+		<h1 class="postTitle">
+			<a id="cb_post_title_url" class="postTitle2" href="./高并发服务端分布式系统设计概要（下） - Jone Zhang - 博客园_files/高并发服务端分布式系统设计概要（下） - Jone Zhang - 博客园.html">高并发服务端分布式系统设计概要（下）</a>
+		</h1>
+		<div class="clear"></div>
+		<div class="postBody">
+			<div id="cnblogs_post_body"><p style="margin-top: 10px; margin-bottom: 10px; padding: 0px; font-family: &#39;Helvetica Neue&#39;, Helvetica, Arial, sans-serif; font-size: 13px; line-height: 19px; background-color: #f5f5f5;"><span style="margin: 0px; padding: 0px; color: #333399; font-family: Georgia; font-size: 32px; line-height: 48px;">高并发服务端</span><span style="margin: 0px; padding: 0px; color: #333399; font-family: Georgia; font-size: 32px; line-height: 48px;">分布式系统设计概要（下）</span></p><p style="margin-top: 10px; margin-bottom: 10px; padding: 0px; font-family: &#39;Helvetica Neue&#39;, Helvetica, Arial, sans-serif; font-size: 13px; line-height: 19px; background-color: #f5f5f5;"><span style="margin: 0px; padding: 0px; color: #333399; font-family: Georgia; font-size: 19px; line-height: 27px;">&nbsp; &nbsp; &nbsp; &nbsp;上篇 链接地址：</span><a href="http://www.cnblogs.com/ccdev/p/3338412.html" style="font-family: verdana, &#39;courier new&#39;; font-size: 14px; line-height: 1.5;">http://www.cnblogs.com/ccdev/p/3338412.html</a></p><p>&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;<span style="color: #333399; font-family: Georgia; font-size: 19px; line-height: 27px; background-color: #f5f5f5;">中篇 链接地址：</span><a href="http://www.cnblogs.com/ccdev/p/3340484.html">http://www.cnblogs.com/ccdev/p/3340484.html</a></p><p>&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;<span style="color: #333399; font-family: Georgia; font-size: 19px; line-height: 27px; background-color: #f5f5f5;">现在接着设计我们的“山推”系统。有了前面两篇的铺垫，我们的系统现在已经有了五脏六腑，剩下的工作就是要让其羽翼丰满。那么，是时候，放出我们的“山推”系统全貌了：</span></p><p style="text-align: center;"><img src="./高并发服务端分布式系统设计概要（下） - Jone Zhang - 博客园_files/26151229-0c6be2898ac8494ea733449ca177ecfd.jpg" alt="" style="line-height: 1.5;">&nbsp;</p><p><span style="color: #333399; font-family: Georgia; font-size: 19px; line-height: 27px; background-color: #f5f5f5;">&nbsp; &nbsp; &nbsp; &nbsp; 前面啰嗦了半天，也许不少同学看的不明不白，好了，现在开始看图说话环节：</span></p><p><span style="color: #333399; font-family: Georgia; font-size: 19px; line-height: 27px; background-color: #f5f5f5;">&nbsp; &nbsp; &nbsp; （1）整个系统由N台机器组合而成，其中Global Master一台，Global Slave一台到多台，两者之间保持强一致性并完全同步，可由Global Slave随时顶替Global Master工作，它们被Global Heartbeat（一台）来管理，保证有一个Global Master正常工作；Global Heartbeat由于无压力，通常认为其不能挂掉，如果它挂掉了，则必须人工干预才能恢复正常；</span></p><p><span style="color: #333399; font-family: Georgia; font-size: 19px; line-height: 27px; background-color: #f5f5f5;">&nbsp; &nbsp; &nbsp; （2）整个系统由多个groups合成，每一个group负责相应业务的数据的存取，它们是数据节点，是真正抗压力的地方，每一个group由一个Group Master和一个到多个Group Slave构成，Group Master作为该group的主节点，提供读和写，而Group Slave则只提供读服务且保证这些Group Slave节点中，至少有一个和Group Master保持完全同步，剩余的Group Slave和Group Master能够达到最终一致，它们之间以“半同步”模式工作保证最终一致性；</span></p><p><span style="color: #333399; font-family: Georgia; font-size: 19px; line-height: 27px; background-color: #f5f5f5;">&nbsp; &nbsp; &nbsp; （3）每一个group的健康状态由Global Master来管理，Global Master向group发送管理信息，并保证有一个Group Master正常工作，若Group Master宕机，在该group内通过分布式选举产生新的Group Master顶替原来宕机的机器继续工作，但仍然有一小段时间需要中断写服务来切换新的Group Master；</span></p><p><span style="color: #333399; font-family: Georgia; font-size: 19px; line-height: 27px; background-color: #f5f5f5;">&nbsp; &nbsp; &nbsp; （4）每一个group的底层是实际的存储系统，File system，它们是无状态的，即，由分布式选举产生的Group Master可以在原来的File system上继续工作；</span></p><p><span style="color: #333399; font-family: Georgia; font-size: 19px; line-height: 27px; background-color: #f5f5f5;">&nbsp; &nbsp; &nbsp; （5）Client的上端可认为是Web请求，Client在“首次”进行数据读写时，向Global Master查询相应的group信息，并将其缓存，后续将直接与相应的group进行通信；为避免大量“首次”查询冲垮Global Master，在Client与Global Master之间增加DNS负载均衡，可由Global Slave分担部分查询工作；</span></p><p><span style="color: #333399; font-family: Georgia; font-size: 19px; line-height: 27px; background-color: #f5f5f5;"> &nbsp; &nbsp; （6）当Client已经拥有足够的group信息时，它将直接与group通信进行工作，从而真正的压力和流量由各个group分担，并处理完成需要的工作。</span></p><p>&nbsp; &nbsp; &nbsp; &nbsp;<span style="background-color: #f5f5f5; color: #333399; font-family: Georgia; font-size: 19px; line-height: 27px;">好了，现在我们的“山推”系统设计完成了，但是要将它编码实现，还有很远的路要走，细枝末节的问题也会暴露更多。如果该系统用于线上计算，如有大量的Map-Reduce运行于group中，系统将会更复杂，因为此时不光考虑的数据的存储同步问题，操作也需要同步。现在来检验下我们设计的“山推”系统，主要分布式指标：</span></p><p><span style="background-color: #f5f5f5; color: #333399; font-family: Georgia; font-size: 19px; line-height: 27px;">&nbsp; &nbsp; &nbsp; &nbsp;一致性：如前文所述，Global机器强一致性，Group机器最终一致性；</span></p><p><span style="background-color: #f5f5f5; color: #333399; font-family: Georgia; font-size: 19px; line-height: 27px;">&nbsp; &nbsp; &nbsp; &nbsp;可用性：Global机器保证了HA（高可用性），Group机器则不保证，但满足了分区容错性；</span></p><p><span style="background-color: #f5f5f5; color: #333399; font-family: Georgia; font-size: 19px; line-height: 27px;">&nbsp; &nbsp; &nbsp; &nbsp;备份Replication：Global机器采用完全同步，Group机器则是半同步模式，都可以进行横向扩展；</span></p><p><span style="line-height: 1.5;">&nbsp;</span><span style="background-color: #f5f5f5; color: #333399; font-family: Georgia; font-size: 19px; line-height: 27px;">&nbsp; &nbsp; &nbsp; 故障恢复：如前文所述，Global机器完全同步，故障可不受中断由slave恢复工作，但Group机器采用分布式选举和最终一致性，故障时有较短时间的写服务需要中断并切换到slave机器，但读服务可不中断。</span></p><p><span style="background-color: #f5f5f5;">&nbsp; &nbsp; &nbsp; &nbsp;</span><span style="background-color: #f5f5f5; color: #333399; font-family: Georgia; font-size: 19px; line-height: 27px;">还有其他一些指标，这里就不再多说了。还有一些细节，需要提一下，比如之前的评论中有同学提到，group中master挂时，由slave去顶替，但这样一来该group内其他所有slave需要分担之前成这新master的这个slave的压力，有可能继续挂掉而造成雪崩。针对此种情况，可采用如下做法：即在一个group内，至少还存在一个真正做“备份”用途的slave，平时不抗压力，只同步数据，这样当出现上述情况时，可由该备份slave来顶替成为新master的那个slave，从而避免雪崩效应。不过这样一来，就有新的问题，由于备份slave平时不抗压力，加入抗压力后必然产生一定的数据迁移，数据迁移也是一个较麻烦的问题。常采用的分摊压力做法如一致性Hash算法（环状Hash），可将新结点加入对整个group的影响降到较小的程度。</span></p><p><span style="background-color: #f5f5f5; color: #333399; font-family: Georgia; font-size: 19px; line-height: 27px;">&nbsp; &nbsp; &nbsp; &nbsp; 另外，还有一个较为棘手的问题，就是系统的日志处理，主要是系统宕机后如何恢复之前的操作日志。比较常见的方法是对日志作快照（Snapshot）和回放点（checkpoint），并采用Copy-on-write方式定期将日志作snapshot存储，当发现宕机后，找出对应的回放点并恢复之后的snapshot，但此时仍可能有新的写操作到达，并产生不一致，这里主要依靠Copy-on-write来同步。</span></p><p><span style="background-color: #f5f5f5; color: #333399; font-family: Georgia; font-size: 19px; line-height: 27px;">&nbsp; &nbsp; &nbsp; &nbsp;最后再说说图中的Client部分。显然这个模块就是面向Web的接口，后面连接我们的“山推”系统，它可以包含诸多业务逻辑，最重要的，是要缓存group的信息。在Client和Web之间，还可以有诸如Nginx之类的反向代理服务器存在，做进一步性能提升，这已经超出了本文的范畴，但我们必须明白的是，一个高并发高性能的网站，对性能的要求是从起点开始的，何为起点，即用户的浏览器。</span></p><p><span style="background-color: #f5f5f5; color: #333399; font-family: Georgia; font-size: 19px; line-height: 27px;">&nbsp; &nbsp; &nbsp; &nbsp;现在，让我们来看看GFS的设计：</span></p><p style="text-align: center; "><img src="./高并发服务端分布式系统设计概要（下） - Jone Zhang - 博客园_files/26173648-37256cbdde9e4a54bafc32eaa03ec95b.jpg" alt="" style="line-height: 1.5;">&nbsp;</p><p><span style="background-color: #f5f5f5; color: #333399; font-family: Georgia; font-size: 19px; line-height: 27px;">&nbsp; &nbsp; &nbsp; &nbsp;很明显，这么牛的系统我是设计不出来的，我们的“山推”，就是在学习GFS + Bigtable的主要思想。说到这，也必须提一句，可能我文章中，名词摆的有点多了，如NWR，分布式选举，Paxos包括Copy-on-write等，有兴趣的同学可自行google了解。因为说实在的，这些概念我也没法讲透彻，只是一知半解。另外，大家可参考一些分布式项目的设计，如Cassandra，包括淘宝的Oceanbase等，以加深理解。</span></p><p><span style="background-color: #f5f5f5; color: #333399; font-family: Georgia; font-size: 19px; line-height: 27px;">&nbsp; &nbsp; &nbsp; &nbsp;就写到这里算是完结了。由于写的比较匆忙，可能包含一些错误，希望同学们不吝赐教！提前祝大家国庆节快乐。</span></p></div><div id="MySignature" style="display: block;">iCC Develop Center</div>
+<div class="clear"></div>
+<div id="blog_post_info_block">
+<div id="BlogPostCategory">分类: <a href="http://www.cnblogs.com/ccdev/category/441435.html" target="_blank">高性能系统与分布式计算存储</a></div>
+<div id="EntryTag"></div>
+<div id="blog_post_info"><div id="green_channel">
+        <a href="javascript:void(0);" id="green_channel_digg" onclick="DiggIt(3341234,cb_blogId,1);green_channel_success(this,&#39;谢谢推荐！&#39;);">好文要顶</a>
+            <a id="green_channel_follow" onclick="follow(&#39;97b4da0d-56c7-e111-aa3f-842b2b196315&#39;);" href="javascript:void(0);">关注我</a>
+    <a id="green_channel_favorite" onclick="AddToWz(cb_entryId);return false;" href="javascript:void(0);">收藏该文</a>
+    <a id="green_channel_weibo" href="javascript:void(0);" title="分享至新浪微博" onclick="ShareToTsina()"><img src="./高并发服务端分布式系统设计概要（下） - Jone Zhang - 博客园_files/icon_weibo_24.png" alt=""></a>
+    <a id="green_channel_wechat" href="javascript:void(0);" title="分享至微信" onclick="shareOnWechat()"><img src="./高并发服务端分布式系统设计概要（下） - Jone Zhang - 博客园_files/wechat.png" alt=""></a>
+</div>
+<div id="author_profile">
+    <div id="author_profile_info" class="author_profile_info">
+            <a href="http://home.cnblogs.com/u/ccdev/" target="_blank"><img src="./高并发服务端分布式系统设计概要（下） - Jone Zhang - 博客园_files/20130124140651.png" class="author_avatar" alt=""></a>
+        <div id="author_profile_detail" class="author_profile_info">
+            <a href="http://home.cnblogs.com/u/ccdev/">Jone Zhang</a><br>
+            <a href="http://home.cnblogs.com/u/ccdev/followees">关注 - 1</a><br>
+            <a href="http://home.cnblogs.com/u/ccdev/followers">粉丝 - 346</a>
+        </div>
+    </div>
+    <div class="clear"></div>
+    <div id="author_profile_honor">荣誉：<a href="http://www.cnblogs.com/expert/" target="_blank">推荐博客</a></div>
+    <div id="author_profile_follow">
+                <a href="javascript:void(0);" onclick="follow(&#39;97b4da0d-56c7-e111-aa3f-842b2b196315&#39;);return false;">+加关注</a>
+    </div>
+</div>
+<div id="div_digg">
+    <div class="diggit" onclick="votePost(3341234,&#39;Digg&#39;)">
+        <span class="diggnum" id="digg_count">18</span>
+    </div>
+    <div class="buryit" onclick="votePost(3341234,&#39;Bury&#39;)">
+        <span class="burynum" id="bury_count">0</span>
+    </div>
+    <div class="clear"></div>
+    <div class="diggword" id="digg_tips">
+    </div>
+</div>
+</div>
+<div class="clear"></div>
+<div id="post_next_prev"><a href="http://www.cnblogs.com/ccdev/p/3340484.html" class="p_n_p_prefix">« </a> 上一篇：<a href="http://www.cnblogs.com/ccdev/p/3340484.html" title="发布于2013-09-26 13:24">高并发服务端分布式系统设计概要（中）</a><br><a href="http://www.cnblogs.com/ccdev/p/3542669.html" class="p_n_p_prefix">» </a> 下一篇：<a href="http://www.cnblogs.com/ccdev/p/3542669.html" title="发布于2014-02-10 16:51">浅谈服务器单I/O线程＋工作者线程池模型架构及实现要点</a><br></div>
+</div>
+
+
+		</div>
+		<div class="postDesc">posted @ <span id="post-date">2013-09-26 17:41</span> <a href="http://www.cnblogs.com/ccdev/">Jone Zhang</a> 阅读(<span id="post_view_count">7730</span>) 评论(<span id="post_comment_count">23</span>)  <a href="https://i.cnblogs.com/EditPosts.aspx?postid=3341234" rel="nofollow">编辑</a> <a href="http://www.cnblogs.com/ccdev/p/3341234.html#" onclick="AddToWz(3341234);return false;">收藏</a></div>
+	</div>
+	<script type="text/javascript">var allowComments=true,cb_blogId=121865,cb_entryId=3341234,cb_blogApp=currentBlogApp,cb_blogUserGuid='97b4da0d-56c7-e111-aa3f-842b2b196315',cb_entryCreatedDate='2013/9/26 17:41:00';loadViewCount(cb_entryId);</script>
+	
+</div><!--end: topics 文章、评论容器-->
+</div><a name="!comments"></a><div id="blog-comments-placeholder"><div id="comments_pager_top"></div>
+<br>
+<div class="feedback_area_title">评论列表</div>
+<div class="feedbackNoItems"></div>	
+
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;<span class="comment_actions"></span>
+				</div>
+				<a href="http://www.cnblogs.com/ccdev/p/3341234.html#2783033" class="layer">#1楼</a><a name="2783033" id="comment_anchor_2783033"></a>  <span class="comment_date">2013-09-26 18:24</span> <a id="a_comment_author_2783033" href="http://www.cnblogs.com/trigged/" target="_blank">沐訫</a> <a href="http://msg.cnblogs.com/send/%E6%B2%90%E8%A8%AB" title="发送站内短消息" class="sendMsg2This">&nbsp;</a>
+			</div>
+			<div class="feedbackCon">
+				<div id="comment_body_2783033" class="blog_comment_body">很好的文章,不给有个问题<br>我的理解是 :这个系统的稳定的基础是<br>"至少可以找到一台Group Slave保持和Group Master完全同步"<br><br>1. 这个是个很好的思路,但是这样 slave 和 master 除了读写分职外并不太大区别?<br>2. 如果 group master 接受的数据过多,同时也有很多 group- slave 的时候的这个时候 master 的 load 会很大 ,可能就无法正常提供服务<br>single master 是 gfs 备受诟病的地方 ,博主有没有考虑把 master 换成多点的<br>3. "那么，一个来自Client端的请求，如何到达真正的业务group去呢？在这里，Global Master将提供“首次查询”服务，即，新请求首次请求指定的group时，通过Global Master获得相应的group的信息"  ,博主受 gfs 的影响很明显 ,gfs 的强力之处就是能把700k+ 的映射关系压缩到 46mb ,所以内存不是瓶颈,博主有没有和这相似的算法保证内存不是系统的瓶颈呢</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(2783033,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(2783033,&#39;Bury&#39;,this)">反对(0)</a></div><span id="comment_2783033_avatar" style="display:none;">http://pic.cnblogs.com/face/u276540.jpg?id=02181247</span>
+			</div>
+		</div>
+	
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;<span class="comment_actions"></span>
+				</div>
+				<a href="http://www.cnblogs.com/ccdev/p/3341234.html#2783074" class="layer">#2楼</a><a name="2783074" id="comment_anchor_2783074"></a>  <span class="comment_date">2013-09-26 19:52</span> <a id="a_comment_author_2783074" href="http://www.cnblogs.com/fengde/" target="_blank">Fedel</a> <a href="http://msg.cnblogs.com/send/Fedel" title="发送站内短消息" class="sendMsg2This">&nbsp;</a>
+			</div>
+			<div class="feedbackCon">
+				<div id="comment_body_2783074" class="blog_comment_body">一口气把楼主的“高并发服务端分布式系统设计概要”上中下看完，受益匪浅！我一直在想，写服务比较频繁的系统中，一个业务里Group Master应该也可能有多台吧？</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(2783074,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(2783074,&#39;Bury&#39;,this)">反对(0)</a></div><span id="comment_2783074_avatar" style="display:none;">http://pic.cnblogs.com/face/562982/20140119222620.png</span>
+			</div>
+		</div>
+	
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;<span class="comment_actions"></span>
+				</div>
+				<a href="http://www.cnblogs.com/ccdev/p/3341234.html#2783084" class="layer">#3楼</a><a name="2783084" id="comment_anchor_2783084"></a>  <span class="comment_date">2013-09-26 20:06</span> <a id="a_comment_author_2783084" href="http://www.cnblogs.com/artwl/" target="_blank">artwl</a> <a href="http://msg.cnblogs.com/send/artwl" title="发送站内短消息" class="sendMsg2This">&nbsp;</a>
+			</div>
+			<div class="feedbackCon">
+				<div id="comment_body_2783084" class="blog_comment_body">好文，对此类设计终于有了大致了解</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(2783084,&#39;Digg&#39;,this)">支持(1)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(2783084,&#39;Bury&#39;,this)">反对(0)</a></div><span id="comment_2783084_avatar" style="display:none;">http://pic.cnblogs.com/face/u112805.png?id=201209274142</span>
+			</div>
+		</div>
+	
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;<span class="comment_actions"></span>
+				</div>
+				<a href="http://www.cnblogs.com/ccdev/p/3341234.html#2783423" class="layer">#4楼</a><a name="2783423" id="comment_anchor_2783423"></a>  <span class="comment_date">2013-09-27 10:47</span> <a id="a_comment_author_2783423" href="http://www.cnblogs.com/libinqq/" target="_blank">李彬</a> <a href="http://msg.cnblogs.com/send/%E6%9D%8E%E5%BD%AC" title="发送站内短消息" class="sendMsg2This">&nbsp;</a>
+			</div>
+			<div class="feedbackCon">
+				<div id="comment_body_2783423" class="blog_comment_body">我现在倒是碰到一个头疼的问题,我们只有3台服务器。<br>每台服务器不同的机房， 用Dnspod IP指向同一域名。<br>但是发现一个问题，Dnspod 的负载均衡总是让用户跳<br>来跳去的，用户一会在A服务器，一会突然又跳到B服务器。<br>而A服务器和B服务器之间远隔千山万水，如果程序让A、B、C<br>服务器共享服务器变量，也是不可取的，距离太远速度太慢。<br>而让A、B、C 3台服务器在同一机房也是不可取的，因为地域原因<br>导致南北访问速度差异很大。 蛮头疼的。<br>我的理想是，A 在北京带宽有速度，B 在广州。 <br>但是 Dnspod 多IP指向同一域名后，总是发现跳来跳去的，<br>你们怎么解决的请指教。</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(2783423,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(2783423,&#39;Bury&#39;,this)">反对(0)</a></div>
+			</div>
+		</div>
+	
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;<span class="comment_actions"></span>
+				</div>
+				<a href="http://www.cnblogs.com/ccdev/p/3341234.html#2783492" class="layer">#5楼</a><a name="2783492" id="comment_anchor_2783492"></a>  <span class="comment_date">2013-09-27 11:47</span> <a id="a_comment_author_2783492" href="http://www.cnblogs.com/xzwen/" target="_blank">向振文</a> <a href="http://msg.cnblogs.com/send/%E5%90%91%E6%8C%AF%E6%96%87" title="发送站内短消息" class="sendMsg2This">&nbsp;</a>
+			</div>
+			<div class="feedbackCon">
+				<div id="comment_body_2783492" class="blog_comment_body"><a href="http://www.cnblogs.com/ccdev/p/3341234.html#2783423" title="查看所回复的评论" onclick="commentManager.renderComments(0,50,2783423);">@</a>
+李彬<br>这个问题可不可以用DNS控制，例如北方的IP到A，中部IP到B，南方的IP到C，就不会跳来跳去。</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(2783492,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(2783492,&#39;Bury&#39;,this)">反对(0)</a></div><span id="comment_2783492_avatar" style="display:none;">http://pic.cnblogs.com/face/u371399.jpg?id=30160838</span>
+			</div>
+		</div>
+	
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;<span class="comment_actions"></span>
+				</div>
+				<a href="http://www.cnblogs.com/ccdev/p/3341234.html#2783505" class="layer">#6楼</a><a name="2783505" id="comment_anchor_2783505"></a>  <span class="comment_date">2013-09-27 11:57</span> <a id="a_comment_author_2783505" href="http://www.cnblogs.com/codezyc/" target="_blank">codezyc</a> <a href="http://msg.cnblogs.com/send/codezyc" title="发送站内短消息" class="sendMsg2This">&nbsp;</a>
+			</div>
+			<div class="feedbackCon">
+				<div id="comment_body_2783505" class="blog_comment_body">看完了上中下三篇，受益匪浅，谢谢楼主的分享。</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(2783505,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(2783505,&#39;Bury&#39;,this)">反对(0)</a></div>
+			</div>
+		</div>
+	
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;<span class="comment_actions"></span>
+				</div>
+				<a href="http://www.cnblogs.com/ccdev/p/3341234.html#2783520" class="layer">#7楼</a><a name="2783520" id="comment_anchor_2783520"></a>[<span class="louzhu">楼主</span>]  <span class="comment_date">2013-09-27 12:22</span> <a id="a_comment_author_2783520" href="http://www.cnblogs.com/ccdev/" target="_blank">Jone Zhang</a> <a href="http://msg.cnblogs.com/send/Jone%20Zhang" title="发送站内短消息" class="sendMsg2This">&nbsp;</a>
+			</div>
+			<div class="feedbackCon">
+				<div id="comment_body_2783520" class="blog_comment_body"><a href="http://www.cnblogs.com/ccdev/p/3341234.html#2783033" title="查看所回复的评论" onclick="commentManager.renderComments(0,50,2783033);">@</a>
+沐訫<br>感谢你的评论。<br>这个系统的设计主要就是基于线上读远大于写的需求，所以没有考虑多点写。如果对写的需求较多的话，单点master确实可成为瓶颈。但多点写需要考虑的问题也更多。<br>另外，类似GFS的chunk信息压缩算法我们也做过研究，但也只是理论。</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(2783520,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(2783520,&#39;Bury&#39;,this)">反对(0)</a></div><span id="comment_2783520_avatar" style="display:none;">http://pic.cnblogs.com/face/425152/20130124140651.png</span>
+			</div>
+		</div>
+	
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;<span class="comment_actions"></span>
+				</div>
+				<a href="http://www.cnblogs.com/ccdev/p/3341234.html#2783522" class="layer">#8楼</a><a name="2783522" id="comment_anchor_2783522"></a>[<span class="louzhu">楼主</span>]  <span class="comment_date">2013-09-27 12:23</span> <a id="a_comment_author_2783522" href="http://www.cnblogs.com/ccdev/" target="_blank">Jone Zhang</a> <a href="http://msg.cnblogs.com/send/Jone%20Zhang" title="发送站内短消息" class="sendMsg2This">&nbsp;</a>
+			</div>
+			<div class="feedbackCon">
+				<div id="comment_body_2783522" class="blog_comment_body"><a href="http://www.cnblogs.com/ccdev/p/3341234.html#2783074" title="查看所回复的评论" onclick="commentManager.renderComments(0,50,2783074);">@</a>
+阳光陷阱<br>对，写服务频繁，如淘宝购物车，单点写可能不能满足需求。但多点写需要考虑的问题更多。</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(2783522,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(2783522,&#39;Bury&#39;,this)">反对(0)</a></div><span id="comment_2783522_avatar" style="display:none;">http://pic.cnblogs.com/face/425152/20130124140651.png</span>
+			</div>
+		</div>
+	
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;<span class="comment_actions"></span>
+				</div>
+				<a href="http://www.cnblogs.com/ccdev/p/3341234.html#2783526" class="layer">#9楼</a><a name="2783526" id="comment_anchor_2783526"></a>[<span class="louzhu">楼主</span>]  <span class="comment_date">2013-09-27 12:26</span> <a id="a_comment_author_2783526" href="http://www.cnblogs.com/ccdev/" target="_blank">Jone Zhang</a> <a href="http://msg.cnblogs.com/send/Jone%20Zhang" title="发送站内短消息" class="sendMsg2This">&nbsp;</a>
+			</div>
+			<div class="feedbackCon">
+				<div id="comment_body_2783526" class="blog_comment_body"><a href="http://www.cnblogs.com/ccdev/p/3341234.html#2783423" title="查看所回复的评论" onclick="commentManager.renderComments(0,50,2783423);">@</a>
+李彬<br>你说的这种情况用DNS负载均衡并不理想，如果条件允许可以使用CDN，让不同地区的用户就近访问相应的服务器</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(2783526,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(2783526,&#39;Bury&#39;,this)">反对(0)</a></div><span id="comment_2783526_avatar" style="display:none;">http://pic.cnblogs.com/face/425152/20130124140651.png</span>
+			</div>
+		</div>
+	
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;<span class="comment_actions"></span>
+				</div>
+				<a href="http://www.cnblogs.com/ccdev/p/3341234.html#2783694" class="layer">#10楼</a><a name="2783694" id="comment_anchor_2783694"></a>  <span class="comment_date">2013-09-27 15:39</span> <a id="a_comment_author_2783694" href="http://www.cnblogs.com/chengzihu/" target="_blank">刘光</a> <a href="http://msg.cnblogs.com/send/%E5%88%98%E5%85%89" title="发送站内短消息" class="sendMsg2This">&nbsp;</a>
+			</div>
+			<div class="feedbackCon">
+				<div id="comment_body_2783694" class="blog_comment_body">受教，请问数据分布式同步怎么实现，或者文件系统的数据写同步</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(2783694,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(2783694,&#39;Bury&#39;,this)">反对(0)</a></div><span id="comment_2783694_avatar" style="display:none;">http://pic.cnblogs.com/face/129633/20160217125308.png</span>
+			</div>
+		</div>
+	
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;<span class="comment_actions"></span>
+				</div>
+				<a href="http://www.cnblogs.com/ccdev/p/3341234.html#2783732" class="layer">#11楼</a><a name="2783732" id="comment_anchor_2783732"></a>  <span class="comment_date">2013-09-27 16:21</span> <a id="a_comment_author_2783732" href="http://www.cnblogs.com/wusong/" target="_blank">arg</a> <a href="http://msg.cnblogs.com/send/arg" title="发送站内短消息" class="sendMsg2This">&nbsp;</a>
+			</div>
+			<div class="feedbackCon">
+				<div id="comment_body_2783732" class="blog_comment_body">我现在用的解决方案类似山推的缩略版。不知道lz是否研究过其他负载均衡方案没，很大的不同点在于，不会最后是client直接和具体某个服务先连，而是一直通过一个网关来和网关背后n个服务交互。比如nigx，ARR，NLBS。假如你们的实际应用还是需要nigx的话，那我觉得要逆天了，直链都顶不住，何况中间加一层。</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(2783732,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(2783732,&#39;Bury&#39;,this)">反对(0)</a></div>
+			</div>
+		</div>
+	
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;<span class="comment_actions"></span>
+				</div>
+				<a href="http://www.cnblogs.com/ccdev/p/3341234.html#2783806" class="layer">#12楼</a><a name="2783806" id="comment_anchor_2783806"></a>  <span class="comment_date">2013-09-27 17:40</span> <a id="a_comment_author_2783806" href="http://www.cnblogs.com/zery/" target="_blank">Zery</a> <a href="http://msg.cnblogs.com/send/Zery" title="发送站内短消息" class="sendMsg2This">&nbsp;</a>
+			</div>
+			<div class="feedbackCon">
+				<div id="comment_body_2783806" class="blog_comment_body">很好的文章！让我有了一个基本的概念了！支持！</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(2783806,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(2783806,&#39;Bury&#39;,this)">反对(0)</a></div><span id="comment_2783806_avatar" style="display:none;">http://pic.cnblogs.com/face/366784/20130905143458.png</span>
+			</div>
+		</div>
+	
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;<span class="comment_actions"></span>
+				</div>
+				<a href="http://www.cnblogs.com/ccdev/p/3341234.html#2783909" class="layer">#13楼</a><a name="2783909" id="comment_anchor_2783909"></a>  <span class="comment_date">2013-09-27 20:51</span> <a id="a_comment_author_2783909" href="http://www.cnblogs.com/mad/" target="_blank">君之蘭</a> <a href="http://msg.cnblogs.com/send/%E5%90%9B%E4%B9%8B%E8%98%AD" title="发送站内短消息" class="sendMsg2This">&nbsp;</a>
+			</div>
+			<div class="feedbackCon">
+				<div id="comment_body_2783909" class="blog_comment_body">写最凶猛的就是日志了吧，而日志这东西又不是非常重要，一般用持久化队列做存储，定时批量写入。<br><br>像淘宝的购物车，双11的时候写也非常恐怖，一个Master对应多个Savle没错，毕竟就算淘宝也是读远大于写，关键是要很多Group分流才行。<br><br>像Redis这种可持久化的缓存服务做中间过渡的话应该也可以考虑缓解写的压力，不过就是要做到即时让用户看到信息，所谓即时我想1~3秒内看到信息算是即时吧……，仅仅添加到购物车用户未必查看，就算查看js就能做到。真正下订单的数据比较敏感，不可丢。<br><br>像小米这种抢购真正的订单量也就十万，大多用于用户队列和站点服务器压力。</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(2783909,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(2783909,&#39;Bury&#39;,this)">反对(0)</a></div><span id="comment_2783909_avatar" style="display:none;">http://pic.cnblogs.com/face/u11157.jpg?id=23082213</span>
+			</div>
+		</div>
+	
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;<span class="comment_actions"></span>
+				</div>
+				<a href="http://www.cnblogs.com/ccdev/p/3341234.html#2783983" class="layer">#14楼</a><a name="2783983" id="comment_anchor_2783983"></a>  <span class="comment_date">2013-09-28 08:08</span> <a id="a_comment_author_2783983" href="http://www.cnblogs.com/libinqq/" target="_blank">李彬</a> <a href="http://msg.cnblogs.com/send/%E6%9D%8E%E5%BD%AC" title="发送站内短消息" class="sendMsg2This">&nbsp;</a>
+			</div>
+			<div class="feedbackCon">
+				<div id="comment_body_2783983" class="blog_comment_body">其实我是非常想高并发在一个机房里，但是现实是你不知道天朝的网络有多么的麻烦，比如你在广州，电信、联通千兆光纤带宽，北京的用户就她妈访问慢，弄的你一点脾气都没有，这不像小米，小米大家可以等，正式网站访问慢，用户绝对不能容忍， 如果我在北京机房弄个服务器，带宽是解决了。<br>腾讯的Dnspod,负载均衡不知道怎么计算的，用户在北京服务器，点下一页偶尔就跳到广州服务器了，弄的我用户身份验证改了一山代码，这样来回跳也不靠谱。<br>其实我本人非常想一个机房大量实施负载均衡的，可是天朝的网络不给力，这不是钱的问题。逼的你去外地托管服务器，而DNS又弄的我好头疼。Dnspod 看来是不可信了。</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(2783983,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(2783983,&#39;Bury&#39;,this)">反对(0)</a></div>
+			</div>
+		</div>
+	
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;<span class="comment_actions"></span>
+				</div>
+				<a href="http://www.cnblogs.com/ccdev/p/3341234.html#2784056" class="layer">#15楼</a><a name="2784056" id="comment_anchor_2784056"></a>  <span class="comment_date">2013-09-28 11:34</span> <a id="a_comment_author_2784056" href="http://www.cnblogs.com/One-dream-man/" target="_blank">do4net艾特126.com</a> <a href="http://msg.cnblogs.com/send/do4net%E8%89%BE%E7%89%B9126.com" title="发送站内短消息" class="sendMsg2This">&nbsp;</a>
+			</div>
+			<div class="feedbackCon">
+				<div id="comment_body_2784056" class="blog_comment_body">楼主辛苦了讲的很好，为什么客户的请求到来的时候 ，不是去Global Heartbeat 上去访问Global 集群的状态那，Global Heartbeat上面不是存放了Golbal集群的状态吗？</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(2784056,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(2784056,&#39;Bury&#39;,this)">反对(0)</a></div><span id="comment_2784056_avatar" style="display:none;">http://pic.cnblogs.com/face/u416851.jpg?id=20231046</span>
+			</div>
+		</div>
+	
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;<span class="comment_actions"></span>
+				</div>
+				<a href="http://www.cnblogs.com/ccdev/p/3341234.html#2784071" class="layer">#16楼</a><a name="2784071" id="comment_anchor_2784071"></a>  <span class="comment_date">2013-09-28 12:08</span> <a id="a_comment_author_2784071" href="http://www.cnblogs.com/yangziyi/" target="_blank">阿毅</a> <a href="http://msg.cnblogs.com/send/%E9%98%BF%E6%AF%85" title="发送站内短消息" class="sendMsg2This">&nbsp;</a>
+			</div>
+			<div class="feedbackCon">
+				<div id="comment_body_2784071" class="blog_comment_body"><a href="http://www.cnblogs.com/ccdev/p/3341234.html#2783983" title="查看所回复的评论" onclick="commentManager.renderComments(0,50,2783983);">@</a>
+李彬<br>cdn和负载均衡就不应该搞混在一块啊。</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(2784071,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(2784071,&#39;Bury&#39;,this)">反对(0)</a></div>
+			</div>
+		</div>
+	
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;<span class="comment_actions"></span>
+				</div>
+				<a href="http://www.cnblogs.com/ccdev/p/3341234.html#2784114" class="layer">#17楼</a><a name="2784114" id="comment_anchor_2784114"></a>  <span class="comment_date">2013-09-28 14:18</span> <a id="a_comment_author_2784114" href="http://www.cnblogs.com/bluedoctor/" target="_blank">深蓝医生</a> <a href="http://msg.cnblogs.com/send/%E6%B7%B1%E8%93%9D%E5%8C%BB%E7%94%9F" title="发送站内短消息" class="sendMsg2This">&nbsp;</a>
+			</div>
+			<div class="feedbackCon">
+				<div id="comment_body_2784114" class="blog_comment_body">看完了上中下三篇，受益匪浅，谢谢楼主的分享。</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(2784114,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(2784114,&#39;Bury&#39;,this)">反对(0)</a></div><span id="comment_2784114_avatar" style="display:none;">http://pic.cnblogs.com/face/u114517.png?id=23112533</span>
+			</div>
+		</div>
+	
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;<span class="comment_actions"></span>
+				</div>
+				<a href="http://www.cnblogs.com/ccdev/p/3341234.html#2785375" class="layer">#18楼</a><a name="2785375" id="comment_anchor_2785375"></a>  <span class="comment_date">2013-09-30 16:19</span> <a id="a_comment_author_2785375" href="http://www.cnblogs.com/woanon/" target="_blank">雨后出太阳</a> <a href="http://msg.cnblogs.com/send/%E9%9B%A8%E5%90%8E%E5%87%BA%E5%A4%AA%E9%98%B3" title="发送站内短消息" class="sendMsg2This">&nbsp;</a>
+			</div>
+			<div class="feedbackCon">
+				<div id="comment_body_2785375" class="blog_comment_body"><a href="http://www.cnblogs.com/ccdev/p/3341234.html#2784056" title="查看所回复的评论" onclick="commentManager.renderComments(0,50,2784056);">@</a>
+Any Liu<br><fieldset class="comment_quote"><legend><a href="http://www.cnblogs.com/ccdev/p/3341234.html#2784056" title="查看引用原文">引用</a></legend>楼主辛苦了讲的很好，为什么客户的请求到来的时候 ，不是去Global Heartbeat 上去访问Global 集群的状态那，Global Heartbeat上面不是存放了Golbal集群的状态吗？</fieldset><br>同疑问，楼主的这个心跳Server到底作用是什么</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(2785375,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(2785375,&#39;Bury&#39;,this)">反对(0)</a></div>
+			</div>
+		</div>
+	
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;<span class="comment_actions"></span>
+				</div>
+				<a href="http://www.cnblogs.com/ccdev/p/3341234.html#2844578" class="layer">#19楼</a><a name="2844578" id="comment_anchor_2844578"></a>  <span class="comment_date">2013-12-25 22:55</span> <a id="a_comment_author_2844578" href="http://www.cnblogs.com/daviddai/" target="_blank">红烧狮子头</a> <a href="http://msg.cnblogs.com/send/%E7%BA%A2%E7%83%A7%E7%8B%AE%E5%AD%90%E5%A4%B4" title="发送站内短消息" class="sendMsg2This">&nbsp;</a>
+			</div>
+			<div class="feedbackCon">
+				<div id="comment_body_2844578" class="blog_comment_body">一口气看完了LZ所有的文章，对高并发的系统架构设计有了一定的轮廓概念了~顶下~</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(2844578,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(2844578,&#39;Bury&#39;,this)">反对(0)</a></div><span id="comment_2844578_avatar" style="display:none;">http://pic.cnblogs.com/face/302948/20150417142456.png</span>
+			</div>
+		</div>
+	
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;<span class="comment_actions"></span>
+				</div>
+				<a href="http://www.cnblogs.com/ccdev/p/3341234.html#2872963" class="layer">#20楼</a><a name="2872963" id="comment_anchor_2872963"></a>  <span class="comment_date">2014-02-10 21:49</span> <a id="a_comment_author_2872963" href="http://www.cnblogs.com/sniperHW/" target="_blank">sniperHW</a> <a href="http://msg.cnblogs.com/send/sniperHW" title="发送站内短消息" class="sendMsg2This">&nbsp;</a>
+			</div>
+			<div class="feedbackCon">
+				<div id="comment_body_2872963" class="blog_comment_body">图用什么工具画的</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(2872963,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(2872963,&#39;Bury&#39;,this)">反对(0)</a></div>
+			</div>
+		</div>
+	
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;<span class="comment_actions"></span>
+				</div>
+				<a href="http://www.cnblogs.com/ccdev/p/3341234.html#3088754" class="layer">#21楼</a><a name="3088754" id="comment_anchor_3088754"></a>  <span class="comment_date">2014-12-18 11:06</span> <a id="a_comment_author_3088754" href="http://www.cnblogs.com/cnlinjie/" target="_blank">cnlinjie</a> <a href="http://msg.cnblogs.com/send/cnlinjie" title="发送站内短消息" class="sendMsg2This">&nbsp;</a>
+			</div>
+			<div class="feedbackCon">
+				<div id="comment_body_3088754" class="blog_comment_body">感谢楼主分享。获益良多。<br>有个问题不解，读写服务器(Master)只能一台吗？如果Master压力很大，要怎么办？扩充Master吗？那写时数据的一致性需要怎么保证呢？</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(3088754,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(3088754,&#39;Bury&#39;,this)">反对(0)</a></div><span id="comment_3088754_avatar" style="display:none;">http://pic.cnblogs.com/face/493345/20160826135047.png</span>
+			</div>
+		</div>
+	
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;<span class="comment_actions"></span>
+				</div>
+				<a href="http://www.cnblogs.com/ccdev/p/3341234.html#3088842" class="layer">#22楼</a><a name="3088842" id="comment_anchor_3088842"></a>[<span class="louzhu">楼主</span>]  <span class="comment_date">2014-12-18 12:20</span> <a id="a_comment_author_3088842" href="http://www.cnblogs.com/ccdev/" target="_blank">Jone Zhang</a> <a href="http://msg.cnblogs.com/send/Jone%20Zhang" title="发送站内短消息" class="sendMsg2This">&nbsp;</a>
+			</div>
+			<div class="feedbackCon">
+				<div id="comment_body_3088842" class="blog_comment_body"><a href="http://www.cnblogs.com/ccdev/p/3341234.html#3088754" title="查看所回复的评论" onclick="commentManager.renderComments(0,50,3088754);">@</a>
+linjie.org<br>我这个设计master就是单点，为克服单点故障，引入了master的备机slave ，两者通过 全局heartbeat来维护同步。<br>如果master要扩充多个（其实仍是一个master多个slave），就需要维护master和多个slave之间的同步，写数据的一致性参考文中的 group内的同步方式 <br>对外接口 访问master时可使用一致性哈希等算法，使压力分摊到各个机器上。</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(3088842,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(3088842,&#39;Bury&#39;,this)">反对(0)</a></div><span id="comment_3088842_avatar" style="display:none;">http://pic.cnblogs.com/face/425152/20130124140651.png</span>
+			</div>
+		</div>
+	
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;<span class="comment_actions"></span>
+				</div>
+				<a href="http://www.cnblogs.com/ccdev/p/3341234.html#3134598" class="layer">#23楼</a><a name="3134598" id="comment_anchor_3134598"></a><span id="comment-maxId" style="display:none;">3134598</span><span id="comment-maxDate" style="display:none;">2015/3/3 18:05:40</span>  <span class="comment_date">2015-03-03 18:05</span> <a id="a_comment_author_3134598" href="http://home.cnblogs.com/u/664197/" target="_blank">fishpro</a> <a href="http://msg.cnblogs.com/send/fishpro" title="发送站内短消息" class="sendMsg2This">&nbsp;</a>
+			</div>
+			<div class="feedbackCon">
+				<div id="comment_body_3134598" class="blog_comment_body">好文</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(3134598,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(3134598,&#39;Bury&#39;,this)">反对(0)</a></div>
+			</div>
+		</div>
+	<div id="comments_pager_bottom"></div></div><script type="text/javascript">var commentManager = new blogCommentManager();commentManager.renderComments(0);</script>
+<div id="comment_form" class="commentform">
+<a name="commentform"></a>
+<div id="divCommentShow"></div>
+<div id="comment_nav"><span id="span_refresh_tips"></span><a href="javascript:void(0);" onclick="return RefreshCommentList();" id="lnk_RefreshComments" runat="server" clientidmode="Static">刷新评论</a><a href="http://www.cnblogs.com/ccdev/p/3341234.html#" onclick="return RefreshPage();">刷新页面</a><a href="http://www.cnblogs.com/ccdev/p/3341234.html#top">返回顶部</a></div>
+<div id="comment_form_container"><div class="login_tips">注册用户登录后才能发表评论，请 <a rel="nofollow" href="javascript:void(0);" class="underline" onclick="return login(&#39;commentform&#39;);">登录</a> 或 <a rel="nofollow" href="javascript:void(0);" class="underline" onclick="return register();">注册</a>，<a href="http://www.cnblogs.com/">访问</a>网站首页。</div></div>
+<div class="ad_text_commentbox" id="ad_text_under_commentbox"></div>
+<div id="ad_t2"><a href="http://www.ucancode.com/index.htm" target="_blank">【推荐】50万行VC++源码: 大型组态工控、电力仿真CAD与GIS源码库</a><br><a href="https://group.cnblogs.com/topic/75389.html" target="_blank">【活动】优达学城正式发布“无人驾驶车工程师”课程</a><br><a href="http://www.rongcloud.cn/live" target="_blank">【推荐】移动直播百强八成都在用融云即时通讯云</a><br><a href="http://www.gcpowertools.com.cn/products/componentone_studio_enterprise.htm?utm_source=cnblogs&utm_medium=blogpage&utm_term=bottom&utm_content=C1&utm_campaign=community" target="_blank">【推荐】别再闷头写代码！找对工具，事半功倍，全能开发工具包用起来</a><br></div>
+<div id="opt_under_post"></div>
+<div id="ad_c1" class="c_ad_block"><a href="http://gold.xitu.io/extension/?utm_source=cnblogs&utm_medium=banner&utm_content=juhe&utm_campaign=q3_extension" target="_blank"><img width="300" height="250" src="./高并发服务端分布式系统设计概要（下） - Jone Zhang - 博客园_files/24442-20160902193613668-1123982956.png" alt=""></a></div>
+<div id="under_post_news"><div class="itnews c_ad_block"><b>最新IT新闻</b>:<br> ·  <a href="http://news.cnblogs.com/n/554430/" target="_blank">真相：朋友圈的“小黄图”从刷爆到被封的“惊魂七小时”</a><br> ·  <a href="http://news.cnblogs.com/n/554429/" target="_blank">再传今日头条接受腾讯注资，估值高达120亿美元？</a><br> ·  <a href="http://news.cnblogs.com/n/554427/" target="_blank">微信回应封杀公众号刷量：来啊互相伤害啊</a><br> ·  <a href="http://news.cnblogs.com/n/554426/" target="_blank">新型“人工胰脏”获FDA核准上市 自动导入胰岛素</a><br> ·  <a href="http://news.cnblogs.com/n/554425/" target="_blank">Galaxy Note 7召回近结束：三星在韩重投广告</a><br>» <a href="http://news.cnblogs.com/" title="IT新闻" target="_blank">更多新闻...</a></div></div>
+<div id="ad_c2" class="c_ad_block"><a href="https://www.jiguang.cn/devservice/?from=cnblogs01" target="_blank"><img width="468" height="60" src="./高并发服务端分布式系统设计概要（下） - Jone Zhang - 博客园_files/24442-20160803181056012-1919505484.jpg" alt=""></a></div>
+<div id="under_post_kb"><div class="itnews c_ad_block" id="kb_block"><b>最新知识库文章</b>:<br><div id="kb_recent"> ·  <a href="http://kb.cnblogs.com/page/553682/" target="_blank">陈皓：什么是工程师文化？</a><br> ·  <a href="http://kb.cnblogs.com/page/551422/" target="_blank">没那么难，谈CSS的设计模式</a><br> ·  <a href="http://kb.cnblogs.com/page/550625/" target="_blank">程序猿媳妇儿注意事项</a><br> ·  <a href="http://kb.cnblogs.com/page/540529/" target="_blank">可是姑娘，你为什么要编程呢？</a><br> ·  <a href="http://kb.cnblogs.com/page/549631/" target="_blank">知其所以然（以算法学习为例）</a><br></div>» <a href="http://kb.cnblogs.com/" target="_blank">更多知识库文章...</a></div></div>
+<div id="HistoryToday" class="c_ad_block"></div>
+<script type="text/javascript">
+    fixPostBody();
+    setTimeout(function () { incrementViewCount(cb_entryId); }, 50);
+    deliverAdT2();
+    deliverAdC1();
+    deliverAdC2();    
+    loadNewsAndKb();
+    loadBlogSignature();
+    LoadPostInfoBlock(cb_blogId, cb_entryId, cb_blogApp, cb_blogUserGuid);
+    GetPrevNextPost(cb_entryId, cb_blogId, cb_entryCreatedDate);
+    loadOptUnderPost();
+    GetHistoryToday(cb_blogId, cb_blogApp, cb_entryCreatedDate);   
+</script>
+</div>
+
+
+	</div><!--end: forFlow -->
+	</div><!--end: mainContent 主体内容容器-->
+
+	<div id="sideBar">
+		<div id="sideBarMain">
+			
+<!--done-->
+<div class="newsItem">
+<h3 class="catListTitle">公告</h3>
+	<div id="blog-news"><p><span style="font-size: 18pt; font-family: &#39;Comic Sans MS&#39;; color: #99cc00;">Dr</span><span style="font-size: 18pt; font-family: &#39;Comic Sans MS&#39;; color: #ff0000;">e</span><span style="font-size: 18pt; font-family: &#39;Comic Sans MS&#39;; color: #ff9900;">a</span><span style="font-size: 18pt; font-family: &#39;Comic Sans MS&#39;; color: #3366ff;">m&nbsp;</span><span style="line-height: 1.5; font-size: 18pt; font-family: &#39;Comic Sans MS&#39;; color: #ffcc00;">Ar</span><span style="line-height: 1.5; font-size: 18pt; font-family: &#39;Comic Sans MS&#39;; color: #ff0000;">c</span><span style="line-height: 1.5; font-size: 18pt; font-family: &#39;Comic Sans MS&#39;; color: #3366ff;">h</span><span style="line-height: 1.5; font-size: 18pt; font-family: &#39;Comic Sans MS&#39;; color: #ffcc00;">ite</span><span style="line-height: 1.5; font-size: 18pt; font-family: &#39;Comic Sans MS&#39;; color: #ffcc00;">ct</span></p>
+<p>&nbsp;</p><p><span style="font-family: &#39;Comic Sans MS&#39;; font-size: 14pt;"><strong>张峻崇技术博客</strong></span></p><p>&nbsp;<strong style="font-family: Courier; font-size: 14pt; line-height: 1.5;">Jone Zhang's Blog</strong></p><p>&nbsp;</p><p>目前所在地：北京&nbsp;</p><p>主页：<a href="http://www.ccixx.com/">http://ccixx.com</a></p><p>邮件：zhangjunchong(at)gmail.com</p><p>&nbsp; &nbsp; &nbsp; &nbsp; zjc(at)ccixx.com</p><div id="profile_block">昵称：<a href="http://home.cnblogs.com/u/ccdev/">Jone Zhang</a><br>园龄：<a href="http://home.cnblogs.com/u/ccdev/" title="入园时间：2012-07-06">4年2个月</a><br>荣誉：<a href="http://www.cnblogs.com/expert/">推荐博客</a><br>粉丝：<a href="http://home.cnblogs.com/u/ccdev/followers/">346</a><br>关注：<a href="http://home.cnblogs.com/u/ccdev/followees/">1</a><div id="p_b_follow"><a href="javascript:void(0);" onclick="follow(&#39;97b4da0d-56c7-e111-aa3f-842b2b196315&#39;)">+加关注</a></div></div></div><script type="text/javascript">loadBlogNews();</script>
+</div>
+
+			<div id="blog-calendar" style=""><table id="blogCalendar" class="Cal" cellspacing="0" cellpadding="0" title="Calendar">
+	<tbody><tr><td colspan="7"><table class="CalTitle" cellspacing="0">
+		<tbody><tr><td class="CalNextPrev"><a href="javascript:void(0);" onclick="loadBlogCalendar(&#39;2016/08/01&#39;);return false;">&lt;</a></td><td align="center">2016年9月</td><td class="CalNextPrev" align="right"><a href="javascript:void(0);" onclick="loadBlogCalendar(&#39;2016/10/01&#39;);return false;">&gt;</a></td></tr>
+	</tbody></table></td></tr><tr><th class="CalDayHeader" align="center" abbr="日" scope="col">日</th><th class="CalDayHeader" align="center" abbr="一" scope="col">一</th><th class="CalDayHeader" align="center" abbr="二" scope="col">二</th><th class="CalDayHeader" align="center" abbr="三" scope="col">三</th><th class="CalDayHeader" align="center" abbr="四" scope="col">四</th><th class="CalDayHeader" align="center" abbr="五" scope="col">五</th><th class="CalDayHeader" align="center" abbr="六" scope="col">六</th></tr><tr><td class="CalOtherMonthDay" align="center">28</td><td class="CalOtherMonthDay" align="center">29</td><td class="CalOtherMonthDay" align="center">30</td><td class="CalOtherMonthDay" align="center">31</td><td align="center">1</td><td align="center">2</td><td class="CalWeekendDay" align="center">3</td></tr><tr><td class="CalWeekendDay" align="center">4</td><td align="center">5</td><td align="center">6</td><td align="center">7</td><td align="center">8</td><td align="center">9</td><td class="CalWeekendDay" align="center">10</td></tr><tr><td class="CalWeekendDay" align="center">11</td><td align="center">12</td><td align="center">13</td><td align="center">14</td><td align="center">15</td><td align="center">16</td><td class="CalWeekendDay" align="center">17</td></tr><tr><td class="CalWeekendDay" align="center">18</td><td align="center">19</td><td align="center">20</td><td align="center">21</td><td align="center">22</td><td align="center">23</td><td class="CalWeekendDay" align="center">24</td></tr><tr><td class="CalWeekendDay" align="center">25</td><td align="center">26</td><td align="center">27</td><td align="center">28</td><td class="CalTodayDay" align="center">29</td><td align="center">30</td><td class="CalOtherMonthDay" align="center">1</td></tr><tr><td class="CalOtherMonthDay" align="center">2</td><td class="CalOtherMonthDay" align="center">3</td><td class="CalOtherMonthDay" align="center">4</td><td class="CalOtherMonthDay" align="center">5</td><td class="CalOtherMonthDay" align="center">6</td><td class="CalOtherMonthDay" align="center">7</td><td class="CalOtherMonthDay" align="center">8</td></tr>
+</tbody></table></div><script type="text/javascript">loadBlogDefaultCalendar();</script>
+			
+			<div id="leftcontentcontainer">
+				<div id="blog-sidecolumn"><div id="sidebar_search" class="sidebar-block"></div><div id="sidebar_categories">
+<div id="sidebar_postcategory" class="catListPostCategory sidebar-block">
+<h3 class="catListTitle">随笔分类</h3>
+
+<ul>
+
+<li><a id="CatList_LinkList_0_Link_0" href="http://www.cnblogs.com/ccdev/category/438035.html">C/C++ 技术积淀(9)</a> </li>
+
+<li><a id="CatList_LinkList_0_Link_1" href="http://www.cnblogs.com/ccdev/category/411456.html">C++面试常见问题(5)</a> </li>
+
+<li><a id="CatList_LinkList_0_Link_2" href="http://www.cnblogs.com/ccdev/category/411687.html">C面试常见问题(5)</a> </li>
+
+<li><a id="CatList_LinkList_0_Link_3" href="http://www.cnblogs.com/ccdev/category/413056.html">Git on Mac(2)</a> </li>
+
+<li><a id="CatList_LinkList_0_Link_4" href="http://www.cnblogs.com/ccdev/category/711330.html">Golang</a> </li>
+
+<li><a id="CatList_LinkList_0_Link_5" href="http://www.cnblogs.com/ccdev/category/411479.html">iPhone Programming(1)</a> </li>
+
+<li><a id="CatList_LinkList_0_Link_6" href="http://www.cnblogs.com/ccdev/category/411459.html">Mac OS X 虚拟机(1)</a> </li>
+
+<li><a id="CatList_LinkList_0_Link_7" href="http://www.cnblogs.com/ccdev/category/411492.html">Mac学习与使用(1)</a> </li>
+
+<li><a id="CatList_LinkList_0_Link_8" href="http://www.cnblogs.com/ccdev/category/411480.html">Obj-C(2)</a> </li>
+
+<li><a id="CatList_LinkList_0_Link_9" href="http://www.cnblogs.com/ccdev/category/440231.html">Performanced C++ 经验规则(6)</a> </li>
+
+<li><a id="CatList_LinkList_0_Link_10" href="http://www.cnblogs.com/ccdev/category/413061.html">Unix/Linux(2)</a> </li>
+
+<li><a id="CatList_LinkList_0_Link_11" href="http://www.cnblogs.com/ccdev/category/551698.html">服务器架构(1)</a> </li>
+
+<li><a id="CatList_LinkList_0_Link_12" href="http://www.cnblogs.com/ccdev/category/441435.html">高性能系统与分布式计算存储(5)</a> </li>
+
+<li><a id="CatList_LinkList_0_Link_13" href="http://www.cnblogs.com/ccdev/category/413084.html">海量数据处理算法(3)</a> </li>
+
+<li><a id="CatList_LinkList_0_Link_14" href="http://www.cnblogs.com/ccdev/category/411464.html">数据结构面试常见问题（C/C++）(3)</a> </li>
+
+<li><a id="CatList_LinkList_0_Link_15" href="http://www.cnblogs.com/ccdev/category/411477.html">算法分析(3)</a> </li>
+
+</ul>
+
+</div>
+
+<div id="sidebar_postarchive" class="catListPostArchive sidebar-block">
+<h3 class="catListTitle">随笔档案</h3>
+
+<ul>
+
+<li><a id="CatList_LinkList_1_Link_0" href="http://www.cnblogs.com/ccdev/archive/2014/02.html">2014年2月 (1)</a> </li>
+
+<li><a id="CatList_LinkList_1_Link_1" href="http://www.cnblogs.com/ccdev/archive/2013/09.html">2013年9月 (3)</a> </li>
+
+<li><a id="CatList_LinkList_1_Link_2" href="http://www.cnblogs.com/ccdev/archive/2012/12.html">2012年12月 (9)</a> </li>
+
+<li><a id="CatList_LinkList_1_Link_3" href="http://www.cnblogs.com/ccdev/archive/2012/09.html">2012年9月 (15)</a> </li>
+
+<li><a id="CatList_LinkList_1_Link_4" href="http://www.cnblogs.com/ccdev/archive/2012/07.html">2012年7月 (1)</a> </li>
+
+</ul>
+
+</div>
+
+</div><div id="sidebar_scorerank" class="sidebar-block">
+<div class="catListBlogRank">
+<h3 class="catListTitle">积分与排名</h3>
+<ul>
+	<li class="liScore">
+		积分 -	61359
+	</li>
+	<li class="liRank">
+		排名 -	3852
+	</li>
+</ul>
+</div>
+
+
+</div><div id="sidebar_recentcomments" class="sidebar-block"><div id="recent_comments_wrap">
+<div class="catListComment">
+<h3 class="catListTitle">最新评论</h3>
+
+	<div id="RecentCommentsBlock"><ul>
+        <li class="recent_comment_title"><a href="http://www.cnblogs.com/ccdev/archive/2012/09/08/2676485.html#3392154">1. Re:通过迭代（非递归）及递归将单链表逆序</a></li>
+        <li class="recent_comment_body">Node* Inverse(Node* head){ Node* prev = nullptr; Node* cur = head; while (cur != nullptr) {......</li>
+        <li class="recent_comment_author">--wgtdkp</li>
+        <li class="recent_comment_title"><a href="http://www.cnblogs.com/ccdev/p/3338412.html#3359485">2. Re:高并发服务端分布式系统设计概要（上）</a></li>
+        <li class="recent_comment_body">文笔。。。。看着太累</li>
+        <li class="recent_comment_author">--水晶玛瑙</li>
+        <li class="recent_comment_title"><a href="http://www.cnblogs.com/ccdev/archive/2012/09/09/2677328.html#3331233">3. Re:算法探讨——再议经典算法问题：求最大子序列和、绝对值最大子序列和以及其区间</a></li>
+        <li class="recent_comment_body">求最大子序列和以及其区间，O(N)的算法当输入全是负数时不好用了，博主改进一下吧。如输入全是-1时就不行</li>
+        <li class="recent_comment_author">--不锈钢老鼠</li>
+        <li class="recent_comment_title"><a href="http://www.cnblogs.com/ccdev/archive/2012/07/07/2580447.html#3234006">4. Re:iPhone App 开发第一步：从零到真机调试HelloWorld</a></li>
+        <li class="recent_comment_body">免费App网页自动下载安装所需服务器！微信里无需跳转直接安装！安卓苹果二合一安装！App刷榜刷评论刷量排名优化！iosapp无需经过苹果漫长严格审核,直接发布,通过网页或二维码，无需苹果帐号一键下载安......</li>
+        <li class="recent_comment_author">--网络开发者</li>
+        <li class="recent_comment_title"><a href="http://www.cnblogs.com/ccdev/p/3341234.html#3134598">5. Re:高并发服务端分布式系统设计概要（下）</a></li>
+        <li class="recent_comment_body">好文</li>
+        <li class="recent_comment_author">--fishpro</li>
+</ul>
+</div>
+</div>
+</div></div><div id="sidebar_topviewedposts" class="sidebar-block"><div id="topview_posts_wrap">
+<div class="catListView">
+<h3 class="catListTitle">阅读排行榜</h3>
+	<div id="TopViewPostsBlock"><ul><li><a href="http://www.cnblogs.com/ccdev/archive/2012/09/12/2682098.html">1. Mac OS X Git安装教程(89731)</a></li><li><a href="http://www.cnblogs.com/ccdev/archive/2012/12/19/2825355.html">2. C++ 线程安全的单例模式(23208)</a></li><li><a href="http://www.cnblogs.com/ccdev/p/3338412.html">3. 高并发服务端分布式系统设计概要（上）(22081)</a></li><li><a href="http://www.cnblogs.com/ccdev/archive/2012/12/28/2836599.html">4. 高性能分布式计算与存储系统设计概要——暨2012年工作3年半总结（上）(12925)</a></li><li><a href="http://www.cnblogs.com/ccdev/archive/2012/07/07/2580447.html">5. iPhone App 开发第一步：从零到真机调试HelloWorld(11945)</a></li></ul></div>
+</div>
+</div></div><div id="sidebar_topcommentedposts" class="sidebar-block"><div id="topfeedback_posts_wrap">
+<div class="catListFeedback">
+<h3 class="catListTitle">评论排行榜</h3>
+	<div id="TopFeedbackPostsBlock"><ul><li><a href="http://www.cnblogs.com/ccdev/archive/2012/12/29/2837754.html">1. 高性能分布式计算与存储系统设计概要——暨2012年工作3年半总结（下）(48)</a></li><li><a href="http://www.cnblogs.com/ccdev/archive/2012/12/28/2836599.html">2. 高性能分布式计算与存储系统设计概要——暨2012年工作3年半总结（上）(46)</a></li><li><a href="http://www.cnblogs.com/ccdev/p/3338412.html">3. 高并发服务端分布式系统设计概要（上）(25)</a></li><li><a href="./高并发服务端分布式系统设计概要（下） - Jone Zhang - 博客园_files/高并发服务端分布式系统设计概要（下） - Jone Zhang - 博客园.html">4. 高并发服务端分布式系统设计概要（下）(23)</a></li><li><a href="http://www.cnblogs.com/ccdev/p/3340484.html">5. 高并发服务端分布式系统设计概要（中）(10)</a></li></ul></div>
+</div>
+</div></div><div id="sidebar_topdiggedposts" class="sidebar-block"><div id="topdigg_posts_wrap">
+<div class="catListView">
+<h3 class="catListTitle">推荐排行榜</h3>
+<div id="TopDiggPostsBlock"><ul><li><a href="http://www.cnblogs.com/ccdev/archive/2012/12/29/2837754.html">1. 高性能分布式计算与存储系统设计概要——暨2012年工作3年半总结（下）(35)</a></li><li><a href="http://www.cnblogs.com/ccdev/archive/2012/12/28/2836599.html">2. 高性能分布式计算与存储系统设计概要——暨2012年工作3年半总结（上）(32)</a></li><li><a href="http://www.cnblogs.com/ccdev/p/3338412.html">3. 高并发服务端分布式系统设计概要（上）(29)</a></li><li><a href="./高并发服务端分布式系统设计概要（下） - Jone Zhang - 博客园_files/高并发服务端分布式系统设计概要（下） - Jone Zhang - 博客园.html">4. 高并发服务端分布式系统设计概要（下）(18)</a></li><li><a href="http://www.cnblogs.com/ccdev/p/3340484.html">5. 高并发服务端分布式系统设计概要（中）(10)</a></li></ul></div>
+</div></div></div></div><script type="text/javascript">loadBlogSideColumn();</script>
+			</div>
+			
+		</div><!--end: sideBarMain -->
+	</div><!--end: sideBar 侧边栏容器 -->
+	<div class="clear"></div>
+	</div><!--end: main -->
+	<div class="clear"></div>
+	<div id="footer">
+		
+<!--done-->
+Copyright ©2016 Jone Zhang
+	</div><!--end: footer -->
+</div><!--end: home 自定义的最大容器 -->
+
+
+<audio controls="controls" style="display: none;"></audio></body><style type="text/css">#yddContainer{display:block;font-family:Microsoft YaHei;position:relative;width:100%;height:100%;top:-4px;left:-4px;font-size:12px;border:1px solid}#yddTop{display:block;height:22px}#yddTopBorderlr{display:block;position:static;height:17px;padding:2px 28px;line-height:17px;font-size:12px;color:#5079bb;font-weight:bold;border-style:none solid;border-width:1px}#yddTopBorderlr .ydd-sp{position:absolute;top:2px;height:0;overflow:hidden}.ydd-icon{left:5px;width:17px;padding:0px 0px 0px 0px;padding-top:17px;background-position:-16px -44px}.ydd-close{right:5px;width:16px;padding-top:16px;background-position:left -44px}#yddKeyTitle{float:left;text-decoration:none}#yddMiddle{display:block;margin-bottom:10px}.ydd-tabs{display:block;margin:5px 0;padding:0 5px;height:18px;border-bottom:1px solid}.ydd-tab{display:block;float:left;height:18px;margin:0 5px -1px 0;padding:0 4px;line-height:18px;border:1px solid;border-bottom:none}.ydd-trans-container{display:block;line-height:160%}.ydd-trans-container a{text-decoration:none;}#yddBottom{position:absolute;bottom:0;left:0;width:100%;height:22px;line-height:22px;overflow:hidden;background-position:left -22px}.ydd-padding010{padding:0 10px}#yddWrapper{color:#252525;z-index:10001;background:url(chrome-extension://eopjamdnofihpioajgfdikhhbobonhbb/ab20.png);}#yddContainer{background:#fff;border-color:#4b7598}#yddTopBorderlr{border-color:#f0f8fc}#yddWrapper .ydd-sp{background-image:url(chrome-extension://eopjamdnofihpioajgfdikhhbobonhbb/ydd-sprite.png)}#yddWrapper a,#yddWrapper a:hover,#yddWrapper a:visited{color:#50799b}#yddWrapper .ydd-tabs{color:#959595}.ydd-tabs,.ydd-tab{background:#fff;border-color:#d5e7f3}#yddBottom{color:#363636}#yddWrapper{min-width:250px;max-width:400px;}</style></html>

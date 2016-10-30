@@ -1,0 +1,527 @@
+\documentclass{report}
+\title{Exercises on parsing}
+\author{Yves Bertot, Pierre Cast\'eran}
+\usepackage[latin1]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{makeidx}
+\usepackage{multind}
+\usepackage{alltt}   
+\usepackage{verbatim}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{theorem}
+\usepackage[dvips]{epsfig}
+\usepackage{epic}
+\usepackage{eepic}
+\usepackage{ecltree}
+\usepackage{moreverb} 
+\usepackage{color}
+\usepackage{pifont}
+\usepackage{xr}
+\usepackage{url}
+
+\newcommand{\variantspringer}[1]{#1}
+\newcommand{\marginok}[1]{\marginpar{\raggedright OK:#1}}
+\newcommand{\tab}{{\null\hskip1cm}}
+\newcommand{\Ltac}{\mbox{\emph{$\cal L$}tac}}
+\newcommand{\coq}{\mbox{\emph{Coq}}}
+\newcommand{\lcf}{\mbox{\emph{LCF}}}
+\newcommand{\hol}{\mbox{\emph{HOL}}}
+\newcommand{\pvs}{\mbox{\emph{PVS}}}
+\newcommand{\isabelle}{\mbox{\emph{Isabelle}}}
+\newcommand{\prolog}{\mbox{\emph{Prolog}}}
+\newcommand{\goalbar}{\tt{}============================\it}
+\newcommand{\gallina}{\mbox{\emph{Gallina}}}
+\newcommand{\joker}{\texttt{\_}}
+\newcommand{\eprime}{\(\e^{\prime}\)}
+\newcommand{\Ztype}{\citecoq{Z}}
+\newcommand{\propsort}{\citecoq{Prop}}
+\newcommand{\setsort}{\citecoq{Set}}
+\newcommand{\typesort}{\citecoq{Type}}
+\newcommand{\ocaml}{\mbox{\emph{OCAML}}}
+\newcommand{\haskell}{\mbox{\emph{Haskell}}}
+\newcommand{\why}{\mbox{\emph{Why}}}
+\newcommand{\Pascal}{\mbox{\emph{Pascal}}}
+
+\newcommand{\ml}{\mbox{\emph{ML}}}
+
+\newcommand{\scheme}{\mbox{\emph{Scheme}}}
+\newcommand{\lisp}{\mbox{\emph{Lisp}}}
+
+\newcommand{\implarrow}{\mbox{$\Rightarrow$}}
+\newcommand{\metavar}[1]{?#1}
+\newcommand{\notincoq}[1]{#1}
+\newcommand{\coqscope}[1]{\%#1}
+\newcommand{\arrow}{\mbox{$\rightarrow$}}
+\newcommand{\fleche}{\arrow}
+\newcommand{\funarrow}{\mbox{$\Rightarrow$}}
+\newcommand{\ltacarrow}{\funarrow}
+\newcommand{\coqand}{\mbox{\(\wedge\)}}
+\newcommand{\coqor}{\mbox{\(\vee\)}}
+\newcommand{\coqnot}{\mbox{\(\neg\)}}
+\newcommand{\hide}[1]{}
+\newcommand{\hidedots}[1]{...}
+\newcommand{\sig}[3]{\texttt{\{}#1\texttt{:}#2 \texttt{|} #3\texttt{\}}}
+\renewcommand{\neg}{\sim}
+\renewcommand{\marginpar}[1]{}
+
+\addtocounter{secnumdepth}{1}
+\providecommand{\og}{«}
+\providecommand{\fg}{»}
+\definecolor{light}{rgb}{0.9,0.9,0.9}
+
+\newcommand{\hard}{\mbox{\small *}}
+\newcommand{\xhard}{\mbox{\small **}}
+\newcommand{\xxhard}{\mbox{\small ***}}
+
+%%% Operateurs, etc.
+\newcommand{\impl}{\mbox{$\rightarrow$}}
+\newcommand{\appli}[2]{\mbox{\tt{#1 #2}}}
+\newcommand{\applis}[1]{\mbox{\texttt{#1}}}
+\newcommand{\abst}[3]{\mbox{\tt{fun #1:#2 \funarrow #3}}}
+\newcommand{\coqle}{\mbox{$\leq$}}
+\newcommand{\coqge}{\mbox{$\geq$}}
+\newcommand{\coqdiff}{\mbox{$\neq$}}
+\newcommand{\coqiff}{\mbox{$\leftrightarrow$}}
+\newcommand{\prodsym}{\mbox{\(\forall\,\)}}
+\newcommand{\exsym}{\mbox{\(\exists\,\)}}
+
+\newcommand{\substsign}{/}
+\newcommand{\subst}[3]{\mbox{#1\{#2\substsign{}#3\}}}
+\newcommand{\anoabst}[2]{\mbox{\tt[#1]#2}}
+\newcommand{\letin}[3]{\mbox{\tt let #1:=#2 in #3}}
+\newcommand{\prodep}[3]{\mbox{\tt \(\forall\,\)#1:#2,$\,$#3}}
+\newcommand{\prodplus}[2]{\mbox{\tt\(\forall\,\)$\,$#1,$\,$#2}}
+\newcommand{\dom}[1]{\textrm{dom}(#1)} % domaine d'un contexte (log function)
+\newcommand{\norm}[1]{\textrm{n}(#1)} % forme normale (log function)
+\newcommand{\coqZ}[1]{\mbox{\tt{`#1`}}}
+\newcommand{\coqnat}[1]{\mbox{\tt{#1}}}
+\newcommand{\coqcart}[2]{\mbox{\tt{#1*#2}}}
+\newcommand{\alphacong}{\mbox{$\,\cong_{\alpha}\,$}} % alpha-congruence
+\newcommand{\betareduc}{\mbox{$\,\rightsquigarrow_{\!\beta}$}\,} % beta reduction
+%\newcommand{\betastar}{\mbox{$\,\Rightarrow_{\!\beta}^{*}\,$}} % beta reduction
+\newcommand{\deltareduc}{\mbox{$\,\rightsquigarrow_{\!\delta}$}\,} % delta reduction
+\newcommand{\dbreduc}{\mbox{$\,\rightsquigarrow_{\!\delta\beta}$}\,} % delta,beta reduction
+\newcommand{\ireduc}{\mbox{$\,\rightsquigarrow_{\!\iota}$}\,} % delta,beta reduction
+
+
+% jugement de typage
+\newcommand{\these}{\boldsymbol{\large \vdash}}
+\newcommand{\disj}{\mbox{$\backslash/$}}
+\newcommand{\conj}{\mbox{$/\backslash$}}
+%\newcommand{\juge}[3]{\mbox{$#1 \boldsymbol{\vdash} #2 : #3 $}}
+\newcommand{\juge}[4]{\mbox{$#1,#2 \these #3 \boldsymbol{:} #4 $}}
+\newcommand{\smalljuge}[3]{\mbox{$#1 \these #2 \boldsymbol{:} #3 $}}
+\newcommand{\goal}[3]{\mbox{$#1,#2 \these^{\!\!\!?} #3  $}}
+\newcommand{\sgoal}[2]{\mbox{$#1\these^{\!\!\!\!?} #2 $}}
+\newcommand{\reduc}[5]{\mbox{$#1,#2 \these #3 \rhd_{#4}#5 $}}
+\newcommand{\convert}[5]{\mbox{$#1,#2 \these #3 =_{#4}#5 $}}
+\newcommand{\convorder}[5]{\mbox{$#1,#2 \these #3\leq _{#4}#5 $}}
+\newcommand{\wouff}[2]{\mbox{$\emph{WF}(#1)[#2]$}}
+
+
+%\newcommand{\mthese}{\underset{M}{\vdash}}
+\newcommand{\mthese}{\boldsymbol{\vdash}_{\!\!M}}
+\newcommand{\type}{\boldsymbol{:}}
+
+% jugement absolu
+
+%\newcommand{\ajuge}[2]{\mbox{$ \boldsymbol{\vdash} #1 : #2 $}}
+\newcommand{\ajuge}[2]{\mbox{$\these #1 \boldsymbol{:} #2 $}}
+
+%%% logique minimale
+\newcommand{\propzero}{\mbox{$P_0$}} % types de Fzero
+
+%%% logique propositionnelle classique
+\newcommand {\ff}{\boldsymbol{f}} % faux
+\newcommand {\vv}{\boldsymbol{t}} % vrai
+
+\newcommand{\verite}{\mbox{$\cal{B}$}} % {\ff,\vv}
+\newcommand{\sequ}[2]{\mbox{$#1 \vdash #2 $}} % sequent
+\newcommand{\strip}[1]{#1^o} % enlever les variables d'un contexte
+
+
+
+%%% tactiques
+\newcommand{\decomp}{\delta} % decomposition
+\newcommand{\recomp}{\rho} % recomposition
+
+%%% divers
+\newcommand{\cqfd}{\mbox{\textbf{cqfd}}}
+\newcommand{\fail}{\mbox{\textbf{F}}}
+\newcommand{\succes}{\mbox{$\blacksquare$}}
+%%% Environnements
+
+
+%% Fzero
+\newcommand{\con}{\mbox{$\cal C$}}
+\newcommand{\var}{\mbox{$\cal V$}}
+
+\newcommand{\atomzero}{\mbox{${\cal A}_0$}} % types de base de Fzero
+\newcommand{\typezero}{\mbox{${\cal T}_0$}} % types de Fzero
+\newcommand{\termzero}{\mbox{$\Lambda_0$}} % termes de Fzero 
+\newcommand{\conzero}{\mbox{$\cal C_0$}} % contextes de Fzero 
+
+\newcommand{\buts}{\mbox{$\cal B$}} % buts
+
+%%% for drawing terms
+% abstraction [x:t]e
+\newcommand{\PicAbst}[3]{\begin{bundle}{\bf abst}\chunk{#1}\chunk{#2}\chunk{#3}%
+                        \end{bundle}}
+
+% the same in DeBruijn form
+\newcommand{\PicDbj}[2]{\begin{bundle}{\bf abst}\chunk{#1}\chunk{#2}
+                       \end{bundle}}
+
+
+% applications
+\newcommand{\PicAppl}[2]{\begin{bundle}{\bf appl}\chunk{#1}\chunk{#2}%
+                         \end{bundle}}
+
+% variables
+\newcommand{\PicVar}[1]{\begin{bundle}{\bf var}\chunk{#1}
+                          \end{bundle}}
+
+% constantes
+\newcommand{\PicCon}[1]{\begin{bundle}{\bf const}\chunk{#1}\end{bundle}}
+
+% arrows
+\newcommand{\PicImpl}[2]{\begin{bundle}{\impl}\chunk{#1}\chunk{#2}%
+                         \end{bundle}}
+
+
+
+%%%% scripts coq
+\newcommand{\prompt}{\mbox{\sl Coq $<\;$}}
+\newcommand{\natquicksort}{\texttt{nat\_quicksort}}
+\newcommand{\citecoq}[1]{\mbox{\texttt{#1}}}
+\newcommand{\safeit}{\it}
+\newtheorem{exercice}{Exercise}
+%\newtheorem{definition}{Definition}[chapter]
+\begin{document}
+\maketitle
+
+This file presents a series of exercices about parsing  parenthesized 
+expression (from Chap. 8 of the book).
+
+
+
+\begin{exercice}\label{exo-wp-1}%solution inductive-prop-chap/SRC/parsing.v
+This exercise starts a long series of exercises on parenthesized
+expressions.  This series will finish with the construction of a
+parser for well-parenthesized expressions; in other words, a program
+that constructs a piece of data that represents the structure of an
+expression (see Exercises~\ref{exo-wp-2} and~\ref{exo-wp-6}, 
+pages~\pageref{exo-wp-2},~\pageref{exo-wp-6}).
+
+We consider the following type of characters:
+%V8 A prendre
+%V8 A prendre
+%A prendre
+% inclusion numero 511
+% traduction numero 1068
+\begin{alltt}
+Inductive par : Set := open | close.
+\end{alltt}
+We represent character strings using the type
+``\citecoq{\appli{list}{par}}.''  An expression is well-parenthesized 
+when:
+\begin{enumerate}
+\item it is the empty list,
+\item it is a well-parenthesized expression between parentheses,
+\item it is the concatenation of two well-parenthesized expressions.
+\end{enumerate}
+Define the inductive property
+``\citecoq{wp:\appli{list}{par}\arrow{}Prop}'' that corresponds to this
+informal definition.  You can use the function \citecoq{app} given in
+the module \citecoq{List} to concatenate two lists.  Prove the
+following two properties:
+%V8 A prendre
+% inclusion numero 513
+% traduction numero 1072
+\begin{alltt}
+\hide{Check (fun (wp : list par \arrow Prop)(}wp_oc : wp (cons open (cons close nil))\hide{)(}
+
+wp_o_head_c :
+     {\prodsym}l1 l2:list par,
+       wp l1 \arrow{} wp l2 \arrow{} wp (cons open (app l1 (cons close l2)))
+\hide{)(}
+wp_o_tail_c :
+     {\prodsym}l1 l2:list par, wp l1 \arrow{} wp l2 \arrow{}
+       wp (app l1 (cons open (app l2 (cons close nil))))\hide{)\funarrow False)}.
+\end{alltt}
+\end{exercice}
+\begin{exercice}%solution inductive-prop-chap/SRC/parsing.v
+\label{exo-wp-1-1}
+This exercise continues Exercise~\ref{exo-wp-1}.  We consider a type of
+binary trees without labels and a function that maps any tree to a
+list of characters.  Show that this function always builds a
+well-parenthesized expression:
+\index{Examples}{Function definitions!bin\_to\_string}
+%A prendre
+%V8 A prendre
+%V8 A prendre
+% inclusion numero 514
+% traduction numero 1074
+\begin{alltt}
+Inductive bin : Set := L : bin | N : bin\arrow{}bin\arrow{}bin.
+
+Fixpoint bin_to_string (t:bin) : list par :=
+  match t with
+  | L \funarrow{} nil
+  | N u v \funarrow{}
+    cons open 
+      (app (bin_to_string u)(cons close (bin_to_string v)))
+  end.
+\end{alltt}
+\end{exercice}
+\begin{exercice}\label{exo-wp-1-2}%solution inductive-prop-chap/SRC/parsing.v
+This exercise continues Exercise~\ref{exo-wp-1-1}.
+Prove that the following function also returns a well-parenthesized
+expression:
+\index{Examples}{Function definitions!bin\_to\_string'}
+%A prendre
+%V8 A prendre
+%V8 A prendre
+% inclusion numero 515
+% traduction numero 1076
+\begin{alltt}
+Fixpoint bin_to_string' (t:bin) : list par :=
+  match t with
+  | L \funarrow{} nil
+  | N u v \funarrow{}
+    app (bin_to_string' u)
+        (cons open (app (bin_to_string' v)(cons close nil)))
+  end.
+\end{alltt}
+\end{exercice}
+
+
+
+\begin{exercice}\label{exo-wp-2}{\hard} %solution inductive-prop-chap/SRC/parsing.v
+This exercise continues Exercise~\ref{exo-wp-1},
+page~\pageref{exo-wp-1}.  Here is a second definition of
+well-parenthesized expressions.  Prove that it is equivalent to the
+previous one:
+%A prendre
+%V8 A prendre
+% inclusion numero 587
+% traduction numero 1161
+\begin{alltt}
+Inductive wp' : list par \arrow{} Prop :=
+| wp'_nil : wp' nil
+| wp'_cons : {\prodsym}l1 l2:list par, wp' l1 \arrow{} wp' l2 \arrow{} 
+                  wp' (cons open (app l1 (cons close l2))).
+\end{alltt}
+\end{exercice}
+\begin{exercice}\label{exo-wp-3} {\hard} %solution inductive-prop-chap/SRC/parsing.v
+This exercise continues Exercise~\ref{exo-wp-2}.  Here is a third
+definition. Prove that it is equivalent to the previous ones:
+%A prendre
+%V8 A prendre
+% inclusion numero 588
+% traduction numero 1162
+\begin{alltt}
+Inductive wp'' : list par \arrow{} Prop :=
+| wp''_nil : wp'' nil
+| wp''_cons :
+  {\prodsym}l1 l2:list par, wp'' l1 \arrow{} wp'' l2 \arrow{}
+      wp'' (app l1 (cons open (app l2 (cons close nil)))).
+\end{alltt}
+\end{exercice}
+\begin{exercice}\label{exo-wp-4}{\xhard} %solution inductive-prop-chap/SRC/parsing.v
+This exercise continues Exercise~\ref{exo-wp-3}.  Here is a function that 
+recognizes well-parenthesized expressions by counting the opening
+parentheses that are not yet closed:
+\index{Examples}{Function definitions!recognize}
+%A prendre
+%V8 A prendre
+% inclusion numero 589
+% traduction numero 1163
+\begin{alltt}
+Fixpoint recognize (n:nat)(l:list par)\{struct l\} : bool :=
+  match l with
+    nil \funarrow{} match n with O \funarrow{} true | _ \funarrow{} false end
+  | cons open l' \funarrow{} recognize (S n) l'
+  | cons close l' \funarrow{}
+    match n with O \funarrow{} false | S n' \funarrow{} recognize n' l' end
+  end.
+\end{alltt}
+Prove the following theorem:
+\iffalse
+%A prendre
+%V8 A prendre
+% inclusion numero 590
+% traduction numero 1164
+\begin{alltt}
+(* This fragment is not in the book *)
+Variable hypothesis wp : list par \arrow{} Prop.
+Hypothesis
+(* end of fragment *)
+\end{alltt}
+\fi
+%A prendre
+%V8 A prendre
+% inclusion numero 591
+% traduction numero 1165
+\begin{alltt}
+recognize_complete_aux :
+  {\prodsym}l:list par,\, wp l \arrow{}
+  {\prodsym}(n:nat)(l':list par), 
+  recognize n (app l l') = recognize n l'.
+\end{alltt}
+Conclude with the following main theorem:
+\iffalse
+%A prendre
+%V8 A prendre
+% inclusion numero 592
+% traduction numero 1166
+\begin{alltt}
+(* This fragment is not in the book *)
+Hypothesis
+(* end of fragment *)
+\end{alltt}
+\fi
+%A prendre
+%V8 A prendre
+% inclusion numero 593
+% traduction numero 1167
+\begin{alltt}
+recognize_complete :
+  {\prodsym}l:list par, wp l \arrow{} recognize 0 l = true.
+\end{alltt}
+\end{exercice}
+\begin{exercice}\label{exo-wp-5}{\xxhard} %solution inductive-prop-chap/SRC/parsing.v
+This exercise is rather hard and continues Exercise~\ref{exo-wp-4}.
+Prove that the \citecoq{recognize} function only accepts
+well-parenthesized expressions, More precisely
+\iffalse
+%A prendre
+%V8 A prendre
+% inclusion numero 594
+% traduction numero 1168
+\begin{alltt}
+(* This fragment is not in the book *)
+Hypothesis
+(* end of fragment *)
+\end{alltt}
+\fi
+%A prendre
+%V8 A prendre
+% inclusion numero 595
+% traduction numero 1169
+\begin{alltt}
+recognize_sound : {\prodsym}l:list par, recognize 0 l = true \arrow{} wp l.
+\end{alltt}
+Hint: we suggest proving that if ``\citecoq{\applis{recognize \(n\)
+\(l\)}}'' is \citecoq{true}, then the string ``\citecoq{\applis{app
+\(l_n\) \(l\)}}'' is well-parenthesized, where \(l_n\) is the string
+made of \(n\) opening parentheses.  Several lemmas about list
+concatenation are needed.
+\end{exercice}
+\begin{exercice}\label{exo-wp-7}{\xxhard} %solution inductive-prop-chap/SRC/parsing.v
+This exercise continues Exercises~\ref{exo-wp-1-2}
+and~\ref{exo-wp-3}.  We consider the following parsing function:
+\index{Examples}{Function definitions!parse}
+%A prendre
+%V8 A prendre
+% inclusion numero 596
+% traduction numero 1170
+\begin{alltt}
+Fixpoint parse (s:list bin)(t:bin)(l:list par)\{struct l\}
+ : option bin :=
+  match l with
+  | nil \funarrow{} match s with nil \funarrow{} Some t | _ \funarrow{} None end
+  | cons open l' \funarrow{} parse (cons t s) L l'
+  | cons close l' \funarrow{}
+    match s with
+    | cons t' s' \funarrow{} parse s' (N t' t) l'
+    | _ \funarrow{} None
+    end
+  end.
+\end{alltt}
+Prove that this parser is correct and complete:
+%A prendre
+%V8 A prendre
+% inclusion numero 598
+% traduction numero 1171
+\begin{alltt}
+\hide{Hypothesis }parse_complete :
+ {\prodsym}l:list par, wp l \arrow{} parse nil L l {\coqdiff} None.
+
+\hide{Hypothesis }parse_invert:
+  {\prodsym}(l:list par)(t:bin),
+      parse nil L l = Some t \arrow{} bin_to_string' t = l.
+
+\hide{Hypothesis }parse_sound:
+ {\prodsym}(l:list par)(t:bin), parse nil L l = Some t \arrow{} wp l.
+\end{alltt}
+Hint: the completeness proof is easier when using the structure
+proposed by the inductive definition \citecoq{wp'}. 
+\end{exercice}
+
+
+\begin{exercice}\label{exo-wp-6}{\xxhard} %solution inductive-prop-chap/SRC/parsing.v
+This exercise continues Exercise~\ref{exo-wp-1-2}
+page~\pageref{exo-wp-1-2}.  The following inductive definition gives
+the description of a parsing function for well-paren\-the\-sized
+expressions.  Intuitively, ``\citecoq{parse\_rel \(l_1\) \(l_2\) \(t\)}'' 
+reads as ``parsing the string \(l_1\) leaves \(l_2\) as suffix
+and builds the tree \(t\).''
+%A prendre
+%V8 A prendre
+% inclusion numero 634
+% traduction numero 1206
+\begin{alltt}
+Inductive parse_rel : list par \arrow{} list par \arrow{} bin \arrow{} Prop :=
+  | parse_node :
+    {\prodsym}(l1 l2 l3:list par)(t1 t2:bin),
+      parse_rel l1 (cons close l2) t1 \arrow{} parse_rel l2 l3 t2 \arrow{} 
+      parse_rel (cons open l1) l3 (N t1 t2)
+  | parse_leaf_nil : parse_rel nil nil L
+  | parse_leaf_close :
+      {\prodsym}l:list par, parse_rel (cons close l)(cons close l) L.
+\end{alltt}
+Prove the following lemmas:
+\iffalse
+%A prendre
+%V8 A prendre
+% inclusion numero 635
+% traduction numero 1207
+\begin{alltt}
+(* This fragment is not in the book *)
+Hypothesis
+(* end of fragment *)
+\end{alltt}
+\fi
+%A prendre
+%V8 A prendre
+% inclusion numero 636
+% traduction numero 1208
+\begin{alltt}
+parse_rel_sound_aux :
+    {\prodsym}(l1 l2:list par)(t:bin),
+      parse_rel l1 l2 t \arrow{} l1 = app (bin_to_string t) l2.
+\end{alltt}
+\iffalse
+%A prendre
+%V8 A prendre
+% inclusion numero 637
+% traduction numero 1209
+\begin{alltt}
+(* This fragment is not in the book *)
+Hypothesis
+(* end of fragment *)
+\end{alltt}
+\fi
+%A prendre
+%V8 A prendre
+% inclusion numero 638
+% traduction numero 1210
+\begin{alltt}
+parse_rel_sound :
+    {\prodsym}l:list par, ({\exsym}t:bin, parse_rel l nil t)\arrow{} wp l.
+\end{alltt}
+\end{exercice}
+
+\end{document}

@@ -1,0 +1,2 @@
+echo "-R . coqart85 " >_CoqProject ; find . -name '*.v' -print  >> _CoqProject 
+

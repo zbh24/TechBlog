@@ -1,0 +1,34 @@
+<html>
+<title> A polymorphic functional  </title>
+<body>
+<h1>  A polymorphic functional </h1>
+
+Consider the following definitions :
+
+
+<pre>
+Unset Implicit Arguments.
+
+Definition compose (A:Set) (g f:A -> A) (x:A) := g (f x).
+
+Definition thrice (A:Set) (f:A -> A) := compose A f (compose A f f).
+</pre>
+
+Build an expression, the normal form of which is <tt>27</tt>, using
+only two occurrences of <tt>thrice</tt>, one occurrence of <tt>S</tt>,
+one occurrence of <tt>(0)</tt> and two jokers (symbol '<tt>_</tt>' ).
+<br>
+Same question, without using jokers.
+
+<h2>Solution</h2>
+
+<a href="SRC/thrice.v"> Look at this file </a>
+<br><br>
+<hr>
+<a href="../index.html">Going  home </a> 
+<hr>
+<address><a href="mailto:casteran@labri.fr">Pierre Castéran</a></address>
+</body>
+</html>
+
+

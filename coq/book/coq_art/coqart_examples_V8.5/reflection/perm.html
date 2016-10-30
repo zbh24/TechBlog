@@ -1,0 +1,28 @@
+<html>
+<title> Proving that lists are not permutations using reflection
+ </title>
+<body>
+<h1> Proving that lists are not permutations using reflection
+</h1>
+
+<p>
+Using the notion of permutations defined in <a href="../inductive-prop-chap/perms.html">this exercise</a>
+and the counting function defined in <a href="../progav/moreperms.html">
+this exercise</a>.
+show that if a list is a permutation of another list, then any natural number 
+occurs as many times in both lists.
+</p>
+<p>
+Build a specialized reflection tactic ``<tt>NoPerm \(n\)</tt>'' that solve goals
+of the form <tt>~perm l l'</tt> by finding an element of the first
+list that does not occur the same number of times in both lists.
+</p>
+<h2>Solution</h2>
+<a href="../progav/SRC/moreperms.v"> This file </a>
+<br>
+<br>
+<hr>
+<a href="../index.html">Going  home </a> <hr>
+</body>
+</html>
+

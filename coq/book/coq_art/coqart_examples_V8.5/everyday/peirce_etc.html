@@ -1,0 +1,29 @@
+<html>
+<title> Polymorphic minimal propositional logic </title>
+<h1> Polymorphic minimal propositional logic </h1>
+Prove the following theorems (without using automatic tactics).
+<pre>
+Lemma id_P : forall P:Prop, P -> P.
+
+Lemma id_PP : forall P:Prop, (P -> P) -> P -> P.
+
+Lemma imp_trans : forall P Q R :Prop, (P -> Q) -> (Q -> R) -> P -> R.
+
+Lemma imp_perm :  forall P Q R :Prop, (P -> Q -> R) -> Q -> P -> R.
+
+Lemma ignore_Q : forall P Q R :Prop, (P -> R) -> P -> Q -> R.
+
+Lemma delta_imp :  forall P Q :Prop,(P -> P -> Q) -> P -> Q.
+
+Lemma delta_impR :forall P Q :Prop, (P -> Q) -> P -> P -> Q.
+
+Lemma diamond : forall P Q R T:Prop, (P -> Q) -> 
+                                  (P -> R) -> 
+                                  (Q -> R -> T) -> 
+                                  P -> T.
+Lemma weak_peirce : forall P Q:Prop, ((((P -> Q) -> P) -> P) -> Q) -> Q.
+
+</pre>
+<h2> Solution </h2>
+Look at <a href="SRC/peirce_etc.v"> this file </a>.
+</html>

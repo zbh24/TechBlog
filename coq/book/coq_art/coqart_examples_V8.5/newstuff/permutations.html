@@ -1,0 +1,45 @@
+<html>
+<title> Equivalence between two definitions of permutations of lists </title>
+<body>
+<h1> Equivalence between two definitions of permutations of lists </h1>
+
+
+There are (at least) two ways of defining permutations between lists:
+<ul>
+<li> Comparing the numbter of occurrences of items in both lists
+   (see Coq.Sorting.Permutation in <a href="http://coq.inria.fr/library-eng.html"> Standard Library </a>)
+<li> Using an inductive definition (quoted from the Reference Manual)
+<pre>
+Inductive permI  :list A ->list A ->Prop:=
+|permI_refl:forall l, permI l l
+|permI_cons:forall a l0 l1, permI l0 l1-> permI (a::l0)(a::l1)
+|permI_app:forall a l, permI (a::l) (l++(a::nil))
+|permI_trans:forall l1 l2 l3,
+              permI l1 l2 -> permI l2 l3 -> permI l1 l3.
+
+</pre>
+</ul>
+
+Show that both definitions are logically equivalent.
+
+<br>
+
+Use this equivalence to prove easily the following fact:
+<pre>
+Lemma counterexample : ~ permI (2::3::5::5::8::7::4::nil) 
+                               (3::2::8::7::4::3::5::nil).
+</pre>
+
+<h2> Solution </h2>
+<a href="SRC/permutation.v"> This file </a>
+
+<br>
+
+Look also  at the following exercises on permutations :
+<a href="../progav/moreperms.html"> this one </a>
+and <a href="../reflection/perm.html"> this one </a>.
+<hr>
+<a href="../index.html">Going  home </a> 
+<hr> Exercise proposed by Houda Anoun
+</body>
+</html>

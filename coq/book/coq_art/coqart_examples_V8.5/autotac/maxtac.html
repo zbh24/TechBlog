@@ -1,0 +1,58 @@
+<html>
+<title> On pattern matching in Ltac  </title>
+<body>
+<h1> On pattern matching in Ltac </h1>
+
+Consider the following development:
+<pre>
+Require Import Arith.
+Require Import Compare_dec.
+
+Definition max (n p:nat) : nat :=
+  if le_lt_dec n p then p else n.
+
+Lemma le_max_eq :  forall n p, n <= p -> p = max n p.
+ intros n p; unfold max; case (le_lt_dec n p);simpl.
+ trivial.
+ intros; apply le_antisym;auto with arith.
+Qed.
+
+Ltac max_le_rw H :=
+ match goal with H : ?a <= ?b |- ?G =>  elim (le_max_eq a b H) end.
+
+Lemma L1: forall n p, n <= p -> max n p + max n p = 2 * p.
+ intros n p H; max_le_rw H.
+ simpl;auto.
+Qed.
+(* seems OK, 
+   but ... *)
+
+Lemma L2 :  forall n p, n <= p -> 2 <= 3 -> max n p + max n p = 2 * p.
+ intros n p H H0. 
+ max_le_rw H.
+ (* 
+  n : nat
+  p : nat
+  H : n <= p
+  H0 : 2 <= 3
+  ============================
+   max n p + max n p = 2 * p
+*)
+</pre>
+
+What does this example show about pattern matching in Ltac?
+<br>
+Define a tactic similar to <tt>max_le_rw</tt> (using <tt>elim</tt>), which works fine on <tt>L2</tt>.
+<br> <font color=red> Hint: </font> You may use "<tt>type of</tt>" in your tactic.
+
+<h2>Solution</h2>
+
+Look at <a href="SRC/maxtac.v"> this file </a>
+<br>
+<br>
+<hr>
+<a href="../index.html">Going  home </a>
+<hr>
+ <address><a href="mailto:casteran@labri.fr">Pierre Castéran</a></address>
+</body>
+</html>

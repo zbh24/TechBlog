@@ -1,0 +1,33 @@
+<html>
+<title> On permutations </title>
+<body>
+<h1> On permutations </h1>
+
+Define the following relationships on <tt>(list A)</tt>:
+<ul>
+<li> The list <em>l'</em> is obtained from <em>l</em> by transposing two consecutive
+    items.
+<li> The list <em>l'</em> is obtained from <em>l</em> by a finite number of such transpositions. <em> We say that <em>l'</em> is a permutation of <em>l</em>.
+</ul>
+
+Show that the second one is an equivalence relation.
+
+<h2> Solution </h2>
+
+Look at <a href="SRC/perms.v"> this file </a>
+
+<h3> Note </h3>
+You could also define the relationship <tt>perm</tt> as
+<tt>(Rstar _ transpose)</tt>. In this case, you first have
+to load the module <tt>Rstar</tt> of the library <tt>Relations</tt>,
+and prove that the reflexive transitive closure of a symmetric relation
+is symmetric too.
+<br>
+<a href="SRC/perms2.v"> Follow this link </a>
+<br>
+<br>
+<hr>
+<a href="../index.html">Going  home </a> <hr>
+<address><a href="mailto:casteran@labri.fr">Pierre Castéran</a></address>
+</body>
+</html>

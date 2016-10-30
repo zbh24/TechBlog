@@ -29,7 +29,7 @@ int gennext(string s) {
     } else {
       k = next[k];
     }
-  }
+  } 
   return 0;
 }
 

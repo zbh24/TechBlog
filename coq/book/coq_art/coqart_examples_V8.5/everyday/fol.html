@@ -1,0 +1,40 @@
+<html>
+<title> Some proofs in predicate calculus </title>
+<body>
+<h1>  Some proofs in predicate calculus </h1>
+
+Consider the following declarations :
+
+
+<pre>
+ Section A_declared.
+ Variables (A : Set )
+           (P Q : A->Prop)
+           (R : A->A->Prop).
+</pre>
+
+Prove the following theorems:
+
+<pre>
+ (forall a b:A, R a b) -> forall a b:A, R b a
+
+ (forall a:A, P a -> Q a) -> (forall a:A, P a) -> forall a:A, Q a
+
+ (forall a b:A, R a b) -> forall a:A, R a a
+</pre>
+
+<h2>Solution</h2>
+
+<a href="SRC/fol.v"> Look at this file </a>
+
+<h3> Note </h3>
+Each of these proofs can be replaced by a simple call to <tt>auto</tt>.
+<br><br>
+<hr>
+<a href="../index.html">Going  home </a> 
+<hr>
+<address><a href="mailto:casteran@labri.fr">Pierre Castéran</a></address>
+</body>
+</html>
+
+

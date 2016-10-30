@@ -1,0 +1,57 @@
+<html>
+<title> A Coercion from vectors of length 2 to ordered pairs  </title>
+<body>
+<h1> A Coercion from vectors of length 2 to ordered pairs </h1>
+
+<h2> First Question </h2>
+
+Consider the following definitions:
+
+
+
+<pre>
+Require Import Bvector.
+
+Implicit Arguments Vcons [A n].
+Implicit Arguments Vnil [A].
+Implicit Arguments Vhead [A n].
+Implicit Arguments Vtail [A n].
+
+Definition vec2 (A:Type) := vector A 2.
+
+Definition vcons2 (A:Type)(a b:A): vec2 A := Vcons a (Vcons b Vnil).
+Implicit Arguments vcons2 [A].
+</pre>
+<br>
+
+Define a coercion from <tt>vec2</tt> to the class <tt>prod</tt> of cartesian
+products.
+
+The following commands should work properly:
+<pre>
+Check (fst (vcons2 3 4)). 
+
+Eval compute in (snd (vcons2 3 4)).
+</pre>
+
+<h2> A (more difficult) question </h2>
+
+Prove the following theorem:
+<pre>
+Lemma V2 : forall A (v:vec2 A), v= vcons2 (fst v) (snd v).
+</pre>
+
+<br>
+<b>Hint</b> 
+The solution of the second question may use dependent elimination.
+Please refer to <a href="http://www.labri.fr/~casteran/RecTutorial.pdf">
+The tutorial on [Co]-Inductive Types in Coq </a> (Section 6).
+
+<h2> Solution </h2>
+Look at <a href="SRC/Vector2Cart.v"> this file </a>.
+
+
+<hr>
+<a href="../index.html">Going  home </a> 
+</body>
+</html>

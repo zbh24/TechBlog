@@ -110,6 +110,13 @@ subst.
 omega.
 Qed.
 
+Inductive fb:nat->Prop :=
+ | fb0 : fb 0
+ | fb1 : fb 1
+ | fbn : forall n m :nat, fb n -> fb m -> fb (n + m).
+
+
+
 Theorem step_deterministic:
   deterministic step.
 Proof.

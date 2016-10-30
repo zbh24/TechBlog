@@ -1,0 +1,44 @@
+<html>
+<title> Some simple proofs </title>
+<body>
+<h1> Some simple proofs </h1>
+First declare the following variables : <tt>P</tt>, <tt>Q</tt>, <tt>R</tt>, 
+<tt>S</tt> of sort <tt>Prop</tt>.
+<br>
+Then prove the following theorems, using only the tactics
+<tt>assumption</tt>, <tt>intros</tt>, and <tt>apply</tt>.
+
+<pre>
+ Lemma id_P : P -> P.
+
+ Lemma id_PP : (P->P)->(P->P).
+
+ Lemma imp_trans : (P->Q)->(Q->R)->P->R.
+
+ Lemma imp_perm : (P->Q->R)->(Q->P->R).
+
+ Lemma ignore_Q : (P->R)->P->Q->R.
+
+ Lemma delta_imp  : (P->P->Q)->P->Q.
+
+ Lemma delta_impR : (P->Q)->(P->P->Q).
+
+ Lemma diamond : (P->Q)->(P->R)->(Q->R->S)->P->S.
+
+ Lemma weak_peirce : ((((P->Q)->P)->P)->Q)->Q.
+</pre>
+ <br>
+     <a href="SRC/simple_proofs.v"> Solution (without tacticals) </a>
+     <br>
+     <a href="SRC/simple_proofs2.v"> Solution (using some tacticals) </a>
+<hr>
+<h2> Note  </h2>
+  All these theorems  can be proved with a simple call to <tt>Auto</tt>.
+
+<br>
+<br>
+<hr>
+<a href="../index.html">Going  home </a> <hr>
+<address><a href="mailto:casteran@labri.fr">Pierre Castéran</a></address>
+</body>
+</html>

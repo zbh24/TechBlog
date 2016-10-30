@@ -1,0 +1,10 @@
+all : 
+	coq_makefile\
+	le_lt_S_eq.v primes_hyps.v  chap7.v Zpos_x_tac.v maxtac.v \
+	> makefile
+	touch .depend
+	make depend
+	make all
+
+
+

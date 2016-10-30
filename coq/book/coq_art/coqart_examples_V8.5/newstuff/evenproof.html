@@ -1,0 +1,36 @@
+<html>
+<title> On the danger of evaluation </title>
+<body>
+<h1> On the danger of evaluation </h1>
+
+First define on <tt>nat</tt> the exponential towers of base 2 and heigth 
+<em>n</em>.
+For instance the tower of height 4 is 2<sup>2<sup>2<sup>2</sup></sup></sup>
+=16384.
+<ol>
+<li> Consider the following definition of even natural numbers:
+<pre>
+Inductive even : nat -> Prop :=
+  even0 : even 0
+| even_S : forall p, even p -> even (S (S p)).
+
+Hint Constructors even.
+</pre>
+Prove that the tower of height 6 is an even number, 
+and let us call your theorem <tt>six_tower</tt>. 
+<li> 
+Try the command <tt> Eval compute in six_tower </tt>
+<li>
+Make the constant <tt>six_tower</tt> transparent (by replacing
+its <tt>Qed</tt> with <tt>Defined</tt>), and redo the preceding question.
+<li>
+I presume that your proof of <tt>six_tower</tt> uses some lemmas.
+Edit your proof and replace their <tt>Qed</tt> with <tt>Defined</tt>.
+What happens? 
+</ol>
+<h2> Solution </h2>
+Look at <a href="SRC/evenproof.v"> this file </a>.
+<hr>
+<a href="../index.html">Going  home </a> 
+</body>
+</html>

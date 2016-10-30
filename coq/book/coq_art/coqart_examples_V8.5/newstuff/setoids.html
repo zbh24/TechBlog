@@ -1,0 +1,34 @@
+<html>
+<title> Setoids for beginners </title>
+<body>
+<h1> Setoids for beginners </h1>
+
+Although the type <b>Z</b> of integers is already defined in Coq, it
+is interesting to look at the usual mathematical building of the set of
+integers as a quotient of the set of pairs of natural numbers by the
+ equivalence relation <em>(a,b) R (c,d)</em> if <em>a+d = b+c</em>.
+<br>
+In Coq, you will associate a setoid to this equivalence relation, and
+register the usual operations : <b>+</b>, <b>*</b>, etc, as morphisms.
+Prove also that you build a ring with unity and the property of integrity
+(<em>i.e.</em> if <em>xy = 0 </em> then <em>x = 0 </em> or
+<em>y = 0 </em>.)<br>
+
+In a second time, build the ring of integers modulo p (with p:nat).
+<br>
+Give some examples of <tt>setoid_replace</tt> and <tt>setoid_rewrite</tt>.
+
+<h2> Solution </h2>
+<ul>
+<li>
+<a href="V8ONLY/setoids.v"> For Coq V8.0 </a> 
+<li>
+<a href="CVSONLY/setoids2.v"> For Coq CVS (with smarter <tt>setoid_rewrite</tt>
+and <tt>setoid_replace</tt>) </a>
+<br><br>
+<hr>
+<a href="../index.html">Going  home </a> 
+<hr>
+<address><a href="mailto:casteran@labri.fr">Pierre Castéran</a></address>
+</body>
+</html>

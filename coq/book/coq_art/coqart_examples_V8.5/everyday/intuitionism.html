@@ -1,0 +1,35 @@
+<html>
+<title> Intuitionistic Propositional Logic </title>
+<body>
+<h1>  Intuitionistic Propositional Logic </h1>
+
+Prove the following theorems (<font color=red> without using <tt>tauto</tt> !</font>).
+
+
+<pre>
+Lemma and_assoc : forall A B C:Prop, A /\ (B /\ C) -> (A /\ B) /\ C.
+
+Lemma and_imp_dist : forall A B C D:Prop,
+                     (A -> B) /\ (C -> D) -> A /\ C -> B /\ D.
+
+Lemma not_contrad : forall A : Prop, ~(A /\ ~A).
+
+Lemma or_and_not : forall A B : Prop, (A\/B)/\~A -> B.
+
+</pre>
+
+<h2>Solution</h2>
+
+<a href="SRC/intuitionism.v"> Look at this file </a>
+
+<h3> Note </h3>
+Each of these proofs can be replaced by a simple call to <tt>tauto</tt>.
+<br><br>
+<hr>
+<a href="../index.html">Going  home </a> 
+<hr>
+<address><a href="mailto:casteran@labri.fr">Pierre Castéran</a></address>
+</body>
+</html>
+
+

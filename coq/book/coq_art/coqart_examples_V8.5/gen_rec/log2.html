@@ -1,0 +1,29 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html>
+  <head>
+    <title> Discrete logarithm
+</title>
+  </head>
+
+  <body>
+    <h1> Discrete logarithm
+</h1>
+<p>
+Using the function <tt>two_power</tt> defined for the exercise
+<a href="../structinduct/two_power.html">about computing the power of 2.</a>
+and well-founded recursion, define a function that satisfies the following
+specification:
+</p>
+<pre>
+ forall n:nat, n <> 0 ->
+         {p : nat | two_power p <= n /\ n < two_power (p + 1)}
+</pre>
+<h2>Solution</h2>
+<a href="SRC/log2.v">Follow this link</a>
+<br><br>
+<hr>
+<a href="../index.html">Going  home </a> 
+    <hr>
+    <address><a href="mailto:casterant@labri.fr">Pierre Castéran</a></address>
+  </body>
+</html>

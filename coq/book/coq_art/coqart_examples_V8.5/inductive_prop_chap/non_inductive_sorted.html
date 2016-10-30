@@ -1,0 +1,36 @@
+<html>
+<title>Non inductive definition of sorted lists
+</title>
+<body>
+<h1>Non inductive definition of sorted lists
+</h1>
+<p>
+Here are two definitions of sorted lists.  Prove that they are equivalent.
+</p>
+<pre>
+Require Export List.
+
+Inductive sorted (A:Set)(R:A->A->Prop) : list A -> Prop :=
+  | sorted0 : sorted A R nil
+  | sorted1 : forall x:A, sorted A R (cons x nil)
+  | sorted2 :
+      forall (x y:A)(l:list A),
+        R x y ->
+        sorted A R (cons y l)-> sorted A R (cons x (cons y l)).
+
+Definition sorted' (A:Set)(R:A->A->Prop)(l:list A) :=
+  forall (l1 l2:list A)(n1 n2:A),
+    l = app l1 (cons n1 (cons n2 l2))-> R n1 n2.
+</pre>
+<h2> Solution </h2>
+
+Look at <a href="SRC/non_inductive_sorted.v"> This file </a>
+<br>
+<br>
+<hr>
+<a href="../index.html">Going  home </a> <hr>
+<address><a href="mailto:casteran@labri.fr">Pierre Castéran</a></address>
+
+</body>
+
+</html>

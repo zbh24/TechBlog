@@ -1,0 +1,15 @@
+all : 
+	coq_makefile\
+	chap8.v \
+        le_impred.v le_diff.v even.v last.v \
+	palindrome.v perms.v perms2.v starclos.v \
+        weird_induc.v lt_le.v parsing.v le_prime.v JM_assoc.v \
+        Hoare_sequence.v Hoare_while_rule_bis.v frobenius.v \
+        impredicative.v infinite_loop.v non_inductive_sorted.v \
+        parsing2.v parsing3.v  id_solution.v JMeqSolution.v magaud.v > makefile
+	touch .depend
+	make depend
+	make all
+
+
+

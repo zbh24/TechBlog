@@ -1,0 +1,44 @@
+<html>
+<title> On Negation </title>
+<body>
+<h1> On Negation </h1>
+
+Prove the following propositions:
+
+<pre>
+~ False
+
+forall P:Prop, ~ ~ ~ P -> ~ P
+
+forall P Q:Prop, ~ ~ ~ P -> P -> Q
+
+forall P Q:Prop, (P -> Q) -> ~ Q -> ~ P.
+
+forall P Q R:Prop, (P -> Q) -> (P -> ~ Q) -> P -> R.
+</pre>
+
+Some of these propositions don't need <tt>False</tt>-elimination;
+in these situations, show that these theorems are derived from some 
+theorems of the minimal propositional logic.
+
+<h2> Solution </h2>
+
+See <a href="SRC/on_negation.v"> on_negation.v </a>
+
+<h2>Notes</h2>
+Whenever <tt>False</tt>-elimination  is  not
+ needed, we first proved some lemma in minimal propositional logic, then
+apply it to derive the statement we wanted to prove.
+<br>
+Please notice that all these results could be proved in one step :
+either by "<tt>unfold not; auto</tt>" if <tt>False</tt>-elimination is not needed,
+or by <tt>tauto</tt> in the other case.
+
+<br><br>
+<hr>
+<a href="../index.html">Going  home </a> 
+<hr>
+<address><a href="mailto:casteran@labri.fr">Pierre Castéran</a></address>
+
+</body>
+</html>

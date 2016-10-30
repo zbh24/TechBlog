@@ -1,0 +1,11 @@
+all : 
+	coq_makefile\
+	factor.v plus_with_natrec.v \
+	chap14.v list_ltree_ind2.v ltree_count.v ltree_to_ntree.v\
+	update_eq.v use_le_ind_max.v > makefile
+	touch .depend
+	make depend
+	make all
+
+
+

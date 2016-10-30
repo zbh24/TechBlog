@@ -1,0 +1,15 @@
+all : 
+	coq_makefile\
+	Coinduc.v list_inject.v infinite_impred.v \
+	infinite_impred_prelude.v \
+	Ltree.v building.v graft.v \
+	graft_unfold.v Tree_Inf.v LTree_bisimilar.v graft_absorb.v \
+	bug_infinite.v finite_or_infinite.v finiteness_needed.v \
+        LMap.v \
+        > makefile
+	touch .depend
+	make depend
+	make all
+
+
+

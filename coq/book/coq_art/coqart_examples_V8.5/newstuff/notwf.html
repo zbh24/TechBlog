@@ -1,0 +1,43 @@
+<html>
+<title> On Well Founded sets and the Axiom of Functional Choice  </title>
+<body>
+<h1> On Well Founded sets and the Axiom of Choice </h1>
+
+First, build a context with classical logic and assume the Axiom of
+Functional Choice:
+
+
+
+<pre>
+Require Import Classical.
+
+Axiom functional_choice : forall (A:Set)(S:A->A->Prop), 
+                      (forall x, exists y, S x y )-> 
+                          exists f, forall x, S x (f x).
+</pre>
+
+
+Prove the following theorem:
+<pre>
+notWellFounded_seq
+     : forall (A : Set) (R : A -> A -> Prop),
+       ~ well_founded R ->
+       exists f : nat -> A, (forall n : nat, R (f (S n)) (f n))
+</pre>
+
+<h2> Remarks </h2>
+
+Look also at <a href="../gen-rec/not-decreasing.html"> that exercise </a>
+<br>
+The Axiom of Functional Choice is presented on  Coq's FAQ 
+(in <a href="http://coq.inria.fr/doc-eng.html"> Coq's documentation </a>).
+Look at the section "The Logic of Coq : Axioms".
+
+<h2> Solution </h2>
+Look at <a href="SRC/notwf.v"> this file </a>.
+
+
+<hr>
+<a href="../index.html">Going  home </a> 
+</body>
+</html>

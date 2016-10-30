@@ -1,0 +1,29 @@
+<html>
+<title> Splitting and combining lists </title>
+<body>
+<h1>  Splitting and combining lists </h1>
+
+Define two functions with the foolowing type
+<tt>
+split
+     : forall A B : Set, list (A * B) -> list A * list B
+
+combine
+     : forall A B : Set, list A -> list B -> list (A * B)
+
+</tt>
+and the usual behavior (transform a list of pairs into
+a pair of lists containing the same data, and vice-versa, whenever possible)
+
+<br>
+Prove a simple theorem relating <tt>split</tt> and <tt>combine</tt>
+
+<h2>Solution</h2>
+
+Look at <a href="SRC/split.v"> this file </a>
+<hr>
+<a href="../index.html">Going  home </a> <hr>
+
+ <address><a href="mailto:casteran@labri.fr">Pierre Castéran</a></address>
+</body>
+</html>

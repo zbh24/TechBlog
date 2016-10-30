@@ -1,0 +1,10 @@
+all : 
+	coq_makefile\
+	chap16.v verif_divide.v prime_sqrt.v neutral.v \
+	> makefile
+	touch .depend
+	make depend
+	make all
+
+
+

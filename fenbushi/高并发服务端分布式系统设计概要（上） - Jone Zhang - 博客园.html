@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<!-- saved from url=(0043)http://www.cnblogs.com/ccdev/p/3338412.html -->
+<html lang="zh-cn"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<title>高并发服务端分布式系统设计概要（上） - Jone Zhang - 博客园</title>
+<link type="text/css" rel="stylesheet" href="./高并发服务端分布式系统设计概要（上） - Jone Zhang - 博客园_files/blog-common.css">
+<link id="MainCss" type="text/css" rel="stylesheet" href="./高并发服务端分布式系统设计概要（上） - Jone Zhang - 博客园_files/bundle-ThinkInside.css">
+<link title="RSS" type="application/rss+xml" rel="alternate" href="http://www.cnblogs.com/ccdev/rss">
+<link title="RSD" type="application/rsd+xml" rel="EditURI" href="http://www.cnblogs.com/ccdev/rsd.xml">
+<link type="application/wlwmanifest+xml" rel="wlwmanifest" href="http://www.cnblogs.com/ccdev/wlwmanifest.xml">
+<script src="./高并发服务端分布式系统设计概要（上） - Jone Zhang - 博客园_files/jquery.js" type="text/javascript"></script>  
+<script type="text/javascript">var currentBlogApp = 'ccdev', cb_enable_mathjax=false;var isLogined=false;</script>
+<script src="./高并发服务端分布式系统设计概要（上） - Jone Zhang - 博客园_files/blog-common.js" type="text/javascript"></script>
+</head>
+<body>
+<a name="top"></a>
+
+<!--done-->
+<div id="home">
+<div id="header">
+	<div id="blogTitle">
+	<a id="lnkBlogLogo" href="http://www.cnblogs.com/ccdev/"><img id="blogLogo" src="./高并发服务端分布式系统设计概要（上） - Jone Zhang - 博客园_files/logo.gif" alt="返回主页"></a>			
+		
+<!--done-->
+<h1><a id="Header1_HeaderTitle" class="headermaintitle" href="http://www.cnblogs.com/ccdev/">Jone Zhang's Blog</a></h1>
+<h2></h2>
+
+
+
+		
+	</div><!--end: blogTitle 博客的标题和副标题 -->
+	<div id="navigator">
+		
+<ul id="navList">
+<li><a id="blog_nav_sitehome" class="menu" href="http://www.cnblogs.com/">博客园</a></li>
+<li><a id="blog_nav_myhome" class="menu" href="http://www.cnblogs.com/ccdev/">首页</a></li>
+<li><a id="blog_nav_newpost" class="menu" rel="nofollow" href="https://i.cnblogs.com/EditPosts.aspx?opt=1">新随笔</a></li>
+<li><a id="blog_nav_contact" class="menu" rel="nofollow" href="https://msg.cnblogs.com/send/Jone%20Zhang">联系</a></li>
+<li><a id="blog_nav_rss" class="menu" href="http://www.cnblogs.com/ccdev/rss">订阅</a>
+<!--<a id="blog_nav_rss_image" class="aHeaderXML" href="http://www.cnblogs.com/ccdev/rss"><img src="//www.cnblogs.com/images/xml.gif" alt="订阅" /></a>--></li>
+<li><a id="blog_nav_admin" class="menu" rel="nofollow" href="https://i.cnblogs.com/">管理</a></li>
+</ul>
+		<div class="blogStats">
+			
+			
+<span id="stats_post_count">随笔 - 29&nbsp; </span>
+<span id="stats_article_count">文章 - 0&nbsp; </span>
+<span id="stats-comment_count">评论 - 198</span>
+
+			
+		</div><!--end: blogStats -->
+	</div><!--end: navigator 博客导航栏 -->
+</div><!--end: header 头部 -->
+
+<div id="main">
+	<div id="mainContent">
+	<div class="forFlow">
+		
+<div id="post_detail">
+<!--done-->
+<div id="topics">
+	<div class="post">
+		<h1 class="postTitle">
+			<a id="cb_post_title_url" class="postTitle2" href="./高并发服务端分布式系统设计概要（上） - Jone Zhang - 博客园_files/高并发服务端分布式系统设计概要（上） - Jone Zhang - 博客园.html">高并发服务端分布式系统设计概要（上）</a>
+		</h1>
+		<div class="clear"></div>
+		<div class="postBody">
+			<div id="cnblogs_post_body"><p><span style="background-color: #f5f5f5; color: #333399; font-family: Georgia; font-size: 32px; line-height: 48px;">高并发服务端</span><span style="background-color: #f5f5f5; color: #333399; font-family: Georgia; font-size: 32px; line-height: 48px;">分布式系统设计概要（上）</span></p><p><span style="color: #333399; font-family: Georgia; font-size: 19px; line-height: 27px; background-color: #f5f5f5;">&nbsp;</span><span style="background-color: #f5f5f5; color: #333399; font-family: Georgia; font-size: 19px; line-height: 27px;">&nbsp; &nbsp; &nbsp; &nbsp; ======张峻崇 原创。转载请注明出处。======</span></p><p><span style="color: #333399; font-family: Georgia; font-size: 19px; line-height: 27px; background-color: #f5f5f5;">&nbsp; &nbsp; &nbsp; &nbsp; 又是快一年没写博客了，2013年也只剩尾巴，也不知道今年都忙了些什么。写这篇文章的目的，主要是把今年以来学习的一些东西积淀下来，同时作为之前文章《高性能分布式计算与存储系统设计概要》的补充与提升，然而本人水平非常有限，回头看之前写的文章也有许多不足，甚至是错误，希望同学们看到了错误多多见谅，更欢迎与我讨论并指正。</span></p><p>&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;<span style="color: #333399; font-family: Georgia; font-size: 19px; line-height: 27px; background-color: #f5f5f5;">我大概是从2010年底起开始进入高并发、高性能服务器和分布式这一块领域的研究，到现在也差不多有三年，但其实很多东西仍然是一知半解，我所提到的许许多多概念，也许任何一个我都不能讲的很清楚，还需要继续钻研。但我们平时在工作和学习中，多半也只能从这种一知半解开始，慢慢琢磨，不断改进。</span></p><p>&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;<span style="color: #333399; font-family: Georgia; font-size: 19px; line-height: 27px; background-color: #f5f5f5;">好了，下面开始说我们今天要设计的系统。</span></p><p>&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;<span style="color: #333399; font-family: Georgia; font-size: 19px; line-height: 27px; background-color: #f5f5f5;">这个系统的目标很明确，针对千万级以上PV的网站，设计一套用于后台的高并发的分布式处理系统。这套系统包含业务逻辑的处理、各种计算、存储、日志、备份等方面内容，可用于类微博，SNS，广告推送，邮件等有大量线上并发请求的场景。</span></p><p><span style="color: #333399; font-family: Georgia; font-size: 19px; line-height: 27px; background-color: #f5f5f5;">&nbsp; &nbsp; &nbsp; &nbsp; 如何抗大流量高并发？（不要告诉我把服务器买的再好一点）说起来很简单，就是“分”，如何“分”，简单的说就是把不同的业务分拆到不同的服务器上去跑（垂直拆分），相同的业务压力分拆到不同的服务器去跑（水平拆分），并时刻不要忘记备份、扩展、意外处理等讨厌的问题。说起来都比较简单，但设计和实现起来，就会比较困难。以前我的文章，都是“从整到零”的方式来设计一个系统，这次咱们就反着顺序来。</span></p><p><span style="color: #333399; font-family: Georgia; font-size: 19px; line-height: 27px; background-color: #f5f5f5;">&nbsp; &nbsp; &nbsp; &nbsp; 那我们首先来看，我们的数据应该如何存储和取用。根据我们之前确定的“分”的方法，先确定以下2点：</span></p><p><span style="color: #333399; font-family: Georgia; font-size: 19px; line-height: 27px; background-color: #f5f5f5;">&nbsp; &nbsp; &nbsp; （1）我们的分布式系统，按不同的业务，存储不同的数据；（2）同样的业务，同一个数据应存储多份，其中有的存储提供读写，而有的存储只提供读。</span></p><p><span style="color: #333399; font-family: Georgia; font-size: 19px; line-height: 27px; background-color: #f5f5f5;">&nbsp; &nbsp; &nbsp; &nbsp; 好，先解释下这2点。对于（1）应该容易理解，比如说，我这套系统用于微博（就假想我们做一个山寨的推特吧，给他个命名就叫“山推” 好了，以下都叫山推，Stwi），那么，“我关注的人”这一个业务的数据，肯定和“我发了的推文”这个业务的数据是分开存储的，那么我们现在把，每一个业务所负责的数据的存储，称为一个group。即以group的方式，来负责各个业务的数据的存储。接下来说（2），现在我们已经知道，数据按业务拆到group里面去存取，那么一个group里面又应该有哪些角色呢？自然的，应该有一台主要的机器，作为group的核心，我们称它为Group Master，是的，它就是这个group的主要代表。这个group的数据，在Group Master上应该都能找到，进行读写。另外，我们还需要一些辅助角色，我们称它们为Group Slaves，这些slave机器做啥工作呢？它们负责去Group Master处拿数据，并尽量保持和它同步，并提供读服务。请注意我的用词，“尽量”，稍后将会解释。现在我们已经有了一个group的基本轮廓：</span></p><p style="text-align: center;">&nbsp;<img src="./高并发服务端分布式系统设计概要（上） - Jone Zhang - 博客园_files/25174412-8f284fe2da254ce8bba6ab211c51bed1.jpg" alt="" style="line-height: 1.5;"></p><p><span style="color: #333399; font-family: Georgia; font-size: 19px; line-height: 27px; background-color: #f5f5f5;">&nbsp; &nbsp; &nbsp; &nbsp; 一个group提供对外的接口（废话否则怎么存取数据），group的底层可以是实际的File System，甚至是HDFS。Group Master和Group Slave可以共享同一个File System（用于不能丢数据的强一致性系统），也可以分别指向不同的File System（用于弱一致性，允许停写服务和系统宕机时丢数据的系统），但总之应认为这个"File System"是无状态，有状态的是Group Master和各个Group Slave。</span></p><p><span style="color: #333399; font-family: Georgia; font-size: 19px; line-height: 27px; background-color: #f5f5f5;">&nbsp; &nbsp; &nbsp; &nbsp; 下面来说一个group如何工作，同步等核心问题。首先，一个group的</span><span style="color: #333399; font-family: Georgia; font-size: 19px; line-height: 27px; background-color: #f5f5f5;">Group Master和Group Slave</span><br><span style="color: #333399; font-family: Georgia; font-size: 19px; line-height: 27px; background-color: #f5f5f5;">间应保持强一致性还是弱一致性（最终一致性）应取决于具体的业务需求，以我们的“山推”来说，Group Master和Group Slave并不要求保持强一致性，而弱一致性（最终一致性）即能满足要求，为什么？因为对于“山推”来讲，一个Group Master写了一个数据，而另一个Group Slave被读到一个“过期”（因为Group Master已经写，但此Group Slave还未更新此数据）的数据通常并不会带来大问题，比如，我在“山推”上发了一个推文，“关注我的人”并没有即时同步地看到我的最新推文，并没有太大影响，只要“稍后”它们能看到最新的数据即可，这就是所谓的最终一致性。但当Group Master挂掉时，写服务将中断一小段时间由其它Group Slave来顶替，稍后还要再讲这个问题。假如我们要做的系统不是山推，而是淘宝购物车，支付宝一类的，那么弱一致性（最终一致性）则很难满足要求，同时写服务挂掉也是不能忍受的，对于这样的系统，应保证“强一致性”，保证不能丢失任何数据。</span></p><p><span style="color: #333399; font-family: Georgia; font-size: 19px; line-height: 27px; background-color: #f5f5f5;">&nbsp; &nbsp; &nbsp; &nbsp; 接下来还是以我们的“山推“为例，看看一个group如何完成数据同步。假设，现在我有一个请求要写一个数据，由于只有Group Master能写，那么Group Master将接受这个写请求，并加入写的队列，然后Group Master将通知所有Group Slave来更新这个数据，之后这个数据才真正被写入File System。那么现在就有一个问题，是否应等所有Group Slave都更新了这个数据，才算写成功了呢？这里涉及一些NWR的概念，我们作一个取舍，即至少有一个Group Slave同步成功，才能返回写请求的成功。这是为什么呢？因为假如这时候Group Master突然挂掉了，那么我们至少可以找到一台Group Slave保持和Group Master完全同步的数据并顶替它继续工作，剩下的、其它的Group Slave将“异步”地更新这个新数据，很显然，假如现在有多个读请求过来并到达不同的Group Slave节点，它们很可能读到不一样的数据，但最终这些数据会一致，如前所述。我们做的这种取舍，叫“半同步”模式。那之前所说的强一致性系统应如何工作呢？很显然，必须得等所有Group Slave都同步完成才能返回写成功，这样Group Master挂了，没事，其它Group Slave顶上就行，不会丢失数据，但是付出的代价就是，等待同步的时间。假如我们的group是跨机房、跨地区分布的，那么等待所有Group Slave同步完成将是很大的性能挑战。所以综合考虑，除了对某些特别的系统，采用“最终一致性”和“半同步”工作的系统，是符合高并发线上应用需求的。而且，还有一个非常重要的原因，就是通常线上的请求都是读&gt;&gt;写，这也正是“最终一致性”符合的应用场景。</span></p><p><span style="color: #333399; font-family: Georgia; font-size: 19px; line-height: 27px; background-color: #f5f5f5;">&nbsp; &nbsp; &nbsp; &nbsp; 好，继续。刚才我们曾提到，如果Group Master宕机挂掉，至少可以找到一个和它保持同不的Group Slave来顶替它继续工作，其它的Group Slave则“尽量”保持和Group Master同步，如前文所述。那么这是如何做到的呢？这里涉及到“分布式选举”的概念，如Paxos协议，通过分布式选举，总能找到一个最接近Group Master的Group Slave，来顶替它，从而保证系统的可持续工作。当然，在此过程中，对于最终一致性系统，仍然会有一小段时间的写服务中断。现在继续假设，我们的“山推”已经有了一些规模，而负责“山推”推文的这个group也有了五台机器，并跨机房，跨地区分布，按照上述设计，无论哪个机房断电或机器故障，都不会影响这个group的正常工作，只是会有一些小的影响而已。</span></p><p><span style="color: #333399; font-family: Georgia; font-size: 19px; line-height: 27px; background-color: #f5f5f5;">&nbsp; &nbsp; &nbsp; &nbsp; 那么对于这个group，还剩2个问题，一是如何知道Group Master挂掉了呢？二是在图中我们已经看到Group Slave是可扩展的，那么新加入的Group Slave应如何去“偷”数据从而逐渐和其它节点同步呢？对于问题一，我们的方案是这样的，另外提供一个类似“心跳”的服务（由谁提供呢，后面我们将讲到的Global Master将派上用场），group内所有节点无论是Group Master还是Group Slave都不停地向这个“心跳”服务去申请一个证书，或认为是一把锁，并且这个锁是有时间的，会过期。“心跳”服务定期检查Group Master的锁和其有效性，一旦过期，如果Group Master工作正常，它将锁延期并继续工作，否则说明Group Master挂掉，由其它Group Slave竞争得到此锁（分布式选举），从而变成新的Group Master。对于问题二，则很简单，新加入的Group Slave不断地“偷”老数据，而新数据总由于Group Master通知其更新，最终与其它所有结点同步。（当然，“偷”数据所用的时间并不乐观，通常在小时级别）</span></p><p><span style="color: #333399; font-family: Georgia; font-size: 19px; line-height: 27px; background-color: #f5f5f5;">&nbsp; &nbsp; &nbsp; &nbsp; 中篇链接：</span><a href="http://www.cnblogs.com/ccdev/p/3340484.html">http://www.cnblogs.com/ccdev/p/3340484.html</a></p><span style="color: #333399; font-family: Georgia; font-size: 19px; line-height: 27px; background-color: #f5f5f5;">&nbsp; &nbsp; &nbsp; &nbsp; 下篇链接：</span><a href="http://www.cnblogs.com/ccdev/p/3341234.html">http://www.cnblogs.com/ccdev/p/3341234.html</a><br><p>&nbsp;</p><p>&nbsp;</p></div><div id="MySignature" style="display: block;">iCC Develop Center</div>
+<div class="clear"></div>
+<div id="blog_post_info_block">
+<div id="BlogPostCategory">分类: <a href="http://www.cnblogs.com/ccdev/category/441435.html" target="_blank">高性能系统与分布式计算存储</a></div>
+<div id="EntryTag"></div>
+<div id="blog_post_info"><div id="green_channel">
+        <a href="javascript:void(0);" id="green_channel_digg" onclick="DiggIt(3338412,cb_blogId,1);green_channel_success(this,&#39;谢谢推荐！&#39;);">好文要顶</a>
+            <a id="green_channel_follow" onclick="follow(&#39;97b4da0d-56c7-e111-aa3f-842b2b196315&#39;);" href="javascript:void(0);">关注我</a>
+    <a id="green_channel_favorite" onclick="AddToWz(cb_entryId);return false;" href="javascript:void(0);">收藏该文</a>
+    <a id="green_channel_weibo" href="javascript:void(0);" title="分享至新浪微博" onclick="ShareToTsina()"><img src="./高并发服务端分布式系统设计概要（上） - Jone Zhang - 博客园_files/icon_weibo_24.png" alt=""></a>
+    <a id="green_channel_wechat" href="javascript:void(0);" title="分享至微信" onclick="shareOnWechat()"><img src="./高并发服务端分布式系统设计概要（上） - Jone Zhang - 博客园_files/wechat.png" alt=""></a>
+</div>
+<div id="author_profile">
+    <div id="author_profile_info" class="author_profile_info">
+            <a href="http://home.cnblogs.com/u/ccdev/" target="_blank"><img src="./高并发服务端分布式系统设计概要（上） - Jone Zhang - 博客园_files/20130124140651.png" class="author_avatar" alt=""></a>
+        <div id="author_profile_detail" class="author_profile_info">
+            <a href="http://home.cnblogs.com/u/ccdev/">Jone Zhang</a><br>
+            <a href="http://home.cnblogs.com/u/ccdev/followees">关注 - 1</a><br>
+            <a href="http://home.cnblogs.com/u/ccdev/followers">粉丝 - 346</a>
+        </div>
+    </div>
+    <div class="clear"></div>
+    <div id="author_profile_honor">荣誉：<a href="http://www.cnblogs.com/expert/" target="_blank">推荐博客</a></div>
+    <div id="author_profile_follow">
+                <a href="javascript:void(0);" onclick="follow(&#39;97b4da0d-56c7-e111-aa3f-842b2b196315&#39;);return false;">+加关注</a>
+    </div>
+</div>
+<div id="div_digg">
+    <div class="diggit" onclick="votePost(3338412,&#39;Digg&#39;)">
+        <span class="diggnum" id="digg_count">29</span>
+    </div>
+    <div class="buryit" onclick="votePost(3338412,&#39;Bury&#39;)">
+        <span class="burynum" id="bury_count">0</span>
+    </div>
+    <div class="clear"></div>
+    <div class="diggword" id="digg_tips">
+    </div>
+</div>
+</div>
+<div class="clear"></div>
+<div id="post_next_prev"><a href="http://www.cnblogs.com/ccdev/archive/2012/12/29/2837754.html" class="p_n_p_prefix">« </a> 上一篇：<a href="http://www.cnblogs.com/ccdev/archive/2012/12/29/2837754.html" title="发布于2012-12-29 00:02">高性能分布式计算与存储系统设计概要——暨2012年工作3年半总结（下）</a><br><a href="http://www.cnblogs.com/ccdev/p/3340484.html" class="p_n_p_prefix">» </a> 下一篇：<a href="http://www.cnblogs.com/ccdev/p/3340484.html" title="发布于2013-09-26 13:24">高并发服务端分布式系统设计概要（中）</a><br></div>
+</div>
+
+
+		</div>
+		<div class="postDesc">posted @ <span id="post-date">2013-09-26 10:41</span> <a href="http://www.cnblogs.com/ccdev/">Jone Zhang</a> 阅读(<span id="post_view_count">22076</span>) 评论(<span id="post_comment_count">25</span>)  <a href="https://i.cnblogs.com/EditPosts.aspx?postid=3338412" rel="nofollow">编辑</a> <a href="http://www.cnblogs.com/ccdev/p/3338412.html#" onclick="AddToWz(3338412);return false;">收藏</a></div>
+	</div>
+	<script type="text/javascript">var allowComments=true,cb_blogId=121865,cb_entryId=3338412,cb_blogApp=currentBlogApp,cb_blogUserGuid='97b4da0d-56c7-e111-aa3f-842b2b196315',cb_entryCreatedDate='2013/9/26 10:41:00';loadViewCount(cb_entryId);</script>
+	
+</div><!--end: topics 文章、评论容器-->
+</div><a name="!comments"></a><div id="blog-comments-placeholder"><div id="comments_pager_top"></div>
+<br>
+<div class="feedback_area_title">评论列表</div>
+<div class="feedbackNoItems"></div>	
+
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;<span class="comment_actions"></span>
+				</div>
+				<a href="http://www.cnblogs.com/ccdev/p/3338412.html#2782671" class="layer">#1楼</a><a name="2782671" id="comment_anchor_2782671"></a>  <span class="comment_date">2013-09-26 12:59</span> <a id="a_comment_author_2782671" href="http://www.cnblogs.com/liydotnet/" target="_blank">liy</a> <a href="http://msg.cnblogs.com/send/liy" title="发送站内短消息" class="sendMsg2This">&nbsp;</a>
+			</div>
+			<div class="feedbackCon">
+				<div id="comment_body_2782671" class="blog_comment_body">类似hadoop</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(2782671,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(2782671,&#39;Bury&#39;,this)">反对(0)</a></div>
+			</div>
+		</div>
+	
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;<span class="comment_actions"></span>
+				</div>
+				<a href="http://www.cnblogs.com/ccdev/p/3338412.html#2782702" class="layer">#2楼</a><a name="2782702" id="comment_anchor_2782702"></a>  <span class="comment_date">2013-09-26 13:41</span> <a id="a_comment_author_2782702" href="http://www.cnblogs.com/dreign/" target="_blank">轮回</a> <a href="http://msg.cnblogs.com/send/%E8%BD%AE%E5%9B%9E" title="发送站内短消息" class="sendMsg2This">&nbsp;</a>
+			</div>
+			<div class="feedbackCon">
+				<div id="comment_body_2782702" class="blog_comment_body">楼主讲的很详细，mongodb 的分布式大概也是这样的。</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(2782702,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(2782702,&#39;Bury&#39;,this)">反对(0)</a></div><span id="comment_2782702_avatar" style="display:none;">http://pic.cnblogs.com/face/3250/20141202180339.png</span>
+			</div>
+		</div>
+	
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;<span class="comment_actions"></span>
+				</div>
+				<a href="http://www.cnblogs.com/ccdev/p/3338412.html#2782752" class="layer">#3楼</a><a name="2782752" id="comment_anchor_2782752"></a>  <span class="comment_date">2013-09-26 14:44</span> <a id="a_comment_author_2782752" href="http://home.cnblogs.com/u/195912/" target="_blank">FunLove</a> <a href="http://msg.cnblogs.com/send/FunLove" title="发送站内短消息" class="sendMsg2This">&nbsp;</a>
+			</div>
+			<div class="feedbackCon">
+				<div id="comment_body_2782752" class="blog_comment_body">学习了，大型分布式可以参考下</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(2782752,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(2782752,&#39;Bury&#39;,this)">反对(0)</a></div>
+			</div>
+		</div>
+	
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;<span class="comment_actions"></span>
+				</div>
+				<a href="http://www.cnblogs.com/ccdev/p/3338412.html#2782763" class="layer">#4楼</a><a name="2782763" id="comment_anchor_2782763"></a>  <span class="comment_date">2013-09-26 14:53</span> <a id="a_comment_author_2782763" href="http://home.cnblogs.com/u/129318/" target="_blank">其实我不笨</a> <a href="http://msg.cnblogs.com/send/%E5%85%B6%E5%AE%9E%E6%88%91%E4%B8%8D%E7%AC%A8" title="发送站内短消息" class="sendMsg2This">&nbsp;</a>
+			</div>
+			<div class="feedbackCon">
+				<div id="comment_body_2782763" class="blog_comment_body">mark。。。。。。。。。。。。。</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(2782763,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(2782763,&#39;Bury&#39;,this)">反对(0)</a></div>
+			</div>
+		</div>
+	
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;<span class="comment_actions"></span>
+				</div>
+				<a href="http://www.cnblogs.com/ccdev/p/3338412.html#2782842" class="layer">#5楼</a><a name="2782842" id="comment_anchor_2782842"></a>  <span class="comment_date">2013-09-26 16:03</span> <a id="a_comment_author_2782842" href="http://www.cnblogs.com/wangiqngpei557/" target="_blank">王清培</a> <a href="http://msg.cnblogs.com/send/%E7%8E%8B%E6%B8%85%E5%9F%B9" title="发送站内短消息" class="sendMsg2This">&nbsp;</a>
+			</div>
+			<div class="feedbackCon">
+				<div id="comment_body_2782842" class="blog_comment_body">不错，楼主辛苦；</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(2782842,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(2782842,&#39;Bury&#39;,this)">反对(0)</a></div><span id="comment_2782842_avatar" style="display:none;">http://pic.cnblogs.com/face/u202205.jpg?id=13105403</span>
+			</div>
+		</div>
+	
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;<span class="comment_actions"></span>
+				</div>
+				<a href="http://www.cnblogs.com/ccdev/p/3338412.html#2782914" class="layer">#6楼</a><a name="2782914" id="comment_anchor_2782914"></a>  <span class="comment_date">2013-09-26 16:49</span> <a id="a_comment_author_2782914" href="http://www.cnblogs.com/efan/" target="_blank">芽小凡</a> <a href="http://msg.cnblogs.com/send/%E8%8A%BD%E5%B0%8F%E5%87%A1" title="发送站内短消息" class="sendMsg2This">&nbsp;</a>
+			</div>
+			<div class="feedbackCon">
+				<div id="comment_body_2782914" class="blog_comment_body">楼主辛苦，学习了，虽然这中间有些专业术语不懂，还是大概了解流程了</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(2782914,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(2782914,&#39;Bury&#39;,this)">反对(0)</a></div><span id="comment_2782914_avatar" style="display:none;">http://pic.cnblogs.com/face/562703/20140801183335.png</span>
+			</div>
+		</div>
+	
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;<span class="comment_actions"></span>
+				</div>
+				<a href="http://www.cnblogs.com/ccdev/p/3338412.html#2782927" class="layer">#7楼</a><a name="2782927" id="comment_anchor_2782927"></a>  <span class="comment_date">2013-09-26 16:55</span> <a id="a_comment_author_2782927" href="http://www.cnblogs.com/qixuejia/" target="_blank">Cat Qi</a> <a href="http://msg.cnblogs.com/send/Cat%20Qi" title="发送站内短消息" class="sendMsg2This">&nbsp;</a>
+			</div>
+			<div class="feedbackCon">
+				<div id="comment_body_2782927" class="blog_comment_body">mark</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(2782927,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(2782927,&#39;Bury&#39;,this)">反对(0)</a></div><span id="comment_2782927_avatar" style="display:none;">http://pic.cnblogs.com/face/u72042.gif</span>
+			</div>
+		</div>
+	
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;<span class="comment_actions"></span>
+				</div>
+				<a href="http://www.cnblogs.com/ccdev/p/3338412.html#2782940" class="layer">#8楼</a><a name="2782940" id="comment_anchor_2782940"></a>  <span class="comment_date">2013-09-26 17:06</span> <a id="a_comment_author_2782940" href="http://www.cnblogs.com/AaronYang/" target="_blank">AaronYang</a> <a href="http://msg.cnblogs.com/send/AaronYang" title="发送站内短消息" class="sendMsg2This">&nbsp;</a>
+			</div>
+			<div class="feedbackCon">
+				<div id="comment_body_2782940" class="blog_comment_body">我苦B。。。不太看得懂，却知道你的思路</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(2782940,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(2782940,&#39;Bury&#39;,this)">反对(0)</a></div><span id="comment_2782940_avatar" style="display:none;">http://pic.cnblogs.com/face/377862/20150925093149.png</span>
+			</div>
+		</div>
+	
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;<span class="comment_actions"></span>
+				</div>
+				<a href="http://www.cnblogs.com/ccdev/p/3338412.html#2783050" class="layer">#9楼</a><a name="2783050" id="comment_anchor_2783050"></a>  <span class="comment_date">2013-09-26 19:10</span> <a id="a_comment_author_2783050" href="http://www.cnblogs.com/fengde/" target="_blank">Fedel</a> <a href="http://msg.cnblogs.com/send/Fedel" title="发送站内短消息" class="sendMsg2This">&nbsp;</a>
+			</div>
+			<div class="feedbackCon">
+				<div id="comment_body_2783050" class="blog_comment_body">算是启蒙了！</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(2783050,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(2783050,&#39;Bury&#39;,this)">反对(0)</a></div><span id="comment_2783050_avatar" style="display:none;">http://pic.cnblogs.com/face/562982/20140119222620.png</span>
+			</div>
+		</div>
+	
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;<span class="comment_actions"></span>
+				</div>
+				<a href="http://www.cnblogs.com/ccdev/p/3338412.html#2783078" class="layer">#10楼</a><a name="2783078" id="comment_anchor_2783078"></a>  <span class="comment_date">2013-09-26 19:57</span> <a id="a_comment_author_2783078" href="http://www.cnblogs.com/artwl/" target="_blank">artwl</a> <a href="http://msg.cnblogs.com/send/artwl" title="发送站内短消息" class="sendMsg2This">&nbsp;</a>
+			</div>
+			<div class="feedbackCon">
+				<div id="comment_body_2783078" class="blog_comment_body">非常好的文章，谢谢分享</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(2783078,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(2783078,&#39;Bury&#39;,this)">反对(0)</a></div><span id="comment_2783078_avatar" style="display:none;">http://pic.cnblogs.com/face/u112805.png?id=201209274142</span>
+			</div>
+		</div>
+	
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;<span class="comment_actions"></span>
+				</div>
+				<a href="http://www.cnblogs.com/ccdev/p/3338412.html#2783201" class="layer">#11楼</a><a name="2783201" id="comment_anchor_2783201"></a>  <span class="comment_date">2013-09-26 23:50</span> <a id="a_comment_author_2783201" href="http://www.cnblogs.com/bluedoctor/" target="_blank">深蓝医生</a> <a href="http://msg.cnblogs.com/send/%E6%B7%B1%E8%93%9D%E5%8C%BB%E7%94%9F" title="发送站内短消息" class="sendMsg2This">&nbsp;</a>
+			</div>
+			<div class="feedbackCon">
+				<div id="comment_body_2783201" class="blog_comment_body">不错，学习了！</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(2783201,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(2783201,&#39;Bury&#39;,this)">反对(0)</a></div><span id="comment_2783201_avatar" style="display:none;">http://pic.cnblogs.com/face/u114517.png?id=23112533</span>
+			</div>
+		</div>
+	
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;<span class="comment_actions"></span>
+				</div>
+				<a href="http://www.cnblogs.com/ccdev/p/3338412.html#2783216" class="layer">#12楼</a><a name="2783216" id="comment_anchor_2783216"></a>  <span class="comment_date">2013-09-27 00:38</span> <a id="a_comment_author_2783216" href="http://www.cnblogs.com/JACK-SPARROW/" target="_blank">王大明</a> <a href="http://msg.cnblogs.com/send/%E7%8E%8B%E5%A4%A7%E6%98%8E" title="发送站内短消息" class="sendMsg2This">&nbsp;</a>
+			</div>
+			<div class="feedbackCon">
+				<div id="comment_body_2783216" class="blog_comment_body">mark,谢谢分享<br>有时间详细琢磨一下</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(2783216,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(2783216,&#39;Bury&#39;,this)">反对(0)</a></div><span id="comment_2783216_avatar" style="display:none;">http://pic.cnblogs.com/face/u365543.jpg?id=21233518</span>
+			</div>
+		</div>
+	
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;<span class="comment_actions"></span>
+				</div>
+				<a href="http://www.cnblogs.com/ccdev/p/3338412.html#2783264" class="layer">#13楼</a><a name="2783264" id="comment_anchor_2783264"></a>  <span class="comment_date">2013-09-27 08:41</span> <a id="a_comment_author_2783264" href="http://www.cnblogs.com/whosedream/" target="_blank">一文钱</a> <a href="http://msg.cnblogs.com/send/%E4%B8%80%E6%96%87%E9%92%B1" title="发送站内短消息" class="sendMsg2This">&nbsp;</a>
+			</div>
+			<div class="feedbackCon">
+				<div id="comment_body_2783264" class="blog_comment_body">好文，让我有了个初步的模糊的认知</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(2783264,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(2783264,&#39;Bury&#39;,this)">反对(0)</a></div><span id="comment_2783264_avatar" style="display:none;">http://pic.cnblogs.com/face/u261483.jpg?id=07153328</span>
+			</div>
+		</div>
+	
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;<span class="comment_actions"></span>
+				</div>
+				<a href="http://www.cnblogs.com/ccdev/p/3338412.html#2783432" class="layer">#14楼</a><a name="2783432" id="comment_anchor_2783432"></a>  <span class="comment_date">2013-09-27 10:50</span> <a id="a_comment_author_2783432" href="http://www.cnblogs.com/eric-gao/" target="_blank">源来如此</a> <a href="http://msg.cnblogs.com/send/%E6%BA%90%E6%9D%A5%E5%A6%82%E6%AD%A4" title="发送站内短消息" class="sendMsg2This">&nbsp;</a>
+			</div>
+			<div class="feedbackCon">
+				<div id="comment_body_2783432" class="blog_comment_body">非常好！讲的很详细！</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(2783432,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(2783432,&#39;Bury&#39;,this)">反对(0)</a></div><span id="comment_2783432_avatar" style="display:none;">http://pic.cnblogs.com/face/375380/20130129172332.png</span>
+			</div>
+		</div>
+	
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;<span class="comment_actions"></span>
+				</div>
+				<a href="http://www.cnblogs.com/ccdev/p/3338412.html#2783440" class="layer">#15楼</a><a name="2783440" id="comment_anchor_2783440"></a>  <span class="comment_date">2013-09-27 11:00</span> <a id="a_comment_author_2783440" href="http://home.cnblogs.com/u/124509/" target="_blank">zfy</a> <a href="http://msg.cnblogs.com/send/zfy" title="发送站内短消息" class="sendMsg2This">&nbsp;</a>
+			</div>
+			<div class="feedbackCon">
+				<div id="comment_body_2783440" class="blog_comment_body">好文，mark....</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(2783440,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(2783440,&#39;Bury&#39;,this)">反对(0)</a></div>
+			</div>
+		</div>
+	
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;<span class="comment_actions"></span>
+				</div>
+				<a href="http://www.cnblogs.com/ccdev/p/3338412.html#2783771" class="layer">#16楼</a><a name="2783771" id="comment_anchor_2783771"></a>  <span class="comment_date">2013-09-27 17:03</span> <a id="a_comment_author_2783771" href="http://home.cnblogs.com/u/255321/" target="_blank">julianking</a> <a href="http://msg.cnblogs.com/send/julianking" title="发送站内短消息" class="sendMsg2This">&nbsp;</a>
+			</div>
+			<div class="feedbackCon">
+				<div id="comment_body_2783771" class="blog_comment_body">mark.... 学习了</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(2783771,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(2783771,&#39;Bury&#39;,this)">反对(0)</a></div>
+			</div>
+		</div>
+	
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;<span class="comment_actions"></span>
+				</div>
+				<a href="http://www.cnblogs.com/ccdev/p/3338412.html#2784215" class="layer">#17楼</a><a name="2784215" id="comment_anchor_2784215"></a>  <span class="comment_date">2013-09-28 18:46</span> <a id="a_comment_author_2784215" href="http://www.cnblogs.com/netfocus/" target="_blank">netfocus</a> <a href="http://msg.cnblogs.com/send/netfocus" title="发送站内短消息" class="sendMsg2This">&nbsp;</a>
+			</div>
+			<div class="feedbackCon">
+				<div id="comment_body_2784215" class="blog_comment_body">多谢楼主分享，看完第一篇，思路很清晰。正在看中篇，呵呵</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(2784215,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(2784215,&#39;Bury&#39;,this)">反对(0)</a></div><span id="comment_2784215_avatar" style="display:none;">http://pic.cnblogs.com/face/13665/20150126002828.png</span>
+			</div>
+		</div>
+	
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;<span class="comment_actions"></span>
+				</div>
+				<a href="http://www.cnblogs.com/ccdev/p/3338412.html#2784370" class="layer">#18楼</a><a name="2784370" id="comment_anchor_2784370"></a>  <span class="comment_date">2013-09-29 09:35</span> <a id="a_comment_author_2784370" href="http://www.cnblogs.com/woanon/" target="_blank">雨后出太阳</a> <a href="http://msg.cnblogs.com/send/%E9%9B%A8%E5%90%8E%E5%87%BA%E5%A4%AA%E9%98%B3" title="发送站内短消息" class="sendMsg2This">&nbsp;</a>
+			</div>
+			<div class="feedbackCon">
+				<div id="comment_body_2784370" class="blog_comment_body">入门好文，继续看中篇</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(2784370,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(2784370,&#39;Bury&#39;,this)">反对(0)</a></div>
+			</div>
+		</div>
+	
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;<span class="comment_actions"></span>
+				</div>
+				<a href="http://www.cnblogs.com/ccdev/p/3338412.html#2785278" class="layer">#19楼</a><a name="2785278" id="comment_anchor_2785278"></a>  <span class="comment_date">2013-09-30 14:43</span> <a id="a_comment_author_2785278" href="http://home.cnblogs.com/u/434505/" target="_blank">力菜</a> <a href="http://msg.cnblogs.com/send/%E5%8A%9B%E8%8F%9C" title="发送站内短消息" class="sendMsg2This">&nbsp;</a>
+			</div>
+			<div class="feedbackCon">
+				<div id="comment_body_2785278" class="blog_comment_body">mark</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(2785278,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(2785278,&#39;Bury&#39;,this)">反对(0)</a></div>
+			</div>
+		</div>
+	
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;<span class="comment_actions"></span>
+				</div>
+				<a href="http://www.cnblogs.com/ccdev/p/3338412.html#2785331" class="layer">#20楼</a><a name="2785331" id="comment_anchor_2785331"></a>  <span class="comment_date">2013-09-30 15:27</span> <a id="a_comment_author_2785331" href="http://www.cnblogs.com/teamworks/" target="_blank">大道理</a> <a href="http://msg.cnblogs.com/send/%E5%A4%A7%E9%81%93%E7%90%86" title="发送站内短消息" class="sendMsg2This">&nbsp;</a>
+			</div>
+			<div class="feedbackCon">
+				<div id="comment_body_2785331" class="blog_comment_body">Mark，感谢楼主！</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(2785331,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(2785331,&#39;Bury&#39;,this)">反对(0)</a></div><span id="comment_2785331_avatar" style="display:none;">http://pic.cnblogs.com/face/185978/20130904153355.png</span>
+			</div>
+		</div>
+	
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;<span class="comment_actions"></span>
+				</div>
+				<a href="http://www.cnblogs.com/ccdev/p/3338412.html#2791901" class="layer">#21楼</a><a name="2791901" id="comment_anchor_2791901"></a>  <span class="comment_date">2013-10-13 01:51</span> <a id="a_comment_author_2791901" href="http://www.cnblogs.com/DKSoft/" target="_blank">D10.天地弦</a> <a href="http://msg.cnblogs.com/send/D10.%E5%A4%A9%E5%9C%B0%E5%BC%A6" title="发送站内短消息" class="sendMsg2This">&nbsp;</a>
+			</div>
+			<div class="feedbackCon">
+				<div id="comment_body_2791901" class="blog_comment_body">Mark</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(2791901,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(2791901,&#39;Bury&#39;,this)">反对(0)</a></div>
+			</div>
+		</div>
+	
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;<span class="comment_actions"></span>
+				</div>
+				<a href="http://www.cnblogs.com/ccdev/p/3338412.html#2845286" class="layer">#22楼</a><a name="2845286" id="comment_anchor_2845286"></a>  <span class="comment_date">2013-12-26 17:20</span> <a id="a_comment_author_2845286" href="http://www.cnblogs.com/job-views/" target="_blank">一介莽夫</a> <a href="http://msg.cnblogs.com/send/%E4%B8%80%E4%BB%8B%E8%8E%BD%E5%A4%AB" title="发送站内短消息" class="sendMsg2This">&nbsp;</a>
+			</div>
+			<div class="feedbackCon">
+				<div id="comment_body_2845286" class="blog_comment_body">顶，上次也看了你的类似博文！说的很细，赞一个。</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(2845286,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(2845286,&#39;Bury&#39;,this)">反对(0)</a></div>
+			</div>
+		</div>
+	
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;<span class="comment_actions"></span>
+				</div>
+				<a href="http://www.cnblogs.com/ccdev/p/3338412.html#2944110" class="layer">#23楼</a><a name="2944110" id="comment_anchor_2944110"></a>  <span class="comment_date">2014-05-22 11:21</span> <a id="a_comment_author_2944110" href="http://www.cnblogs.com/weishaohua/" target="_blank">□华子</a> <a href="http://msg.cnblogs.com/send/%E2%96%A1%E5%8D%8E%E5%AD%90" title="发送站内短消息" class="sendMsg2This">&nbsp;</a>
+			</div>
+			<div class="feedbackCon">
+				<div id="comment_body_2944110" class="blog_comment_body">不错的文章</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(2944110,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(2944110,&#39;Bury&#39;,this)">反对(0)</a></div>
+			</div>
+		</div>
+	
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;<span class="comment_actions"></span>
+				</div>
+				<a href="http://www.cnblogs.com/ccdev/p/3338412.html#3088752" class="layer">#24楼</a><a name="3088752" id="comment_anchor_3088752"></a>  <span class="comment_date">2014-12-18 11:05</span> <a id="a_comment_author_3088752" href="http://www.cnblogs.com/cnlinjie/" target="_blank">cnlinjie</a> <a href="http://msg.cnblogs.com/send/cnlinjie" title="发送站内短消息" class="sendMsg2This">&nbsp;</a>
+			</div>
+			<div class="feedbackCon">
+				<div id="comment_body_3088752" class="blog_comment_body">感谢楼主分享。获益良多。<br>有个问题不解，读写服务器(Master)只能一台吗？如果Master压力很大，要怎么办？扩充Master吗？那写时数据的一致性需要怎么保证呢？</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(3088752,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(3088752,&#39;Bury&#39;,this)">反对(0)</a></div><span id="comment_3088752_avatar" style="display:none;">http://pic.cnblogs.com/face/493345/20160826135047.png</span>
+			</div>
+		</div>
+	
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;<span class="comment_actions"></span>
+				</div>
+				<a href="http://www.cnblogs.com/ccdev/p/3338412.html#3359485" class="layer">#25楼</a><a name="3359485" id="comment_anchor_3359485"></a><span id="comment-maxId" style="display:none;">3359485</span><span id="comment-maxDate" style="display:none;">2016/2/4 14:02:17</span>  <span class="comment_date">2016-02-04 14:02</span> <a id="a_comment_author_3359485" href="http://www.cnblogs.com/chenhais/" target="_blank">水晶玛瑙</a> <a href="http://msg.cnblogs.com/send/%E6%B0%B4%E6%99%B6%E7%8E%9B%E7%91%99" title="发送站内短消息" class="sendMsg2This">&nbsp;</a>
+			</div>
+			<div class="feedbackCon">
+				<div id="comment_body_3359485" class="blog_comment_body">文笔。。。。看着太累</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(3359485,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(3359485,&#39;Bury&#39;,this)">反对(0)</a></div><span id="comment_3359485_avatar" style="display:none;">http://pic.cnblogs.com/face/u317149.jpg?id=20221011</span>
+			</div>
+		</div>
+	<div id="comments_pager_bottom"></div></div><script type="text/javascript">var commentManager = new blogCommentManager();commentManager.renderComments(0);</script>
+<div id="comment_form" class="commentform">
+<a name="commentform"></a>
+<div id="divCommentShow"></div>
+<div id="comment_nav"><span id="span_refresh_tips"></span><a href="javascript:void(0);" onclick="return RefreshCommentList();" id="lnk_RefreshComments" runat="server" clientidmode="Static">刷新评论</a><a href="http://www.cnblogs.com/ccdev/p/3338412.html#" onclick="return RefreshPage();">刷新页面</a><a href="http://www.cnblogs.com/ccdev/p/3338412.html#top">返回顶部</a></div>
+<div id="comment_form_container"><div class="login_tips">注册用户登录后才能发表评论，请 <a rel="nofollow" href="javascript:void(0);" class="underline" onclick="return login(&#39;commentform&#39;);">登录</a> 或 <a rel="nofollow" href="javascript:void(0);" class="underline" onclick="return register();">注册</a>，<a href="http://www.cnblogs.com/">访问</a>网站首页。</div></div>
+<div class="ad_text_commentbox" id="ad_text_under_commentbox"></div>
+<div id="ad_t2"><a href="http://www.ucancode.com/index.htm" target="_blank">【推荐】50万行VC++源码: 大型组态工控、电力仿真CAD与GIS源码库</a><br><a href="https://group.cnblogs.com/topic/75389.html" target="_blank">【活动】优达学城正式发布“无人驾驶车工程师”课程</a><br><a href="http://www.rongcloud.cn/live" target="_blank">【推荐】移动直播百强八成都在用融云即时通讯云</a><br><a href="http://www.gcpowertools.com.cn/products/componentone_studio_enterprise.htm?utm_source=cnblogs&utm_medium=blogpage&utm_term=bottom&utm_content=C1&utm_campaign=community" target="_blank">【推荐】别再闷头写代码！找对工具，事半功倍，全能开发工具包用起来</a><br></div>
+<div id="opt_under_post"></div>
+<div id="ad_c1" class="c_ad_block"><a href="http://gold.xitu.io/extension/?utm_source=cnblogs&utm_medium=banner&utm_content=juhe&utm_campaign=q3_extension" target="_blank"><img width="300" height="250" src="./高并发服务端分布式系统设计概要（上） - Jone Zhang - 博客园_files/24442-20160902193613668-1123982956.png" alt=""></a></div>
+<div id="under_post_news"><div class="itnews c_ad_block"><b>最新IT新闻</b>:<br> ·  <a href="http://news.cnblogs.com/n/554422/" target="_blank">谷歌发布视频界的ImageNet，这可能是史上最大的数据集了</a><br> ·  <a href="http://news.cnblogs.com/n/554421/" target="_blank">淘宝刷单再遭央视曝光，刷单缘何屡禁不止</a><br> ·  <a href="http://news.cnblogs.com/n/554420/" target="_blank">日本开设“VR专业学校” 免费入学还有奖学金</a><br> ·  <a href="http://news.cnblogs.com/n/554419/" target="_blank">Android 6.0发布一年后：一加X终于迎来“棉花糖”更新</a><br> ·  <a href="http://news.cnblogs.com/n/554418/" target="_blank">并入鸿海后夏普购回原总部所在地大楼</a><br>» <a href="http://news.cnblogs.com/" title="IT新闻" target="_blank">更多新闻...</a></div></div>
+<div id="ad_c2" class="c_ad_block"><a href="https://www.jiguang.cn/devservice/?from=cnblogs01" target="_blank"><img width="468" height="60" src="./高并发服务端分布式系统设计概要（上） - Jone Zhang - 博客园_files/24442-20160803181056012-1919505484.jpg" alt=""></a></div>
+<div id="under_post_kb"><div class="itnews c_ad_block" id="kb_block"><b>最新知识库文章</b>:<br><div id="kb_recent"> ·  <a href="http://kb.cnblogs.com/page/553682/" target="_blank">陈皓：什么是工程师文化？</a><br> ·  <a href="http://kb.cnblogs.com/page/551422/" target="_blank">没那么难，谈CSS的设计模式</a><br> ·  <a href="http://kb.cnblogs.com/page/550625/" target="_blank">程序猿媳妇儿注意事项</a><br> ·  <a href="http://kb.cnblogs.com/page/540529/" target="_blank">可是姑娘，你为什么要编程呢？</a><br> ·  <a href="http://kb.cnblogs.com/page/549631/" target="_blank">知其所以然（以算法学习为例）</a><br></div>» <a href="http://kb.cnblogs.com/" target="_blank">更多知识库文章...</a></div></div>
+<div id="HistoryToday" class="c_ad_block"></div>
+<script type="text/javascript">
+    fixPostBody();
+    setTimeout(function () { incrementViewCount(cb_entryId); }, 50);
+    deliverAdT2();
+    deliverAdC1();
+    deliverAdC2();    
+    loadNewsAndKb();
+    loadBlogSignature();
+    LoadPostInfoBlock(cb_blogId, cb_entryId, cb_blogApp, cb_blogUserGuid);
+    GetPrevNextPost(cb_entryId, cb_blogId, cb_entryCreatedDate);
+    loadOptUnderPost();
+    GetHistoryToday(cb_blogId, cb_blogApp, cb_entryCreatedDate);   
+</script>
+</div>
+
+
+	</div><!--end: forFlow -->
+	</div><!--end: mainContent 主体内容容器-->
+
+	<div id="sideBar">
+		<div id="sideBarMain">
+			
+<!--done-->
+<div class="newsItem">
+<h3 class="catListTitle">公告</h3>
+	<div id="blog-news"><p><span style="font-size: 18pt; font-family: &#39;Comic Sans MS&#39;; color: #99cc00;">Dr</span><span style="font-size: 18pt; font-family: &#39;Comic Sans MS&#39;; color: #ff0000;">e</span><span style="font-size: 18pt; font-family: &#39;Comic Sans MS&#39;; color: #ff9900;">a</span><span style="font-size: 18pt; font-family: &#39;Comic Sans MS&#39;; color: #3366ff;">m&nbsp;</span><span style="line-height: 1.5; font-size: 18pt; font-family: &#39;Comic Sans MS&#39;; color: #ffcc00;">Ar</span><span style="line-height: 1.5; font-size: 18pt; font-family: &#39;Comic Sans MS&#39;; color: #ff0000;">c</span><span style="line-height: 1.5; font-size: 18pt; font-family: &#39;Comic Sans MS&#39;; color: #3366ff;">h</span><span style="line-height: 1.5; font-size: 18pt; font-family: &#39;Comic Sans MS&#39;; color: #ffcc00;">ite</span><span style="line-height: 1.5; font-size: 18pt; font-family: &#39;Comic Sans MS&#39;; color: #ffcc00;">ct</span></p>
+<p>&nbsp;</p><p><span style="font-family: &#39;Comic Sans MS&#39;; font-size: 14pt;"><strong>张峻崇技术博客</strong></span></p><p>&nbsp;<strong style="font-family: Courier; font-size: 14pt; line-height: 1.5;">Jone Zhang's Blog</strong></p><p>&nbsp;</p><p>目前所在地：北京&nbsp;</p><p>主页：<a href="http://www.ccixx.com/">http://ccixx.com</a></p><p>邮件：zhangjunchong(at)gmail.com</p><p>&nbsp; &nbsp; &nbsp; &nbsp; zjc(at)ccixx.com</p><div id="profile_block">昵称：<a href="http://home.cnblogs.com/u/ccdev/">Jone Zhang</a><br>园龄：<a href="http://home.cnblogs.com/u/ccdev/" title="入园时间：2012-07-06">4年2个月</a><br>荣誉：<a href="http://www.cnblogs.com/expert/">推荐博客</a><br>粉丝：<a href="http://home.cnblogs.com/u/ccdev/followers/">346</a><br>关注：<a href="http://home.cnblogs.com/u/ccdev/followees/">1</a><div id="p_b_follow"><a href="javascript:void(0);" onclick="follow(&#39;97b4da0d-56c7-e111-aa3f-842b2b196315&#39;)">+加关注</a></div></div></div><script type="text/javascript">loadBlogNews();</script>
+</div>
+
+			<div id="blog-calendar" style=""><table id="blogCalendar" class="Cal" cellspacing="0" cellpadding="0" title="Calendar">
+	<tbody><tr><td colspan="7"><table class="CalTitle" cellspacing="0">
+		<tbody><tr><td class="CalNextPrev"><a href="javascript:void(0);" onclick="loadBlogCalendar(&#39;2016/08/01&#39;);return false;">&lt;</a></td><td align="center">2016年9月</td><td class="CalNextPrev" align="right"><a href="javascript:void(0);" onclick="loadBlogCalendar(&#39;2016/10/01&#39;);return false;">&gt;</a></td></tr>
+	</tbody></table></td></tr><tr><th class="CalDayHeader" align="center" abbr="日" scope="col">日</th><th class="CalDayHeader" align="center" abbr="一" scope="col">一</th><th class="CalDayHeader" align="center" abbr="二" scope="col">二</th><th class="CalDayHeader" align="center" abbr="三" scope="col">三</th><th class="CalDayHeader" align="center" abbr="四" scope="col">四</th><th class="CalDayHeader" align="center" abbr="五" scope="col">五</th><th class="CalDayHeader" align="center" abbr="六" scope="col">六</th></tr><tr><td class="CalOtherMonthDay" align="center">28</td><td class="CalOtherMonthDay" align="center">29</td><td class="CalOtherMonthDay" align="center">30</td><td class="CalOtherMonthDay" align="center">31</td><td align="center">1</td><td align="center">2</td><td class="CalWeekendDay" align="center">3</td></tr><tr><td class="CalWeekendDay" align="center">4</td><td align="center">5</td><td align="center">6</td><td align="center">7</td><td align="center">8</td><td align="center">9</td><td class="CalWeekendDay" align="center">10</td></tr><tr><td class="CalWeekendDay" align="center">11</td><td align="center">12</td><td align="center">13</td><td align="center">14</td><td align="center">15</td><td align="center">16</td><td class="CalWeekendDay" align="center">17</td></tr><tr><td class="CalWeekendDay" align="center">18</td><td align="center">19</td><td align="center">20</td><td align="center">21</td><td align="center">22</td><td align="center">23</td><td class="CalWeekendDay" align="center">24</td></tr><tr><td class="CalWeekendDay" align="center">25</td><td align="center">26</td><td align="center">27</td><td align="center">28</td><td class="CalTodayDay" align="center">29</td><td align="center">30</td><td class="CalOtherMonthDay" align="center">1</td></tr><tr><td class="CalOtherMonthDay" align="center">2</td><td class="CalOtherMonthDay" align="center">3</td><td class="CalOtherMonthDay" align="center">4</td><td class="CalOtherMonthDay" align="center">5</td><td class="CalOtherMonthDay" align="center">6</td><td class="CalOtherMonthDay" align="center">7</td><td class="CalOtherMonthDay" align="center">8</td></tr>
+</tbody></table></div><script type="text/javascript">loadBlogDefaultCalendar();</script>
+			
+			<div id="leftcontentcontainer">
+				<div id="blog-sidecolumn"><div id="sidebar_search" class="sidebar-block"></div><div id="sidebar_categories">
+<div id="sidebar_postcategory" class="catListPostCategory sidebar-block">
+<h3 class="catListTitle">随笔分类</h3>
+
+<ul>
+
+<li><a id="CatList_LinkList_0_Link_0" href="http://www.cnblogs.com/ccdev/category/438035.html">C/C++ 技术积淀(9)</a> </li>
+
+<li><a id="CatList_LinkList_0_Link_1" href="http://www.cnblogs.com/ccdev/category/411456.html">C++面试常见问题(5)</a> </li>
+
+<li><a id="CatList_LinkList_0_Link_2" href="http://www.cnblogs.com/ccdev/category/411687.html">C面试常见问题(5)</a> </li>
+
+<li><a id="CatList_LinkList_0_Link_3" href="http://www.cnblogs.com/ccdev/category/413056.html">Git on Mac(2)</a> </li>
+
+<li><a id="CatList_LinkList_0_Link_4" href="http://www.cnblogs.com/ccdev/category/711330.html">Golang</a> </li>
+
+<li><a id="CatList_LinkList_0_Link_5" href="http://www.cnblogs.com/ccdev/category/411479.html">iPhone Programming(1)</a> </li>
+
+<li><a id="CatList_LinkList_0_Link_6" href="http://www.cnblogs.com/ccdev/category/411459.html">Mac OS X 虚拟机(1)</a> </li>
+
+<li><a id="CatList_LinkList_0_Link_7" href="http://www.cnblogs.com/ccdev/category/411492.html">Mac学习与使用(1)</a> </li>
+
+<li><a id="CatList_LinkList_0_Link_8" href="http://www.cnblogs.com/ccdev/category/411480.html">Obj-C(2)</a> </li>
+
+<li><a id="CatList_LinkList_0_Link_9" href="http://www.cnblogs.com/ccdev/category/440231.html">Performanced C++ 经验规则(6)</a> </li>
+
+<li><a id="CatList_LinkList_0_Link_10" href="http://www.cnblogs.com/ccdev/category/413061.html">Unix/Linux(2)</a> </li>
+
+<li><a id="CatList_LinkList_0_Link_11" href="http://www.cnblogs.com/ccdev/category/551698.html">服务器架构(1)</a> </li>
+
+<li><a id="CatList_LinkList_0_Link_12" href="http://www.cnblogs.com/ccdev/category/441435.html">高性能系统与分布式计算存储(5)</a> </li>
+
+<li><a id="CatList_LinkList_0_Link_13" href="http://www.cnblogs.com/ccdev/category/413084.html">海量数据处理算法(3)</a> </li>
+
+<li><a id="CatList_LinkList_0_Link_14" href="http://www.cnblogs.com/ccdev/category/411464.html">数据结构面试常见问题（C/C++）(3)</a> </li>
+
+<li><a id="CatList_LinkList_0_Link_15" href="http://www.cnblogs.com/ccdev/category/411477.html">算法分析(3)</a> </li>
+
+</ul>
+
+</div>
+
+<div id="sidebar_postarchive" class="catListPostArchive sidebar-block">
+<h3 class="catListTitle">随笔档案</h3>
+
+<ul>
+
+<li><a id="CatList_LinkList_1_Link_0" href="http://www.cnblogs.com/ccdev/archive/2014/02.html">2014年2月 (1)</a> </li>
+
+<li><a id="CatList_LinkList_1_Link_1" href="http://www.cnblogs.com/ccdev/archive/2013/09.html">2013年9月 (3)</a> </li>
+
+<li><a id="CatList_LinkList_1_Link_2" href="http://www.cnblogs.com/ccdev/archive/2012/12.html">2012年12月 (9)</a> </li>
+
+<li><a id="CatList_LinkList_1_Link_3" href="http://www.cnblogs.com/ccdev/archive/2012/09.html">2012年9月 (15)</a> </li>
+
+<li><a id="CatList_LinkList_1_Link_4" href="http://www.cnblogs.com/ccdev/archive/2012/07.html">2012年7月 (1)</a> </li>
+
+</ul>
+
+</div>
+
+</div><div id="sidebar_scorerank" class="sidebar-block">
+<div class="catListBlogRank">
+<h3 class="catListTitle">积分与排名</h3>
+<ul>
+	<li class="liScore">
+		积分 -	61348
+	</li>
+	<li class="liRank">
+		排名 -	3852
+	</li>
+</ul>
+</div>
+
+
+</div><div id="sidebar_recentcomments" class="sidebar-block"><div id="recent_comments_wrap">
+<div class="catListComment">
+<h3 class="catListTitle">最新评论</h3>
+
+	<div id="RecentCommentsBlock"><ul>
+        <li class="recent_comment_title"><a href="http://www.cnblogs.com/ccdev/archive/2012/09/08/2676485.html#3392154">1. Re:通过迭代（非递归）及递归将单链表逆序</a></li>
+        <li class="recent_comment_body">Node* Inverse(Node* head){ Node* prev = nullptr; Node* cur = head; while (cur != nullptr) {......</li>
+        <li class="recent_comment_author">--wgtdkp</li>
+        <li class="recent_comment_title"><a href="http://www.cnblogs.com/ccdev/p/3338412.html#3359485">2. Re:高并发服务端分布式系统设计概要（上）</a></li>
+        <li class="recent_comment_body">文笔。。。。看着太累</li>
+        <li class="recent_comment_author">--水晶玛瑙</li>
+        <li class="recent_comment_title"><a href="http://www.cnblogs.com/ccdev/archive/2012/09/09/2677328.html#3331233">3. Re:算法探讨——再议经典算法问题：求最大子序列和、绝对值最大子序列和以及其区间</a></li>
+        <li class="recent_comment_body">求最大子序列和以及其区间，O(N)的算法当输入全是负数时不好用了，博主改进一下吧。如输入全是-1时就不行</li>
+        <li class="recent_comment_author">--不锈钢老鼠</li>
+        <li class="recent_comment_title"><a href="http://www.cnblogs.com/ccdev/archive/2012/07/07/2580447.html#3234006">4. Re:iPhone App 开发第一步：从零到真机调试HelloWorld</a></li>
+        <li class="recent_comment_body">免费App网页自动下载安装所需服务器！微信里无需跳转直接安装！安卓苹果二合一安装！App刷榜刷评论刷量排名优化！iosapp无需经过苹果漫长严格审核,直接发布,通过网页或二维码，无需苹果帐号一键下载安......</li>
+        <li class="recent_comment_author">--网络开发者</li>
+        <li class="recent_comment_title"><a href="http://www.cnblogs.com/ccdev/p/3341234.html#3134598">5. Re:高并发服务端分布式系统设计概要（下）</a></li>
+        <li class="recent_comment_body">好文</li>
+        <li class="recent_comment_author">--fishpro</li>
+</ul>
+</div>
+</div>
+</div></div><div id="sidebar_topviewedposts" class="sidebar-block"><div id="topview_posts_wrap">
+<div class="catListView">
+<h3 class="catListTitle">阅读排行榜</h3>
+	<div id="TopViewPostsBlock"><ul><li><a href="http://www.cnblogs.com/ccdev/archive/2012/09/12/2682098.html">1. Mac OS X Git安装教程(89708)</a></li><li><a href="http://www.cnblogs.com/ccdev/archive/2012/12/19/2825355.html">2. C++ 线程安全的单例模式(23203)</a></li><li><a href="./高并发服务端分布式系统设计概要（上） - Jone Zhang - 博客园_files/高并发服务端分布式系统设计概要（上） - Jone Zhang - 博客园.html">3. 高并发服务端分布式系统设计概要（上）(22077)</a></li><li><a href="http://www.cnblogs.com/ccdev/archive/2012/12/28/2836599.html">4. 高性能分布式计算与存储系统设计概要——暨2012年工作3年半总结（上）(12923)</a></li><li><a href="http://www.cnblogs.com/ccdev/archive/2012/07/07/2580447.html">5. iPhone App 开发第一步：从零到真机调试HelloWorld(11945)</a></li></ul></div>
+</div>
+</div></div><div id="sidebar_topcommentedposts" class="sidebar-block"><div id="topfeedback_posts_wrap">
+<div class="catListFeedback">
+<h3 class="catListTitle">评论排行榜</h3>
+	<div id="TopFeedbackPostsBlock"><ul><li><a href="http://www.cnblogs.com/ccdev/archive/2012/12/29/2837754.html">1. 高性能分布式计算与存储系统设计概要——暨2012年工作3年半总结（下）(48)</a></li><li><a href="http://www.cnblogs.com/ccdev/archive/2012/12/28/2836599.html">2. 高性能分布式计算与存储系统设计概要——暨2012年工作3年半总结（上）(46)</a></li><li><a href="./高并发服务端分布式系统设计概要（上） - Jone Zhang - 博客园_files/高并发服务端分布式系统设计概要（上） - Jone Zhang - 博客园.html">3. 高并发服务端分布式系统设计概要（上）(25)</a></li><li><a href="http://www.cnblogs.com/ccdev/p/3341234.html">4. 高并发服务端分布式系统设计概要（下）(23)</a></li><li><a href="http://www.cnblogs.com/ccdev/p/3340484.html">5. 高并发服务端分布式系统设计概要（中）(10)</a></li></ul></div>
+</div>
+</div></div><div id="sidebar_topdiggedposts" class="sidebar-block"><div id="topdigg_posts_wrap">
+<div class="catListView">
+<h3 class="catListTitle">推荐排行榜</h3>
+<div id="TopDiggPostsBlock"><ul><li><a href="http://www.cnblogs.com/ccdev/archive/2012/12/29/2837754.html">1. 高性能分布式计算与存储系统设计概要——暨2012年工作3年半总结（下）(35)</a></li><li><a href="http://www.cnblogs.com/ccdev/archive/2012/12/28/2836599.html">2. 高性能分布式计算与存储系统设计概要——暨2012年工作3年半总结（上）(32)</a></li><li><a href="./高并发服务端分布式系统设计概要（上） - Jone Zhang - 博客园_files/高并发服务端分布式系统设计概要（上） - Jone Zhang - 博客园.html">3. 高并发服务端分布式系统设计概要（上）(29)</a></li><li><a href="http://www.cnblogs.com/ccdev/p/3341234.html">4. 高并发服务端分布式系统设计概要（下）(18)</a></li><li><a href="http://www.cnblogs.com/ccdev/p/3340484.html">5. 高并发服务端分布式系统设计概要（中）(10)</a></li></ul></div>
+</div></div></div></div><script type="text/javascript">loadBlogSideColumn();</script>
+			</div>
+			
+		</div><!--end: sideBarMain -->
+	</div><!--end: sideBar 侧边栏容器 -->
+	<div class="clear"></div>
+	</div><!--end: main -->
+	<div class="clear"></div>
+	<div id="footer">
+		
+<!--done-->
+Copyright ©2016 Jone Zhang
+	</div><!--end: footer -->
+</div><!--end: home 自定义的最大容器 -->
+
+
+<audio controls="controls" style="display: none;"></audio></body><style type="text/css">#yddContainer{display:block;font-family:Microsoft YaHei;position:relative;width:100%;height:100%;top:-4px;left:-4px;font-size:12px;border:1px solid}#yddTop{display:block;height:22px}#yddTopBorderlr{display:block;position:static;height:17px;padding:2px 28px;line-height:17px;font-size:12px;color:#5079bb;font-weight:bold;border-style:none solid;border-width:1px}#yddTopBorderlr .ydd-sp{position:absolute;top:2px;height:0;overflow:hidden}.ydd-icon{left:5px;width:17px;padding:0px 0px 0px 0px;padding-top:17px;background-position:-16px -44px}.ydd-close{right:5px;width:16px;padding-top:16px;background-position:left -44px}#yddKeyTitle{float:left;text-decoration:none}#yddMiddle{display:block;margin-bottom:10px}.ydd-tabs{display:block;margin:5px 0;padding:0 5px;height:18px;border-bottom:1px solid}.ydd-tab{display:block;float:left;height:18px;margin:0 5px -1px 0;padding:0 4px;line-height:18px;border:1px solid;border-bottom:none}.ydd-trans-container{display:block;line-height:160%}.ydd-trans-container a{text-decoration:none;}#yddBottom{position:absolute;bottom:0;left:0;width:100%;height:22px;line-height:22px;overflow:hidden;background-position:left -22px}.ydd-padding010{padding:0 10px}#yddWrapper{color:#252525;z-index:10001;background:url(chrome-extension://eopjamdnofihpioajgfdikhhbobonhbb/ab20.png);}#yddContainer{background:#fff;border-color:#4b7598}#yddTopBorderlr{border-color:#f0f8fc}#yddWrapper .ydd-sp{background-image:url(chrome-extension://eopjamdnofihpioajgfdikhhbobonhbb/ydd-sprite.png)}#yddWrapper a,#yddWrapper a:hover,#yddWrapper a:visited{color:#50799b}#yddWrapper .ydd-tabs{color:#959595}.ydd-tabs,.ydd-tab{background:#fff;border-color:#d5e7f3}#yddBottom{color:#363636}#yddWrapper{min-width:250px;max-width:400px;}</style></html>

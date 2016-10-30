@@ -1,0 +1,8 @@
+all : 
+	coq_makefile \
+	intuitionism.v peirce_etc.v fol.v chap5.v my_le.v class.v \
+        exo_on_ex.v \
+        > makefile
+	touch .depend
+	make depend
+	make all

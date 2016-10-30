@@ -1,0 +1,12 @@
+all : 
+	coq_makefile\
+	all_perm.v eq_trans.v  impred.v  on_negation.v \
+        polymorph.v chap4.v leibniz.v plus_permute2.v\
+        thrice.v dyslexia.v impred_not.v one_four.v polyminimal.v\
+        > makefile
+	touch .depend
+	make depend
+	make all
+
+
+

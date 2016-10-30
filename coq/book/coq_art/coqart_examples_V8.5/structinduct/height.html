@@ -1,0 +1,33 @@
+<html>
+<title>Trees with fixed height
+</title>
+<body>
+<h1>Trees with fixed height
+</h1>
+<p>
+Here is a type of fixed height tree.
+</p>
+<pre>
+Inductive htree (A:Set) : nat->Set :=
+ | hleaf : A->htree A 0
+ | hnode : forall n:nat, A -> htree A n -> htree A n -> htree A (S n).
+</pre>
+<p>
+We say that a value of type <tt>htree A <i>n</i></tt> is a tree of height
+<i>n</i>.
+Define a function that takes a number <i>n</i> and builds a fixed-height
+tree of height <i>n</i> containing integer values.
+</p>
+<h2>Solution</h2>
+
+<a href="SRC/height.v"> Look at this file </a>
+
+<br>
+<br>
+<hr>
+<a href="../index.html">Going  home </a> <hr>
+<address><a href="mailto:casteran@labri.fr">Pierre Castéran</a></address>
+</body>
+</html>
+
+

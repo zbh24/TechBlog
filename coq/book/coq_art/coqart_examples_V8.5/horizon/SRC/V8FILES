@@ -1,0 +1,7 @@
+all : 
+	coq_makefile insertionv8.v \
+        > makefile
+	touch .depend
+	make depend
+	make all
+

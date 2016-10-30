@@ -1,0 +1,9 @@
+all : 
+	coq_makefile\
+	 searchtrees.v searchtrees2.v \
+         search_set.v \
+        > makefile
+	touch .depend
+	make depend
+	make all
+

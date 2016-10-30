@@ -1,0 +1,10 @@
+all : 
+	coq_makefile\
+	chap10.v \
+	> makefile
+	touch .depend
+	make depend
+	make all
+
+
+

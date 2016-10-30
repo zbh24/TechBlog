@@ -1,0 +1,56 @@
+<html>
+<title> On Goodstein Sequences </title>
+<body>
+<h1> On Goodstein Sequences </h1>
+
+
+This exercise is linked with the Goodstein sequence starting at 4
+in base 2 (G(4,2)).
+See for instance
+  Kirby and Paris "Independence results for Peano Arithmetic"
+  Journal of Symbolic Logic, 1978, vol 43, pp 725-731.<br>
+
+
+Consider the following definitions :
+
+<pre>
+Require Import Arith.
+Require Import Omega.
+Require Import Relations.
+
+Record item :Set := quad {
+                    b: nat ; 
+                    c2 : nat ; (* coefficient of b^2 *)
+                    c1 :nat ; (* coefficient of b *)
+                    c0 :nat    (* coefficient of b^0 *) }.
+
+
+(* relation between two consecutive items of the sequence *)
+
+Inductive R: item -> item ->Prop :=
+ exp0 : forall n i j k, R (quad n i j (S k)) (quad  (S n) i j k)
+|exp1 : forall n i j , R (quad n i (S j) 0) (quad (S n) i j n)
+|exp2 : forall n i  , R (quad n (S i) 0 0)  (quad (S n) i n n).
+
+Definition Rplus := clos_trans _ R.
+Definition Rstar := clos_refl_trans _ R.
+
+Definition reachable (q:item) := Rstar (quad 3 2 2 2) q.
+</pre>
+Prove a theorem of the form <tt>reachable (quad N 0 0 0)</tt>
+<h2> Remark </h2>
+This exercise can be adapted  in <tt>C</tt>:
+Which value  is printed when the following program terminates
+(if it terminates)  ?
+<br>
+<a href="good.c">The source </a>
+
+
+<h2> Solution </h2>
+Look at <a href="V8ONLY/G4.v"> this file </a>.
+<br> Warning : in CoqCVS, compile with option -no-vm
+
+<hr>
+<a href="../index.html">Going  home </a> 
+</body>
+</html>

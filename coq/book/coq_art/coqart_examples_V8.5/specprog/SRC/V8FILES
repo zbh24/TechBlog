@@ -1,0 +1,7 @@
+all : 
+	coq_makefile \
+	chap2.v polynom.v somme5.v \
+        > makefile
+	touch .depend
+	make depend
+	make all

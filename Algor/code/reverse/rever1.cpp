@@ -1,4 +1,5 @@
 //普通方法实现链表的逆置
+// no head-node
 void reverseList(pNode *head)
 {
 	pNode p, q, r;

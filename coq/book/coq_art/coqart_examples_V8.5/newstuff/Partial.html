@@ -1,0 +1,47 @@
+<html>
+<title> On Partial functions </title>
+<body>
+<h1> On Partial functions </h1>
+
+Consider the following module:
+
+<pre>
+Require Import Ensembles.
+
+Set Implicit Arguments.
+
+(** A partial function is characterized by a domain, a codomain,
+  and a total function *)
+
+Record partial_function (A B : Type) : Type := {
+  domain : Ensemble A ;
+  codomain : Ensemble B;
+  ap : A -> B;
+  domain_ok : forall a, In _ domain a -> In _ codomain (ap a)}.
+
+(** Equality on partial functions *)
+ 
+Inductive pfun_eq (A B : Type)(F G : partial_function A B) :
+ Prop :=
+ mk_pfun_eq : domain F = domain G ->
+              codomain F = codomain G ->
+              (forall a, In _ (domain F) a ->
+                         ap F a = ap G a) ->
+              pfun_eq F G.
+
+
+(** equality on partial functions is Leibniz equality  *)
+
+Axiom pfun_extensionality : forall (A B : Type)
+                                   (F G : partial_function A B),
+                                    pfun_eq F G -> F = G.
+
+</pre>
+
+Is it a good formalization of partial functions?
+<h2> Solution </h2>
+Look at <a href="PartialSol.html"> this file </a>.
+<hr>
+<a href="../index.html">Going  home </a> 
+</body>
+</html>

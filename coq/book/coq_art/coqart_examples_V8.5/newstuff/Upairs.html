@@ -1,0 +1,23 @@
+<html>
+<title> Equality on unordred pairs </title>
+<body>
+<h1>  Equality on unordered pairs </h1>
+
+Let <tt>t:Set</tt>  be a type with an equivalence relation 
+<tt>eq:t->t->Prop</tt>. We can represent unordered pairs of elements of
+<t> as elements of the cartesian product <tt>t*t</tt>, considering
+the pairs <tt>(x,y)</tt> and <tt>(y,x)</tt> as equivalent.
+<br>
+Moreover, if <tt>eq</tt> is decidable, the equivalence on <tt>t*t</tt> induced 
+induced  by  <tt>eq</tt> and satisfying the property above is decidable too.
+<br>
+Express this construction by a functor taking as argument an arbitrary module
+<tt>M:DecidableType</tt> (see Coq's standard library).
+
+<h2> Solution </h2>
+
+<a href="SRC/Upairs.v"> Follow this link</a>
+<hr>
+<a href="../index.html">Going  home </a> 
+</body>
+</html>

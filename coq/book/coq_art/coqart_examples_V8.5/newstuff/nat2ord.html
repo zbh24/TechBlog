@@ -1,0 +1,49 @@
+<html>
+<title> A Coercion from natural numbers into ordinal terms  </title>
+<body>
+<h1>A Coercion from natural numbers into ordinal terms </h1>
+
+Consider the following definition of ordinal terms as an inductive type:
+
+<pre>
+Inductive Ord : Set :=
+| zero : Ord
+| succ : Ord -> Ord
+| limit : (nat->Ord)->Ord.
+
+Fixpoint plus (o1 o2:Ord){struct o2} :=
+  match o2 with zero => o1
+              | succ o2' => succ (o1 + o2')
+              | limit f => limit (fun n => plus o1 (f n))
+  end.
+
+Notation  "o1 + o2" := (plus o1 o2):o_scope.
+Open Scope o_scope.
+
+</pre>
+<br>
+It is natural to consider the set of natural numbers as a subset of ordinal terms. Formalize it as a coercion from the type <tt>nat</tt> into <tt>Ord</tt>.
+
+The following code must be accepted by the <tt>Coq</tt> compiler.
+
+<pre>
+Definition omega := limit (fun n => n).
+
+Check (succ 23).
+
+Check (succ (3+5)).
+
+Eval compute in (succ (3+5)).
+
+Check (omega = 2+omega).
+
+</pre>
+
+<h2> Solution </h2>
+Look at <a href="SRC/nat2ord.v"> this file </a>.
+
+
+<hr>
+<a href="../index.html">Going  home </a> 
+</body>
+</html>

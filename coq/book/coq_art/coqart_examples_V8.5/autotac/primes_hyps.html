@@ -1,0 +1,39 @@
+<html>
+<title> Some lemmas about divisibility   </title>
+<body>
+<h1> Some lemmas about divisibility </h1>
+
+Complete the following development:
+
+<pre>
+Require Import Arith.
+
+Definition divides (n m:nat) := exists p:nat, p*n = m.
+
+Lemma divides_O : forall n:nat, divides n 0.
+
+Lemma divides_plus : forall n m:nat, divides n m -> divides n (n+m).
+
+Lemma not_divides_plus : forall n m:nat, ~ divides n m -> ~ divides n (n+m).
+
+Lemma not_divides_lt : forall n m:nat, 0<m ->  m<n -> ~ divides n m.
+
+Lemma not_lt_2_divides : forall n m:nat, n <> 1 -> n < 2 -> 0 < m -> 
+                        ~ divides n m.
+Lemma le_plus_minus : forall n m:nat, le n m -> m = n+(m-n).
+
+Lemma lt_lt_or_eq : forall n m:nat, n < S m ->  n<m \/  n=m.
+
+</pre>
+
+<h2>Solution</h2>
+
+Look at <a href="SRC/primes_hyps.v"> this file </a>
+<br>
+<br>
+<hr>
+<a href="../index.html">Going  home </a>
+<hr>
+ <address><a href="mailto:casteran@labri.fr">Pierre Castéran</a></address>
+</body>
+</html>

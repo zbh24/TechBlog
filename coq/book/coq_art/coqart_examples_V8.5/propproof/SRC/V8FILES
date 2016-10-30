@@ -1,0 +1,14 @@
+all : 
+	coq_makefile\
+	auto6.v \
+        cut_example.v \
+	simple_proofs2.v \
+	simple_proofs.v \
+	chap3.v \
+        > makefile
+	touch .depend
+	make depend
+	make all
+
+
+

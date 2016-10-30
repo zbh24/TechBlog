@@ -1,0 +1,37 @@
+<html>
+<title> Unfold lemmas for graft  </title>
+<body>
+<h1> Unfold lemmas for graft </h1>
+
+You've defined a graft operation in this <a href="graft.html"> 
+exercise </a>.
+<br> You're asked to prove  unfold lemmas, <em>i.e.</em> the following
+theorems :
+<pre>
+Lemma graft_unfold1 : forall (A:Set) (t': LTree A), graft LLeaf  t' = t'.
+
+Lemma graft_unfold2: forall (A:Set)(a:A) (t1 t2 t':LTree A),
+                      (graft (LBin a t1 t2) t')=
+                      (LBin a (graft t1 t') (graft t2 t')).
+
+Lemma graft_unfold : forall (A:Set) (t t': LTree A),
+                     graft t t' = match t  with
+                                  | LLeaf => t'
+                                  | LBin n t1 t2 =>
+                                             LBin  n (graft t1 t')
+                                                     (graft t2 t')
+                                  end.
+
+</pre>
+<h3> Resources </h3>
+Load <a href="SRC/building.v"> This file </a>
+<h2> Solution </h2>
+<a href="SRC/graft_unfold.v"> Follow this link </a> for a complete solution.
+<br>
+<br>
+<hr>
+<a href="../index.html">Going  home </a> 
+<hr>
+<address><a href="mailto:casteran@labri.fr">Pierre Castéran</a></address>
+</body>
+</html>

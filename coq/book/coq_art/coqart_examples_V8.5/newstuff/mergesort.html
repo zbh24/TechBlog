@@ -1,0 +1,96 @@
+<html>
+<title> Mergesort </title>
+<body>
+<h1>  Mergesort </h1>
+
+
+This exercise is taken from Conor McBride's <a href="http://www.e-pig.org/epigram1.html"> tutorial on Epigram </a>
+
+<h2> Sorting </h2>
+
+First, specify sorting lists of natural numbers through a predicate :
+<pre>
+sort : list nat -> list nat -> Prop.
+</pre>
+
+<h2> Merging </h2>
+Define a function <tt>merge: list nat -> list nat -> list nat</tt>
+such that the following lemma holds :
+<pre>
+Lemma merge_and_sort : forall l l', sorted l -> sorted l' ->
+                                    sort (l++l') (merge l l').
+</pre>
+
+Prove this property.
+
+
+<h2> Balanced binary trees </h2>
+
+Consider the type of binary trees whose nodes are labeled in type N and
+leaves in type L:
+
+<pre>
+Inductive tree(N L:Type):Type :=
+  Leaf : L -> tree N L
+| Node : N -> tree N L -> tree N L -> tree N L.
+</pre>
+
+We now consider trees whose nodes contain boolean values and leaves 
+an optional value of type <tt>L</tt>, <em>i.e</em> trees of type
+<tt>tree bool (option L)</tt>. <br>
+
+
+Complete the following definition:
+
+<pre>
+(* A (bool,option L) tree is balanced if every node labeled with true has 
+   the same number of leaves labeled with L in both subtrees, and every
+   node labeled with false has one more leave labeled with L in its left son
+   than its right son *)
+
+Inductive  balanced(L:Type): tree bool (option L) -> nat -> Prop :=
+</pre>
+
+<h2> Insertion in a balanced tree </h2>
+
+Define a function :
+<pre>
+insert (L:Type): L ->  tree bool (option L)) ->  tree bool (option L)
+</pre>
+such that the insertion of <tt>l:L</tt> into a balanced tree ressults in
+a balanced tree
+
+<h2> Building a balanced tree from a list </h2>
+Define a function
+<pre>
+share (L:Type) : L -> tree bool (option L)
+</pre>
+such that <tt>share _ ls</tt> returns a balanced tree contianing all the
+elements of <tt>ls</tt>
+
+<h2> mergesort itself </h2>
+
+We now have all material for building a sorting function 
+<pre>
+mergesort : list nat -> list nat
+</pre>
+<ol>
+<li>let <em>l</em> be a list of natural numbers
+<li> build a balanced tree whose leaves are labled with the elements of 
+<em>l</em>
+<li> flatten this tree, using <tt>merge></tt> to combine the leaves of
+the left and right subtrees
+</ol>
+
+Prove the theorem:
+<pre>
+Theorem mergesort_ok : forall l, sort l (mergesort l).
+</pre>
+
+<h2> Solution </h2>
+
+<a href="CVSONLY/mergesort.v"> Follow this link</a>
+<hr>
+<a href="../index.html">Going  home </a> 
+</body>
+</html>

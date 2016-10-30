@@ -73,7 +73,7 @@ int split(string s,char c,vector<string>& res) {
 
 struct trie {
   //char c;
-  int flag;// -1 ,1,2
+  int flag;// -1,1,2
   int prity;
   struct trie *next[2];
 };

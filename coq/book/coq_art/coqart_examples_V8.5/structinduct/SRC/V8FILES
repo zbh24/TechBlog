@@ -1,0 +1,21 @@
+all : 
+	coq_makefile\
+	chap6.v \
+        seasons.v boolequal.v exobool.v partialfunc.v \
+	lt_3.v more_seasons.v  month.v pos_even_bool.v \
+        mult2.v rplus.v exo_sum_f.v sum.v \
+        Rat_prelude.v Rat.v  bool_discr.v man_inj.v two_power.v \
+	binary_word_or.v binary_word.v \
+        emptyset.v manhattan.v height.v nbseats.v positive.v vectors.v \
+	propositional.v first_in_list.v \
+	is_January.v fzero_present.v tree_bij.v \
+	erato.v depfun.v exo_frac.v pos_div4.v power_log.v \
+        plus_n_O.v value_present.v poly_tree.v twofirst.v iota.v \
+        nth_option.v nth_length.v first_in_list.v split.v izero_present.v \
+        > makefile
+	touch .depend
+	make depend
+	make all
+
+
+

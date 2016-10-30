@@ -1,0 +1,38 @@
+<html>
+<title> A boggy definition of Infinity  </title>
+<body>
+<h1> A boggy definition of Infinity </h1>
+
+Consider the following type:
+<pre>
+Set Implicit Arguments.
+
+CoInductive LList (A:Set) : Set :=
+  | LNil : LList A
+  | LCons : A -> LList A -> LList A.
+
+Implicit Arguments LNil [A].
+</pre>
+
+A distracted student confuses keywords and gives an <em>inductive</em>
+definition of being infinite:
+
+<pre>
+Inductive BugInfinite (A:Set) : LList A -> Prop :=
+    BugInfinite_intro :
+      forall a (l:LList A),
+        BugInfinite l -> BugInfinite (LCons a l).      
+</pre>
+Show that this predicate can never be satisfied.
+
+<h2> Solution </h2>
+<a href="SRC/bug_infinite.v"> Follow this link </a>
+<br>
+<br>
+<hr>
+<a href="../index.html">Going  home </a> 
+<hr>
+
+<address><a href="mailto:casteran@labri.fr">Pierre Castéran</a></address>
+</body>
+</html>

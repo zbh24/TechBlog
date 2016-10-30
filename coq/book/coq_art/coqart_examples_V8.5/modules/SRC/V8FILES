@@ -1,0 +1,10 @@
+all : 
+	coq_makefile\
+	dict.v DecOrders.v list_order.v \
+	> makefile
+	touch .depend
+	make depend
+	make all
+
+
+

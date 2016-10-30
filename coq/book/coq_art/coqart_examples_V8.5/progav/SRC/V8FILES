@@ -1,0 +1,12 @@
+all : 
+	coq_makefile\
+	chap9.v extract.v fib_intro1.v fib_ind.v fib_tail.v \
+        moreperms.v quadruple.v sig_rec_simple.v plus_prim.v \
+        exo_eqdec.v div3.v mod2.v div2_mod2.v plusss.v \
+        div3tofib_ind.v fib_positive.v sqrt.v > makefile
+	touch .depend
+	make depend
+	make all
+
+
+
