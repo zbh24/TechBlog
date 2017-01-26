@@ -716,6 +716,7 @@ Disassembly of section .text:
  8048e67:	8b 75 cc             	mov    -0x34(%ebp),%esi
  8048e6a:	31 ff                	xor    %edi,%edi
  8048e6c:	8d 74 26 00          	lea    0x0(%esi,%eiz,1),%esi
+ // understand it
  8048e70:	8b 56 08             	mov    0x8(%esi),%edx
  8048e73:	8b 06                	mov    (%esi),%eax
  8048e75:	3b 02                	cmp    (%edx),%eax

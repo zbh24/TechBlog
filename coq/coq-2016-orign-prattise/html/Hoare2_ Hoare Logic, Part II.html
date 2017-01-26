@@ -1,0 +1,1554 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!-- saved from url=(0056)http://www.seas.upenn.edu/~cis500/current/sf/Hoare2.html -->
+<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<link href="./Hoare2_ Hoare Logic, Part II_files/coqdoc.css" rel="stylesheet" type="text/css">
+<title>Hoare2: Hoare Logic, Part II</title>
+<script type="text/javascript" src="./Hoare2_ Hoare Logic, Part II_files/jquery-1.8.3.js"></script>
+<script type="text/javascript" src="./Hoare2_ Hoare Logic, Part II_files/main.js"></script>
+</head>
+
+<body>
+
+<div id="page">
+
+<div id="header">
+</div>
+
+<div id="main">
+
+<h1 class="libtitle">Hoare2<span class="subtitle">Hoare Logic, Part II</span></h1>
+
+<div class="code code-tight">
+</div>
+
+<div class="doc">
+
+</div>
+<div class="code code-tight">
+
+<br>
+<span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="http://coq.inria.fr/library/Coq.Bool.Bool.html#"><span class="id" type="library">Coq.Bool.Bool</span></a>.<br>
+<span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="http://coq.inria.fr/library/Coq.Arith.Arith.html#"><span class="id" type="library">Coq.Arith.Arith</span></a>.<br>
+<span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="http://coq.inria.fr/library/Coq.Arith.EqNat.html#"><span class="id" type="library">Coq.Arith.EqNat</span></a>.<br>
+<span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="http://coq.inria.fr/library/Coq.omega.Omega.html#"><span class="id" type="library">Coq.omega.Omega</span></a>.<br>
+
+<br>
+<span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/SfLib.html#"><span class="id" type="library">SfLib</span></a>.<br>
+<span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Maps.html#"><span class="id" type="library">Maps</span></a>.<br>
+<span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Imp.html#"><span class="id" type="library">Imp</span></a>.<br>
+<span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Hoare.html#"><span class="id" type="library">Hoare</span></a>.<br>
+
+<br>
+</div>
+
+<div class="doc">
+<a name="lab433"></a><h1 class="section">Decorated Programs</h1>
+
+<div class="paragraph"> </div>
+
+ The beauty of Hoare Logic is that it is <i>compositional</i>: the
+    structure of proofs exactly follows the structure of programs.
+    This suggests that we can record the essential ideas of a proof
+    informally (leaving out some low-level calculational details) by
+    decorating a program with appropriate assertions on each of its
+    commands.  Such a <i>decorated program</i> carries with it
+    an (informal) proof of its own correctness. 
+<div class="paragraph"> </div>
+
+ For example, here is a complete decorated program: 
+<div class="paragraph"> </div>
+
+
+<div class="paragraph"> </div>
+
+<div class="code code-tight">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">True</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}&nbsp;<span style="font-family: arial;">⇾</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">m</span>&nbsp;=&nbsp;<span class="id" type="var">m</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">X</span>&nbsp;::=&nbsp;<span class="id" type="var">m</span>;;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">X</span>&nbsp;=&nbsp;<span class="id" type="var">m</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}&nbsp;<span style="font-family: arial;">⇾</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">X</span>&nbsp;=&nbsp;<span class="id" type="var">m</span>&nbsp;<span style="font-family: arial;">∧</span>&nbsp;<span class="id" type="var">p</span>&nbsp;=&nbsp;<span class="id" type="var">p</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">Z</span>&nbsp;::=&nbsp;<span class="id" type="var">p</span>;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">X</span>&nbsp;=&nbsp;<span class="id" type="var">m</span>&nbsp;<span style="font-family: arial;">∧</span>&nbsp;<span class="id" type="var">Z</span>&nbsp;=&nbsp;<span class="id" type="var">p</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}&nbsp;<span style="font-family: arial;">⇾</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">Z</span>&nbsp;-&nbsp;<span class="id" type="var">X</span>&nbsp;=&nbsp;<span class="id" type="var">p</span>&nbsp;-&nbsp;<span class="id" type="var">m</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">WHILE</span>&nbsp;<span class="id" type="var">X</span>&nbsp;≠&nbsp;0&nbsp;<span class="id" type="var">DO</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">Z</span>&nbsp;-&nbsp;<span class="id" type="var">X</span>&nbsp;=&nbsp;<span class="id" type="var">p</span>&nbsp;-&nbsp;<span class="id" type="var">m</span>&nbsp;<span style="font-family: arial;">∧</span>&nbsp;<span class="id" type="var">X</span>&nbsp;≠&nbsp;0&nbsp;<span style="letter-spacing:-.4em;">}</span>}&nbsp;<span style="font-family: arial;">⇾</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;(<span class="id" type="var">Z</span>&nbsp;-&nbsp;1)&nbsp;-&nbsp;(<span class="id" type="var">X</span>&nbsp;-&nbsp;1)&nbsp;=&nbsp;<span class="id" type="var">p</span>&nbsp;-&nbsp;<span class="id" type="var">m</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">Z</span>&nbsp;::=&nbsp;<span class="id" type="var">Z</span>&nbsp;-&nbsp;1;;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">Z</span>&nbsp;-&nbsp;(<span class="id" type="var">X</span>&nbsp;-&nbsp;1)&nbsp;=&nbsp;<span class="id" type="var">p</span>&nbsp;-&nbsp;<span class="id" type="var">m</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">X</span>&nbsp;::=&nbsp;<span class="id" type="var">X</span>&nbsp;-&nbsp;1<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">Z</span>&nbsp;-&nbsp;<span class="id" type="var">X</span>&nbsp;=&nbsp;<span class="id" type="var">p</span>&nbsp;-&nbsp;<span class="id" type="var">m</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">END</span>;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">Z</span>&nbsp;-&nbsp;<span class="id" type="var">X</span>&nbsp;=&nbsp;<span class="id" type="var">p</span>&nbsp;-&nbsp;<span class="id" type="var">m</span>&nbsp;<span style="font-family: arial;">∧</span>&nbsp;¬&nbsp;(<span class="id" type="var">X</span>&nbsp;≠&nbsp;0)&nbsp;<span style="letter-spacing:-.4em;">}</span>}&nbsp;<span style="font-family: arial;">⇾</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">Z</span>&nbsp;=&nbsp;<span class="id" type="var">p</span>&nbsp;-&nbsp;<span class="id" type="var">m</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}
+<div class="paragraph"> </div>
+
+</div>
+
+<div class="paragraph"> </div>
+
+ Concretely, a decorated program consists of the program text
+    interleaved with assertions (either a single assertion or possibly
+    two assertions separated by an implication).  To check that a
+    decorated program represents a valid proof, we check that each
+    individual command is <i>locally consistent</i> with its nearby
+    assertions in the following sense: 
+<div class="paragraph"> </div>
+
+
+<div class="paragraph"> </div>
+
+<ul class="doclist">
+<li> <span class="inlinecode"><span class="id" type="var">SKIP</span></span> is locally consistent if its precondition and
+      postcondition are the same:
+
+<div class="paragraph"> </div>
+
+<div class="code code-tight">
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">P</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">SKIP</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">P</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}
+<div class="paragraph"> </div>
+
+</div>
+
+</li>
+</ul>
+
+<div class="paragraph"> </div>
+
+
+<div class="paragraph"> </div>
+
+<ul class="doclist">
+<li> The sequential composition of <span class="inlinecode"><span class="id" type="var">c<sub>1</sub></span></span> and <span class="inlinecode"><span class="id" type="var">c<sub>2</sub></span></span> is locally
+      consistent (with respect to assertions <span class="inlinecode"><span class="id" type="var">P</span></span> and <span class="inlinecode"><span class="id" type="var">R</span></span>) if <span class="inlinecode"><span class="id" type="var">c<sub>1</sub></span></span> is
+      locally consistent (with respect to <span class="inlinecode"><span class="id" type="var">P</span></span> and <span class="inlinecode"><span class="id" type="var">Q</span></span>) and <span class="inlinecode"><span class="id" type="var">c<sub>2</sub></span></span> is
+      locally consistent (with respect to <span class="inlinecode"><span class="id" type="var">Q</span></span> and <span class="inlinecode"><span class="id" type="var">R</span></span>):
+
+<div class="paragraph"> </div>
+
+<div class="code code-tight">
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">P</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">c<sub>1</sub></span>;;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">Q</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">c<sub>2</sub></span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">R</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}
+<div class="paragraph"> </div>
+
+</div>
+
+</li>
+</ul>
+
+<div class="paragraph"> </div>
+
+
+<div class="paragraph"> </div>
+
+<ul class="doclist">
+<li> An assignment is locally consistent if its precondition is
+      the appropriate substitution of its postcondition:
+
+<div class="paragraph"> </div>
+
+<div class="code code-tight">
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">P</span>&nbsp;[<span class="id" type="var">X</span>&nbsp;<span style="font-family: arial;">↦</span>&nbsp;<span class="id" type="var">a</span>]&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">X</span>&nbsp;::=&nbsp;<span class="id" type="var">a</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">P</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}
+<div class="paragraph"> </div>
+
+</div>
+
+</li>
+</ul>
+
+<div class="paragraph"> </div>
+
+
+<div class="paragraph"> </div>
+
+<ul class="doclist">
+<li> A conditional is locally consistent (with respect to assertions
+      <span class="inlinecode"><span class="id" type="var">P</span></span> and <span class="inlinecode"><span class="id" type="var">Q</span></span>) if the assertions at the top of its "then" and
+      "else" branches are exactly <span class="inlinecode"><span class="id" type="var">P</span></span> <span class="inlinecode"><span style="font-family: arial;">∧</span></span> <span class="inlinecode"><span class="id" type="var">b</span></span> and <span class="inlinecode"><span class="id" type="var">P</span></span> <span class="inlinecode"><span style="font-family: arial;">∧</span></span> <span class="inlinecode">¬<span class="id" type="var">b</span></span> and if its "then"
+      branch is locally consistent (with respect to <span class="inlinecode"><span class="id" type="var">P</span></span> <span class="inlinecode"><span style="font-family: arial;">∧</span></span> <span class="inlinecode"><span class="id" type="var">b</span></span> and <span class="inlinecode"><span class="id" type="var">Q</span></span>)
+      and its "else" branch is locally consistent (with respect to
+      <span class="inlinecode"><span class="id" type="var">P</span></span> <span class="inlinecode"><span style="font-family: arial;">∧</span></span> <span class="inlinecode">¬<span class="id" type="var">b</span></span> and <span class="inlinecode"><span class="id" type="var">Q</span></span>):
+
+<div class="paragraph"> </div>
+
+<div class="code code-tight">
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">P</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">IFB</span>&nbsp;<span class="id" type="var">b</span>&nbsp;<span class="id" type="var">THEN</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">P</span>&nbsp;<span style="font-family: arial;">∧</span>&nbsp;<span class="id" type="var">b</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">c<sub>1</sub></span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">Q</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">ELSE</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">P</span>&nbsp;<span style="font-family: arial;">∧</span>&nbsp;¬<span class="id" type="var">b</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">c<sub>2</sub></span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">Q</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">FI</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">Q</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}
+<div class="paragraph"> </div>
+
+</div>
+
+</li>
+</ul>
+
+<div class="paragraph"> </div>
+
+
+<div class="paragraph"> </div>
+
+<ul class="doclist">
+<li> A while loop with precondition <span class="inlinecode"><span class="id" type="var">P</span></span> is locally consistent if its
+      postcondition is <span class="inlinecode"><span class="id" type="var">P</span></span> <span class="inlinecode"><span style="font-family: arial;">∧</span></span> <span class="inlinecode">¬<span class="id" type="var">b</span></span>, if the pre- and postconditions of
+      its body are exactly <span class="inlinecode"><span class="id" type="var">P</span></span> <span class="inlinecode"><span style="font-family: arial;">∧</span></span> <span class="inlinecode"><span class="id" type="var">b</span></span> and <span class="inlinecode"><span class="id" type="var">P</span></span>, and if its body is locally 
+      consistent:
+
+<div class="paragraph"> </div>
+
+<div class="code code-tight">
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">P</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">WHILE</span>&nbsp;<span class="id" type="var">b</span>&nbsp;<span class="id" type="var">DO</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">P</span>&nbsp;<span style="font-family: arial;">∧</span>&nbsp;<span class="id" type="var">b</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">c<sub>1</sub></span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">P</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">END</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">P</span>&nbsp;<span style="font-family: arial;">∧</span>&nbsp;¬<span class="id" type="var">b</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}
+<div class="paragraph"> </div>
+
+</div>
+
+</li>
+</ul>
+
+<div class="paragraph"> </div>
+
+
+<div class="paragraph"> </div>
+
+<ul class="doclist">
+<li> A pair of assertions separated by <span class="inlinecode"><span style="font-family: arial;">⇾</span></span> is locally consistent if
+      the first implies the second (in all states):
+
+<div class="paragraph"> </div>
+
+<div class="code code-tight">
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">P</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}&nbsp;<span style="font-family: arial;">⇾</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">P'</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}
+<div class="paragraph"> </div>
+
+</div>
+
+<div class="paragraph"> </div>
+
+      This corresponds to the application of <span class="inlinecode"><span class="id" type="var">hoare_consequence</span></span> and
+      is the only place in a decorated program where checking if
+      decorations are correct is not fully mechanical and syntactic,
+      but rather may involve logical and/or arithmetic reasoning.
+
+</li>
+</ul>
+
+<div class="paragraph"> </div>
+
+ The above essentially describes a procedure for <i>verifying</i>
+    the correctness of a given proof involves checking that every
+    single command is locally consistent with the accompanying
+    assertions.  If we are instead interested in <i>finding</i> a proof for
+    a given specification, we need to discover the right assertions.
+    This can be done in an almost mechanical way, with the exception
+    of finding loop invariants, which is the subject of the next
+    section.  In the remainder of this section we explain in detail how
+    to construct decorations for several simple programs that don't
+    involve non-trivial loop invariants. 
+</div>
+<div class="code code-tight">
+
+<br>
+</div>
+
+<div class="doc">
+<a name="lab434"></a><h2 class="section">Example: Swapping Using Addition and Subtraction</h2>
+
+<div class="paragraph"> </div>
+
+ Here is a program that swaps the values of two variables using
+    addition and subtraction (instead of by assigning to a temporary
+    variable).
+
+<div class="paragraph"> </div>
+
+<div class="code code-tight">
+&nbsp;&nbsp;<span class="id" type="var">X</span>&nbsp;::=&nbsp;<span class="id" type="var">X</span>&nbsp;+&nbsp;<span class="id" type="var">Y</span>;;<br>
+&nbsp;&nbsp;<span class="id" type="var">Y</span>&nbsp;::=&nbsp;<span class="id" type="var">X</span>&nbsp;-&nbsp;<span class="id" type="var">Y</span>;;<br>
+&nbsp;&nbsp;<span class="id" type="var">X</span>&nbsp;::=&nbsp;<span class="id" type="var">X</span>&nbsp;-&nbsp;<span class="id" type="var">Y</span>
+<div class="paragraph"> </div>
+
+</div>
+    We can prove using decorations that this program is correct —
+    i.e., it always swaps the values of variables <span class="inlinecode"><span class="id" type="var">X</span></span> and <span class="inlinecode"><span class="id" type="var">Y</span></span>. 
+<div class="paragraph"> </div>
+
+ 
+<div class="paragraph"> </div>
+
+<div class="code code-tight">
+&nbsp;&nbsp;&nbsp;&nbsp;(1)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">X</span>&nbsp;=&nbsp;<span class="id" type="var">m</span>&nbsp;<span style="font-family: arial;">∧</span>&nbsp;<span class="id" type="var">Y</span>&nbsp;=&nbsp;<span class="id" type="var">n</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}&nbsp;<span style="font-family: arial;">⇾</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;(2)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;(<span class="id" type="var">X</span>&nbsp;+&nbsp;<span class="id" type="var">Y</span>)&nbsp;-&nbsp;((<span class="id" type="var">X</span>&nbsp;+&nbsp;<span class="id" type="var">Y</span>)&nbsp;-&nbsp;<span class="id" type="var">Y</span>)&nbsp;=&nbsp;<span class="id" type="var">n</span>&nbsp;<span style="font-family: arial;">∧</span>&nbsp;(<span class="id" type="var">X</span>&nbsp;+&nbsp;<span class="id" type="var">Y</span>)&nbsp;-&nbsp;<span class="id" type="var">Y</span>&nbsp;=&nbsp;<span class="id" type="var">m</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">X</span>&nbsp;::=&nbsp;<span class="id" type="var">X</span>&nbsp;+&nbsp;<span class="id" type="var">Y</span>;;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(3)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">X</span>&nbsp;-&nbsp;(<span class="id" type="var">X</span>&nbsp;-&nbsp;<span class="id" type="var">Y</span>)&nbsp;=&nbsp;<span class="id" type="var">n</span>&nbsp;<span style="font-family: arial;">∧</span>&nbsp;<span class="id" type="var">X</span>&nbsp;-&nbsp;<span class="id" type="var">Y</span>&nbsp;=&nbsp;<span class="id" type="var">m</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">Y</span>&nbsp;::=&nbsp;<span class="id" type="var">X</span>&nbsp;-&nbsp;<span class="id" type="var">Y</span>;;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(4)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">X</span>&nbsp;-&nbsp;<span class="id" type="var">Y</span>&nbsp;=&nbsp;<span class="id" type="var">n</span>&nbsp;<span style="font-family: arial;">∧</span>&nbsp;<span class="id" type="var">Y</span>&nbsp;=&nbsp;<span class="id" type="var">m</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">X</span>&nbsp;::=&nbsp;<span class="id" type="var">X</span>&nbsp;-&nbsp;<span class="id" type="var">Y</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;(5)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">X</span>&nbsp;=&nbsp;<span class="id" type="var">n</span>&nbsp;<span style="font-family: arial;">∧</span>&nbsp;<span class="id" type="var">Y</span>&nbsp;=&nbsp;<span class="id" type="var">m</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}
+<div class="paragraph"> </div>
+
+</div>
+ These decorations can be constructed as follows:
+
+<div class="paragraph"> </div>
+
+<ul class="doclist">
+<li> We begin with the undecorated program (the unnumbered lines).
+
+</li>
+<li> We then add the specification — i.e., the outer
+        precondition (1) and postcondition (5). In the precondition we
+        use auxiliary variables (parameters) <span class="inlinecode"><span class="id" type="var">m</span></span> and <span class="inlinecode"><span class="id" type="var">n</span></span> to remember
+        the initial values of variables <span class="inlinecode"><span class="id" type="var">X</span></span> and respectively <span class="inlinecode"><span class="id" type="var">Y</span></span>, so
+        that we can refer to them in the postcondition (5).
+
+</li>
+<li> We work backwards mechanically, starting from (5) and
+        proceeding until we get to (2). At each step, we obtain the
+        precondition of the assignment from its postcondition by
+        substituting the assigned variable with the right-hand-side of
+        the assignment. For instance, we obtain (4) by substituting
+        <span class="inlinecode"><span class="id" type="var">X</span></span> with <span class="inlinecode"><span class="id" type="var">X</span></span> <span class="inlinecode">-</span> <span class="inlinecode"><span class="id" type="var">Y</span></span> in (5), and (3) by substituting <span class="inlinecode"><span class="id" type="var">Y</span></span> with <span class="inlinecode"><span class="id" type="var">X</span></span> <span class="inlinecode">-</span>
+        <span class="inlinecode"><span class="id" type="var">Y</span></span> in (4).
+
+</li>
+<li> Finally, we verify that (1) logically implies (2) — i.e.,
+        that the step from (1) to (2) is a valid use of the law of
+        consequence. For this we substitute <span class="inlinecode"><span class="id" type="var">X</span></span> by <span class="inlinecode"><span class="id" type="var">m</span></span> and <span class="inlinecode"><span class="id" type="var">Y</span></span> by <span class="inlinecode"><span class="id" type="var">n</span></span>
+        and calculate as follows:
+
+<div class="paragraph"> </div>
+
+<div class="code code-tight">
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" type="var">m</span>&nbsp;+&nbsp;<span class="id" type="var">n</span>)&nbsp;-&nbsp;((<span class="id" type="var">m</span>&nbsp;+&nbsp;<span class="id" type="var">n</span>)&nbsp;-&nbsp;<span class="id" type="var">n</span>)&nbsp;=&nbsp;<span class="id" type="var">n</span>&nbsp;<span style="font-family: arial;">∧</span>&nbsp;(<span class="id" type="var">m</span>&nbsp;+&nbsp;<span class="id" type="var">n</span>)&nbsp;-&nbsp;<span class="id" type="var">n</span>&nbsp;=&nbsp;<span class="id" type="var">m</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" type="var">m</span>&nbsp;+&nbsp;<span class="id" type="var">n</span>)&nbsp;-&nbsp;<span class="id" type="var">m</span>&nbsp;=&nbsp;<span class="id" type="var">n</span>&nbsp;<span style="font-family: arial;">∧</span>&nbsp;<span class="id" type="var">m</span>&nbsp;=&nbsp;<span class="id" type="var">m</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">n</span>&nbsp;=&nbsp;<span class="id" type="var">n</span>&nbsp;<span style="font-family: arial;">∧</span>&nbsp;<span class="id" type="var">m</span>&nbsp;=&nbsp;<span class="id" type="var">m</span>
+<div class="paragraph"> </div>
+
+</div>
+
+</li>
+</ul>
+
+<div class="paragraph"> </div>
+
+    Note that, since we are working with natural numbers, not
+    fixed-width machine integers, we don't need to worry about the
+    possibility of arithmetic overflow anywhere in this argument.  
+    (This makes life quite a bit simpler!) 
+</div>
+<div class="code code-tight">
+
+<br>
+</div>
+
+<div class="doc">
+<a name="lab435"></a><h2 class="section">Example: Simple Conditionals</h2>
+
+<div class="paragraph"> </div>
+
+ Here is a simple decorated program using conditionals:
+
+<div class="paragraph"> </div>
+
+<div class="code code-tight">
+&nbsp;(1)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{<span class="id" type="var">True</span><span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">IFB</span>&nbsp;<span class="id" type="var">X</span>&nbsp;≤&nbsp;<span class="id" type="var">Y</span>&nbsp;<span class="id" type="var">THEN</span><br>
+&nbsp;(2)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{<span class="id" type="var">True</span>&nbsp;<span style="font-family: arial;">∧</span>&nbsp;<span class="id" type="var">X</span>&nbsp;≤&nbsp;<span class="id" type="var">Y</span><span style="letter-spacing:-.4em;">}</span>}&nbsp;<span style="font-family: arial;">⇾</span><br>
+&nbsp;(3)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{(<span class="id" type="var">Y</span>&nbsp;-&nbsp;<span class="id" type="var">X</span>)&nbsp;+&nbsp;<span class="id" type="var">X</span>&nbsp;=&nbsp;<span class="id" type="var">Y</span>&nbsp;<span style="font-family: arial;">∨</span>&nbsp;(<span class="id" type="var">Y</span>&nbsp;-&nbsp;<span class="id" type="var">X</span>)&nbsp;+&nbsp;<span class="id" type="var">Y</span>&nbsp;=&nbsp;<span class="id" type="var">X</span><span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">Z</span>&nbsp;::=&nbsp;<span class="id" type="var">Y</span>&nbsp;-&nbsp;<span class="id" type="var">X</span><br>
+&nbsp;(4)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{<span class="id" type="var">Z</span>&nbsp;+&nbsp;<span class="id" type="var">X</span>&nbsp;=&nbsp;<span class="id" type="var">Y</span>&nbsp;<span style="font-family: arial;">∨</span>&nbsp;<span class="id" type="var">Z</span>&nbsp;+&nbsp;<span class="id" type="var">Y</span>&nbsp;=&nbsp;<span class="id" type="var">X</span><span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">ELSE</span><br>
+&nbsp;(5)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{<span class="id" type="var">True</span>&nbsp;<span style="font-family: arial;">∧</span>&nbsp;~(<span class="id" type="var">X</span>&nbsp;≤&nbsp;<span class="id" type="var">Y</span>)&nbsp;<span style="letter-spacing:-.4em;">}</span>}&nbsp;<span style="font-family: arial;">⇾</span><br>
+&nbsp;(6)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{(<span class="id" type="var">X</span>&nbsp;-&nbsp;<span class="id" type="var">Y</span>)&nbsp;+&nbsp;<span class="id" type="var">X</span>&nbsp;=&nbsp;<span class="id" type="var">Y</span>&nbsp;<span style="font-family: arial;">∨</span>&nbsp;(<span class="id" type="var">X</span>&nbsp;-&nbsp;<span class="id" type="var">Y</span>)&nbsp;+&nbsp;<span class="id" type="var">Y</span>&nbsp;=&nbsp;<span class="id" type="var">X</span><span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">Z</span>&nbsp;::=&nbsp;<span class="id" type="var">X</span>&nbsp;-&nbsp;<span class="id" type="var">Y</span><br>
+&nbsp;(7)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{<span class="id" type="var">Z</span>&nbsp;+&nbsp;<span class="id" type="var">X</span>&nbsp;=&nbsp;<span class="id" type="var">Y</span>&nbsp;<span style="font-family: arial;">∨</span>&nbsp;<span class="id" type="var">Z</span>&nbsp;+&nbsp;<span class="id" type="var">Y</span>&nbsp;=&nbsp;<span class="id" type="var">X</span><span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">FI</span><br>
+&nbsp;(8)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{<span class="id" type="var">Z</span>&nbsp;+&nbsp;<span class="id" type="var">X</span>&nbsp;=&nbsp;<span class="id" type="var">Y</span>&nbsp;<span style="font-family: arial;">∨</span>&nbsp;<span class="id" type="var">Z</span>&nbsp;+&nbsp;<span class="id" type="var">Y</span>&nbsp;=&nbsp;<span class="id" type="var">X</span><span style="letter-spacing:-.4em;">}</span>}
+<div class="paragraph"> </div>
+
+</div>
+
+<div class="paragraph"> </div>
+
+These decorations were constructed as follows:
+
+<div class="paragraph"> </div>
+
+<ul class="doclist">
+<li> We start with the outer precondition (1) and postcondition (8).
+
+</li>
+<li> We follow the format dictated by the <span class="inlinecode"><span class="id" type="var">hoare_if</span></span> rule and copy the
+    postcondition (8) to (4) and (7). We conjoin the precondition (1)
+    with the guard of the conditional to obtain (2). We conjoin (1)
+    with the negated guard of the conditional to obtain (5).
+
+</li>
+<li> In order to use the assignment rule and obtain (3), we substitute
+    <span class="inlinecode"><span class="id" type="var">Z</span></span> by <span class="inlinecode"><span class="id" type="var">Y</span></span> <span class="inlinecode">-</span> <span class="inlinecode"><span class="id" type="var">X</span></span> in (4). To obtain (6) we substitute <span class="inlinecode"><span class="id" type="var">Z</span></span> by <span class="inlinecode"><span class="id" type="var">X</span></span> <span class="inlinecode">-</span> <span class="inlinecode"><span class="id" type="var">Y</span></span>
+    in (7).
+
+</li>
+<li> Finally, we verify that (2) implies (3) and (5) implies (6). Both
+    of these implications crucially depend on the ordering of <span class="inlinecode"><span class="id" type="var">X</span></span> and
+    <span class="inlinecode"><span class="id" type="var">Y</span></span> obtained from the guard. For instance, knowing that <span class="inlinecode"><span class="id" type="var">X</span></span> <span class="inlinecode">≤</span> <span class="inlinecode"><span class="id" type="var">Y</span></span>
+    ensures that subtracting <span class="inlinecode"><span class="id" type="var">X</span></span> from <span class="inlinecode"><span class="id" type="var">Y</span></span> and then adding back <span class="inlinecode"><span class="id" type="var">X</span></span>
+    produces <span class="inlinecode"><span class="id" type="var">Y</span></span>, as required by the first disjunct of (3). Similarly,
+    knowing that <span class="inlinecode">~(<span class="id" type="var">X</span></span> <span class="inlinecode">≤</span> <span class="inlinecode"><span class="id" type="var">Y</span>)</span> ensures that subtracting <span class="inlinecode"><span class="id" type="var">Y</span></span> from <span class="inlinecode"><span class="id" type="var">X</span></span> and
+    then adding back <span class="inlinecode"><span class="id" type="var">Y</span></span> produces <span class="inlinecode"><span class="id" type="var">X</span></span>, as needed by the second
+    disjunct of (6). Note that <span class="inlinecode"><span class="id" type="var">n</span></span> <span class="inlinecode">-</span> <span class="inlinecode"><span class="id" type="var">m</span></span> <span class="inlinecode">+</span> <span class="inlinecode"><span class="id" type="var">m</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">n</span></span> does <i>not</i> hold for
+    arbitrary natural numbers <span class="inlinecode"><span class="id" type="var">n</span></span> and <span class="inlinecode"><span class="id" type="var">m</span></span> (for example, <span class="inlinecode">3</span> <span class="inlinecode">-</span> <span class="inlinecode">5</span> <span class="inlinecode">+</span> <span class="inlinecode">5</span> <span class="inlinecode">=</span>
+    <span class="inlinecode">5</span>). 
+</li>
+</ul>
+ <div style="background-color:lightgray; color:red; margin:10px; padding:10px; "> The <span class="inlinecode">¬</span> in that paragraph is typeset wrong.  Maybe it's time
+    to give up on all the unicode hacks in the generated HTML...? 
+</div> 
+<div class="paragraph"> </div>
+
+<a name="lab436"></a><h4 class="section">Exercise: 2 stars (if_minus_plus_reloaded)</h4>
+ Fill in valid decorations for the following program:
+
+<div class="paragraph"> </div>
+
+<div class="code code-tight">
+&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">True</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;<span class="id" type="var">IFB</span>&nbsp;<span class="id" type="var">X</span>&nbsp;≤&nbsp;<span class="id" type="var">Y</span>&nbsp;<span class="id" type="var">THEN</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">}</span>}&nbsp;<span style="font-family: arial;">⇾</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">Z</span>&nbsp;::=&nbsp;<span class="id" type="var">Y</span>&nbsp;-&nbsp;<span class="id" type="var">X</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;<span class="id" type="var">ELSE</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">}</span>}&nbsp;<span style="font-family: arial;">⇾</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">Y</span>&nbsp;::=&nbsp;<span class="id" type="var">X</span>&nbsp;+&nbsp;<span class="id" type="var">Z</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;<span class="id" type="var">FI</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">Y</span>&nbsp;=&nbsp;<span class="id" type="var">X</span>&nbsp;+&nbsp;<span class="id" type="var">Z</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}
+<div class="paragraph"> </div>
+
+</div>
+
+<div class="paragraph"> </div>
+
+ <font size="-2">☐</font> 
+</div>
+<div class="code code-tight">
+
+<br>
+</div>
+
+<div class="doc">
+<a name="lab437"></a><h2 class="section">Example: Reduce to Zero</h2>
+
+<div class="paragraph"> </div>
+
+ Here is a <span class="inlinecode"><span class="id" type="var">WHILE</span></span> loop that is so simple it needs no
+    invariant (i.e., the invariant <span class="inlinecode"><span class="id" type="var">True</span></span> will do the job).
+
+<div class="paragraph"> </div>
+
+<div class="code code-tight">
+&nbsp;(1)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">True</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">WHILE</span>&nbsp;<span class="id" type="var">X</span>&nbsp;≠&nbsp;0&nbsp;<span class="id" type="var">DO</span><br>
+&nbsp;(2)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">True</span>&nbsp;<span style="font-family: arial;">∧</span>&nbsp;<span class="id" type="var">X</span>&nbsp;≠&nbsp;0&nbsp;<span style="letter-spacing:-.4em;">}</span>}&nbsp;<span style="font-family: arial;">⇾</span><br>
+&nbsp;(3)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">True</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">X</span>&nbsp;::=&nbsp;<span class="id" type="var">X</span>&nbsp;-&nbsp;1<br>
+&nbsp;(4)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">True</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">END</span><br>
+&nbsp;(5)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">True</span>&nbsp;<span style="font-family: arial;">∧</span>&nbsp;<span class="id" type="var">X</span>&nbsp;=&nbsp;0&nbsp;<span style="letter-spacing:-.4em;">}</span>}&nbsp;<span style="font-family: arial;">⇾</span><br>
+&nbsp;(6)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">X</span>&nbsp;=&nbsp;0&nbsp;<span style="letter-spacing:-.4em;">}</span>}
+<div class="paragraph"> </div>
+
+</div>
+The decorations can be constructed as follows:
+
+<div class="paragraph"> </div>
+
+<ul class="doclist">
+<li> Start with the outer precondition (1) and postcondition (6).
+
+</li>
+<li> Following the format dictated by the <span class="inlinecode"><span class="id" type="var">hoare_while</span></span> rule, we copy
+    (1) to (4). We conjoin (1) with the guard to obtain (2) and with
+    the negation of the guard to obtain (5). Note that, because the
+    outer postcondition (6) does not syntactically match (5), we need a
+    trivial use of the consequence rule from (5) to (6).
+
+</li>
+<li> Assertion (3) is the same as (4), because <span class="inlinecode"><span class="id" type="var">X</span></span> does not appear in
+    <span class="inlinecode">4</span>, so the substitution in the assignment rule is trivial.
+
+</li>
+<li> Finally, the implication between (2) and (3) is also trivial.
+
+</li>
+</ul>
+
+<div class="paragraph"> </div>
+
+ From this informal proof, it is easy to read off a formal proof
+    using the Coq versions of the Hoare rules.  Note that we do <i>not</i>
+    unfold the definition of <span class="inlinecode"><span class="id" type="var">hoare_triple</span></span> anywhere in this proof —
+    the idea is to use the Hoare rules as a "self-contained" logic for
+    reasoning about programs. 
+</div>
+<div class="code code-tight">
+
+<br>
+<span class="id" type="keyword">Definition</span> <a name="reduce_to_zero&#39;"><span class="id" type="definition">reduce_to_zero'</span></a> : <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Imp.html#com"><span class="id" type="inductive">com</span></a> :=<br>
+&nbsp;&nbsp;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Imp.html#::'WHILE'_x_'DO'_x_'END'"><span class="id" type="notation">WHILE</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Imp.html#BNot"><span class="id" type="constructor">BNot</span></a> (<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Imp.html#BEq"><span class="id" type="constructor">BEq</span></a> (<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Imp.html#AId"><span class="id" type="constructor">AId</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Imp.html#X"><span class="id" type="definition">X</span></a>) (<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Imp.html#ANum"><span class="id" type="constructor">ANum</span></a> 0)) <span class="id" type="var">DO</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Imp.html#X"><span class="id" type="definition">X</span></a> ::= <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Imp.html#AMinus"><span class="id" type="constructor">AMinus</span></a> (<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Imp.html#AId"><span class="id" type="constructor">AId</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Imp.html#X"><span class="id" type="definition">X</span></a>) (<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Imp.html#ANum"><span class="id" type="constructor">ANum</span></a> 1)<br>
+&nbsp;&nbsp;<span class="id" type="var">END</span>.<br>
+
+<br>
+<span class="id" type="keyword">Theorem</span> <a name="reduce_to_zero_correct&#39;"><span class="id" type="lemma">reduce_to_zero_correct'</span></a> :<br>
+&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{<span class="id" type="keyword">fun</span> <span class="id" type="var">st</span> ⇒ <a class="idref" href="http://coq.inria.fr/library/Coq.Init.Logic.html#True"><span class="id" type="inductive">True</span></a><span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Hoare2.html#reduce_to_zero'"><span class="id" type="definition">reduce_to_zero'</span></a><br>
+&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{<span class="id" type="keyword">fun</span> <span class="id" type="var">st</span> ⇒ <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Hoare2.html#st"><span class="id" type="variable">st</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Imp.html#X"><span class="id" type="definition">X</span></a> = 0<span style="letter-spacing:-.4em;">}</span>}.<br>
+<span class="id" type="keyword">Proof</span>.<br>
+&nbsp;&nbsp;<span class="id" type="tactic">unfold</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Hoare2.html#reduce_to_zero'"><span class="id" type="definition">reduce_to_zero'</span></a>.<br>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;First&nbsp;we&nbsp;need&nbsp;to&nbsp;transform&nbsp;the&nbsp;postcondition&nbsp;so<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;that&nbsp;hoare_while&nbsp;will&nbsp;apply.&nbsp;*)</span><br>
+&nbsp;&nbsp;<span class="id" type="tactic">eapply</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Hoare.html#hoare_consequence_post"><span class="id" type="lemma">hoare_consequence_post</span></a>.<br>
+&nbsp;&nbsp;<span class="id" type="tactic">apply</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Hoare.html#hoare_while"><span class="id" type="lemma">hoare_while</span></a>.<br>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;Loop&nbsp;body&nbsp;preserves&nbsp;invariant&nbsp;*)</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;Need&nbsp;to&nbsp;massage&nbsp;precondition&nbsp;before&nbsp;<span class="inlinecode"><span class="id" type="var">hoare_asgn</span></span>&nbsp;applies&nbsp;*)</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">eapply</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Hoare.html#hoare_consequence_pre"><span class="id" type="lemma">hoare_consequence_pre</span></a>. <span class="id" type="tactic">apply</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Hoare.html#hoare_asgn"><span class="id" type="lemma">hoare_asgn</span></a>.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;Proving&nbsp;trivial&nbsp;implication&nbsp;(2)&nbsp;-&gt;&gt;&nbsp;(3)&nbsp;*)</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">st</span> [<span class="id" type="var">HT</span> <span class="id" type="var">Hbp</span>]. <span class="id" type="tactic">unfold</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Hoare.html#assn_sub"><span class="id" type="definition">assn_sub</span></a>. <span class="id" type="tactic">apply</span> <a class="idref" href="http://coq.inria.fr/library/Coq.Init.Logic.html#I"><span class="id" type="constructor">I</span></a>.<br>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;Invariant&nbsp;and&nbsp;negated&nbsp;guard&nbsp;imply&nbsp;postcondition&nbsp;*)</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">st</span> [<span class="id" type="var">Inv</span> <span class="id" type="var">GuardFalse</span>].<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">unfold</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Hoare.html#bassn"><span class="id" type="definition">bassn</span></a> <span class="id" type="keyword">in</span> <span class="id" type="var">GuardFalse</span>. <span class="id" type="tactic">simpl</span> <span class="id" type="keyword">in</span> <span class="id" type="var">GuardFalse</span>.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;SearchAbout&nbsp;helps&nbsp;to&nbsp;find&nbsp;the&nbsp;right&nbsp;lemmas&nbsp;*)</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">Search</span><span class="id" type="var">About</span> [<a class="idref" href="http://coq.inria.fr/library/Coq.Init.Logic.html#not"><span class="id" type="definition">not</span></a> <a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#true"><span class="id" type="constructor">true</span></a>].<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">rewrite</span> <a class="idref" href="http://coq.inria.fr/library/Coq.Bool.Bool.html#not_true_iff_false"><span class="id" type="lemma">not_true_iff_false</span></a> <span class="id" type="keyword">in</span> <span class="id" type="var">GuardFalse</span>.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">Search</span><span class="id" type="var">About</span> [<a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#negb"><span class="id" type="definition">negb</span></a> <a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#false"><span class="id" type="constructor">false</span></a>].<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">rewrite</span> <a class="idref" href="http://coq.inria.fr/library/Coq.Bool.Bool.html#negb_false_iff"><span class="id" type="lemma">negb_false_iff</span></a> <span class="id" type="keyword">in</span> <span class="id" type="var">GuardFalse</span>.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">Search</span><span class="id" type="var">About</span> [<a class="idref" href="http://coq.inria.fr/library/Coq.Arith.EqNat.html#beq_nat"><span class="id" type="definition">beq_nat</span></a> <a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#true"><span class="id" type="constructor">true</span></a>].<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">apply</span> <a class="idref" href="http://coq.inria.fr/library/Coq.Arith.EqNat.html#beq_nat_true"><span class="id" type="lemma">beq_nat_true</span></a> <span class="id" type="keyword">in</span> <span class="id" type="var">GuardFalse</span>.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">apply</span> <span class="id" type="var">GuardFalse</span>. <span class="id" type="keyword">Qed</span>.<br>
+
+<br>
+</div>
+
+<div class="doc">
+<a name="lab438"></a><h2 class="section">Example: Division</h2>
+
+<div class="paragraph"> </div>
+
+ The following Imp program calculates the integer quotient and
+    remainder of two numbers <span class="inlinecode"><span class="id" type="var">m</span></span> and <span class="inlinecode"><span class="id" type="var">n</span></span> that are arbitrary constants
+    in the program.
+
+<div class="paragraph"> </div>
+
+<div class="code code-tight">
+&nbsp;&nbsp;<span class="id" type="var">X</span>&nbsp;::=&nbsp;<span class="id" type="var">m</span>;;<br>
+&nbsp;&nbsp;<span class="id" type="var">Y</span>&nbsp;::=&nbsp;0;;<br>
+&nbsp;&nbsp;<span class="id" type="var">WHILE</span>&nbsp;<span class="id" type="var">n</span>&nbsp;≤&nbsp;<span class="id" type="var">X</span>&nbsp;<span class="id" type="var">DO</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">X</span>&nbsp;::=&nbsp;<span class="id" type="var">X</span>&nbsp;-&nbsp;<span class="id" type="var">n</span>;;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">Y</span>&nbsp;::=&nbsp;<span class="id" type="var">Y</span>&nbsp;+&nbsp;1<br>
+&nbsp;&nbsp;<span class="id" type="var">END</span>;
+<div class="paragraph"> </div>
+
+</div>
+    In we replace <span class="inlinecode"><span class="id" type="var">m</span></span> and <span class="inlinecode"><span class="id" type="var">n</span></span> by concrete numbers and execute the program, 
+    it will terminate with the variable <span class="inlinecode"><span class="id" type="var">X</span></span> set to the remainder when <span class="inlinecode"><span class="id" type="var">m</span></span> 
+    is divided by <span class="inlinecode"><span class="id" type="var">n</span></span> and <span class="inlinecode"><span class="id" type="var">Y</span></span> set to the quotient. 
+<div class="paragraph"> </div>
+
+ In order to give a specification to this program we need to
+    remember that dividing <span class="inlinecode"><span class="id" type="var">m</span></span> by <span class="inlinecode"><span class="id" type="var">n</span></span> produces a reminder <span class="inlinecode"><span class="id" type="var">X</span></span> and a
+    quotient <span class="inlinecode"><span class="id" type="var">Y</span></span> such that <span class="inlinecode"><span class="id" type="var">n</span></span> <span class="inlinecode">*</span> <span class="inlinecode"><span class="id" type="var">Y</span></span> <span class="inlinecode">+</span> <span class="inlinecode"><span class="id" type="var">X</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">m</span></span> <span class="inlinecode"><span style="font-family: arial;">∧</span></span> <span class="inlinecode"><span class="id" type="var">X</span></span> <span class="inlinecode">&lt;</span> <span class="inlinecode"><span class="id" type="var">n</span></span>.
+
+<div class="paragraph"> </div>
+
+    It turns out that we get lucky with this program and don't have to
+    think very hard about the loop invariant: the invariant is just the
+    first conjunct <span class="inlinecode"><span class="id" type="var">n</span></span> <span class="inlinecode">*</span> <span class="inlinecode"><span class="id" type="var">Y</span></span> <span class="inlinecode">+</span> <span class="inlinecode"><span class="id" type="var">X</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">m</span></span>, and we can use this to decorate
+    the program.
+
+<div class="paragraph"> </div>
+
+
+<div class="paragraph"> </div>
+
+<div class="code code-tight">
+&nbsp;(1)&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">True</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}&nbsp;<span style="font-family: arial;">⇾</span><br>
+&nbsp;(2)&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">n</span>&nbsp;*&nbsp;0&nbsp;+&nbsp;<span class="id" type="var">m</span>&nbsp;=&nbsp;<span class="id" type="var">m</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">X</span>&nbsp;::=&nbsp;<span class="id" type="var">m</span>;;<br>
+&nbsp;(3)&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">n</span>&nbsp;*&nbsp;0&nbsp;+&nbsp;<span class="id" type="var">X</span>&nbsp;=&nbsp;<span class="id" type="var">m</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">Y</span>&nbsp;::=&nbsp;0;;<br>
+&nbsp;(4)&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">n</span>&nbsp;*&nbsp;<span class="id" type="var">Y</span>&nbsp;+&nbsp;<span class="id" type="var">X</span>&nbsp;=&nbsp;<span class="id" type="var">m</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">WHILE</span>&nbsp;<span class="id" type="var">n</span>&nbsp;≤&nbsp;<span class="id" type="var">X</span>&nbsp;<span class="id" type="var">DO</span><br>
+&nbsp;(5)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">n</span>&nbsp;*&nbsp;<span class="id" type="var">Y</span>&nbsp;+&nbsp;<span class="id" type="var">X</span>&nbsp;=&nbsp;<span class="id" type="var">m</span>&nbsp;<span style="font-family: arial;">∧</span>&nbsp;<span class="id" type="var">n</span>&nbsp;≤&nbsp;<span class="id" type="var">X</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}&nbsp;<span style="font-family: arial;">⇾</span><br>
+&nbsp;(6)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">n</span>&nbsp;*&nbsp;(<span class="id" type="var">Y</span>&nbsp;+&nbsp;1)&nbsp;+&nbsp;(<span class="id" type="var">X</span>&nbsp;-&nbsp;<span class="id" type="var">n</span>)&nbsp;=&nbsp;<span class="id" type="var">m</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">X</span>&nbsp;::=&nbsp;<span class="id" type="var">X</span>&nbsp;-&nbsp;<span class="id" type="var">n</span>;;<br>
+&nbsp;(7)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">n</span>&nbsp;*&nbsp;(<span class="id" type="var">Y</span>&nbsp;+&nbsp;1)&nbsp;+&nbsp;<span class="id" type="var">X</span>&nbsp;=&nbsp;<span class="id" type="var">m</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">Y</span>&nbsp;::=&nbsp;<span class="id" type="var">Y</span>&nbsp;+&nbsp;1<br>
+&nbsp;(8)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">n</span>&nbsp;*&nbsp;<span class="id" type="var">Y</span>&nbsp;+&nbsp;<span class="id" type="var">X</span>&nbsp;=&nbsp;<span class="id" type="var">m</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">END</span><br>
+&nbsp;(9)&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">n</span>&nbsp;*&nbsp;<span class="id" type="var">Y</span>&nbsp;+&nbsp;<span class="id" type="var">X</span>&nbsp;=&nbsp;<span class="id" type="var">m</span>&nbsp;<span style="font-family: arial;">∧</span>&nbsp;<span class="id" type="var">X</span>&nbsp;&lt;&nbsp;<span class="id" type="var">n</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}
+<div class="paragraph"> </div>
+
+</div>
+
+<div class="paragraph"> </div>
+
+    Assertions (4), (5), (8), and (9) are derived mechanically from
+    the invariant and the loop's guard.  Assertions (8), (7), and (6)
+    are derived using the assignment rule going backwards from (8) to
+    (6).  Assertions (4), (3), and (2) are again backwards applications
+    of the assignment rule.
+
+<div class="paragraph"> </div>
+
+    Now that we've decorated the program it only remains to check that
+    the two uses of the consequence rule are correct — i.e., that (1)
+    implies (2) and that (5) implies (6).  This is indeed the case, so
+    we have a valid decorated program.
+
+</div>
+<div class="code code-tight">
+
+<br>
+</div>
+
+<div class="doc">
+<a name="lab439"></a><h1 class="section">Finding Loop Invariants</h1>
+
+<div class="paragraph"> </div>
+
+ Once the outermost precondition and postcondition are
+    chosen, the only creative part in verifying programs using Hoare
+    Logic is finding the right loop invariants.  The reason this is
+    difficult is the same as the reason that inductive mathematical
+    proofs are: strengthening the loop invariant (or the induction
+    hypothesis) means that you have a stronger assumption to work with
+    when trying to establish the postcondition of the loop body (or
+    complete the induction step of the proof), but it also means that
+    the loop body postcondition itself (or the statement being proved
+    inductively) is stronger and thus harder to prove!
+
+<div class="paragraph"> </div>
+
+    This section shows how to approach the challenge of finding loop
+    invariants through a series of examples and exercises. 
+<div class="paragraph"> </div>
+
+<a name="lab440"></a><h2 class="section">Example: Slow Subtraction</h2>
+
+<div class="paragraph"> </div>
+
+ The following program subtracts the value of <span class="inlinecode"><span class="id" type="var">X</span></span> from the value of
+    <span class="inlinecode"><span class="id" type="var">Y</span></span> by repeatedly decrementing both <span class="inlinecode"><span class="id" type="var">X</span></span> and <span class="inlinecode"><span class="id" type="var">Y</span></span>.  We want to verify its
+    correctness with respect to the following specification:
+
+<div class="paragraph"> </div>
+
+<div class="code code-tight">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">X</span>&nbsp;=&nbsp;<span class="id" type="var">m</span>&nbsp;<span style="font-family: arial;">∧</span>&nbsp;<span class="id" type="var">Y</span>&nbsp;=&nbsp;<span class="id" type="var">n</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">WHILE</span>&nbsp;<span class="id" type="var">X</span>&nbsp;≠&nbsp;0&nbsp;<span class="id" type="var">DO</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">Y</span>&nbsp;::=&nbsp;<span class="id" type="var">Y</span>&nbsp;-&nbsp;1;;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">X</span>&nbsp;::=&nbsp;<span class="id" type="var">X</span>&nbsp;-&nbsp;1<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">END</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">Y</span>&nbsp;=&nbsp;<span class="id" type="var">n</span>&nbsp;-&nbsp;<span class="id" type="var">m</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}
+<div class="paragraph"> </div>
+
+</div>
+
+<div class="paragraph"> </div>
+
+    To verify this program, we need to find an invariant <span class="inlinecode"><span class="id" type="var">I</span></span> for the
+    loop.  As a first step we can leave <span class="inlinecode"><span class="id" type="var">I</span></span> as an unknown and build a
+    <i>skeleton</i> for the proof by applying (backward) the rules for local
+    consistency.  This process leads to the following skeleton:
+
+<div class="paragraph"> </div>
+
+<div class="code code-tight">
+&nbsp;&nbsp;&nbsp;&nbsp;(1)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">X</span>&nbsp;=&nbsp;<span class="id" type="var">m</span>&nbsp;<span style="font-family: arial;">∧</span>&nbsp;<span class="id" type="var">Y</span>&nbsp;=&nbsp;<span class="id" type="var">n</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}&nbsp;&nbsp;<span style="font-family: arial;">⇾</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" type="var">a</span>)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(2)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">I</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">WHILE</span>&nbsp;<span class="id" type="var">X</span>&nbsp;≠&nbsp;0&nbsp;<span class="id" type="var">DO</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;(3)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">I</span>&nbsp;<span style="font-family: arial;">∧</span>&nbsp;<span class="id" type="var">X</span>&nbsp;≠&nbsp;0&nbsp;<span style="letter-spacing:-.4em;">}</span>}&nbsp;&nbsp;<span style="font-family: arial;">⇾</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" type="var">c</span>)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(4)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">I</span>&nbsp;[<span class="id" type="var">X</span>&nbsp;<span style="font-family: arial;">↦</span>&nbsp;<span class="id" type="var">X</span>-1]&nbsp;[<span class="id" type="var">Y</span>&nbsp;<span style="font-family: arial;">↦</span>&nbsp;<span class="id" type="var">Y</span>-1]&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">Y</span>&nbsp;::=&nbsp;<span class="id" type="var">Y</span>&nbsp;-&nbsp;1;;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(5)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">I</span>&nbsp;[<span class="id" type="var">X</span>&nbsp;<span style="font-family: arial;">↦</span>&nbsp;<span class="id" type="var">X</span>-1]&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">X</span>&nbsp;::=&nbsp;<span class="id" type="var">X</span>&nbsp;-&nbsp;1<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(6)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">I</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">END</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;(7)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">I</span>&nbsp;<span style="font-family: arial;">∧</span>&nbsp;~(<span class="id" type="var">X</span>&nbsp;≠&nbsp;0)&nbsp;<span style="letter-spacing:-.4em;">}</span>}&nbsp;&nbsp;<span style="font-family: arial;">⇾</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" type="var">b</span>)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(8)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">Y</span>&nbsp;=&nbsp;<span class="id" type="var">n</span>&nbsp;-&nbsp;<span class="id" type="var">m</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}
+<div class="paragraph"> </div>
+
+</div>
+
+<div class="paragraph"> </div>
+
+    By examining this skeleton, we can see that any valid <span class="inlinecode"><span class="id" type="var">I</span></span> will
+    have to respect three conditions:
+
+<div class="paragraph"> </div>
+
+<ul class="doclist">
+<li> (a) it must be weak enough to be implied by the loop's
+      precondition, i.e., (1) must imply (2);
+
+</li>
+<li> (b) it must be strong enough to imply the loop's postcondition,
+      i.e., (7) must imply (8);
+
+</li>
+<li> (c) it must be preserved by one iteration of the loop, i.e., (3)
+      must imply (4). 
+</li>
+</ul>
+ <div style="background-color:lightgray; color:red; margin:10px; padding:10px; "> Here's another bad <span class="inlinecode">¬</span> (in the proof)... 
+</div> 
+<div class="paragraph"> </div>
+
+ These conditions are actually independent of the particular
+    program and specification we are considering. Indeed, every loop
+    invariant has to satisfy them. One way to find an invariant that
+    simultaneously satisfies these three conditions is by using an
+    iterative process: start with a "candidate" invariant (e.g., a
+    guess or a heuristic choice) and check the three conditions above;
+    if any of the checks fails, try to use the information that we get
+    from the failure to produce another — hopefully better — candidate
+    invariant, and repeat the process.
+
+<div class="paragraph"> </div>
+
+    For instance, in the reduce-to-zero example above, we saw that,
+    for a very simple loop, choosing <span class="inlinecode"><span class="id" type="var">True</span></span> as an invariant did the
+    job.  So let's try instantiating <span class="inlinecode"><span class="id" type="var">I</span></span> with <span class="inlinecode"><span class="id" type="var">True</span></span> in the skeleton 
+    above see what we get...
+
+<div class="paragraph"> </div>
+
+<div class="code code-tight">
+&nbsp;&nbsp;&nbsp;&nbsp;(1)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">X</span>&nbsp;=&nbsp;<span class="id" type="var">m</span>&nbsp;<span style="font-family: arial;">∧</span>&nbsp;<span class="id" type="var">Y</span>&nbsp;=&nbsp;<span class="id" type="var">n</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}&nbsp;<span style="font-family: arial;">⇾</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" type="var">a</span>&nbsp;-&nbsp;<span class="id" type="var">OK</span>)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(2)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">True</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">WHILE</span>&nbsp;<span class="id" type="var">X</span>&nbsp;≠&nbsp;0&nbsp;<span class="id" type="var">DO</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;(3)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">True</span>&nbsp;<span style="font-family: arial;">∧</span>&nbsp;<span class="id" type="var">X</span>&nbsp;≠&nbsp;0&nbsp;<span style="letter-spacing:-.4em;">}</span>}&nbsp;&nbsp;<span style="font-family: arial;">⇾</span>&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" type="var">c</span>&nbsp;-&nbsp;<span class="id" type="var">OK</span>)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(4)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">True</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">Y</span>&nbsp;::=&nbsp;<span class="id" type="var">Y</span>&nbsp;-&nbsp;1;;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(5)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">True</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">X</span>&nbsp;::=&nbsp;<span class="id" type="var">X</span>&nbsp;-&nbsp;1<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(6)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">True</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">END</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;(7)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">True</span>&nbsp;<span style="font-family: arial;">∧</span>&nbsp;<span class="id" type="var">X</span>&nbsp;=&nbsp;0&nbsp;<span style="letter-spacing:-.4em;">}</span>}&nbsp;&nbsp;<span style="font-family: arial;">⇾</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" type="var">b</span>&nbsp;-&nbsp;<span class="id" type="var">WRONG</span>!)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(8)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">Y</span>&nbsp;=&nbsp;<span class="id" type="var">n</span>&nbsp;-&nbsp;<span class="id" type="var">m</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}
+<div class="paragraph"> </div>
+
+</div>
+
+<div class="paragraph"> </div>
+
+    While conditions (a) and (c) are trivially satisfied,
+    condition (b) is wrong, i.e., it is not the case that (7) <span class="inlinecode"><span class="id" type="var">True</span></span> <span class="inlinecode"><span style="font-family: arial;">∧</span></span>
+    <span class="inlinecode"><span class="id" type="var">X</span></span> <span class="inlinecode">=</span> <span class="inlinecode">0</span> implies (8) <span class="inlinecode"><span class="id" type="var">Y</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">n</span></span> <span class="inlinecode">-</span> <span class="inlinecode"><span class="id" type="var">m</span></span>.  In fact, the two assertions are
+    completely unrelated, so it is very easy to find a counterexample 
+    to the implication (say, <span class="inlinecode"><span class="id" type="var">Y</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">X</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">m</span></span> <span class="inlinecode">=</span> <span class="inlinecode">0</span> and <span class="inlinecode"><span class="id" type="var">n</span></span> <span class="inlinecode">=</span> <span class="inlinecode">1</span>).
+
+<div class="paragraph"> </div>
+
+    If we want (b) to hold, we need to strengthen the invariant so
+    that it implies the postcondition (8).  One simple way to do
+    this is to let the invariant <i>be</i> the postcondition.  So let's
+    return to our skeleton, instantiate <span class="inlinecode"><span class="id" type="var">I</span></span> with <span class="inlinecode"><span class="id" type="var">Y</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">n</span></span> <span class="inlinecode">-</span> <span class="inlinecode"><span class="id" type="var">m</span></span>, and
+    check conditions (a) to (c) again.
+
+<div class="paragraph"> </div>
+
+<div class="code code-tight">
+&nbsp;&nbsp;&nbsp;&nbsp;(1)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">X</span>&nbsp;=&nbsp;<span class="id" type="var">m</span>&nbsp;<span style="font-family: arial;">∧</span>&nbsp;<span class="id" type="var">Y</span>&nbsp;=&nbsp;<span class="id" type="var">n</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}&nbsp;&nbsp;<span style="font-family: arial;">⇾</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" type="var">a</span>&nbsp;-&nbsp;<span class="id" type="var">WRONG</span>!)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(2)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">Y</span>&nbsp;=&nbsp;<span class="id" type="var">n</span>&nbsp;-&nbsp;<span class="id" type="var">m</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">WHILE</span>&nbsp;<span class="id" type="var">X</span>&nbsp;≠&nbsp;0&nbsp;<span class="id" type="var">DO</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;(3)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">Y</span>&nbsp;=&nbsp;<span class="id" type="var">n</span>&nbsp;-&nbsp;<span class="id" type="var">m</span>&nbsp;<span style="font-family: arial;">∧</span>&nbsp;<span class="id" type="var">X</span>&nbsp;≠&nbsp;0&nbsp;<span style="letter-spacing:-.4em;">}</span>}&nbsp;&nbsp;<span style="font-family: arial;">⇾</span>&nbsp;&nbsp;&nbsp;(<span class="id" type="var">c</span>&nbsp;-&nbsp;<span class="id" type="var">WRONG</span>!)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(4)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">Y</span>&nbsp;-&nbsp;1&nbsp;=&nbsp;<span class="id" type="var">n</span>&nbsp;-&nbsp;<span class="id" type="var">m</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">Y</span>&nbsp;::=&nbsp;<span class="id" type="var">Y</span>&nbsp;-&nbsp;1;;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(5)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">Y</span>&nbsp;=&nbsp;<span class="id" type="var">n</span>&nbsp;-&nbsp;<span class="id" type="var">m</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">X</span>&nbsp;::=&nbsp;<span class="id" type="var">X</span>&nbsp;-&nbsp;1<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(6)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">Y</span>&nbsp;=&nbsp;<span class="id" type="var">n</span>&nbsp;-&nbsp;<span class="id" type="var">m</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">END</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;(7)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">Y</span>&nbsp;=&nbsp;<span class="id" type="var">n</span>&nbsp;-&nbsp;<span class="id" type="var">m</span>&nbsp;<span style="font-family: arial;">∧</span>&nbsp;<span class="id" type="var">X</span>&nbsp;=&nbsp;0&nbsp;<span style="letter-spacing:-.4em;">}</span>}&nbsp;&nbsp;<span style="font-family: arial;">⇾</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" type="var">b</span>&nbsp;-&nbsp;<span class="id" type="var">OK</span>)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(8)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">Y</span>&nbsp;=&nbsp;<span class="id" type="var">n</span>&nbsp;-&nbsp;<span class="id" type="var">m</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}
+<div class="paragraph"> </div>
+
+</div>
+
+<div class="paragraph"> </div>
+
+    This time, condition (b) holds trivially, but (a) and (c) are
+    broken. Condition (a) requires that (1) <span class="inlinecode"><span class="id" type="var">X</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">m</span></span> <span class="inlinecode"><span style="font-family: arial;">∧</span></span> <span class="inlinecode"><span class="id" type="var">Y</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">n</span></span>
+    implies (2) <span class="inlinecode"><span class="id" type="var">Y</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">n</span></span> <span class="inlinecode">-</span> <span class="inlinecode"><span class="id" type="var">m</span></span>.  If we substitute <span class="inlinecode"><span class="id" type="var">Y</span></span> by <span class="inlinecode"><span class="id" type="var">n</span></span> we have to
+    show that <span class="inlinecode"><span class="id" type="var">n</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">n</span></span> <span class="inlinecode">-</span> <span class="inlinecode"><span class="id" type="var">m</span></span> for arbitrary <span class="inlinecode"><span class="id" type="var">m</span></span> and <span class="inlinecode"><span class="id" type="var">n</span></span>, which is not 
+    the case (for instance, when <span class="inlinecode"><span class="id" type="var">m</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">n</span></span> <span class="inlinecode">=</span> <span class="inlinecode">1</span>).  Condition (c) requires 
+    that <span class="inlinecode"><span class="id" type="var">n</span></span> <span class="inlinecode">-</span> <span class="inlinecode"><span class="id" type="var">m</span></span> <span class="inlinecode">-</span> <span class="inlinecode">1</span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">n</span></span> <span class="inlinecode">-</span> <span class="inlinecode"><span class="id" type="var">m</span></span>, which fails, for instance, for <span class="inlinecode"><span class="id" type="var">n</span></span> <span class="inlinecode">=</span> <span class="inlinecode">1</span> 
+    and <span class="inlinecode"><span class="id" type="var">m</span></span> <span class="inlinecode">=</span> <span class="inlinecode">0</span>. So, although <span class="inlinecode"><span class="id" type="var">Y</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">n</span></span> <span class="inlinecode">-</span> <span class="inlinecode"><span class="id" type="var">m</span></span> holds at the end of the loop, 
+    it does not hold from the start, and it doesn't hold on each 
+    iteration; it is not a correct invariant.
+
+<div class="paragraph"> </div>
+
+    This failure is not very surprising: the variable <span class="inlinecode"><span class="id" type="var">Y</span></span> changes
+    during the loop, while <span class="inlinecode"><span class="id" type="var">m</span></span> and <span class="inlinecode"><span class="id" type="var">n</span></span> are constant, so the assertion
+    we chose didn't have much chance of being an invariant!
+
+<div class="paragraph"> </div>
+
+    To do better, we need to generalize (8) to some statement that is
+    equivalent to (8) when <span class="inlinecode"><span class="id" type="var">X</span></span> is <span class="inlinecode">0</span>, since this will be the case
+    when the loop terminates, and that "fills the gap" in some
+    appropriate way when <span class="inlinecode"><span class="id" type="var">X</span></span> is nonzero.  Looking at how the loop
+    works, we can observe that <span class="inlinecode"><span class="id" type="var">X</span></span> and <span class="inlinecode"><span class="id" type="var">Y</span></span> are decremented together
+    until <span class="inlinecode"><span class="id" type="var">X</span></span> reaches <span class="inlinecode">0</span>.  So, if <span class="inlinecode"><span class="id" type="var">X</span></span> <span class="inlinecode">=</span> <span class="inlinecode">2</span> and <span class="inlinecode"><span class="id" type="var">Y</span></span> <span class="inlinecode">=</span> <span class="inlinecode">5</span> initially,
+    after one iteration of the loop we obtain <span class="inlinecode"><span class="id" type="var">X</span></span> <span class="inlinecode">=</span> <span class="inlinecode">1</span> and <span class="inlinecode"><span class="id" type="var">Y</span></span> <span class="inlinecode">=</span> <span class="inlinecode">4</span>;
+    after two iterations <span class="inlinecode"><span class="id" type="var">X</span></span> <span class="inlinecode">=</span> <span class="inlinecode">0</span> and <span class="inlinecode"><span class="id" type="var">Y</span></span> <span class="inlinecode">=</span> <span class="inlinecode">3</span>; and then the loop stops.
+    Notice that the difference between <span class="inlinecode"><span class="id" type="var">Y</span></span> and <span class="inlinecode"><span class="id" type="var">X</span></span> stays constant
+    between iterations: initially, <span class="inlinecode"><span class="id" type="var">Y</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">n</span></span> and <span class="inlinecode"><span class="id" type="var">X</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">m</span></span>, and the
+    difference is always <span class="inlinecode"><span class="id" type="var">n</span></span> <span class="inlinecode">-</span> <span class="inlinecode"><span class="id" type="var">m</span></span>.  So let's try instantiating <span class="inlinecode"><span class="id" type="var">I</span></span> in
+    the skeleton above with <span class="inlinecode"><span class="id" type="var">Y</span></span> <span class="inlinecode">-</span> <span class="inlinecode"><span class="id" type="var">X</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">n</span></span> <span class="inlinecode">-</span> <span class="inlinecode"><span class="id" type="var">m</span></span>.
+
+<div class="paragraph"> </div>
+
+<div class="code code-tight">
+&nbsp;&nbsp;&nbsp;&nbsp;(1)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">X</span>&nbsp;=&nbsp;<span class="id" type="var">m</span>&nbsp;<span style="font-family: arial;">∧</span>&nbsp;<span class="id" type="var">Y</span>&nbsp;=&nbsp;<span class="id" type="var">n</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}&nbsp;&nbsp;<span style="font-family: arial;">⇾</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" type="var">a</span>&nbsp;-&nbsp;<span class="id" type="var">OK</span>)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(2)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">Y</span>&nbsp;-&nbsp;<span class="id" type="var">X</span>&nbsp;=&nbsp;<span class="id" type="var">n</span>&nbsp;-&nbsp;<span class="id" type="var">m</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">WHILE</span>&nbsp;<span class="id" type="var">X</span>&nbsp;≠&nbsp;0&nbsp;<span class="id" type="var">DO</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;(3)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">Y</span>&nbsp;-&nbsp;<span class="id" type="var">X</span>&nbsp;=&nbsp;<span class="id" type="var">n</span>&nbsp;-&nbsp;<span class="id" type="var">m</span>&nbsp;<span style="font-family: arial;">∧</span>&nbsp;<span class="id" type="var">X</span>&nbsp;≠&nbsp;0&nbsp;<span style="letter-spacing:-.4em;">}</span>}&nbsp;&nbsp;<span style="font-family: arial;">⇾</span>&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" type="var">c</span>&nbsp;-&nbsp;<span class="id" type="var">OK</span>)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(4)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;(<span class="id" type="var">Y</span>&nbsp;-&nbsp;1)&nbsp;-&nbsp;(<span class="id" type="var">X</span>&nbsp;-&nbsp;1)&nbsp;=&nbsp;<span class="id" type="var">n</span>&nbsp;-&nbsp;<span class="id" type="var">m</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">Y</span>&nbsp;::=&nbsp;<span class="id" type="var">Y</span>&nbsp;-&nbsp;1;;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(5)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">Y</span>&nbsp;-&nbsp;(<span class="id" type="var">X</span>&nbsp;-&nbsp;1)&nbsp;=&nbsp;<span class="id" type="var">n</span>&nbsp;-&nbsp;<span class="id" type="var">m</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">X</span>&nbsp;::=&nbsp;<span class="id" type="var">X</span>&nbsp;-&nbsp;1<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(6)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">Y</span>&nbsp;-&nbsp;<span class="id" type="var">X</span>&nbsp;=&nbsp;<span class="id" type="var">n</span>&nbsp;-&nbsp;<span class="id" type="var">m</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">END</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;(7)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">Y</span>&nbsp;-&nbsp;<span class="id" type="var">X</span>&nbsp;=&nbsp;<span class="id" type="var">n</span>&nbsp;-&nbsp;<span class="id" type="var">m</span>&nbsp;<span style="font-family: arial;">∧</span>&nbsp;<span class="id" type="var">X</span>&nbsp;=&nbsp;0&nbsp;<span style="letter-spacing:-.4em;">}</span>}&nbsp;&nbsp;<span style="font-family: arial;">⇾</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" type="var">b</span>&nbsp;-&nbsp;<span class="id" type="var">OK</span>)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(8)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">Y</span>&nbsp;=&nbsp;<span class="id" type="var">n</span>&nbsp;-&nbsp;<span class="id" type="var">m</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}
+<div class="paragraph"> </div>
+
+</div>
+
+<div class="paragraph"> </div>
+
+    Success!  Conditions (a), (b) and (c) all hold now.  (To
+    verify (c), we need to check that, under the assumption that <span class="inlinecode"><span class="id" type="var">X</span></span> <span class="inlinecode">≠</span>
+    <span class="inlinecode">0</span>, we have <span class="inlinecode"><span class="id" type="var">Y</span></span> <span class="inlinecode">-</span> <span class="inlinecode"><span class="id" type="var">X</span></span> <span class="inlinecode">=</span> <span class="inlinecode">(<span class="id" type="var">Y</span></span> <span class="inlinecode">-</span> <span class="inlinecode">1)</span> <span class="inlinecode">-</span> <span class="inlinecode">(<span class="id" type="var">X</span></span> <span class="inlinecode">-</span> <span class="inlinecode">1)</span>; this holds for all
+    natural numbers <span class="inlinecode"><span class="id" type="var">X</span></span> and <span class="inlinecode"><span class="id" type="var">Y</span></span>.) 
+</div>
+<div class="code code-tight">
+
+<br>
+</div>
+
+<div class="doc">
+<a name="lab441"></a><h2 class="section">Exercise: Slow Assignment</h2>
+
+<div class="paragraph"> </div>
+
+<a name="lab442"></a><h4 class="section">Exercise: 2 stars (slow_assignment)</h4>
+ A roundabout way of assigning a number currently stored in <span class="inlinecode"><span class="id" type="var">X</span></span> to
+    the variable <span class="inlinecode"><span class="id" type="var">Y</span></span> is to start <span class="inlinecode"><span class="id" type="var">Y</span></span> at <span class="inlinecode">0</span>, then decrement <span class="inlinecode"><span class="id" type="var">X</span></span> until
+    it hits <span class="inlinecode">0</span>, incrementing <span class="inlinecode"><span class="id" type="var">Y</span></span> at each step. Here is a program that
+    implements this idea:
+
+<div class="paragraph"> </div>
+
+<div class="code code-tight">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">X</span>&nbsp;=&nbsp;<span class="id" type="var">m</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">Y</span>&nbsp;::=&nbsp;0;;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">WHILE</span>&nbsp;<span class="id" type="var">X</span>&nbsp;≠&nbsp;0&nbsp;<span class="id" type="var">DO</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">X</span>&nbsp;::=&nbsp;<span class="id" type="var">X</span>&nbsp;-&nbsp;1;;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">Y</span>&nbsp;::=&nbsp;<span class="id" type="var">Y</span>&nbsp;+&nbsp;1<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">END</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">Y</span>&nbsp;=&nbsp;<span class="id" type="var">m</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}
+<div class="paragraph"> </div>
+
+</div>
+    Write an informal decorated program showing that this procedure 
+    is correct. 
+</div>
+<div class="code code-tight">
+
+<br>
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span><br>
+</div>
+
+<div class="doc">
+<font size="-2">☐</font> 
+</div>
+<div class="code code-tight">
+
+<br>
+</div>
+
+<div class="doc">
+<a name="lab443"></a><h2 class="section">Exercise: Slow Addition</h2>
+
+<div class="paragraph"> </div>
+
+<a name="lab444"></a><h4 class="section">Exercise: 3 stars, optional (add_slowly_decoration)</h4>
+ The following program adds the variable X into the variable Z
+    by repeatedly decrementing X and incrementing Z.
+
+<div class="paragraph"> </div>
+
+<div class="code code-tight">
+&nbsp;&nbsp;<span class="id" type="var">WHILE</span>&nbsp;<span class="id" type="var">X</span>&nbsp;≠&nbsp;0&nbsp;<span class="id" type="var">DO</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">Z</span>&nbsp;::=&nbsp;<span class="id" type="var">Z</span>&nbsp;+&nbsp;1;;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">X</span>&nbsp;::=&nbsp;<span class="id" type="var">X</span>&nbsp;-&nbsp;1<br>
+&nbsp;&nbsp;<span class="id" type="var">END</span>
+<div class="paragraph"> </div>
+
+</div>
+
+<div class="paragraph"> </div>
+
+    Following the pattern of the <span class="inlinecode"><span class="id" type="var">subtract_slowly</span></span> example above, pick
+    a precondition and postcondition that give an appropriate
+    specification of <span class="inlinecode"><span class="id" type="var">add_slowly</span></span>; then (informally) decorate the
+    program accordingly. 
+</div>
+<div class="code code-tight">
+
+<br>
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span><br>
+</div>
+
+<div class="doc">
+<font size="-2">☐</font> 
+</div>
+<div class="code code-tight">
+
+<br>
+</div>
+
+<div class="doc">
+<a name="lab445"></a><h2 class="section">Example: Parity</h2>
+
+<div class="paragraph"> </div>
+
+ Here is a cute little program for computing the parity of the
+    value initially stored in <span class="inlinecode"><span class="id" type="var">X</span></span> (due to Daniel Cristofani).
+
+<div class="paragraph"> </div>
+
+<div class="code code-tight">
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">X</span>&nbsp;=&nbsp;<span class="id" type="var">m</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;<span class="id" type="var">WHILE</span>&nbsp;2&nbsp;≤&nbsp;<span class="id" type="var">X</span>&nbsp;<span class="id" type="var">DO</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">X</span>&nbsp;::=&nbsp;<span class="id" type="var">X</span>&nbsp;-&nbsp;2<br>
+&nbsp;&nbsp;<span class="id" type="var">END</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">X</span>&nbsp;=&nbsp;<span class="id" type="var">parity</span>&nbsp;<span class="id" type="var">m</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}
+<div class="paragraph"> </div>
+
+</div>
+    The mathematical <span class="inlinecode"><span class="id" type="var">parity</span></span> function used in the specification is
+    defined in Coq as follows: 
+</div>
+<div class="code code-tight">
+
+<br>
+<span class="id" type="keyword">Fixpoint</span> <a name="parity"><span class="id" type="definition">parity</span></a> <span class="id" type="var">x</span> :=<br>
+&nbsp;&nbsp;<span class="id" type="keyword">match</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Hoare2.html#x"><span class="id" type="variable">x</span></a> <span class="id" type="keyword">with</span><br>
+&nbsp;&nbsp;| 0 ⇒ 0<br>
+&nbsp;&nbsp;| 1 ⇒ 1<br>
+&nbsp;&nbsp;| <a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#S"><span class="id" type="constructor">S</span></a> (<a class="idref" href="http://coq.inria.fr/library/Coq.Init.Datatypes.html#S"><span class="id" type="constructor">S</span></a> <span class="id" type="var">x'</span>) ⇒ <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Hoare2.html#parity"><span class="id" type="definition">parity</span></a> <span class="id" type="var">x'</span><br>
+&nbsp;&nbsp;<span class="id" type="keyword">end</span>.<br>
+
+<br>
+</div>
+
+<div class="doc">
+The postcondition does not hold at the beginning of the loop,
+    since <span class="inlinecode"><span class="id" type="var">m</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">parity</span></span> <span class="inlinecode"><span class="id" type="var">m</span></span> does not hold for an arbitrary <span class="inlinecode"><span class="id" type="var">m</span></span>, so we
+    cannot use that as an invariant.  To find an invariant that works,
+    let's think a bit about what this loop does.  On each iteration it
+    decrements <span class="inlinecode"><span class="id" type="var">X</span></span> by <span class="inlinecode">2</span>, which preserves the parity of <span class="inlinecode"><span class="id" type="var">X</span></span>.  So the
+    parity of <span class="inlinecode"><span class="id" type="var">X</span></span> does not change, i.e., it is invariant.  The initial
+    value of <span class="inlinecode"><span class="id" type="var">X</span></span> is <span class="inlinecode"><span class="id" type="var">m</span></span>, so the parity of <span class="inlinecode"><span class="id" type="var">X</span></span> is always equal to the
+    parity of <span class="inlinecode"><span class="id" type="var">m</span></span>. Using <span class="inlinecode"><span class="id" type="var">parity</span></span> <span class="inlinecode"><span class="id" type="var">X</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">parity</span></span> <span class="inlinecode"><span class="id" type="var">m</span></span> as an invariant we
+    obtain the following decorated program:
+
+<div class="paragraph"> </div>
+
+<div class="code code-tight">
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">X</span>&nbsp;=&nbsp;<span class="id" type="var">m</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}&nbsp;<span style="font-family: arial;">⇾</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" type="var">a</span>&nbsp;-&nbsp;<span class="id" type="var">OK</span>)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">parity</span>&nbsp;<span class="id" type="var">X</span>&nbsp;=&nbsp;<span class="id" type="var">parity</span>&nbsp;<span class="id" type="var">m</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;<span class="id" type="var">WHILE</span>&nbsp;2&nbsp;≤&nbsp;<span class="id" type="var">X</span>&nbsp;<span class="id" type="var">DO</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">parity</span>&nbsp;<span class="id" type="var">X</span>&nbsp;=&nbsp;<span class="id" type="var">parity</span>&nbsp;<span class="id" type="var">m</span>&nbsp;<span style="font-family: arial;">∧</span>&nbsp;2&nbsp;≤&nbsp;<span class="id" type="var">X</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}&nbsp;&nbsp;<span style="font-family: arial;">⇾</span>&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" type="var">c</span>&nbsp;-&nbsp;<span class="id" type="var">OK</span>)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">parity</span>&nbsp;(<span class="id" type="var">X</span>-2)&nbsp;=&nbsp;<span class="id" type="var">parity</span>&nbsp;<span class="id" type="var">m</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">X</span>&nbsp;::=&nbsp;<span class="id" type="var">X</span>&nbsp;-&nbsp;2<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">parity</span>&nbsp;<span class="id" type="var">X</span>&nbsp;=&nbsp;<span class="id" type="var">parity</span>&nbsp;<span class="id" type="var">m</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;<span class="id" type="var">END</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">parity</span>&nbsp;<span class="id" type="var">X</span>&nbsp;=&nbsp;<span class="id" type="var">parity</span>&nbsp;<span class="id" type="var">m</span>&nbsp;<span style="font-family: arial;">∧</span>&nbsp;<span class="id" type="var">X</span>&nbsp;&lt;&nbsp;2&nbsp;<span style="letter-spacing:-.4em;">}</span>}&nbsp;&nbsp;<span style="font-family: arial;">⇾</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" type="var">b</span>&nbsp;-&nbsp;<span class="id" type="var">OK</span>)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">X</span>&nbsp;=&nbsp;<span class="id" type="var">parity</span>&nbsp;<span class="id" type="var">m</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}
+<div class="paragraph"> </div>
+
+</div>
+
+<div class="paragraph"> </div>
+
+    With this invariant, conditions (a), (b), and (c) are all
+    satisfied. For verifying (b), we observe that, when <span class="inlinecode"><span class="id" type="var">X</span></span> <span class="inlinecode">&lt;</span> <span class="inlinecode">2</span>, we
+    have <span class="inlinecode"><span class="id" type="var">parity</span></span> <span class="inlinecode"><span class="id" type="var">X</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">X</span></span> (we can easily see this in the definition of
+    <span class="inlinecode"><span class="id" type="var">parity</span></span>).  For verifying (c), we observe that, when <span class="inlinecode">2</span> <span class="inlinecode">≤</span> <span class="inlinecode"><span class="id" type="var">X</span></span>, we
+    have <span class="inlinecode"><span class="id" type="var">parity</span></span> <span class="inlinecode"><span class="id" type="var">X</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">parity</span></span> <span class="inlinecode">(<span class="id" type="var">X</span>-2)</span>. 
+<div class="paragraph"> </div>
+
+<a name="lab446"></a><h4 class="section">Exercise: 3 stars, optional (parity_formal)</h4>
+ Translate this proof to Coq. Refer to the reduce-to-zero example
+    for ideas. You may find the following two lemmas useful: 
+</div>
+<div class="code code-tight">
+
+<br>
+<span class="id" type="keyword">Lemma</span> <a name="parity_ge_2"><span class="id" type="lemma">parity_ge_2</span></a> : <span style="font-family: arial;">∀</span><span class="id" type="var">x</span>,<br>
+&nbsp;&nbsp;2 ≤ <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Hoare2.html#x"><span class="id" type="variable">x</span></a> <span style="font-family: arial;">→</span><br>
+&nbsp;&nbsp;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Hoare2.html#parity"><span class="id" type="definition">parity</span></a> (<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Hoare2.html#x"><span class="id" type="variable">x</span></a> - 2) = <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Hoare2.html#parity"><span class="id" type="definition">parity</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Hoare2.html#x"><span class="id" type="variable">x</span></a>.<br>
+<div class="togglescript" id="proofcontrol1" onclick="toggleDisplay(&#39;proof1&#39;);toggleDisplay(&#39;proofcontrol1&#39;)"><span class="show"></span></div>
+<div class="proofscript" id="proof1" onclick="toggleDisplay(&#39;proof1&#39;);toggleDisplay(&#39;proofcontrol1&#39;)">
+<span class="id" type="keyword">Proof</span>.<br>
+&nbsp;&nbsp;<span class="id" type="tactic">induction</span> <span class="id" type="var">x</span>; <span class="id" type="tactic">intro</span>. <span class="id" type="tactic">reflexivity</span>.<br>
+&nbsp;&nbsp;<span class="id" type="tactic">destruct</span> <span class="id" type="var">x</span>. <span class="id" type="tactic">inversion</span> <span class="id" type="var">H</span>. <span class="id" type="tactic">inversion</span> <span class="id" type="var">H<sub>1</sub></span>.<br>
+&nbsp;&nbsp;<span class="id" type="tactic">simpl</span>. <span class="id" type="tactic">rewrite</span> <span style="font-family: arial;">←</span> <a class="idref" href="http://coq.inria.fr/library/Coq.Arith.Minus.html#minus_n_O"><span class="id" type="lemma">minus_n_O</span></a>. <span class="id" type="tactic">reflexivity</span>.<br>
+<span class="id" type="keyword">Qed</span>.<br>
+</div>
+
+<br>
+<span class="id" type="keyword">Lemma</span> <a name="parity_lt_2"><span class="id" type="lemma">parity_lt_2</span></a> : <span style="font-family: arial;">∀</span><span class="id" type="var">x</span>,<br>
+&nbsp;&nbsp;¬ 2 ≤ <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Hoare2.html#x"><span class="id" type="variable">x</span></a> <span style="font-family: arial;">→</span><br>
+&nbsp;&nbsp;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Hoare2.html#parity"><span class="id" type="definition">parity</span></a> (<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Hoare2.html#x"><span class="id" type="variable">x</span></a>) = <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Hoare2.html#x"><span class="id" type="variable">x</span></a>.<br>
+<div class="togglescript" id="proofcontrol2" onclick="toggleDisplay(&#39;proof2&#39;);toggleDisplay(&#39;proofcontrol2&#39;)"><span class="show"></span></div>
+<div class="proofscript" id="proof2" onclick="toggleDisplay(&#39;proof2&#39;);toggleDisplay(&#39;proofcontrol2&#39;)">
+<span class="id" type="keyword">Proof</span>.<br>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span>. <span class="id" type="tactic">induction</span> <span class="id" type="var">x</span>. <span class="id" type="tactic">reflexivity</span>. <span class="id" type="tactic">destruct</span> <span class="id" type="var">x</span>. <span class="id" type="tactic">reflexivity</span>.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">exfalso</span>. <span class="id" type="tactic">apply</span> <span class="id" type="var">H</span>. <span class="id" type="tactic">omega</span>.<br>
+<span class="id" type="keyword">Qed</span>.<br>
+</div>
+
+<br>
+<span class="id" type="keyword">Theorem</span> <a name="parity_correct"><span class="id" type="lemma">parity_correct</span></a> : <span style="font-family: arial;">∀</span><span class="id" type="var">m</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{ <span class="id" type="keyword">fun</span> <span class="id" type="var">st</span> ⇒ <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Hoare2.html#st"><span class="id" type="variable">st</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Imp.html#X"><span class="id" type="definition">X</span></a> = <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Hoare2.html#m"><span class="id" type="variable">m</span></a> <span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Imp.html#::'WHILE'_x_'DO'_x_'END'"><span class="id" type="notation">WHILE</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Imp.html#BLe"><span class="id" type="constructor">BLe</span></a> (<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Imp.html#ANum"><span class="id" type="constructor">ANum</span></a> 2) (<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Imp.html#AId"><span class="id" type="constructor">AId</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Imp.html#X"><span class="id" type="definition">X</span></a>) <span class="id" type="var">DO</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Imp.html#X"><span class="id" type="definition">X</span></a> ::= <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Imp.html#AMinus"><span class="id" type="constructor">AMinus</span></a> (<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Imp.html#AId"><span class="id" type="constructor">AId</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Imp.html#X"><span class="id" type="definition">X</span></a>) (<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Imp.html#ANum"><span class="id" type="constructor">ANum</span></a> 2)<br>
+&nbsp;&nbsp;<span class="id" type="var">END</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{ <span class="id" type="keyword">fun</span> <span class="id" type="var">st</span> ⇒ <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Hoare2.html#st"><span class="id" type="variable">st</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Imp.html#X"><span class="id" type="definition">X</span></a> = <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Hoare2.html#parity"><span class="id" type="definition">parity</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Hoare2.html#m"><span class="id" type="variable">m</span></a> <span style="letter-spacing:-.4em;">}</span>}.<br>
+<span class="id" type="keyword">Proof</span>.<br>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br>
+</div>
+
+<div class="doc">
+<font size="-2">☐</font> 
+</div>
+<div class="code code-tight">
+
+<br>
+</div>
+
+<div class="doc">
+<a name="lab447"></a><h2 class="section">Example: Finding Square Roots</h2>
+
+<div class="paragraph"> </div>
+
+ The following program computes the square root of <span class="inlinecode"><span class="id" type="var">X</span></span>
+    by naive iteration:
+
+<div class="paragraph"> </div>
+
+<div class="code code-tight">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">X</span>=<span class="id" type="var">m</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">Z</span>&nbsp;::=&nbsp;0;;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">WHILE</span>&nbsp;(<span class="id" type="var">Z</span>+1)*(<span class="id" type="var">Z</span>+1)&nbsp;≤&nbsp;<span class="id" type="var">X</span>&nbsp;<span class="id" type="var">DO</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">Z</span>&nbsp;::=&nbsp;<span class="id" type="var">Z</span>+1<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">END</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">Z</span>*<span class="id" type="var">Z</span>≤<span class="id" type="var">m</span>&nbsp;<span style="font-family: arial;">∧</span>&nbsp;<span class="id" type="var">m</span>&lt;(<span class="id" type="var">Z</span>+1)*(<span class="id" type="var">Z</span>+1)&nbsp;<span style="letter-spacing:-.4em;">}</span>}
+<div class="paragraph"> </div>
+
+</div>
+
+<div class="paragraph"> </div>
+
+ As above, we can try to use the postcondition as a candidate
+    invariant, obtaining the following decorated program:
+
+<div class="paragraph"> </div>
+
+<div class="code code-tight">
+&nbsp;(1)&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">X</span>=<span class="id" type="var">m</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}&nbsp;&nbsp;<span style="font-family: arial;">⇾</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" type="var">a</span>&nbsp;-&nbsp;<span class="id" type="var">second</span>&nbsp;<span class="id" type="var">conjunct</span>&nbsp;<span class="id" type="var">of</span>&nbsp;(2)&nbsp;<span class="id" type="var">WRONG</span>!)<br>
+&nbsp;(2)&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;0*0&nbsp;≤&nbsp;<span class="id" type="var">m</span>&nbsp;<span style="font-family: arial;">∧</span>&nbsp;<span class="id" type="var">m</span>&lt;1*1&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">Z</span>&nbsp;::=&nbsp;0;;<br>
+&nbsp;(3)&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">Z</span>*<span class="id" type="var">Z</span>&nbsp;≤&nbsp;<span class="id" type="var">m</span>&nbsp;<span style="font-family: arial;">∧</span>&nbsp;<span class="id" type="var">m</span>&lt;(<span class="id" type="var">Z</span>+1)*(<span class="id" type="var">Z</span>+1)&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">WHILE</span>&nbsp;(<span class="id" type="var">Z</span>+1)*(<span class="id" type="var">Z</span>+1)&nbsp;≤&nbsp;<span class="id" type="var">X</span>&nbsp;<span class="id" type="var">DO</span><br>
+&nbsp;(4)&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">Z</span>*<span class="id" type="var">Z</span>≤<span class="id" type="var">m</span>&nbsp;<span style="font-family: arial;">∧</span>&nbsp;(<span class="id" type="var">Z</span>+1)*(<span class="id" type="var">Z</span>+1)≤<span class="id" type="var">X</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}&nbsp;&nbsp;<span style="font-family: arial;">⇾</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" type="var">c</span>&nbsp;-&nbsp;<span class="id" type="var">WRONG</span>!)<br>
+&nbsp;(5)&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;(<span class="id" type="var">Z</span>+1)*(<span class="id" type="var">Z</span>+1)≤<span class="id" type="var">m</span>&nbsp;<span style="font-family: arial;">∧</span>&nbsp;<span class="id" type="var">m</span>&lt;(<span class="id" type="var">Z</span>+2)*(<span class="id" type="var">Z</span>+2)&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">Z</span>&nbsp;::=&nbsp;<span class="id" type="var">Z</span>+1<br>
+&nbsp;(6)&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">Z</span>*<span class="id" type="var">Z</span>≤<span class="id" type="var">m</span>&nbsp;<span style="font-family: arial;">∧</span>&nbsp;<span class="id" type="var">m</span>&lt;(<span class="id" type="var">Z</span>+1)*(<span class="id" type="var">Z</span>+1)&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">END</span><br>
+&nbsp;(7)&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">Z</span>*<span class="id" type="var">Z</span>≤<span class="id" type="var">m</span>&nbsp;<span style="font-family: arial;">∧</span>&nbsp;<span class="id" type="var">m</span>&lt;(<span class="id" type="var">Z</span>+1)*(<span class="id" type="var">Z</span>+1)&nbsp;<span style="font-family: arial;">∧</span>&nbsp;<span class="id" type="var">X</span>&lt;(<span class="id" type="var">Z</span>+1)*(<span class="id" type="var">Z</span>+1)&nbsp;<span style="letter-spacing:-.4em;">}</span>}&nbsp;&nbsp;<span style="font-family: arial;">⇾</span>&nbsp;(<span class="id" type="var">b</span>&nbsp;-&nbsp;<span class="id" type="var">OK</span>)<br>
+&nbsp;(8)&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">Z</span>*<span class="id" type="var">Z</span>≤<span class="id" type="var">m</span>&nbsp;<span style="font-family: arial;">∧</span>&nbsp;<span class="id" type="var">m</span>&lt;(<span class="id" type="var">Z</span>+1)*(<span class="id" type="var">Z</span>+1)&nbsp;<span style="letter-spacing:-.4em;">}</span>}
+<div class="paragraph"> </div>
+
+</div>
+
+<div class="paragraph"> </div>
+
+    This didn't work very well: conditions (a) and (c) both failed.
+    Looking at condition (c), we see that the second conjunct of (4)
+    is almost the same as the first conjunct of (5), except that (4)
+    mentions <span class="inlinecode"><span class="id" type="var">X</span></span> while (5) mentions <span class="inlinecode"><span class="id" type="var">m</span></span>. But note that <span class="inlinecode"><span class="id" type="var">X</span></span> is never
+    assigned in this program, so we should always have <span class="inlinecode"><span class="id" type="var">X</span>=<span class="id" type="var">m</span></span>, but we 
+    didn't propagate this information from (1) into the loop invariant.
+
+<div class="paragraph"> </div>
+
+    Also, looking at the second conjunct of (8), it seems quite
+    hopeless as an invariant; fortunately and we don't even need it, 
+    since we can obtain it from the negation of the guard — the third 
+    conjunct in (7) — again under the assumption that <span class="inlinecode"><span class="id" type="var">X</span>=<span class="id" type="var">m</span></span>.
+
+<div class="paragraph"> </div>
+
+    So we now try <span class="inlinecode"><span class="id" type="var">X</span>=<span class="id" type="var">m</span></span> <span class="inlinecode"><span style="font-family: arial;">∧</span></span> <span class="inlinecode"><span class="id" type="var">Z</span>*<span class="id" type="var">Z</span></span> <span class="inlinecode">≤</span> <span class="inlinecode"><span class="id" type="var">m</span></span> as the loop invariant:
+
+<div class="paragraph"> </div>
+
+<div class="code code-tight">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">X</span>=<span class="id" type="var">m</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}&nbsp;&nbsp;<span style="font-family: arial;">⇾</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" type="var">a</span>&nbsp;-&nbsp;<span class="id" type="var">OK</span>)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">X</span>=<span class="id" type="var">m</span>&nbsp;<span style="font-family: arial;">∧</span>&nbsp;0*0&nbsp;≤&nbsp;<span class="id" type="var">m</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">Z</span>&nbsp;::=&nbsp;0;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">X</span>=<span class="id" type="var">m</span>&nbsp;<span style="font-family: arial;">∧</span>&nbsp;<span class="id" type="var">Z</span>*<span class="id" type="var">Z</span>&nbsp;≤&nbsp;<span class="id" type="var">m</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">WHILE</span>&nbsp;(<span class="id" type="var">Z</span>+1)*(<span class="id" type="var">Z</span>+1)&nbsp;≤&nbsp;<span class="id" type="var">X</span>&nbsp;<span class="id" type="var">DO</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">X</span>=<span class="id" type="var">m</span>&nbsp;<span style="font-family: arial;">∧</span>&nbsp;<span class="id" type="var">Z</span>*<span class="id" type="var">Z</span>≤<span class="id" type="var">m</span>&nbsp;<span style="font-family: arial;">∧</span>&nbsp;(<span class="id" type="var">Z</span>+1)*(<span class="id" type="var">Z</span>+1)≤<span class="id" type="var">X</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}&nbsp;&nbsp;<span style="font-family: arial;">⇾</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" type="var">c</span>&nbsp;-&nbsp;<span class="id" type="var">OK</span>)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">X</span>=<span class="id" type="var">m</span>&nbsp;<span style="font-family: arial;">∧</span>&nbsp;(<span class="id" type="var">Z</span>+1)*(<span class="id" type="var">Z</span>+1)≤<span class="id" type="var">m</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">Z</span>&nbsp;::=&nbsp;<span class="id" type="var">Z</span>+1<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">X</span>=<span class="id" type="var">m</span>&nbsp;<span style="font-family: arial;">∧</span>&nbsp;<span class="id" type="var">Z</span>*<span class="id" type="var">Z</span>≤<span class="id" type="var">m</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">END</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">X</span>=<span class="id" type="var">m</span>&nbsp;<span style="font-family: arial;">∧</span>&nbsp;<span class="id" type="var">Z</span>*<span class="id" type="var">Z</span>≤<span class="id" type="var">m</span>&nbsp;<span style="font-family: arial;">∧</span>&nbsp;<span class="id" type="var">X</span>&lt;(<span class="id" type="var">Z</span>+1)*(<span class="id" type="var">Z</span>+1)&nbsp;<span style="letter-spacing:-.4em;">}</span>}&nbsp;&nbsp;<span style="font-family: arial;">⇾</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" type="var">b</span>&nbsp;-&nbsp;<span class="id" type="var">OK</span>)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">Z</span>*<span class="id" type="var">Z</span>≤<span class="id" type="var">m</span>&nbsp;<span style="font-family: arial;">∧</span>&nbsp;<span class="id" type="var">m</span>&lt;(<span class="id" type="var">Z</span>+1)*(<span class="id" type="var">Z</span>+1)&nbsp;<span style="letter-spacing:-.4em;">}</span>}
+<div class="paragraph"> </div>
+
+</div>
+
+<div class="paragraph"> </div>
+
+    This works, since conditions (a), (b), and (c) are now all
+    trivially satisfied.
+
+<div class="paragraph"> </div>
+
+    Very often, even if a variable is used in a loop in a read-only
+    fashion (i.e., it is referred to by the program or by the
+    specification and it is not changed by the loop), it is necessary
+    to add the fact that it doesn't change to the loop invariant. 
+</div>
+<div class="code code-tight">
+
+<br>
+</div>
+
+<div class="doc">
+<a name="lab448"></a><h2 class="section">Example: Squaring</h2>
+
+<div class="paragraph"> </div>
+
+ Here is a program that squares <span class="inlinecode"><span class="id" type="var">X</span></span> by repeated addition:
+
+<div class="paragraph"> </div>
+
+
+<div class="paragraph"> </div>
+
+<div class="code code-tight">
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">X</span>&nbsp;=&nbsp;<span class="id" type="var">m</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;<span class="id" type="var">Y</span>&nbsp;::=&nbsp;0;;<br>
+&nbsp;&nbsp;<span class="id" type="var">Z</span>&nbsp;::=&nbsp;0;;<br>
+&nbsp;&nbsp;<span class="id" type="var">WHILE</span>&nbsp;&nbsp;<span class="id" type="var">Y</span>&nbsp;≠&nbsp;<span class="id" type="var">X</span>&nbsp;&nbsp;<span class="id" type="var">DO</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">Z</span>&nbsp;::=&nbsp;<span class="id" type="var">Z</span>&nbsp;+&nbsp;<span class="id" type="var">X</span>;;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">Y</span>&nbsp;::=&nbsp;<span class="id" type="var">Y</span>&nbsp;+&nbsp;1<br>
+&nbsp;&nbsp;<span class="id" type="var">END</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">Z</span>&nbsp;=&nbsp;<span class="id" type="var">m</span>*<span class="id" type="var">m</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}
+<div class="paragraph"> </div>
+
+</div>
+
+<div class="paragraph"> </div>
+
+ The first thing to note is that the loop reads <span class="inlinecode"><span class="id" type="var">X</span></span> but doesn't
+    change its value. As we saw in the previous example, it is a good idea
+    in such cases to add <span class="inlinecode"><span class="id" type="var">X</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">m</span></span> to the invariant.  The other thing
+    that we know is often useful in the invariant is the postcondition, 
+    so let's add that too, leading to the invariant candidate
+    <span class="inlinecode"><span class="id" type="var">Z</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">m</span></span> <span class="inlinecode">*</span> <span class="inlinecode"><span class="id" type="var">m</span></span> <span class="inlinecode"><span style="font-family: arial;">∧</span></span> <span class="inlinecode"><span class="id" type="var">X</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">m</span></span>.
+
+<div class="paragraph"> </div>
+
+<div class="code code-tight">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">X</span>&nbsp;=&nbsp;<span class="id" type="var">m</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}&nbsp;<span style="font-family: arial;">⇾</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" type="var">a</span>&nbsp;-&nbsp;<span class="id" type="var">WRONG</span>)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;0&nbsp;=&nbsp;<span class="id" type="var">m</span>*<span class="id" type="var">m</span>&nbsp;<span style="font-family: arial;">∧</span>&nbsp;<span class="id" type="var">X</span>&nbsp;=&nbsp;<span class="id" type="var">m</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">Y</span>&nbsp;::=&nbsp;0;;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;0&nbsp;=&nbsp;<span class="id" type="var">m</span>*<span class="id" type="var">m</span>&nbsp;<span style="font-family: arial;">∧</span>&nbsp;<span class="id" type="var">X</span>&nbsp;=&nbsp;<span class="id" type="var">m</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">Z</span>&nbsp;::=&nbsp;0;;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">Z</span>&nbsp;=&nbsp;<span class="id" type="var">m</span>*<span class="id" type="var">m</span>&nbsp;<span style="font-family: arial;">∧</span>&nbsp;<span class="id" type="var">X</span>&nbsp;=&nbsp;<span class="id" type="var">m</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">WHILE</span>&nbsp;<span class="id" type="var">Y</span>&nbsp;≠&nbsp;<span class="id" type="var">X</span>&nbsp;<span class="id" type="var">DO</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">Z</span>&nbsp;=&nbsp;<span class="id" type="var">Y</span>*<span class="id" type="var">m</span>&nbsp;<span style="font-family: arial;">∧</span>&nbsp;<span class="id" type="var">X</span>&nbsp;=&nbsp;<span class="id" type="var">m</span>&nbsp;<span style="font-family: arial;">∧</span>&nbsp;<span class="id" type="var">Y</span>&nbsp;≠&nbsp;<span class="id" type="var">X</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}&nbsp;<span style="font-family: arial;">⇾</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" type="var">c</span>&nbsp;-&nbsp;<span class="id" type="var">WRONG</span>)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">Z</span>+<span class="id" type="var">X</span>&nbsp;=&nbsp;<span class="id" type="var">m</span>*<span class="id" type="var">m</span>&nbsp;<span style="font-family: arial;">∧</span>&nbsp;<span class="id" type="var">X</span>&nbsp;=&nbsp;<span class="id" type="var">m</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">Z</span>&nbsp;::=&nbsp;<span class="id" type="var">Z</span>&nbsp;+&nbsp;<span class="id" type="var">X</span>;;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">Z</span>&nbsp;=&nbsp;<span class="id" type="var">m</span>*<span class="id" type="var">m</span>&nbsp;<span style="font-family: arial;">∧</span>&nbsp;<span class="id" type="var">X</span>&nbsp;=&nbsp;<span class="id" type="var">m</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">Y</span>&nbsp;::=&nbsp;<span class="id" type="var">Y</span>&nbsp;+&nbsp;1<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">Z</span>&nbsp;=&nbsp;<span class="id" type="var">m</span>*<span class="id" type="var">m</span>&nbsp;<span style="font-family: arial;">∧</span>&nbsp;<span class="id" type="var">X</span>&nbsp;=&nbsp;<span class="id" type="var">m</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">END</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">Z</span>&nbsp;=&nbsp;<span class="id" type="var">m</span>*<span class="id" type="var">m</span>&nbsp;<span style="font-family: arial;">∧</span>&nbsp;<span class="id" type="var">X</span>&nbsp;=&nbsp;<span class="id" type="var">m</span>&nbsp;<span style="font-family: arial;">∧</span>&nbsp;<span class="id" type="var">Y</span>&nbsp;=&nbsp;<span class="id" type="var">X</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}&nbsp;<span style="font-family: arial;">⇾</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" type="var">b</span>&nbsp;-&nbsp;<span class="id" type="var">OK</span>)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">Z</span>&nbsp;=&nbsp;<span class="id" type="var">m</span>*<span class="id" type="var">m</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}
+<div class="paragraph"> </div>
+
+</div>
+
+<div class="paragraph"> </div>
+
+    Conditions (a) and (c) fail because of the <span class="inlinecode"><span class="id" type="var">Z</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">m</span>*<span class="id" type="var">m</span></span> part.  While
+    <span class="inlinecode"><span class="id" type="var">Z</span></span> starts at <span class="inlinecode">0</span> and works itself up to <span class="inlinecode"><span class="id" type="var">m</span>*<span class="id" type="var">m</span></span>, we can't expect
+    <span class="inlinecode"><span class="id" type="var">Z</span></span> to be <span class="inlinecode"><span class="id" type="var">m</span>*<span class="id" type="var">m</span></span> from the start.  If we look at how <span class="inlinecode"><span class="id" type="var">Z</span></span> progesses
+    in the loop, after the 1st iteration <span class="inlinecode"><span class="id" type="var">Z</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">m</span></span>, after the 2nd
+    iteration <span class="inlinecode"><span class="id" type="var">Z</span></span> <span class="inlinecode">=</span> <span class="inlinecode">2*<span class="id" type="var">m</span></span>, and at the end <span class="inlinecode"><span class="id" type="var">Z</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">m</span>*<span class="id" type="var">m</span></span>.  Since the variable
+    <span class="inlinecode"><span class="id" type="var">Y</span></span> tracks how many times we go through the loop, this leads us to
+    derive a new invariant candidate: <span class="inlinecode"><span class="id" type="var">Z</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">Y</span>*<span class="id" type="var">m</span></span> <span class="inlinecode"><span style="font-family: arial;">∧</span></span> <span class="inlinecode"><span class="id" type="var">X</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">m</span></span>.
+
+<div class="paragraph"> </div>
+
+<div class="code code-tight">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">X</span>&nbsp;=&nbsp;<span class="id" type="var">m</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}&nbsp;<span style="font-family: arial;">⇾</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" type="var">a</span>&nbsp;-&nbsp;<span class="id" type="var">OK</span>)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;0&nbsp;=&nbsp;0*<span class="id" type="var">m</span>&nbsp;<span style="font-family: arial;">∧</span>&nbsp;<span class="id" type="var">X</span>&nbsp;=&nbsp;<span class="id" type="var">m</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">Y</span>&nbsp;::=&nbsp;0;;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;0&nbsp;=&nbsp;<span class="id" type="var">Y</span>*<span class="id" type="var">m</span>&nbsp;<span style="font-family: arial;">∧</span>&nbsp;<span class="id" type="var">X</span>&nbsp;=&nbsp;<span class="id" type="var">m</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">Z</span>&nbsp;::=&nbsp;0;;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">Z</span>&nbsp;=&nbsp;<span class="id" type="var">Y</span>*<span class="id" type="var">m</span>&nbsp;<span style="font-family: arial;">∧</span>&nbsp;<span class="id" type="var">X</span>&nbsp;=&nbsp;<span class="id" type="var">m</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">WHILE</span>&nbsp;<span class="id" type="var">Y</span>&nbsp;≠&nbsp;<span class="id" type="var">X</span>&nbsp;<span class="id" type="var">DO</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">Z</span>&nbsp;=&nbsp;<span class="id" type="var">Y</span>*<span class="id" type="var">m</span>&nbsp;<span style="font-family: arial;">∧</span>&nbsp;<span class="id" type="var">X</span>&nbsp;=&nbsp;<span class="id" type="var">m</span>&nbsp;<span style="font-family: arial;">∧</span>&nbsp;<span class="id" type="var">Y</span>&nbsp;≠&nbsp;<span class="id" type="var">X</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}&nbsp;<span style="font-family: arial;">⇾</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" type="var">c</span>&nbsp;-&nbsp;<span class="id" type="var">OK</span>)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">Z</span>+<span class="id" type="var">X</span>&nbsp;=&nbsp;(<span class="id" type="var">Y</span>+1)*<span class="id" type="var">m</span>&nbsp;<span style="font-family: arial;">∧</span>&nbsp;<span class="id" type="var">X</span>&nbsp;=&nbsp;<span class="id" type="var">m</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">Z</span>&nbsp;::=&nbsp;<span class="id" type="var">Z</span>&nbsp;+&nbsp;<span class="id" type="var">X</span>;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">Z</span>&nbsp;=&nbsp;(<span class="id" type="var">Y</span>+1)*<span class="id" type="var">m</span>&nbsp;<span style="font-family: arial;">∧</span>&nbsp;<span class="id" type="var">X</span>&nbsp;=&nbsp;<span class="id" type="var">m</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">Y</span>&nbsp;::=&nbsp;<span class="id" type="var">Y</span>&nbsp;+&nbsp;1<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">Z</span>&nbsp;=&nbsp;<span class="id" type="var">Y</span>*<span class="id" type="var">m</span>&nbsp;<span style="font-family: arial;">∧</span>&nbsp;<span class="id" type="var">X</span>&nbsp;=&nbsp;<span class="id" type="var">m</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">END</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">Z</span>&nbsp;=&nbsp;<span class="id" type="var">Y</span>*<span class="id" type="var">m</span>&nbsp;<span style="font-family: arial;">∧</span>&nbsp;<span class="id" type="var">X</span>&nbsp;=&nbsp;<span class="id" type="var">m</span>&nbsp;<span style="font-family: arial;">∧</span>&nbsp;<span class="id" type="var">Y</span>&nbsp;=&nbsp;<span class="id" type="var">X</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}&nbsp;<span style="font-family: arial;">⇾</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" type="var">b</span>&nbsp;-&nbsp;<span class="id" type="var">OK</span>)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">Z</span>&nbsp;=&nbsp;<span class="id" type="var">m</span>*<span class="id" type="var">m</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}
+<div class="paragraph"> </div>
+
+</div>
+
+<div class="paragraph"> </div>
+
+    This new invariant makes the proof go through: all three
+    conditions are easy to check.
+
+<div class="paragraph"> </div>
+
+    It is worth comparing the postcondition <span class="inlinecode"><span class="id" type="var">Z</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">m</span>*<span class="id" type="var">m</span></span> and the <span class="inlinecode"><span class="id" type="var">Z</span></span> <span class="inlinecode">=</span>
+    <span class="inlinecode"><span class="id" type="var">Y</span>*<span class="id" type="var">m</span></span> conjunct of the invariant. It is often the case that one has
+    to replace auxiliary variabes (parameters) with variables — or
+    with expressions involving both variables and parameters, like
+    <span class="inlinecode"><span class="id" type="var">m</span></span> <span class="inlinecode">-</span> <span class="inlinecode"><span class="id" type="var">Y</span></span> — when going from postconditions to invariants. 
+</div>
+<div class="code code-tight">
+
+<br>
+</div>
+
+<div class="doc">
+<a name="lab449"></a><h2 class="section">Exercise: Factorial</h2>
+
+<div class="paragraph"> </div>
+
+<a name="lab450"></a><h4 class="section">Exercise: 3 stars (factorial)</h4>
+ Recall that <span class="inlinecode"><span class="id" type="var">n</span>!</span> denotes the factorial of <span class="inlinecode"><span class="id" type="var">n</span></span> (i.e., <span class="inlinecode"><span class="id" type="var">n</span>!</span> <span class="inlinecode">=</span>
+    <span class="inlinecode">1*2*...*<span class="id" type="var">n</span></span>).  Here is an Imp program that calculates the factorial
+    of the number initially stored in the variable <span class="inlinecode"><span class="id" type="var">X</span></span> and puts it in
+    the variable <span class="inlinecode"><span class="id" type="var">Y</span></span>:
+
+<div class="paragraph"> </div>
+
+<div class="code code-tight">
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">X</span>&nbsp;=&nbsp;<span class="id" type="var">m</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;<span class="id" type="var">Y</span>&nbsp;::=&nbsp;1&nbsp;;;<br>
+&nbsp;&nbsp;<span class="id" type="var">WHILE</span>&nbsp;<span class="id" type="var">X</span>&nbsp;≠&nbsp;0<br>
+&nbsp;&nbsp;<span class="id" type="var">DO</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">Y</span>&nbsp;::=&nbsp;<span class="id" type="var">Y</span>&nbsp;*&nbsp;<span class="id" type="var">X</span>&nbsp;;;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">X</span>&nbsp;::=&nbsp;<span class="id" type="var">X</span>&nbsp;-&nbsp;1<br>
+&nbsp;&nbsp;<span class="id" type="var">END</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">Y</span>&nbsp;=&nbsp;<span class="id" type="var">m</span>!&nbsp;<span style="letter-spacing:-.4em;">}</span>}
+<div class="paragraph"> </div>
+
+</div>
+
+<div class="paragraph"> </div>
+
+    Fill in the blanks in following decorated program:
+
+<div class="paragraph"> </div>
+
+<div class="code code-tight">
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">X</span>&nbsp;=&nbsp;<span class="id" type="var">m</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}&nbsp;<span style="font-family: arial;">⇾</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;<span class="id" type="var">Y</span>&nbsp;::=&nbsp;1;;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;<span class="id" type="var">WHILE</span>&nbsp;<span class="id" type="var">X</span>&nbsp;≠&nbsp;0<br>
+&nbsp;&nbsp;<span class="id" type="var">DO</span>&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">}</span>}&nbsp;<span style="font-family: arial;">⇾</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">Y</span>&nbsp;::=&nbsp;<span class="id" type="var">Y</span>&nbsp;*&nbsp;<span class="id" type="var">X</span>;;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">X</span>&nbsp;::=&nbsp;<span class="id" type="var">X</span>&nbsp;-&nbsp;1<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;<span class="id" type="var">END</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">}</span>}&nbsp;<span style="font-family: arial;">⇾</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">Y</span>&nbsp;=&nbsp;<span class="id" type="var">m</span>!&nbsp;<span style="letter-spacing:-.4em;">}</span>}
+<div class="paragraph"> </div>
+
+</div>
+
+<div class="paragraph"> </div>
+
+ <font size="-2">☐</font> 
+</div>
+<div class="code code-tight">
+
+<br>
+</div>
+
+<div class="doc">
+<a name="lab451"></a><h2 class="section">Exercise: Min</h2>
+
+<div class="paragraph"> </div>
+
+<a name="lab452"></a><h4 class="section">Exercise: 3 stars (Min_Hoare)</h4>
+ Fill in valid decorations for the following program.
+  For the <span class="inlinecode">⇒</span> steps in your annotations, you may rely (silently) 
+  on the following facts about min
+
+<div class="paragraph"> </div>
+
+<div class="code code-tight">
+&nbsp;&nbsp;<span class="id" type="keyword">Lemma</span>&nbsp;<span class="id" type="var">lemma1</span>&nbsp;:&nbsp;<span style="font-family: arial;">∀</span><span class="id" type="var">x</span>&nbsp;<span class="id" type="var">y</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" type="var">x</span>=0&nbsp;<span style="font-family: arial;">∨</span>&nbsp;<span class="id" type="var">y</span>=0)&nbsp;<span style="font-family: arial;">→</span>&nbsp;<span class="id" type="var">min</span>&nbsp;<span class="id" type="var">x</span>&nbsp;<span class="id" type="var">y</span>&nbsp;=&nbsp;0.<br>
+&nbsp;&nbsp;<span class="id" type="keyword">Lemma</span>&nbsp;<span class="id" type="var">lemma2</span>&nbsp;:&nbsp;<span style="font-family: arial;">∀</span><span class="id" type="var">x</span>&nbsp;<span class="id" type="var">y</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">min</span>&nbsp;(<span class="id" type="var">x</span>-1)&nbsp;(<span class="id" type="var">y</span>-1)&nbsp;=&nbsp;(<span class="id" type="var">min</span>&nbsp;<span class="id" type="var">x</span>&nbsp;<span class="id" type="var">y</span>)&nbsp;-&nbsp;1.
+<div class="paragraph"> </div>
+
+</div>
+  plus standard high-school algebra, as always.
+
+<div class="paragraph"> </div>
+
+
+<div class="paragraph"> </div>
+
+<div class="code code-tight">
+&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">True</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}&nbsp;<span style="font-family: arial;">⇾</span><br>
+&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;<span class="id" type="var">X</span>&nbsp;::=&nbsp;<span class="id" type="var">a</span>;;<br>
+&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;<span class="id" type="var">Y</span>&nbsp;::=&nbsp;<span class="id" type="var">b</span>;;<br>
+&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;<span class="id" type="var">Z</span>&nbsp;::=&nbsp;0;;<br>
+&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;<span class="id" type="var">WHILE</span>&nbsp;(<span class="id" type="var">X</span>&nbsp;≠&nbsp;0&nbsp;<span style="font-family: arial;">∧</span>&nbsp;<span class="id" type="var">Y</span>&nbsp;≠&nbsp;0)&nbsp;<span class="id" type="var">DO</span><br>
+&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">}</span>}&nbsp;<span style="font-family: arial;">⇾</span><br>
+&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;<span class="id" type="var">X</span>&nbsp;:=&nbsp;<span class="id" type="var">X</span>&nbsp;-&nbsp;1;;<br>
+&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;<span class="id" type="var">Y</span>&nbsp;:=&nbsp;<span class="id" type="var">Y</span>&nbsp;-&nbsp;1;;<br>
+&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;<span class="id" type="var">Z</span>&nbsp;:=&nbsp;<span class="id" type="var">Z</span>&nbsp;+&nbsp;1<br>
+&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;<span class="id" type="var">END</span><br>
+&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">}</span>}&nbsp;<span style="font-family: arial;">⇾</span><br>
+&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">Z</span>&nbsp;=&nbsp;<span class="id" type="var">min</span>&nbsp;<span class="id" type="var">a</span>&nbsp;<span class="id" type="var">b</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}
+<div class="paragraph"> </div>
+
+</div>
+
+<div class="paragraph"> </div>
+
+ <font size="-2">☐</font> 
+<div class="paragraph"> </div>
+
+<a name="lab453"></a><h4 class="section">Exercise: 3 stars (two_loops)</h4>
+ Here is a very inefficient way of adding 3 numbers:
+
+<div class="paragraph"> </div>
+
+<div class="code code-tight">
+&nbsp;&nbsp;<span class="id" type="var">X</span>&nbsp;::=&nbsp;0;;<br>
+&nbsp;&nbsp;<span class="id" type="var">Y</span>&nbsp;::=&nbsp;0;;<br>
+&nbsp;&nbsp;<span class="id" type="var">Z</span>&nbsp;::=&nbsp;<span class="id" type="var">c</span>;;<br>
+&nbsp;&nbsp;<span class="id" type="var">WHILE</span>&nbsp;<span class="id" type="var">X</span>&nbsp;≠&nbsp;<span class="id" type="var">a</span>&nbsp;<span class="id" type="var">DO</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">X</span>&nbsp;::=&nbsp;<span class="id" type="var">X</span>&nbsp;+&nbsp;1;;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">Z</span>&nbsp;::=&nbsp;<span class="id" type="var">Z</span>&nbsp;+&nbsp;1<br>
+&nbsp;&nbsp;<span class="id" type="var">END</span>;;<br>
+&nbsp;&nbsp;<span class="id" type="var">WHILE</span>&nbsp;<span class="id" type="var">Y</span>&nbsp;≠&nbsp;<span class="id" type="var">b</span>&nbsp;<span class="id" type="var">DO</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">Y</span>&nbsp;::=&nbsp;<span class="id" type="var">Y</span>&nbsp;+&nbsp;1;;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">Z</span>&nbsp;::=&nbsp;<span class="id" type="var">Z</span>&nbsp;+&nbsp;1<br>
+&nbsp;&nbsp;<span class="id" type="var">END</span>
+<div class="paragraph"> </div>
+
+</div>
+
+<div class="paragraph"> </div>
+
+    Show that it does what it should by filling in the blanks in the
+    following decorated program.
+
+<div class="paragraph"> </div>
+
+
+<div class="paragraph"> </div>
+
+<div class="code code-tight">
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">True</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}&nbsp;<span style="font-family: arial;">⇾</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;<span class="id" type="var">X</span>&nbsp;::=&nbsp;0;;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;<span class="id" type="var">Y</span>&nbsp;::=&nbsp;0;;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;<span class="id" type="var">Z</span>&nbsp;::=&nbsp;<span class="id" type="var">c</span>;;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;<span class="id" type="var">WHILE</span>&nbsp;<span class="id" type="var">X</span>&nbsp;≠&nbsp;<span class="id" type="var">a</span>&nbsp;<span class="id" type="var">DO</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">}</span>}&nbsp;<span style="font-family: arial;">⇾</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">X</span>&nbsp;::=&nbsp;<span class="id" type="var">X</span>&nbsp;+&nbsp;1;;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">Z</span>&nbsp;::=&nbsp;<span class="id" type="var">Z</span>&nbsp;+&nbsp;1<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;<span class="id" type="var">END</span>;;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">}</span>}&nbsp;<span style="font-family: arial;">⇾</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;<span class="id" type="var">WHILE</span>&nbsp;<span class="id" type="var">Y</span>&nbsp;≠&nbsp;<span class="id" type="var">b</span>&nbsp;<span class="id" type="var">DO</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">}</span>}&nbsp;<span style="font-family: arial;">⇾</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">Y</span>&nbsp;::=&nbsp;<span class="id" type="var">Y</span>&nbsp;+&nbsp;1;;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">Z</span>&nbsp;::=&nbsp;<span class="id" type="var">Z</span>&nbsp;+&nbsp;1<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">}</span>}<br>
+&nbsp;&nbsp;<span class="id" type="var">END</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">}</span>}&nbsp;<span style="font-family: arial;">⇾</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">Z</span>&nbsp;=&nbsp;<span class="id" type="var">a</span>&nbsp;+&nbsp;<span class="id" type="var">b</span>&nbsp;+&nbsp;<span class="id" type="var">c</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}
+<div class="paragraph"> </div>
+
+</div>
+
+<div class="paragraph"> </div>
+
+ <font size="-2">☐</font> 
+</div>
+<div class="code code-tight">
+
+<br>
+</div>
+
+<div class="doc">
+<a name="lab454"></a><h2 class="section">Exercise: Power Series</h2>
+
+<div class="paragraph"> </div>
+
+<a name="lab455"></a><h4 class="section">Exercise: 4 stars, optional (dpow2_down)</h4>
+ Here is a program that computes the series:
+    <span class="inlinecode">1</span> <span class="inlinecode">+</span> <span class="inlinecode">2</span> <span class="inlinecode">+</span> <span class="inlinecode">2^2</span> <span class="inlinecode">+</span> <span class="inlinecode">...</span> <span class="inlinecode">+</span> <span class="inlinecode">2^<span class="id" type="var">m</span></span> <span class="inlinecode">=</span> <span class="inlinecode">2^(<span class="id" type="var">m</span>+1)</span> <span class="inlinecode">-</span> <span class="inlinecode">1</span>
+
+<div class="paragraph"> </div>
+
+<div class="code code-tight">
+&nbsp;&nbsp;<span class="id" type="var">X</span>&nbsp;::=&nbsp;0;;<br>
+&nbsp;&nbsp;<span class="id" type="var">Y</span>&nbsp;::=&nbsp;1;;<br>
+&nbsp;&nbsp;<span class="id" type="var">Z</span>&nbsp;::=&nbsp;1;;<br>
+&nbsp;&nbsp;<span class="id" type="var">WHILE</span>&nbsp;<span class="id" type="var">X</span>&nbsp;≠&nbsp;<span class="id" type="var">m</span>&nbsp;<span class="id" type="var">DO</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">Z</span>&nbsp;::=&nbsp;2&nbsp;*&nbsp;<span class="id" type="var">Z</span>;;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">Y</span>&nbsp;::=&nbsp;<span class="id" type="var">Y</span>&nbsp;+&nbsp;<span class="id" type="var">Z</span>;;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">X</span>&nbsp;::=&nbsp;<span class="id" type="var">X</span>&nbsp;+&nbsp;1<br>
+&nbsp;&nbsp;<span class="id" type="var">END</span>
+<div class="paragraph"> </div>
+
+</div>
+    Write a decorated program for this. 
+</div>
+<div class="code code-tight">
+
+<br>
+<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span><br>
+
+<br>
+</div>
+
+<div class="doc">
+<a name="lab456"></a><h1 class="section">Weakest Preconditions (Optional)</h1>
+
+<div class="paragraph"> </div>
+
+ Some Hoare triples are more interesting than others.
+    For example,
+
+<div class="paragraph"> </div>
+
+<div class="code code-tight">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">False</span>&nbsp;<span style="letter-spacing:-.4em;">}</span>}&nbsp;&nbsp;<span class="id" type="var">X</span>&nbsp;::=&nbsp;<span class="id" type="var">Y</span>&nbsp;+&nbsp;1&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">X</span>&nbsp;≤&nbsp;5&nbsp;<span style="letter-spacing:-.4em;">}</span>}
+<div class="paragraph"> </div>
+
+</div>
+    is <i>not</i> very interesting: although it is perfectly valid, it
+    tells us nothing useful.  Since the precondition isn't satisfied
+    by any state, it doesn't describe any situations where we can use
+    the command <span class="inlinecode"><span class="id" type="var">X</span></span> <span class="inlinecode">::=</span> <span class="inlinecode"><span class="id" type="var">Y</span></span> <span class="inlinecode">+</span> <span class="inlinecode">1</span> to achieve the postcondition <span class="inlinecode"><span class="id" type="var">X</span></span> <span class="inlinecode">≤</span> <span class="inlinecode">5</span>.
+
+<div class="paragraph"> </div>
+
+    By contrast,
+
+<div class="paragraph"> </div>
+
+<div class="code code-tight">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">Y</span>&nbsp;≤&nbsp;4&nbsp;<span style="font-family: arial;">∧</span>&nbsp;<span class="id" type="var">Z</span>&nbsp;=&nbsp;0&nbsp;<span style="letter-spacing:-.4em;">}</span>}&nbsp;&nbsp;<span class="id" type="var">X</span>&nbsp;::=&nbsp;<span class="id" type="var">Y</span>&nbsp;+&nbsp;1&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">X</span>&nbsp;≤&nbsp;5&nbsp;<span style="letter-spacing:-.4em;">}</span>}
+<div class="paragraph"> </div>
+
+</div>
+    is useful: it tells us that, if we can somehow create a situation
+    in which we know that <span class="inlinecode"><span class="id" type="var">Y</span></span> <span class="inlinecode">≤</span> <span class="inlinecode">4</span> <span class="inlinecode"><span style="font-family: arial;">∧</span></span> <span class="inlinecode"><span class="id" type="var">Z</span></span> <span class="inlinecode">=</span> <span class="inlinecode">0</span>, then running this command
+    will produce a state satisfying the postcondition.  However, this
+    triple is still not as useful as it could be, because the <span class="inlinecode"><span class="id" type="var">Z</span></span> <span class="inlinecode">=</span> <span class="inlinecode">0</span>
+    clause in the precondition actually has nothing to do with the
+    postcondition <span class="inlinecode"><span class="id" type="var">X</span></span> <span class="inlinecode">≤</span> <span class="inlinecode">5</span>.  The <i>most</i> useful triple (for this
+    command and postcondition) is this one:
+
+<div class="paragraph"> </div>
+
+<div class="code code-tight">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">Y</span>&nbsp;≤&nbsp;4&nbsp;<span style="letter-spacing:-.4em;">}</span>}&nbsp;&nbsp;<span class="id" type="var">X</span>&nbsp;::=&nbsp;<span class="id" type="var">Y</span>&nbsp;+&nbsp;1&nbsp;&nbsp;<span style="letter-spacing:-.4em;">{</span>{&nbsp;<span class="id" type="var">X</span>&nbsp;≤&nbsp;5&nbsp;<span style="letter-spacing:-.4em;">}</span>}
+<div class="paragraph"> </div>
+
+</div>
+    In other words, <span class="inlinecode"><span class="id" type="var">Y</span></span> <span class="inlinecode">≤</span> <span class="inlinecode">4</span> is the <i>weakest</i> valid precondition of
+    the command <span class="inlinecode"><span class="id" type="var">X</span></span> <span class="inlinecode">::=</span> <span class="inlinecode"><span class="id" type="var">Y</span></span> <span class="inlinecode">+</span> <span class="inlinecode">1</span> for the postcondition <span class="inlinecode"><span class="id" type="var">X</span></span> <span class="inlinecode">≤</span> <span class="inlinecode">5</span>. 
+<div class="paragraph"> </div>
+
+ In general, we say that "<span class="inlinecode"><span class="id" type="var">P</span></span> is the weakest precondition of
+    command <span class="inlinecode"><span class="id" type="var">c</span></span> for postcondition <span class="inlinecode"><span class="id" type="var">Q</span></span>" if <span class="inlinecode"><span style="letter-spacing:-.4em;">{</span>{<span class="id" type="var">P</span></span></div></div></div><audio controls="controls" style="display: none;"></audio></body><style type="text/css">#yddContainer{display:block;font-family:Microsoft YaHei;position:relative;width:100%;height:100%;top:-4px;left:-4px;font-size:12px;border:1px solid}#yddTop{display:block;height:22px}#yddTopBorderlr{display:block;position:static;height:17px;padding:2px 28px;line-height:17px;font-size:12px;color:#5079bb;font-weight:bold;border-style:none solid;border-width:1px}#yddTopBorderlr .ydd-sp{position:absolute;top:2px;height:0;overflow:hidden}.ydd-icon{left:5px;width:17px;padding:0px 0px 0px 0px;padding-top:17px;background-position:-16px -44px}.ydd-close{right:5px;width:16px;padding-top:16px;background-position:left -44px}#yddKeyTitle{float:left;text-decoration:none}#yddMiddle{display:block;margin-bottom:10px}.ydd-tabs{display:block;margin:5px 0;padding:0 5px;height:18px;border-bottom:1px solid}.ydd-tab{display:block;float:left;height:18px;margin:0 5px -1px 0;padding:0 4px;line-height:18px;border:1px solid;border-bottom:none}.ydd-trans-container{display:block;line-height:160%}.ydd-trans-container a{text-decoration:none;}#yddBottom{position:absolute;bottom:0;left:0;width:100%;height:22px;line-height:22px;overflow:hidden;background-position:left -22px}.ydd-padding010{padding:0 10px}#yddWrapper{color:#252525;z-index:10001;background:url(chrome-extension://eopjamdnofihpioajgfdikhhbobonhbb/ab20.png);}#yddContainer{background:#fff;border-color:#4b7598}#yddTopBorderlr{border-color:#f0f8fc}#yddWrapper .ydd-sp{background-image:url(chrome-extension://eopjamdnofihpioajgfdikhhbobonhbb/ydd-sprite.png)}#yddWrapper a,#yddWrapper a:hover,#yddWrapper a:visited{color:#50799b}#yddWrapper .ydd-tabs{color:#959595}.ydd-tabs,.ydd-tab{background:#fff;border-color:#d5e7f3}#yddBottom{color:#363636}#yddWrapper{min-width:250px;max-width:400px;}</style></html>

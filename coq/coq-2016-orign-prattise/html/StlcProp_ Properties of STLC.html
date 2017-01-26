@@ -1,0 +1,385 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!-- saved from url=(0058)http://www.seas.upenn.edu/~cis500/current/sf/StlcProp.html -->
+<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<link href="./StlcProp_ Properties of STLC_files/coqdoc.css" rel="stylesheet" type="text/css">
+<title>StlcProp: Properties of STLC</title>
+<script type="text/javascript" src="./StlcProp_ Properties of STLC_files/jquery-1.8.3.js"></script>
+<script type="text/javascript" src="./StlcProp_ Properties of STLC_files/main.js"></script>
+</head>
+
+<body>
+
+<div id="page">
+
+<div id="header">
+</div>
+
+<div id="main">
+
+<h1 class="libtitle">StlcProp<span class="subtitle">Properties of STLC</span></h1>
+
+<div class="code code-tight">
+</div>
+
+<div class="doc">
+
+</div>
+<div class="code code-tight">
+
+<br>
+<span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/SfLib.html#"><span class="id" type="library">SfLib</span></a>.<br>
+<span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Maps.html#"><span class="id" type="library">Maps</span></a>.<br>
+<span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <span class="id" type="keyword">Types</span>.<br>
+<span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Stlc.html#"><span class="id" type="library">Stlc</span></a>.<br>
+<span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Smallstep.html#"><span class="id" type="library">Smallstep</span></a>.<br>
+
+<br>
+<span class="id" type="keyword">Module</span> <a name="STLCProp"><span class="id" type="module">STLCProp</span></a>.<br>
+<span class="id" type="keyword">Import</span> <span class="id" type="var">STLC</span>.<br>
+
+<br>
+</div>
+
+<div class="doc">
+In this chapter, we develop the fundamental theory of the Simply
+    Typed Lambda Calculus — in particular, the type safety
+    theorem. 
+</div>
+<div class="code code-tight">
+
+<br>
+</div>
+
+<div class="doc">
+<a name="lab574"></a><h1 class="section">Canonical Forms</h1>
+
+</div>
+<div class="code code-space">
+
+<br>
+<span class="id" type="keyword">Lemma</span> <a name="STLCProp.canonical_forms_bool"><span class="id" type="lemma">canonical_forms_bool</span></a> : <span style="font-family: arial;">∀</span><span class="id" type="var">t</span>,<br>
+&nbsp;&nbsp;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Maps.html#empty"><span class="id" type="definition">empty</span></a> <span style="font-family: arial;">⊢</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/StlcProp.html#t"><span class="id" type="variable">t</span></a> ∈ <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Stlc.html#STLC.TBool"><span class="id" type="constructor">TBool</span></a> <span style="font-family: arial;">→</span><br>
+&nbsp;&nbsp;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Stlc.html#STLC.value"><span class="id" type="inductive">value</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/StlcProp.html#t"><span class="id" type="variable">t</span></a> <span style="font-family: arial;">→</span><br>
+&nbsp;&nbsp;(<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/StlcProp.html#t"><span class="id" type="variable">t</span></a> = <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Stlc.html#STLC.ttrue"><span class="id" type="constructor">ttrue</span></a>) <span style="font-family: arial;">∨</span> (<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/StlcProp.html#t"><span class="id" type="variable">t</span></a> = <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Stlc.html#STLC.tfalse"><span class="id" type="constructor">tfalse</span></a>).<br>
+<span class="id" type="keyword">Proof</span>.<br>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">t</span> <span class="id" type="var">HT</span> <span class="id" type="var">HVal</span>.<br>
+&nbsp;&nbsp;<span class="id" type="tactic">inversion</span> <span class="id" type="var">HVal</span>; <span class="id" type="tactic">intros</span>; <span class="id" type="tactic">subst</span>; <span class="id" type="tactic">try</span> <span class="id" type="tactic">inversion</span> <span class="id" type="var">HT</span>; <span class="id" type="tactic">auto</span>.<br>
+<span class="id" type="keyword">Qed</span>.<br>
+
+<br>
+<span class="id" type="keyword">Lemma</span> <a name="STLCProp.canonical_forms_fun"><span class="id" type="lemma">canonical_forms_fun</span></a> : <span style="font-family: arial;">∀</span><span class="id" type="var">t</span> <span class="id" type="var">T<sub>1</sub></span> <span class="id" type="var">T<sub>2</sub></span>,<br>
+&nbsp;&nbsp;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Maps.html#empty"><span class="id" type="definition">empty</span></a> <span style="font-family: arial;">⊢</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/StlcProp.html#t"><span class="id" type="variable">t</span></a> ∈ (<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Stlc.html#STLC.TArrow"><span class="id" type="constructor">TArrow</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/StlcProp.html#T<sub>1</sub>"><span class="id" type="variable">T<sub>1</sub></span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/StlcProp.html#T<sub>2</sub>"><span class="id" type="variable">T<sub>2</sub></span></a>) <span style="font-family: arial;">→</span><br>
+&nbsp;&nbsp;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Stlc.html#STLC.value"><span class="id" type="inductive">value</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/StlcProp.html#t"><span class="id" type="variable">t</span></a> <span style="font-family: arial;">→</span><br>
+&nbsp;&nbsp;<span style="font-family: arial;">∃</span><span class="id" type="var">x</span> <span class="id" type="var">u</span>, <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/StlcProp.html#t"><span class="id" type="variable">t</span></a> = <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Stlc.html#STLC.tabs"><span class="id" type="constructor">tabs</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/StlcProp.html#x"><span class="id" type="variable">x</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/StlcProp.html#T<sub>1</sub>"><span class="id" type="variable">T<sub>1</sub></span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/StlcProp.html#u"><span class="id" type="variable">u</span></a>.<br>
+<span class="id" type="keyword">Proof</span>.<br>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">t</span> <span class="id" type="var">T<sub>1</sub></span> <span class="id" type="var">T<sub>2</sub></span> <span class="id" type="var">HT</span> <span class="id" type="var">HVal</span>.<br>
+&nbsp;&nbsp;<span class="id" type="tactic">inversion</span> <span class="id" type="var">HVal</span>; <span class="id" type="tactic">intros</span>; <span class="id" type="tactic">subst</span>; <span class="id" type="tactic">try</span> <span class="id" type="tactic">inversion</span> <span class="id" type="var">HT</span>; <span class="id" type="tactic">subst</span>; <span class="id" type="tactic">auto</span>.<br>
+&nbsp;&nbsp;<span style="font-family: arial;">∃</span><span class="id" type="var">x<sub>0</sub></span>. <span style="font-family: arial;">∃</span><span class="id" type="var">t<sub>0</sub></span>. <span class="id" type="tactic">auto</span>.<br>
+<span class="id" type="keyword">Qed</span>.<br>
+
+<br>
+</div>
+
+<div class="doc">
+<a name="lab575"></a><h1 class="section">Progress</h1>
+
+<div class="paragraph"> </div>
+
+ As before, the <i>progress</i> theorem tells us that closed, well-typed
+    terms are not stuck: either a well-typed term is a value, or it
+    can take an evaluation step.  The proof is a relatively
+    straightforward extension of the progress proof we saw in the
+    <span class="inlinecode"><span class="id" type="keyword">Types</span></span> chapter. 
+</div>
+<div class="code code-tight">
+
+<br>
+<span class="id" type="keyword">Theorem</span> <a name="STLCProp.progress"><span class="id" type="lemma">progress</span></a> : <span style="font-family: arial;">∀</span><span class="id" type="var">t</span> <span class="id" type="var">T</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Maps.html#empty"><span class="id" type="definition">empty</span></a> <span style="font-family: arial;">⊢</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/StlcProp.html#t"><span class="id" type="variable">t</span></a> ∈ <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/StlcProp.html#T"><span class="id" type="variable">T</span></a> <span style="font-family: arial;">→</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Stlc.html#STLC.value"><span class="id" type="inductive">value</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/StlcProp.html#t"><span class="id" type="variable">t</span></a> <span style="font-family: arial;">∨</span> <span style="font-family: arial;">∃</span><span class="id" type="var">t'</span>, <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/StlcProp.html#t"><span class="id" type="variable">t</span></a> <span style="font-family: arial;">⇒</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/StlcProp.html#t'"><span class="id" type="variable">t'</span></a>.<br>
+
+<br>
+</div>
+
+<div class="doc">
+<i>Proof</i>: by induction on the derivation of <span class="inlinecode"><span style="font-family: arial;">⊢</span></span> <span class="inlinecode"><span class="id" type="var">t</span></span> <span class="inlinecode">∈</span> <span class="inlinecode"><span class="id" type="var">T</span></span>.
+
+<div class="paragraph"> </div>
+
+<ul class="doclist">
+<li> The last rule of the derivation cannot be <span class="inlinecode"><span class="id" type="var">T_Var</span></span>, since a
+      variable is never well typed in an empty context.
+
+<div class="paragraph"> </div>
+
+
+</li>
+<li> The <span class="inlinecode"><span class="id" type="var">T_True</span></span>, <span class="inlinecode"><span class="id" type="var">T_False</span></span>, and <span class="inlinecode"><span class="id" type="var">T_Abs</span></span> cases are trivial, since in
+      each of these cases we know immediately that <span class="inlinecode"><span class="id" type="var">t</span></span> is a value.
+
+<div class="paragraph"> </div>
+
+
+</li>
+<li> If the last rule of the derivation was <span class="inlinecode"><span class="id" type="var">T_App</span></span>, then <span class="inlinecode"><span class="id" type="var">t</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="var">t<sub>1</sub></span></span>
+      <span class="inlinecode"><span class="id" type="var">t<sub>2</sub></span></span>, and we know that <span class="inlinecode"><span class="id" type="var">t<sub>1</sub></span></span> and <span class="inlinecode"><span class="id" type="var">t<sub>2</sub></span></span> are also well typed in the
+      empty context; in particular, there exists a type <span class="inlinecode"><span class="id" type="var">T<sub>2</sub></span></span> such that
+      <span class="inlinecode"><span style="font-family: arial;">⊢</span></span> <span class="inlinecode"><span class="id" type="var">t<sub>1</sub></span></span> <span class="inlinecode">∈</span> <span class="inlinecode"><span class="id" type="var">T<sub>2</sub></span></span> <span class="inlinecode"><span style="font-family: arial;">→</span></span> <span class="inlinecode"><span class="id" type="var">T</span></span> and <span class="inlinecode"><span style="font-family: arial;">⊢</span></span> <span class="inlinecode"><span class="id" type="var">t<sub>2</sub></span></span> <span class="inlinecode">∈</span> <span class="inlinecode"><span class="id" type="var">T<sub>2</sub></span></span>.  By the induction
+      hypothesis, either <span class="inlinecode"><span class="id" type="var">t<sub>1</sub></span></span> is a value or it can take an evaluation
+      step.
+
+<div class="paragraph"> </div>
+
+<ul class="doclist">
+<li> If <span class="inlinecode"><span class="id" type="var">t<sub>1</sub></span></span> is a value, we now consider <span class="inlinecode"><span class="id" type="var">t<sub>2</sub></span></span>, which by the other
+          induction hypothesis must also either be a value or take an
+          evaluation step.
+
+<div class="paragraph"> </div>
+
+<ul class="doclist">
+<li> Suppose <span class="inlinecode"><span class="id" type="var">t<sub>2</sub></span></span> is a value.  Since <span class="inlinecode"><span class="id" type="var">t<sub>1</sub></span></span> is a value with an
+              arrow type, it must be a lambda abstraction; hence <span class="inlinecode"><span class="id" type="var">t<sub>1</sub></span></span>
+              <span class="inlinecode"><span class="id" type="var">t<sub>2</sub></span></span> can take a step by <span class="inlinecode"><span class="id" type="var">ST_AppAbs</span></span>.
+
+<div class="paragraph"> </div>
+
+
+</li>
+<li> Otherwise, <span class="inlinecode"><span class="id" type="var">t<sub>2</sub></span></span> can take a step, and hence so can <span class="inlinecode"><span class="id" type="var">t<sub>1</sub></span></span>
+              <span class="inlinecode"><span class="id" type="var">t<sub>2</sub></span></span> by <span class="inlinecode"><span class="id" type="var">ST_App2</span></span>.
+
+<div class="paragraph"> </div>
+
+
+</li>
+</ul>
+
+</li>
+<li> If <span class="inlinecode"><span class="id" type="var">t<sub>1</sub></span></span> can take a step, then so can <span class="inlinecode"><span class="id" type="var">t<sub>1</sub></span></span> <span class="inlinecode"><span class="id" type="var">t<sub>2</sub></span></span> by <span class="inlinecode"><span class="id" type="var">ST_App1</span></span>.
+
+<div class="paragraph"> </div>
+
+
+</li>
+</ul>
+
+</li>
+<li> If the last rule of the derivation was <span class="inlinecode"><span class="id" type="var">T_If</span></span>, then <span class="inlinecode"><span class="id" type="var">t</span></span> <span class="inlinecode">=</span> <span class="inlinecode"><span class="id" type="keyword">if</span></span> <span class="inlinecode"><span class="id" type="var">t<sub>1</sub></span></span>
+      <span class="inlinecode"><span class="id" type="keyword">then</span></span> <span class="inlinecode"><span class="id" type="var">t<sub>2</sub></span></span> <span class="inlinecode"><span class="id" type="keyword">else</span></span> <span class="inlinecode"><span class="id" type="var">t<sub>3</sub></span></span>, where <span class="inlinecode"><span class="id" type="var">t<sub>1</sub></span></span> has type <span class="inlinecode"><span class="id" type="var">Bool</span></span>.  By the IH, <span class="inlinecode"><span class="id" type="var">t<sub>1</sub></span></span>
+      either is a value or takes a step.
+
+<div class="paragraph"> </div>
+
+<ul class="doclist">
+<li> If <span class="inlinecode"><span class="id" type="var">t<sub>1</sub></span></span> is a value, then since it has type <span class="inlinecode"><span class="id" type="var">Bool</span></span> it must be
+          either <span class="inlinecode"><span class="id" type="var">true</span></span> or <span class="inlinecode"><span class="id" type="var">false</span></span>.  If it is <span class="inlinecode"><span class="id" type="var">true</span></span>, then <span class="inlinecode"><span class="id" type="var">t</span></span> steps
+          to <span class="inlinecode"><span class="id" type="var">t<sub>2</sub></span></span>; otherwise it steps to <span class="inlinecode"><span class="id" type="var">t<sub>3</sub></span></span>.
+
+<div class="paragraph"> </div>
+
+
+</li>
+<li> Otherwise, <span class="inlinecode"><span class="id" type="var">t<sub>1</sub></span></span> takes a step, and therefore so does <span class="inlinecode"><span class="id" type="var">t</span></span> (by
+          <span class="inlinecode"><span class="id" type="var">ST_If</span></span>).
+
+</li>
+</ul>
+
+</li>
+</ul>
+
+</div>
+<div class="code code-tight">
+
+<br>
+<div class="togglescript" id="proofcontrol1" onclick="toggleDisplay(&#39;proof1&#39;);toggleDisplay(&#39;proofcontrol1&#39;)"><span class="show"></span></div>
+<div class="proofscript" id="proof1" onclick="toggleDisplay(&#39;proof1&#39;);toggleDisplay(&#39;proofcontrol1&#39;)">
+<span class="id" type="keyword">Proof</span> <span class="id" type="keyword">with</span> <span class="id" type="tactic">eauto</span>.<br>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">t</span> <span class="id" type="var">T</span> <span class="id" type="var">Ht</span>.<br>
+&nbsp;&nbsp;<span class="id" type="var">remember</span> (@<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Maps.html#empty"><span class="id" type="definition">empty</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Stlc.html#STLC.ty"><span class="id" type="inductive">ty</span></a>) <span class="id" type="keyword">as</span> <span style="font-family: serif; font-size:85%;">Γ</span>.<br>
+&nbsp;&nbsp;<span class="id" type="tactic">induction</span> <span class="id" type="var">Ht</span>; <span class="id" type="tactic">subst</span> <span style="font-family: serif; font-size:85%;">Γ</span>...<br>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;T_Var&nbsp;*)</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;contradictory:&nbsp;variables&nbsp;cannot&nbsp;be&nbsp;typed&nbsp;in&nbsp;an<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;empty&nbsp;context&nbsp;*)</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">inversion</span> <span class="id" type="var">H</span>.<br>
+
+<br>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;T_App&nbsp;*)</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;<span class="inlinecode"><span class="id" type="var">t</span></span>&nbsp;=&nbsp;<span class="inlinecode"><span class="id" type="var">t<sub>1</sub></span></span> <span class="inlinecode"><span class="id" type="var">t<sub>2</sub></span></span>.&nbsp;&nbsp;Proceed&nbsp;by&nbsp;cases&nbsp;on&nbsp;whether&nbsp;<span class="inlinecode"><span class="id" type="var">t<sub>1</sub></span></span>&nbsp;is&nbsp;a<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;value&nbsp;or&nbsp;steps...&nbsp;*)</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">right</span>. <span class="id" type="tactic">destruct</span> <span class="id" type="var">IHHt1</span>...<br>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;t<sub>1</sub>&nbsp;is&nbsp;a&nbsp;value&nbsp;*)</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">destruct</span> <span class="id" type="var">IHHt2</span>...<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="comment">(*&nbsp;t<sub>2</sub>&nbsp;is&nbsp;also&nbsp;a&nbsp;value&nbsp;*)</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">assert</span> (<span style="font-family: arial;">∃</span><span class="id" type="var">x<sub>0</sub></span> <span class="id" type="var">t<sub>0</sub></span>, <span class="id" type="var">t<sub>1</sub></span> = <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Stlc.html#STLC.tabs"><span class="id" type="constructor">tabs</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/StlcProp.html#x<sub>0</sub>"><span class="id" type="variable">x<sub>0</sub></span></a> <span class="id" type="var">T<sub>11</sub></span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/StlcProp.html#t<sub>0</sub>"><span class="id" type="variable">t<sub>0</sub></span></a>).<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">eapply</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/StlcProp.html#STLCProp.canonical_forms_fun"><span class="id" type="lemma">canonical_forms_fun</span></a>; <span class="id" type="tactic">eauto</span>.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">destruct</span> <span class="id" type="var">H<sub>1</sub></span> <span class="id" type="keyword">as</span> [<span class="id" type="var">x<sub>0</sub></span> [<span class="id" type="var">t<sub>0</sub></span> <span class="id" type="var">Heq</span>]]. <span class="id" type="tactic">subst</span>.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="font-family: arial;">∃</span>([<span class="id" type="var">x<sub>0</sub></span>:=<span class="id" type="var">t<sub>2</sub></span>]<span class="id" type="var">t<sub>0</sub></span>)...<br>
+
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="comment">(*&nbsp;t<sub>2</sub>&nbsp;steps&nbsp;*)</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">inversion</span> <span class="id" type="var">H<sub>0</sub></span> <span class="id" type="keyword">as</span> [<span class="id" type="var">t<sub>2</sub>'</span> <span class="id" type="var">Hstp</span>]. <span style="font-family: arial;">∃</span>(<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Stlc.html#STLC.tapp"><span class="id" type="constructor">tapp</span></a> <span class="id" type="var">t<sub>1</sub></span> <span class="id" type="var">t<sub>2</sub>'</span>)...<br>
+
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;t<sub>1</sub>&nbsp;steps&nbsp;*)</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">inversion</span> <span class="id" type="var">H</span> <span class="id" type="keyword">as</span> [<span class="id" type="var">t<sub>1</sub>'</span> <span class="id" type="var">Hstp</span>]. <span style="font-family: arial;">∃</span>(<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Stlc.html#STLC.tapp"><span class="id" type="constructor">tapp</span></a> <span class="id" type="var">t<sub>1</sub>'</span> <span class="id" type="var">t<sub>2</sub></span>)...<br>
+
+<br>
+&nbsp;&nbsp;- <span class="comment">(*&nbsp;T_If&nbsp;*)</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">right</span>. <span class="id" type="tactic">destruct</span> <span class="id" type="var">IHHt1</span>...<br>
+
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;t<sub>1</sub>&nbsp;is&nbsp;a&nbsp;value&nbsp;*)</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">destruct</span> (<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/StlcProp.html#STLCProp.canonical_forms_bool"><span class="id" type="lemma">canonical_forms_bool</span></a> <span class="id" type="var">t<sub>1</sub></span>); <span class="id" type="tactic">subst</span>; <span class="id" type="tactic">eauto</span>.<br>
+
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="comment">(*&nbsp;t<sub>1</sub>&nbsp;also&nbsp;steps&nbsp;*)</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">inversion</span> <span class="id" type="var">H</span> <span class="id" type="keyword">as</span> [<span class="id" type="var">t<sub>1</sub>'</span> <span class="id" type="var">Hstp</span>]. <span style="font-family: arial;">∃</span>(<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Stlc.html#STLC.tif"><span class="id" type="constructor">tif</span></a> <span class="id" type="var">t<sub>1</sub>'</span> <span class="id" type="var">t<sub>2</sub></span> <span class="id" type="var">t<sub>3</sub></span>)...<br>
+<span class="id" type="keyword">Qed</span>.<br>
+</div>
+
+<br>
+</div>
+
+<div class="doc">
+<a name="lab576"></a><h4 class="section">Exercise: 3 stars, optional (progress_from_term_ind)</h4>
+ Show that progress can also be proved by induction on terms
+    instead of induction on typing derivations. 
+</div>
+<div class="code code-tight">
+
+<br>
+<span class="id" type="keyword">Theorem</span> <a name="STLCProp.progress&#39;"><span class="id" type="lemma">progress'</span></a> : <span style="font-family: arial;">∀</span><span class="id" type="var">t</span> <span class="id" type="var">T</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Maps.html#empty"><span class="id" type="definition">empty</span></a> <span style="font-family: arial;">⊢</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/StlcProp.html#t"><span class="id" type="variable">t</span></a> ∈ <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/StlcProp.html#T"><span class="id" type="variable">T</span></a> <span style="font-family: arial;">→</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Stlc.html#STLC.value"><span class="id" type="inductive">value</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/StlcProp.html#t"><span class="id" type="variable">t</span></a> <span style="font-family: arial;">∨</span> <span style="font-family: arial;">∃</span><span class="id" type="var">t'</span>, <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/StlcProp.html#t"><span class="id" type="variable">t</span></a> <span style="font-family: arial;">⇒</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/StlcProp.html#t'"><span class="id" type="variable">t'</span></a>.<br>
+<span class="id" type="keyword">Proof</span>.<br>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">t</span>.<br>
+&nbsp;&nbsp;<span class="id" type="tactic">induction</span> <span class="id" type="var">t</span>; <span class="id" type="tactic">intros</span> <span class="id" type="var">T</span> <span class="id" type="var">Ht</span>; <span class="id" type="tactic">auto</span>.<br>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;FILL&nbsp;IN&nbsp;HERE&nbsp;*)</span> <span class="id" type="var">Admitted</span>.<br>
+</div>
+
+<div class="doc">
+<font size="-2">☐</font> 
+</div>
+<div class="code code-tight">
+
+<br>
+</div>
+
+<div class="doc">
+<a name="lab577"></a><h1 class="section">Preservation</h1>
+
+<div class="paragraph"> </div>
+
+ The other half of the type soundness property is the preservation
+    of types during reduction.  For this, we need to develop some
+    technical machinery for reasoning about variables and
+    substitution.  Working from top to bottom (the high-level property
+    we are actually interested in to the lowest-level technical lemmas
+    that are needed by various cases of the more interesting proofs),
+    the story goes like this:
+
+<div class="paragraph"> </div>
+
+<ul class="doclist">
+<li> The <i>preservation theorem</i> is proved by induction on a typing
+        derivation, pretty much as we did in the <span class="inlinecode"><span class="id" type="keyword">Types</span></span> chapter.  The
+        one case that is significantly different is the one for the
+        <span class="inlinecode"><span class="id" type="var">ST_AppAbs</span></span> rule, which is defined using the substitution
+        operation.  To see that this step preserves typing, we need to
+        know that the substitution itself does.  So we prove a...
+
+<div class="paragraph"> </div>
+
+
+</li>
+<li> <i>substitution lemma</i>, stating that substituting a (closed)
+        term <span class="inlinecode"><span class="id" type="var">s</span></span> for a variable <span class="inlinecode"><span class="id" type="var">x</span></span> in a term <span class="inlinecode"><span class="id" type="var">t</span></span> preserves the type
+        of <span class="inlinecode"><span class="id" type="var">t</span></span>.  The proof goes by induction on the form of <span class="inlinecode"><span class="id" type="var">t</span></span> and
+        requires looking at all the different cases in the definition
+        of substitition.  This time, the tricky cases are the ones for
+        variables and for function abstractions.  In both cases, we
+        discover that we need to take a term <span class="inlinecode"><span class="id" type="var">s</span></span> that has been shown
+        to be well-typed in some context <span class="inlinecode"><span style="font-family: serif; font-size:85%;">Γ</span></span> and consider the same
+        term <span class="inlinecode"><span class="id" type="var">s</span></span> in a slightly different context <span class="inlinecode"><span style="font-family: serif; font-size:85%;">Γ'</span></span>.  For this
+        we prove a...
+
+<div class="paragraph"> </div>
+
+
+</li>
+<li> <i>context invariance</i> lemma, showing that typing is preserved
+        under "inessential changes" to the context <span class="inlinecode"><span style="font-family: serif; font-size:85%;">Γ</span></span> — in
+        particular, changes that do not affect any of the free
+        variables of the term.  For this, we need a careful definition
+        of
+
+<div class="paragraph"> </div>
+
+
+</li>
+<li> the <i>free variables</i> of a term — i.e., the variables occuring
+        in the term that are not in the scope of a function
+        abstraction that binds them.
+
+</li>
+</ul>
+
+</div>
+<div class="code code-tight">
+
+<br>
+</div>
+
+<div class="doc">
+<a name="lab578"></a><h2 class="section">Free Occurrences</h2>
+
+<div class="paragraph"> </div>
+
+ A variable <span class="inlinecode"><span class="id" type="var">x</span></span> <i>appears free in</i> a term <i>t</i> if <span class="inlinecode"><span class="id" type="var">t</span></span> contains some
+    occurrence of <span class="inlinecode"><span class="id" type="var">x</span></span> that is not under an abstraction labeled <span class="inlinecode"><span class="id" type="var">x</span></span>.  For example:
+
+<div class="paragraph"> </div>
+
+<ul class="doclist">
+<li> <span class="inlinecode"><span class="id" type="var">y</span></span> appears free, but <span class="inlinecode"><span class="id" type="var">x</span></span> does not, in <span class="inlinecode">\<span class="id" type="var">x</span>:<span class="id" type="var">T</span><span style="font-family: arial;">→</span><span class="id" type="var">U</span>.</span> <span class="inlinecode"><span class="id" type="var">x</span></span> <span class="inlinecode"><span class="id" type="var">y</span></span>
+
+</li>
+<li> both <span class="inlinecode"><span class="id" type="var">x</span></span> and <span class="inlinecode"><span class="id" type="var">y</span></span> appear free in <span class="inlinecode">(\<span class="id" type="var">x</span>:<span class="id" type="var">T</span><span style="font-family: arial;">→</span><span class="id" type="var">U</span>.</span> <span class="inlinecode"><span class="id" type="var">x</span></span> <span class="inlinecode"><span class="id" type="var">y</span>)</span> <span class="inlinecode"><span class="id" type="var">x</span></span>
+
+</li>
+<li> no variables appear free in <span class="inlinecode">\<span class="id" type="var">x</span>:<span class="id" type="var">T</span><span style="font-family: arial;">→</span><span class="id" type="var">U</span>.</span> <span class="inlinecode">\<span class="id" type="var">y</span>:<span class="id" type="var">T</span>.</span> <span class="inlinecode"><span class="id" type="var">x</span></span> <span class="inlinecode"><span class="id" type="var">y</span></span>  
+</li>
+</ul>
+
+</div>
+<div class="code code-tight">
+
+<br>
+<span class="id" type="keyword">Inductive</span> <a name="STLCProp.appears_free_in"><span class="id" type="inductive">appears_free_in</span></a> : <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Maps.html#id"><span class="id" type="inductive">id</span></a> <span style="font-family: arial;">→</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Stlc.html#STLC.tm"><span class="id" type="inductive">tm</span></a> <span style="font-family: arial;">→</span> <span class="id" type="keyword">Prop</span> :=<br>
+&nbsp;&nbsp;| <a name="STLCProp.afi_var"><span class="id" type="constructor">afi_var</span></a> : <span style="font-family: arial;">∀</span><span class="id" type="var">x</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/StlcProp.html#appears_free_in"><span class="id" type="inductive">appears_free_in</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/StlcProp.html#x"><span class="id" type="variable">x</span></a> (<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Stlc.html#STLC.tvar"><span class="id" type="constructor">tvar</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/StlcProp.html#x"><span class="id" type="variable">x</span></a>)<br>
+&nbsp;&nbsp;| <a name="STLCProp.afi_app1"><span class="id" type="constructor">afi_app1</span></a> : <span style="font-family: arial;">∀</span><span class="id" type="var">x</span> <span class="id" type="var">t<sub>1</sub></span> <span class="id" type="var">t<sub>2</sub></span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/StlcProp.html#appears_free_in"><span class="id" type="inductive">appears_free_in</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/StlcProp.html#x"><span class="id" type="variable">x</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/StlcProp.html#t<sub>1</sub>"><span class="id" type="variable">t<sub>1</sub></span></a> <span style="font-family: arial;">→</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/StlcProp.html#appears_free_in"><span class="id" type="inductive">appears_free_in</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/StlcProp.html#x"><span class="id" type="variable">x</span></a> (<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Stlc.html#STLC.tapp"><span class="id" type="constructor">tapp</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/StlcProp.html#t<sub>1</sub>"><span class="id" type="variable">t<sub>1</sub></span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/StlcProp.html#t<sub>2</sub>"><span class="id" type="variable">t<sub>2</sub></span></a>)<br>
+&nbsp;&nbsp;| <a name="STLCProp.afi_app2"><span class="id" type="constructor">afi_app2</span></a> : <span style="font-family: arial;">∀</span><span class="id" type="var">x</span> <span class="id" type="var">t<sub>1</sub></span> <span class="id" type="var">t<sub>2</sub></span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/StlcProp.html#appears_free_in"><span class="id" type="inductive">appears_free_in</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/StlcProp.html#x"><span class="id" type="variable">x</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/StlcProp.html#t<sub>2</sub>"><span class="id" type="variable">t<sub>2</sub></span></a> <span style="font-family: arial;">→</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/StlcProp.html#appears_free_in"><span class="id" type="inductive">appears_free_in</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/StlcProp.html#x"><span class="id" type="variable">x</span></a> (<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Stlc.html#STLC.tapp"><span class="id" type="constructor">tapp</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/StlcProp.html#t<sub>1</sub>"><span class="id" type="variable">t<sub>1</sub></span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/StlcProp.html#t<sub>2</sub>"><span class="id" type="variable">t<sub>2</sub></span></a>)<br>
+&nbsp;&nbsp;| <a name="STLCProp.afi_abs"><span class="id" type="constructor">afi_abs</span></a> : <span style="font-family: arial;">∀</span><span class="id" type="var">x</span> <span class="id" type="var">y</span> <span class="id" type="var">T<sub>11</sub></span> <span class="id" type="var">t<sub>12</sub></span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/StlcProp.html#y"><span class="id" type="variable">y</span></a> ≠ <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/StlcProp.html#x"><span class="id" type="variable">x</span></a>  <span style="font-family: arial;">→</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/StlcProp.html#appears_free_in"><span class="id" type="inductive">appears_free_in</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/StlcProp.html#x"><span class="id" type="variable">x</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/StlcProp.html#t<sub>12</sub>"><span class="id" type="variable">t<sub>12</sub></span></a> <span style="font-family: arial;">→</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/StlcProp.html#appears_free_in"><span class="id" type="inductive">appears_free_in</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/StlcProp.html#x"><span class="id" type="variable">x</span></a> (<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Stlc.html#STLC.tabs"><span class="id" type="constructor">tabs</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/StlcProp.html#y"><span class="id" type="variable">y</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/StlcProp.html#T<sub>11</sub>"><span class="id" type="variable">T<sub>11</sub></span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/StlcProp.html#t<sub>12</sub>"><span class="id" type="variable">t<sub>12</sub></span></a>)<br>
+&nbsp;&nbsp;| <a name="STLCProp.afi_if&lt;sub&gt;1&lt;/sub&gt;"><span class="id" type="constructor">afi_if<sub>1</sub></span></a> : <span style="font-family: arial;">∀</span><span class="id" type="var">x</span> <span class="id" type="var">t<sub>1</sub></span> <span class="id" type="var">t<sub>2</sub></span> <span class="id" type="var">t<sub>3</sub></span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/StlcProp.html#appears_free_in"><span class="id" type="inductive">appears_free_in</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/StlcProp.html#x"><span class="id" type="variable">x</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/StlcProp.html#t<sub>1</sub>"><span class="id" type="variable">t<sub>1</sub></span></a> <span style="font-family: arial;">→</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/StlcProp.html#appears_free_in"><span class="id" type="inductive">appears_free_in</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/StlcProp.html#x"><span class="id" type="variable">x</span></a> (<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Stlc.html#STLC.tif"><span class="id" type="constructor">tif</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/StlcProp.html#t<sub>1</sub>"><span class="id" type="variable">t<sub>1</sub></span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/StlcProp.html#t<sub>2</sub>"><span class="id" type="variable">t<sub>2</sub></span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/StlcProp.html#t<sub>3</sub>"><span class="id" type="variable">t<sub>3</sub></span></a>)<br>
+&nbsp;&nbsp;| <a name="STLCProp.afi_if&lt;sub&gt;2&lt;/sub&gt;"><span class="id" type="constructor">afi_if<sub>2</sub></span></a> : <span style="font-family: arial;">∀</span><span class="id" type="var">x</span> <span class="id" type="var">t<sub>1</sub></span> <span class="id" type="var">t<sub>2</sub></span> <span class="id" type="var">t<sub>3</sub></span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/StlcProp.html#appears_free_in"><span class="id" type="inductive">appears_free_in</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/StlcProp.html#x"><span class="id" type="variable">x</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/StlcProp.html#t<sub>2</sub>"><span class="id" type="variable">t<sub>2</sub></span></a> <span style="font-family: arial;">→</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/StlcProp.html#appears_free_in"><span class="id" type="inductive">appears_free_in</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/StlcProp.html#x"><span class="id" type="variable">x</span></a> (<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Stlc.html#STLC.tif"><span class="id" type="constructor">tif</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/StlcProp.html#t<sub>1</sub>"><span class="id" type="variable">t<sub>1</sub></span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/StlcProp.html#t<sub>2</sub>"><span class="id" type="variable">t<sub>2</sub></span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/StlcProp.html#t<sub>3</sub>"><span class="id" type="variable">t<sub>3</sub></span></a>)<br>
+&nbsp;&nbsp;| <a name="STLCProp.afi_if&lt;sub&gt;3&lt;/sub&gt;"><span class="id" type="constructor">afi_if<sub>3</sub></span></a> : <span style="font-family: arial;">∀</span><span class="id" type="var">x</span> <span class="id" type="var">t<sub>1</sub></span> <span class="id" type="var">t<sub>2</sub></span> <span class="id" type="var">t<sub>3</sub></span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/StlcProp.html#appears_free_in"><span class="id" type="inductive">appears_free_in</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/StlcProp.html#x"><span class="id" type="variable">x</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/StlcProp.html#t<sub>3</sub>"><span class="id" type="variable">t<sub>3</sub></span></a> <span style="font-family: arial;">→</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/StlcProp.html#appears_free_in"><span class="id" type="inductive">appears_free_in</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/StlcProp.html#x"><span class="id" type="variable">x</span></a> (<a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/Stlc.html#STLC.tif"><span class="id" type="constructor">tif</span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/StlcProp.html#t<sub>1</sub>"><span class="id" type="variable">t<sub>1</sub></span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/StlcProp.html#t<sub>2</sub>"><span class="id" type="variable">t<sub>2</sub></span></a> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/StlcProp.html#t<sub>3</sub>"><span class="id" type="variable">t<sub>3</sub></span></a>).<br>
+<div class="togglescript" id="proofcontrol2" onclick="toggleDisplay(&#39;proof2&#39;);toggleDisplay(&#39;proofcontrol2&#39;)"><span class="show"></span></div>
+<div class="proofscript" id="proof2" onclick="toggleDisplay(&#39;proof2&#39;);toggleDisplay(&#39;proofcontrol2&#39;)">
+
+<br>
+<span class="id" type="keyword">Hint</span> <span class="id" type="var">Constructors</span> <a class="idref" href="http://www.seas.upenn.edu/~cis500/current/sf/StlcProp.html#appears_free_in"><span class="id" type="inductive">appears_free_in</span></a>.</div></div></div></div><audio controls="controls" style="display: none;"></audio></body><style type="text/css">#yddContainer{display:block;font-family:Microsoft YaHei;position:relative;width:100%;height:100%;top:-4px;left:-4px;font-size:12px;border:1px solid}#yddTop{display:block;height:22px}#yddTopBorderlr{display:block;position:static;height:17px;padding:2px 28px;line-height:17px;font-size:12px;color:#5079bb;font-weight:bold;border-style:none solid;border-width:1px}#yddTopBorderlr .ydd-sp{position:absolute;top:2px;height:0;overflow:hidden}.ydd-icon{left:5px;width:17px;padding:0px 0px 0px 0px;padding-top:17px;background-position:-16px -44px}.ydd-close{right:5px;width:16px;padding-top:16px;background-position:left -44px}#yddKeyTitle{float:left;text-decoration:none}#yddMiddle{display:block;margin-bottom:10px}.ydd-tabs{display:block;margin:5px 0;padding:0 5px;height:18px;border-bottom:1px solid}.ydd-tab{display:block;float:left;height:18px;margin:0 5px -1px 0;padding:0 4px;line-height:18px;border:1px solid;border-bottom:none}.ydd-trans-container{display:block;line-height:160%}.ydd-trans-container a{text-decoration:none;}#yddBottom{position:absolute;bottom:0;left:0;width:100%;height:22px;line-height:22px;overflow:hidden;background-position:left -22px}.ydd-padding010{padding:0 10px}#yddWrapper{color:#252525;z-index:10001;background:url(chrome-extension://eopjamdnofihpioajgfdikhhbobonhbb/ab20.png);}#yddContainer{background:#fff;border-color:#4b7598}#yddTopBorderlr{border-color:#f0f8fc}#yddWrapper .ydd-sp{background-image:url(chrome-extension://eopjamdnofihpioajgfdikhhbobonhbb/ydd-sprite.png)}#yddWrapper a,#yddWrapper a:hover,#yddWrapper a:visited{color:#50799b}#yddWrapper .ydd-tabs{color:#959595}.ydd-tabs,.ydd-tab{background:#fff;border-color:#d5e7f3}#yddBottom{color:#363636}#yddWrapper{min-width:250px;max-width:400px;}</style></html>
