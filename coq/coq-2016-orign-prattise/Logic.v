@@ -913,20 +913,20 @@ right.
 apply H4.
 + 
 intros.
-(* destruct H as [z [H5 H6]]. *)
-(* simpl. *)
-(* right. *)
-(* apply IHl. *)
-
-(* simpl in H. *)
-(* right. *)
-(* apply IHl. *)
-(* destruct H as [x1 [H5 H6]]. *)
-(* exists x1. *)
-(* split. *)
-(* apply H5. *)
-(* simpl in H6. *)
-Admitted.
+simpl in H.
+simpl.
+destruct H as [x0 [H1 H2]].
+destruct H2 as [H3 | H4].
+left.
+rewrite <-H3 in H1.
+apply H1.
+right.
+apply IHl.
+exists x0.
+split.
+apply H1.
+apply H4.
+Qed.
 (** [] *)
 
 (** **** Exercise: 2 stars (in_app_iff)  *)
@@ -1444,10 +1444,12 @@ Proof.
 intros.
 apply functional_extensionality.
 induction x as [| n0 l0 IHl].
+-
 simpl.
 unfold tr_rev.
 compute.
 reflexivity.
+-
 simpl.
 unfold tr_rev.
 unfold tr_rev in IHl.
@@ -1695,6 +1697,32 @@ Qed.
     [beq_nat_true_iff] that is more convenient in certain
     situations (we'll see examples in later chapters). *)
 
+Lemma S_beq_nat:forall n m, n <> m -> beq_nat n m = false.
+Proof.
+induction n.
+intros.
+induction m.
+simpl.
+unfold not in H.
+exfalso.
+apply H.
+reflexivity.
+simpl.
+reflexivity.
+intros.
+induction m.
+simpl.
+reflexivity.
+simpl.
+apply IHn.
+unfold not in H.
+unfold not.
+intros.
+apply H.
+rewrite H0.
+reflexivity.
+Qed.
+
 Theorem beq_nat_false_iff : forall x y : nat,
   beq_nat x y = false <-> x <> y.
 Proof.
@@ -1725,7 +1753,13 @@ rewrite <- beq_nat_refl in HX.
 inversion HX.
 +
 unfold not in H.
-Admitted.
+apply S_beq_nat.
+unfold not.
+intros.
+apply H.
+rewrite H0.
+reflexivity.
+Qed.
 (** [] *)
 
 (** **** Exercise: 3 stars (beq_list)  *)
@@ -1738,19 +1772,65 @@ Admitted.
 Fixpoint beq_list {A} (beq : A -> A -> bool)
                   (l1 l2 : list A) : bool :=
   match l1, l2 with
-      | nil ,nil => true
+      | nil,nil => true
       | nil,_ => false
       | n1 :: l1', nil => false
       | n1 :: l1', n2 :: l2' => if beq n1 n2 then beq_list beq l1' l2' else false
    end.
-         
 
 Lemma beq_list_true_iff :
   forall A (beq : A -> A -> bool),
     (forall a1 a2, beq a1 a2 = true <-> a1 = a2) ->
     forall l1 l2, beq_list beq l1 l2 = true <-> l1 = l2.
 Proof.
-(* FILL IN HERE *) Admitted.
+(* FILL IN HERE *)
+intros A beq.
+intros H.
+induction l1.
+intros.
+split.
+intros.
+induction l2.
+reflexivity.
+simpl in H0.
+inversion H0.
+intros.
+rewrite H0.
+induction l2.
+simpl.
+reflexivity.
+simpl.
+inversion H0.
+induction l2.
+intros.
+split.
+intros.
+simpl in H0.
+inversion H0.
+intros.
+inversion H0.
+split.
+intros.
+simpl in H0.
+destruct (beq x x0) eqn:HX.
+apply H in HX.
+apply IHl1 in H0.
+rewrite HX.
+rewrite H0.
+reflexivity.
+inversion H0.
+intros.
+inversion H0.
+simpl.
+assert(HX:x0 = x0).
+reflexivity.
+apply H in HX.
+rewrite HX.
+rewrite <-H3.
+apply IHl1.
+reflexivity.
+Qed.
+
 (** [] *)
 
 (** **** Exercise: 2 stars, recommended (All_forallb)  *)
@@ -2009,8 +2089,6 @@ unfold excluded_middle.
 intros.
 left.
 apply H with (Q:=P).
-intros.
-
 Admitted.
 
 

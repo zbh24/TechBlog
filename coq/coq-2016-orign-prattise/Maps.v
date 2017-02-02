@@ -115,6 +115,8 @@ Proof.
 
 Definition total_map (A:Type) := id -> A.
 
+(* Definition total_map1(A:Type) :id->A := fun (x:id) => A. *)
+
 (** Intuitively, a total map over an element type [A] _is_ just a
     function that can be used to look up [id]s, yielding [A]s.
 
@@ -130,7 +132,7 @@ Definition t_empty {A:Type} (v : A) : total_map A :=
     takes [x] to [v] and takes every other key to whatever [m] does. *)
 
 Definition t_update {A:Type} (m : total_map A)
-                    (x : id) (v : A) :=
+                    (x : id) (v : A) : total_map A :=
   fun x' => if beq_id x x' then v else m x'.
 
 (** This definition is a nice example of higher-order programming.
@@ -176,7 +178,16 @@ Proof. reflexivity. Qed.
 Lemma t_update_eq : forall A (m: total_map A) x v,
   (t_update m x v) x = v.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  (* FILL IN HERE *)
+intros.
+destruct x.
+simpl.
+unfold t_update.
+simpl.
+SearchAbout beq_nat.
+rewrite <- beq_nat_refl.
+reflexivity.
+Qed.
 (** [] *)
 
 (** **** Exercise: 2 stars, optional (t_update_neq)  *)
@@ -189,7 +200,16 @@ Theorem t_update_neq : forall (X:Type) v x1 x2
   x1 <> x2 ->
   (t_update m x1 v) x2 = m x2.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  (* FILL IN HERE *)
+intros.
+unfold t_update.
+SearchAbout beq_id.
+assert(HX:beq_id x1 x2 =false).
+apply false_beq_id.
+apply H.
+rewrite HX.
+reflexivity.
+Qed.
 (** [] *)
 
 (** **** Exercise: 2 stars, optional (t_update_shadow)  *)
@@ -203,7 +223,17 @@ Lemma t_update_shadow : forall A (m: total_map A) v1 v2 x,
     t_update (t_update m x v1) x v2
   = t_update m x v2.
 Proof.
-  (* FILL IN HERE *) Admitted.
+(* FILL IN HERE *)
+intros.
+unfold t_update.
+simpl.
+(* SearchAbout functional. *)
+apply functional_extensionality.
+intros.
+destruct (beq_id x x0) eqn:HX.
+reflexivity.
+reflexivity.
+Qed.
 (** [] *)
 
 (** For the final two lemmas about total maps, it's convenient to use
@@ -217,7 +247,13 @@ Proof.
 
 Lemma beq_idP : forall x y, reflect (x = y) (beq_id x y).
 Proof.
-  (* FILL IN HERE *) Admitted.
+  (* FILL IN HERE *)
+intros.
+apply iff_reflect.
+SearchAbout beq_id.
+rewrite beq_id_true_iff.
+reflexivity.
+Qed.
 (** [] *)
 
 (** Now, given [id]s [x1] and [x2], we can use the [destruct (beq_idP
@@ -234,7 +270,16 @@ Proof.
 Theorem t_update_same : forall X x (m : total_map X),
   t_update m x (m x) = m.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  (* FILL IN HERE *)
+intros.
+unfold t_update.
+extensionality x0.
+(* apply functional_extensionality. *)
+destruct (beq_idP x x0) as [HX | HX].
+rewrite HX.
+reflexivity.
+reflexivity.
+Qed.
 (** [] *)
 
 (** **** Exercise: 3 stars, recommended (t_update_permute)  *)
@@ -248,7 +293,22 @@ Theorem t_update_permute : forall (X:Type) v1 v2 x1 x2
     (t_update (t_update m x2 v2) x1 v1)
   = (t_update (t_update m x1 v1) x2 v2).
 Proof.
-  (* FILL IN HERE *) Admitted.
+  (* FILL IN HERE *)
+intros.
+unfold t_update.
+apply functional_extensionality.
+intros.
+destruct (beq_idP  x1 x) as [HX | HX].
+destruct (beq_idP  x2 x) as [HX1 | HX1].
+rewrite <- HX in HX1.
+unfold not in H.
+apply H in HX1.
+inversion HX1.
+reflexivity.
+destruct (beq_idP  x2 x) as [HX1 | HX1]
+;reflexivity.  
+Qed.
+
 (** [] *)
 
 (* ###################################################################### *)

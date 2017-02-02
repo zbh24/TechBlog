@@ -782,7 +782,20 @@ rewrite IHl.
 reflexivity.
 Qed.
 
-Theorem app_length_cons : forall (X : Type) (l1 l2 : list X)
+Lemma S_inject:forall n m ,S n = S m -> n = m.
+Proof.
+intros.
+inversion H.
+reflexivity.
+Qed.
+
+Lemma S_cons:forall n m, n = m -> S n = S m.
+intros.
+rewrite H.
+reflexivity.
+Qed.
+
+Theorem app_length_cons' : forall (X : Type) (l1 l2 : list X)
                                   (x : X) (n : nat),
      length (l1 ++ (x :: l2)) = n ->
      S (length (l1 ++ l2)) = n.
@@ -815,12 +828,44 @@ induction l1 as [| n' l'].
     apply H.
 Qed.
 
+Theorem app_length_cons : forall (X : Type) (l1 l2 : list X)
+                                  (x : X) (n : nat),
+     length (l1 ++ (x :: l2)) = n ->
+     S (length (l1 ++ l2)) = n.
+Proof.
+intros X l1.
+induction l1.
+-
+intros l2 x.
+induction n.
+intros.
+inversion H.
+intros.
+simpl in IHn.
+simpl.
+simpl in  H.
+apply H.
+-
+intros l2 x0.
+induction n.
+intros.
+inversion H.
+intros.
+simpl.
+apply S_cons.
+simpl in H.
+simpl in IHn.
+apply IHl1 with (x:=x0).
+apply S_inject in H.
+apply H.
+Qed.
+
 (** [] *)
 
 (** **** Exercise: 4 stars, optional (app_length_twice)  *)
 (** Prove this by induction on [l], without using [app_length] from [Lists]. *)
 
-Theorem app_length_twice : forall (X:Type) (n:nat) (l:list X),
+Theorem app_length_twice' : forall (X:Type) (n:nat) (l:list X),
      length l = n ->
      length (l ++ l) = n + n.
 Proof.
@@ -849,6 +894,49 @@ rewrite plus_comm.
 reflexivity.
 Qed.
 
+Lemma app_cons_x:forall (X:Type) (x:X) (l1 l2 :list X),
+length (l1 ++ x::l2) = S (length (l1 ++ l2) ).
+Proof.
+induction l1;simpl;intros.
+reflexivity.
+apply S_cons.
+apply IHl1.
+Qed.
+
+Theorem app_length_twice : forall (X:Type) (n:nat) (l:list X),
+     length l = n ->
+     length (l ++ l) = n + n.
+Proof.
+  (* FILL IN HERE *) 
+intros X n l.
+generalize dependent n.
+induction l.
+-
+intros.
+simpl.
+simpl in H.
+rewrite <- H.
+simpl.
+reflexivity.
+-
+induction n.
+intros.
+simpl in H.
+inversion H.
+intros.
+simpl in IHn.
+simpl.
+apply S_cons.
+rewrite app_cons_x.
+rewrite plus_comm.
+simpl.
+apply S_cons.
+apply IHl.
+simpl in H.
+inversion H.
+reflexivity.
+Qed.
+
 (** **** Exercise: 3 stars, optional (double_induction)  *)
 (** Prove the following principle of induction over two naturals. *)
 
@@ -859,18 +947,19 @@ Theorem double_induction: forall (P : nat -> nat -> Prop),
   (forall m n, P m n -> P (S m) (S n)) ->
   forall m n, P m n.
 Proof.
-  (* FILL IN HERE *)
-(* intros. *)
-(* generalize dependent m.  *)
-(* generalize dependent n.  *)
-(* assert(HX:forall n,P 0 n). *)
-(*  + intros. *)
-(*    induction n. *)
-(*    apply H. *)
-(*    apply H1. *)
-(*    apply IHn. *)
-(* + apply   *)
-Admitted.
+intros P.
+induction m.
+induction n.
+intros.
+apply H.
+apply H1.
+apply IHn.
+induction n.
+apply H0.
+apply IHm.
+apply H2.
+apply IHm.
+Qed.
 (** [] *)
 
 
@@ -1361,28 +1450,40 @@ Qed.
 (** This one is a bit challenging.  Pay attention to the form of your
     induction hypothesis. *)
 
+Lemma test_filter:forall (X : Type) (test : X -> bool)
+                             (x : X) (l:list X),
+test x = false -> filter test (l ) = filter test (x::l).
+Proof.
+intros.
+unfold filter.
+rewrite H.
+reflexivity.
+Qed.
+
 Theorem filter_exercise : forall (X : Type) (test : X -> bool)
                              (x : X) (l lf : list X),
      filter test l = x :: lf ->
      test x = true.
 Proof.
-  (* FILL IN HERE *)
-(* intros. *)
-(* generalize dependent x. *)
-(* generalize dependent lf. *)
-(* induction l as [| n0 l']. *)
-(* - *)
-(* intros. *)
-(* inversion H.  *)
-(* -  *)
-(* intros. *)
-(* destruct (test n0) eqn:eqn. *)
-(* unfold filter in H. *)
-(* rewrite eqn in H. *)
-(* apply IHl' with (lf :=lf). *)
-(* rewrite <- H. *)
-Admitted.
-(** [] *)
+intros X test x l.
+generalize dependent x.
+induction l.
+intros.
+inversion H.
+intros.
+destruct (test x) eqn:HF.
+assert (HX:x0 =x).
+unfold filter in H.
+rewrite HF in H.
+inversion H.
+reflexivity.
+rewrite HX.
+assumption.
+apply IHl with (x:=x0)(lf:=lf).
+unfold filter in H.
+rewrite HF in H.
+assumption.
+Qed.
 
 (** **** Exercise: 4 stars, advanced, recommended (forall_exists_challenge)  *)
 (** Define two recursive [Fixpoints], [forallb] and [existsb].  The
