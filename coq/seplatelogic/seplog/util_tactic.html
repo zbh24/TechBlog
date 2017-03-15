@@ -1,0 +1,144 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"/>
+<link href="coqdoc.css" rel="stylesheet" type="text/css"/>
+<title>util_tactic</title>
+</head>
+
+<body>
+
+<div id="page">
+
+<div id="header">
+</div>
+
+<div id="main">
+
+<h1 class="libtitle">Library util_tactic</h1>
+
+<code>
+<span class="keyword">Require</span> <span class="keyword">Import</span> List.<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> ZArith.<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> List.<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> EqNat.<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> Classical.<br/>
+
+<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> <a class="modref" href="util.html">util</a>.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Z0_mech"></a>Z0_mech: Z0 = Z_of_nat 0.<br/>
+
+<br/>
+<span class="keyword">Ltac</span> mult_dist :=<br/>
+&nbsp;&nbsp;(rewrite mult_plus_distr_l; (mult_dist || idtac)) || <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(rewrite mult_plus_distr_r; (mult_dist || idtac)) || <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(rewrite mult_minus_distr_r; [(mult_dist || idtac) | OmegaZ]) || <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(rewrite mult_minus_distr_l; [(mult_dist || idtac) | OmegaZ]) || idtac<br/>
+<span class="keyword">with</span> <br/>
+&nbsp;Z_to_nat x:= <br/>
+&nbsp;assert (Z_to_natA1: Zpos x = Z_of_nat (nat_of_P x)); [auto | rewrite Z_to_natA1; clear Z_to_natA1; unfold nat_of_P; simpl (Pmult_nat x 1);idtac ]<br/>
+<span class="keyword">with</span> <br/>
+&nbsp;Supr_Z t := <span class="keyword">match</span> t <span class="keyword">with</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Z0 =&gt;rewrite Z0_mech<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Zpos ?x =&gt;Z_to_nat x<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Zplus ?x1 ?x2 =&gt; (((Supr_Z x1 || idtac); (Supr_Z x2 || idtac); rewrite &lt;- inj_plus) || idtac)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Zminus ?x1 ?x2 =&gt; (((Supr_Z x1 || idtac); (Supr_Z x2 || idtac); rewrite &lt;- inj_minus1; [idtac | omega]) || idtac)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Zmult ?x1 ?x2 =&gt; (((Supr_Z x1 || idtac); (Supr_Z x2 || idtac); rewrite &lt;- inj_mult) || idtac)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Z_of_nat ?x =&gt; idtac<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| ?E =&gt; (assert (Supr_Z'A1: (E &gt;= 0)%Z); [omega | generalize (nat_of_Z _ Supr_Z'A1); clear Supr_Z'A1; intro X; <span class="keyword">let</span> x := fresh <span class="keyword">in</span> (<span class="keyword">let</span> y := fresh <span class="keyword">in</span> (destruct X <span class="keyword">as</span> [x y]; rewrite y))] || idtac)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; idtac<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+<span class="keyword">with</span><br/>
+&nbsp;Supr_Z_eq_left :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> goal <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| |- (?x1 = ?x2)%Z =&gt; Supr_Z x1<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| |- (?x1 &lt;= ?x2)%Z =&gt; Supr_Z x1<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| |- (?x1 &gt;= ?x2)%Z =&gt; Supr_Z x1<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| |- (?x1 &gt; ?x2)%Z =&gt; Supr_Z x1<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| |- (?x1 &lt; ?x2)%Z =&gt; Supr_Z x1<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| |- _ =&gt; idtac<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+<span class="keyword">with</span><br/>
+&nbsp;Supr_Z_eq_right :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> goal <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| |- (?x1 = ?x2)%Z =&gt; Supr_Z x2<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| |- (?x1 &lt;= ?x2)%Z =&gt; Supr_Z x2<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| |- (?x1 &gt;= ?x2)%Z =&gt; Supr_Z x2<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| |- (?x1 &gt; ?x2)%Z =&gt; Supr_Z x2<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| |- (?x1 &lt; ?x2)%Z =&gt; Supr_Z x2<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| |- _ =&gt; idtac<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+<span class="keyword">with</span><br/>
+&nbsp;Supr_Z_eq :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> goal <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| |- ((Z_of_nat ?x1) = (Z_of_nat ?x2))%Z =&gt;  apply Z_of_nat_inj'<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| |- ((Z_of_nat ?x1) &lt;= (Z_of_nat ?x2))%Z =&gt;  apply Z_of_nat_le_inj'<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| |- ((Z_of_nat ?x1) &lt; (Z_of_nat ?x2))%Z =&gt;  apply Z_of_nat_lt_inj'<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| |- ((Z_of_nat ?x1) &gt;= (Z_of_nat ?x2))%Z =&gt;  apply Z_of_nat_ge_inj'<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| |- ((Z_of_nat ?x1) &lt; (Z_of_nat ?x2))%Z =&gt;  apply Z_of_nat_gt_inj'<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| |- _ =&gt; idtac<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+<span class="keyword">with</span><br/>
+&nbsp;Z_to_nat_Hyp x id:= assert (Z_to_natA1: Zpos x = Z_of_nat (nat_of_P x)); [auto | rewrite Z_to_natA1 in id; clear Z_to_natA1; unfold nat_of_P in id; simpl (Pmult_nat x 1) in id;idtac ]<br/>
+<span class="keyword">with</span><br/>
+&nbsp;Supr_Z_Hyp t id:= <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> t <span class="keyword">with</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Z0 =&gt;rewrite Z0_mech  <span class="keyword">in</span> id<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Zpos ?x =&gt;Z_to_nat_Hyp x id<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Zplus ?x1 ?x2 =&gt; (Supr_Z_Hyp x1 id || idtac) ; (Supr_Z_Hyp x2 id || idtac); rewrite &lt;- inj_plus <span class="keyword">in</span> id<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Zminus ?x1 ?x2 =&gt; (Supr_Z_Hyp x1 id || idtac) ; (Supr_Z_Hyp x2 id || idtac); rewrite &lt;- inj_minus1 <span class="keyword">in</span> id; [idtac | omega]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Zmult ?x1 ?x2 =&gt; (Supr_Z_Hyp x1 id || idtac) ; (Supr_Z_Hyp x2 id || idtac); rewrite &lt;- inj_mult <span class="keyword">in</span> id<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Z_of_nat ?x =&gt; idtac<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| ?E =&gt; (assert (Supr_Z'A1: (E &gt;= 0)%Z); [omega | generalize (nat_of_Z _ Supr_Z'A1); clear Supr_Z'A1; intro X; <span class="keyword">let</span> x := fresh <span class="keyword">in</span> (<span class="keyword">let</span> y := fresh <span class="keyword">in</span> (destruct X <span class="keyword">as</span> [x y]; rewrite y <span class="keyword">in</span> id))] || idtac)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; idtac<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+<br/>
+<span class="keyword">with</span><br/>
+&nbsp;Supr_Z_eq_hyp_left :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> goal <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| id: (?x1 = ?x2)%Z |- _ =&gt; Supr_Z_Hyp x1 id<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| id: (?x1 &lt;= ?x2)%Z |- _ =&gt; Supr_Z_Hyp x1 id<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| id: (?x1 &gt;= ?x2)%Z |- _ =&gt; Supr_Z_Hyp x1 id<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| id: (?x1 &gt; ?x2)%Z |- _ =&gt; Supr_Z_Hyp x1 id<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| id: (?x1 &lt; ?x2)%Z |- _ =&gt; Supr_Z_Hyp x1 id<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| |- _ =&gt; idtac<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+<span class="keyword">with</span><br/>
+&nbsp;Supr_Z_eq_hyp_right :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> goal <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| id: (?x1 = ?x2)%Z |- _ =&gt; Supr_Z_Hyp x2 id<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| id: (?x1 &lt;= ?x2)%Z |- _ =&gt; Supr_Z_Hyp x2 id<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| id: (?x1 &gt;= ?x2)%Z |- _ =&gt; Supr_Z_Hyp x2 id<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| id: (?x1 &gt; ?x2)%Z |- _ =&gt; Supr_Z_Hyp x2 id<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| id: (?x1 &lt; ?x2)%Z |- _ =&gt; Supr_Z_Hyp x2 id<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| |- _ =&gt; idtac<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+<span class="keyword">with</span> Supr_Z_eq_Hyp := <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> goal <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| id: (?x1 = ?x2)%Z |- _ =&gt; generalize (Z_of_nat_inj _ _ id); intros<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| id: (?x1 &gt; ?x2)%Z |- _ =&gt; generalize (Z_of_nat_gt_inj _ _ id); intros<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| id: (?x1 &lt; ?x2)%Z |- _ =&gt; generalize (Z_of_nat_lt_inj _ _ id); intros<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| id: (?x1 &gt;= ?x2)%Z |- _ =&gt; generalize (Z_of_nat_ge_inj _ _ id); intros<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| id: (?x1 &lt;= ?x2)%Z |- _ =&gt; generalize (Z_of_nat_le_inj _ _ id); intros<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| |- _ =&gt; idtac<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>
+<br/>
+<span class="keyword">with</span><br/>
+&nbsp;OmegaZ := ((Supr_Z_eq_hyp_left; Supr_Z_eq_hyp_right; Supr_Z_eq_Hyp); (Supr_Z_eq_left; Supr_Z_eq_right; Supr_Z_eq) || idtac); mult_dist; (omega || tauto).<br/>
+
+<br/>
+</code>
+</div>
+
+<div id="footer">
+<hr/><a href="index.html">Index</a><hr/><font size="-1">This page has been generated by <a href="http://coq.inria.fr">coqdoc</a></font>
+</div>
+
+</div>
+
+</body>
+</html>

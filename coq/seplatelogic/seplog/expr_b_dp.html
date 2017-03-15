@@ -1,0 +1,1071 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"/>
+<link href="coqdoc.css" rel="stylesheet" type="text/css"/>
+<title>expr_b_dp</title>
+</head>
+
+<body>
+
+<div id="page">
+
+<div id="header">
+</div>
+
+<div id="main">
+
+<h1 class="libtitle">Library expr_b_dp</h1>
+
+<code>
+<span class="keyword">Load</span> seplog_header.<br/>
+
+<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> Bool.<br/>
+<span class="keyword">Fixpoint</span> <a name="inb"></a>inb (A:<span class="keyword">Set</span>) (B:A-&gt;A-&gt;bool) (l:list A) (a:A) {struct l} : bool :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> l <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a name="nil"></a>nil =&gt; false<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| hd :: tl =&gt; <span class="keyword">if</span> B a hd <span class="keyword">then</span> true <span class="keyword">else</span> inb A B tl a<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+<span class="keyword">Implicit</span> Arguments inb.<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="add_elt_list"></a>add_elt_list (A:<span class="keyword">Set</span>) (B:A-&gt;A-&gt;bool) (l:list A) (a:A) {struct l} : list A :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> l <span class="keyword">with</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a name="nil"></a>nil =&gt; a :: nil<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| hd :: tl =&gt; <span class="keyword">if</span> B hd a <span class="keyword">then</span> l <span class="keyword">else</span> hd :: add_elt_list A B tl a<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+<span class="keyword">Implicit</span> Arguments add_elt_list.<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="app_list"></a>app_list (A:<span class="keyword">Set</span>) (B:A-&gt;A-&gt;bool) (l1 l2:list A) {struct l1} : list A :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> l1 <span class="keyword">with</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a name="nil"></a>nil =&gt; l2<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| hd :: tl =&gt; app_list A B tl (add_elt_list B l2 hd)<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+<span class="keyword">Implicit</span> Arguments app_list.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="option_app"></a>option_app (A:<span class="keyword">Set</span>) (l1 l2:option (list A)) : option (list A) :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> l1 <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;None =&gt; None<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| Some l1' =&gt; <span class="keyword">match</span> l2 <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;None =&gt; None<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Some l2' =&gt; Some (l1' ++ l2')<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+<span class="keyword">Implicit</span> Arguments option_app.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="andb_option"></a>andb_option (a b: option bool) :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> a <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;None =&gt; None<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| Some a' =&gt; <span class="keyword">match</span> b <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;None =&gt; None<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Some b' =&gt; Some (andb a' b')<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="orb_option"></a>orb_option (a b: option bool) :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> a <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;None =&gt; None<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| Some a' =&gt; <span class="keyword">match</span> b <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;None =&gt; None<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Some b' =&gt; Some (orb a' b')<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Notation</span> "e &lt;&lt; e'" := (neg_b (ge_b e e')) (at level 78) : sep_scope.<br/>
+<span class="keyword">Notation</span> "e &lt;&lt;= e'" := (neg_b (gt_b e e')) (at level 78) : sep_scope.<br/>
+<span class="keyword">Notation</span> "! e" := (neg_b e) (at level 78) : sep_scope.<br/>
+<span class="keyword">Notation</span> " s '|b=' b " := (eval_b b s = true) (right associativity, at level 80).<br/>
+<span class="keyword">Notation</span> " s '|b!=' b " := (eval_b b s = false) (right associativity, at level 80).<br/>
+<span class="keyword">Notation</span> " b1 =b&gt; b2 " := ((!b1) ||| b2) (right associativity, at level 80).<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="Expr_var"></a>Expr_var (e:expr) {struct e} : list var.v :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> e <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;var_e x =&gt; x::nil<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| int_e z =&gt; nil<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| add_e e1 e2 =&gt; app_list beq_nat (Expr_var e1) (Expr_var e2)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| min_e e1 e2 =&gt; app_list beq_nat (Expr_var e1) (Expr_var e2)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| mul_e e1 e2 =&gt; app_list beq_nat (Expr_var e1) (Expr_var e2)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| div_e e1 e2 =&gt; app_list beq_nat (Expr_var e1) (Expr_var e2)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| mod_e e1 e2 =&gt; app_list beq_nat (Expr_var e1) (Expr_var e2)<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="Expr_B_var"></a>Expr_B_var (e:expr_b) : list var.v :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> e <span class="keyword">with</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;true_b =&gt; nil<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| eq_b e1 e2 =&gt; app_list beq_nat (Expr_var e1) (Expr_var e2)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| neq_b e1 e2 =&gt; app_list beq_nat (Expr_var e1) (Expr_var e2)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| ge_b e1 e2 =&gt; app_list beq_nat (Expr_var e1) (Expr_var e2)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| gt_b e1 e2 =&gt; app_list beq_nat (Expr_var e1) (Expr_var e2)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| and_b e1 e2 =&gt; app_list beq_nat (Expr_B_var e1) (Expr_B_var e2)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| or_b e1 e2 =&gt; app_list beq_nat (Expr_B_var e1) (Expr_B_var e2)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| neg_b e =&gt; Expr_B_var e<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="expr_b_neg_involutive"></a>expr_b_neg_involutive: forall a,<br/>
+&nbsp;(forall s, eval_b (!! a) s = eval_b a s).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="eval_b_destruct"></a>eval_b_destruct: forall b s,<br/>
+&nbsp;eval_b b s = true \/ eval_b b s = false.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="expr_b_eq"></a>expr_b_eq: forall b1 b2 s,<br/>
+&nbsp;&nbsp;((s |b= b1) &lt;-&gt; (s |b= b2)) -&gt; (eval_b b1 s = eval_b b2 s).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="expr_b_eq'"></a>expr_b_eq': forall b1 b2 s,<br/>
+&nbsp;&nbsp;(eval_b b1 s = eval_b b2 s) -&gt; ((s |b= b1) &lt;-&gt; (s |b= b2)).<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="Expr_B_size"></a>Expr_B_size (e:expr_b) : nat :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> e <span class="keyword">with</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a name="true_b"></a>true_b =&gt; 1<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| eq_b e1 e2 =&gt; 1<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| neq_b e1 e2 =&gt; 1<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| ge_b e1 e2 =&gt; 1<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| gt_b e1 e2 =&gt; 1<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| and_b e1 e2 =&gt; 1 + (Expr_B_size e1) + (Expr_B_size e2) <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| or_b e1 e2 =&gt; 1 + (Expr_B_size e1) + (Expr_B_size e2)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| neg_b e =&gt; 1 + Expr_B_size e<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="expr_b_min_size"></a>expr_b_min_size: forall b,<br/>
+&nbsp;&nbsp;Expr_B_size b &gt;= 1.<br/>
+
+<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="neg_propagate_preserve"></a>neg_propagate_preserve: forall b n,<br/>
+&nbsp;&nbsp;(forall s, eval_b (neg_propagate b n) s = eval_b (<span class="keyword">if</span> n <span class="keyword">then</span> (neg_b b) <span class="keyword">else</span> b) s).<br/>
+
+<br/>
+<span class="keyword">Inductive</span> <a name="is_neg_propagate"></a>is_neg_propagate : expr_b -&gt; <span class="keyword">Prop</span> :=<br/>
+<br/>
+| <a name="true_b_is_neg_propagate"></a>true_b_is_neg_propagate: is_neg_propagate true_b<br/>
+| <a name="eq_b_is_neg_propagate"></a>eq_b_is_neg_propagate: forall e1 e2, is_neg_propagate (eq_b e1 e2)<br/>
+| <a name="neq_b_is_neg_propagate"></a>neq_b_is_neg_propagate: forall e1 e2, is_neg_propagate (neq_b e1 e2)<br/>
+| <a name="ge_b_is_neg_propagate"></a>ge_b_is_neg_propagate: forall e1 e2, is_neg_propagate (ge_b e1 e2)<br/>
+| <a name="gt_b_is_neg_propagate"></a>gt_b_is_neg_propagate: forall e1 e2, is_neg_propagate (gt_b e1 e2)<br/>
+<br/>
+| <a name="neg_b_is_neg_propagate"></a>neg_b_is_neg_propagate: forall e, Expr_B_size e = 1 -&gt; is_neg_propagate (neg_b e)<br/>
+<br/>
+| <a name="and_b_is_neg_propagate"></a>and_b_is_neg_propagate: forall e1 e2, <br/>
+&nbsp;&nbsp;(is_neg_propagate e1) -&gt; <br/>
+&nbsp;&nbsp;(is_neg_propagate e2) -&gt;<br/>
+&nbsp;&nbsp;(is_neg_propagate (and_b e1 e2))<br/>
+<br/>
+| <a name="or_is_neg_propagate"></a>or_is_neg_propagate: forall e1 e2, <br/>
+&nbsp;&nbsp;(is_neg_propagate e1) -&gt; <br/>
+&nbsp;&nbsp;(is_neg_propagate e2) -&gt;<br/>
+&nbsp;&nbsp;(is_neg_propagate (or_b e1 e2)).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="neg_propagate_correct"></a>neg_propagate_correct: forall b n,<br/>
+&nbsp;&nbsp;is_neg_propagate (neg_propagate b n).<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="constraint"></a>constraint := expr.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="constraint_semantic"></a>constraint_semantic (c: constraint) : expr_b := (nat_e 0) &gt;&gt;= c.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="andlist"></a>andlist  := list constraint.<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="andlist_semantic"></a>andlist_semantic (l: andlist) : expr_b:=<br/>
+&nbsp;<span class="keyword">match</span> l <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;<a name="nil"></a>nil =&gt; true_b<br/>
+&nbsp;&nbsp;&nbsp;| hd::tl =&gt; (constraint_semantic hd) &amp;&amp;&amp; (andlist_semantic tl)<br/>
+&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="andlist_plus_andlist"></a>andlist_plus_andlist (c1 c2: andlist) : andlist :=<br/>
+&nbsp;&nbsp;c1 ++ c2.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="andlist_plus_andlist_sem"></a>andlist_plus_andlist_sem: forall b1 b2,<br/>
+&nbsp;&nbsp;(forall s,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;eval_b (andlist_semantic (andlist_plus_andlist b1 b2)) s =<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;eval_b (andlist_semantic b1) s &amp;&amp; eval_b (andlist_semantic b2) s<br/>
+&nbsp;&nbsp;).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="andlist_semantic_app"></a>andlist_semantic_app : forall l1 l2 s,<br/>
+&nbsp;eval_b (andlist_semantic (l1 ++ l2)) s =<br/>
+&nbsp;eval_b ((andlist_semantic l1) &amp;&amp;&amp; (andlist_semantic l2)) s.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="orlist"></a>orlist := list andlist.<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="orlist_semantic"></a>orlist_semantic (l: orlist) : expr_b:=<br/>
+&nbsp;<span class="keyword">match</span> l <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;<a name="nil"></a>nil =&gt; ! true_b<br/>
+&nbsp;&nbsp;&nbsp;| hd::tl =&gt; (andlist_semantic hd) ||| (orlist_semantic tl)<br/>
+&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="orlist_plus_orlist"></a>orlist_plus_orlist (d1 d2: orlist) : orlist :=<br/>
+&nbsp;&nbsp;d1 ++ d2.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="orlist_plus_orlist_sem"></a>orlist_plus_orlist_sem: forall b1 b2,<br/>
+&nbsp;&nbsp;(forall s,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;eval_b (orlist_semantic (orlist_plus_orlist b1 b2)) s =<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;eval_b (orlist_semantic b1) s || eval_b (orlist_semantic b2) s<br/>
+&nbsp;&nbsp;).<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="andlist_mult_orlist"></a>andlist_mult_orlist (c: andlist) (d: orlist) {struct d} : orlist :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> d <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| nil =&gt; nil<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| hd::tl =&gt; orlist_plus_orlist ((andlist_plus_andlist c hd)::nil) (andlist_mult_orlist c tl)<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="andlist_mult_orlist_sem"></a>andlist_mult_orlist_sem: forall b2 b1,<br/>
+&nbsp;&nbsp;(forall s,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;eval_b (orlist_semantic (andlist_mult_orlist b1 b2)) s =<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;eval_b (andlist_semantic b1) s &amp;&amp;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;eval_b (orlist_semantic b2) s<br/>
+&nbsp;&nbsp;).<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="orlist_mult_orlist"></a>orlist_mult_orlist (d1 d2: orlist) {struct d1} : orlist :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> d1 <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| nil =&gt; nil<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| hd::tl =&gt; orlist_plus_orlist (andlist_mult_orlist hd d2) (orlist_mult_orlist tl d2)<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="orlist_mult_orlist_sem"></a>orlist_mult_orlist_sem: forall b1 b2,<br/>
+&nbsp;&nbsp;(forall s,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;eval_b (orlist_semantic (orlist_mult_orlist b1 b2)) s =<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;eval_b (orlist_semantic b1) s &amp;&amp;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;eval_b (orlist_semantic b2) s<br/>
+&nbsp;&nbsp;).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="orlist_semantic_app"></a>orlist_semantic_app: forall l1 l2 s,<br/>
+&nbsp;&nbsp;l1 &lt;&gt; nil -&gt;<br/>
+&nbsp;&nbsp;l2 &lt;&gt; nil -&gt;<br/>
+&nbsp;&nbsp;eval_b (orlist_semantic (l1 ++ l2)) s =<br/>
+&nbsp;&nbsp;eval_b ((orlist_semantic l1) ||| (orlist_semantic l2)) s.<br/>
+&nbsp;&nbsp;Eval_b_hyp_clean; Eval_b_goal.<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="disj_nf"></a>disj_nf (b: expr_b) : orlist :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> b <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| and_b e1 e2 =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;orlist_mult_orlist (disj_nf e1) (disj_nf e2)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| or_b e1 e2 =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;orlist_plus_orlist (disj_nf e1) (disj_nf e2)      <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| neg_b b1 =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> b1 <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| true_b =&gt; ((nat_e 1)::nil)::nil<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| eq_b e1 e2 =&gt; ((e1 +e (nat_e 1) -e e2)::nil)::((e2 +e (nat_e 1) -e e1)::nil)::nil<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| neq_b e1 e2 =&gt; ((e1 -e e2)::(e2 -e e1)::nil)::nil<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| ge_b e1 e2 =&gt; ((e1 +e (nat_e 1) -e e2)::nil)::nil<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| gt_b e1 e2 =&gt; ((e1 -e e2)::nil)::nil<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; nil<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| true_b =&gt; ((nat_e 0)::nil)::nil<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| eq_b e1 e2 =&gt; ((e1 -e e2)::(e2 -e e1)::nil)::nil<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| neq_b e1 e2 =&gt; ((e1 +e (nat_e 1) -e e2)::nil)::((e2 +e (nat_e 1) -e e1)::nil)::nil<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| ge_b e1 e2 =&gt; ((e2 -e e1)::nil)::nil<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| gt_b e1 e2 =&gt; ((e2 +e (nat_e 1) -e e1)::nil)::nil<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="disj_nf_preserve"></a>disj_nf_preserve: forall b,<br/>
+&nbsp;&nbsp;is_neg_propagate b -&gt;  <br/>
+&nbsp;&nbsp;(forall s, eval_b (orlist_semantic (disj_nf b)) s = eval_b b s).<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="expr_b2constraints"></a>expr_b2constraints (b: expr_b) : orlist :=<br/>
+&nbsp;&nbsp;disj_nf (neg_propagate b false).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="expr_b2constraints_correct"></a>expr_b2constraints_correct: forall b,<br/>
+&nbsp;&nbsp;(forall s, eval_b (orlist_semantic (expr_b2constraints b)) s = eval_b b s).<br/>
+
+<br/>
+Open <span class="keyword">Local</span> Scope Z_scope.<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="expr_compute"></a>expr_compute (e: expr) : option Z :=<br/>
+&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> e <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a name="var_e"></a>var_e x =&gt; None<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| int_e x =&gt; Some x<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| e1 +e e2 =&gt; <span class="keyword">match</span> expr_compute e1 <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a name="None"></a>None =&gt; None<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Some e1' =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> expr_compute e2 <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a name="None"></a>None =&gt; None<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Some e2' =&gt; Some (e1' + e2')<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| e1 -e e2 =&gt; <span class="keyword">match</span> expr_compute e1 <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a name="None"></a>None =&gt; None<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Some e1' =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> expr_compute e2 <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a name="None"></a>None =&gt; None<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Some e2' =&gt; Some (e1' - e2')<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| e1 *e e2 =&gt; <span class="keyword">match</span> expr_compute e1 <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a name="None"></a>None =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> expr_compute e2 <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a name="None"></a>None =&gt; None<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Some e2' =&gt; <span class="keyword">if</span> Zeq_bool e2' 0 <span class="keyword">then</span> Some 0 <span class="keyword">else</span> None<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Some e1' =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span> Zeq_bool e1' 0 <span class="keyword">then</span> Some 0 <span class="keyword">else</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> expr_compute e2 <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a name="None"></a>None =&gt; None<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Some e2' =&gt; Some (e1' * e2')<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; None<br/>
+&nbsp;&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="expr_compute_correct"></a>expr_compute_correct: forall e z,<br/>
+&nbsp;&nbsp;expr_compute e = Some z -&gt;<br/>
+&nbsp;&nbsp;(forall s, eval e s = z).<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="simpl_expr'"></a>simpl_expr' (e: expr) : expr :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> e <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| var_e v =&gt; var_e v<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| int_e z =&gt; int_e z<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| e1 +e e2 =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> expr_compute (simpl_expr' e1) <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| None =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> expr_compute (simpl_expr' e2) <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| None =&gt; e<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Some e2' =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span> Zeq_bool e2' 0 <span class="keyword">then</span> e1 <span class="keyword">else</span> e1 +e (int_e e2')<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Some e1' =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span> Zeq_bool e1' 0 <span class="keyword">then</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="keyword">match</span> expr_compute (simpl_expr' e2) <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| None =&gt; e2<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Some e2' =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span> Zeq_bool e2' 0 <span class="keyword">then</span> int_e 0 <span class="keyword">else</span> int_e e2'<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;) <span class="keyword">else</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> expr_compute (simpl_expr' e2) <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| None =&gt; (int_e e1') +e e2<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Some e2' =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span> Zeq_bool e2' 0 <span class="keyword">then</span> int_e e1' <span class="keyword">else</span> int_e (e1' + e2')<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| e1 -e e2 =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> expr_compute (simpl_expr' e1) <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| None =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> expr_compute (simpl_expr' e2) <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| None =&gt; e<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Some e2' =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span> Zeq_bool e2' 0 <span class="keyword">then</span> e1 <span class="keyword">else</span> e1 -e (int_e e2')<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Some e1' =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span> Zeq_bool e1' 0 <span class="keyword">then</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="keyword">match</span> expr_compute (simpl_expr' e2) <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| None =&gt; (int_e 0 -e e2)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Some e2' =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span> Zeq_bool e2' 0 <span class="keyword">then</span> int_e 0 <span class="keyword">else</span> int_e ( - e2')<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;) <span class="keyword">else</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> expr_compute (simpl_expr' e2) <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| None =&gt; (int_e e1') -e e2<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Some e2' =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span> Zeq_bool e2' 0 <span class="keyword">then</span> int_e e1' <span class="keyword">else</span> int_e (e1' - e2')<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| e1 *e e2 =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> expr_compute (simpl_expr' e1) <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| None =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> expr_compute (simpl_expr' e2) <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| None =&gt; e<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Some e2' =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span> Zeq_bool e2' 0 <span class="keyword">then</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int_e 0 <span class="keyword">else</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span> Zeq_bool e2' 1 <span class="keyword">then</span> e1 <span class="keyword">else</span> e1 *e (int_e e2')<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Some e1' =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span> Zeq_bool e1' 0 <span class="keyword">then</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int_e 0 <span class="keyword">else</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span> Zeq_bool e1' 1 <span class="keyword">then</span>                <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="keyword">match</span> expr_compute (simpl_expr' e2) <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| None =&gt; e2<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Some e2' =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span> Zeq_bool e2' 0 <span class="keyword">then</span> int_e 0 <span class="keyword">else</span> int_e (e2')<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;) <span class="keyword">else</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="keyword">match</span> expr_compute (simpl_expr' e2) <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| None =&gt; (int_e e1') *e e2<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Some e2' =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span> Zeq_bool e2' 0 <span class="keyword">then</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int_e 0 <span class="keyword">else</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span> Zeq_bool e2' 1 <span class="keyword">then</span> int_e e1' <span class="keyword">else</span> int_e (e1' * e2')<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; e<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="simpl_expr'_correct"></a>simpl_expr'_correct: forall e s,<br/>
+&nbsp;&nbsp;eval e s = eval (simpl_expr' e) s.<br/>
+
+<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> Max.<br/>
+
+<br/>
+Open <span class="keyword">Local</span> Scope nat_scope.<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="expr_deep"></a>expr_deep (e: expr) : nat :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> e <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| e1 +e e2 =&gt; 1 + (max (expr_deep e1) (expr_deep e2))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| e1 -e e2 =&gt; 1 + (max (expr_deep e1) (expr_deep e2))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| e1 *e e2 =&gt; 1 + (max (expr_deep e1) (expr_deep e2))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; 1<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+Close <span class="keyword">Local</span> Scope nat_scope.<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="simpl_expr_fp"></a>simpl_expr_fp (e: expr) (n: nat) {struct n} : expr :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> n <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| O =&gt; e<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| S n' =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> e <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| var_e v =&gt; var_e v<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| int_e z =&gt; int_e z<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| e1 +e e2 =&gt; simpl_expr' ((simpl_expr_fp e1 n') +e (simpl_expr_fp e2 n'))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| e1 -e e2 =&gt; simpl_expr' ((simpl_expr_fp e1 n') -e (simpl_expr_fp e2 n'))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| e1 *e e2 =&gt; simpl_expr' ((simpl_expr_fp e1 n') *e (simpl_expr_fp e2 n'))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; e<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+Opaque simpl_expr'.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="simpl_expr_fp_corect"></a>simpl_expr_fp_corect: forall n e s,<br/>
+&nbsp;&nbsp;eval e s = eval (simpl_expr_fp e n) s.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="simpl_expr"></a>simpl_expr (e: expr) : expr :=<br/>
+&nbsp;&nbsp;simpl_expr_fp e (expr_deep e).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="simpl_expr_corect"></a>simpl_expr_corect: forall e s,<br/>
+&nbsp;&nbsp;eval e s = eval (simpl_expr e) s.<br/>
+
+<br/>
+Transparent simpl_expr'.<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="expr_var_fact'"></a>expr_var_fact' (e:expr) (v:nat) {struct e} : (expr * expr) :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> e <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a name="var_e"></a>var_e x =&gt; <span class="keyword">if</span> beq_nat x v <span class="keyword">then</span> (nat_e 1, nat_e 0) <span class="keyword">else</span> (nat_e 0, var_e x)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| int_e x =&gt; (nat_e 0, int_e x)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| e1 +e e2 =&gt; <span class="keyword">match</span> expr_var_fact' e1 v <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| (e11, e12) =&gt; <span class="keyword">match</span> expr_var_fact' e2 v <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| (e21,e22) =&gt; (e11 +e e21, e12 +e e22)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| e1 -e e2 =&gt; <span class="keyword">match</span> expr_var_fact' e1 v <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| (e11, e12) =&gt; <span class="keyword">match</span> expr_var_fact' e2 v <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| (e21, e22) =&gt; (e11 -e e21, e12 -e e22)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| e1 *e e2 =&gt; <span class="keyword">match</span> expr_var_fact' e1 v <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| (e11, e12) =&gt; <span class="keyword">match</span> expr_var_fact' e2 v <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| (e21, e22) =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(((e12 *e e21) +e (e11 *e e22)) <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+e <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(var_e v *e (e11 *e e21)),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;e12 *e e22)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| e1 /e e2 =&gt; (nat_e 0, e1 /e e2)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| e1 mode e2 =&gt; (nat_e 0, e1 mode e2)<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="expr_var_fact'_correct"></a>expr_var_fact'_correct: forall e v e1 e2,<br/>
+&nbsp;&nbsp;expr_var_fact' e v = (e1, e2) -&gt;<br/>
+&nbsp;&nbsp;(forall s, eval e s = eval ((var_e v *e e1) +e e2) s).<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="simpl_varlist_constraint"></a>simpl_varlist_constraint (c:constraint) (v:list nat) {struct v} : constraint :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> v <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a name="nil"></a>nil =&gt; simpl_expr c<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| hd :: tl =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> expr_var_fact' c hd <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| (e1, e2) =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;simpl_expr ( <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(simpl_expr (var_e hd *e (simpl_varlist_constraint e1 tl))) <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+e <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(simpl_expr (simpl_varlist_constraint e2 tl)) )<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="simpl_varlist_constraint_correct"></a>simpl_varlist_constraint_correct: forall v c c',<br/>
+&nbsp;simpl_varlist_constraint c v = c' -&gt;<br/>
+&nbsp;(forall s, eval c s = eval c' s).<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="simpl_constraint"></a>simpl_constraint (c:constraint) : constraint :=<br/>
+&nbsp;&nbsp;simpl_varlist_constraint c (Expr_var c).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="simpl_constraint_correct"></a>simpl_constraint_correct: forall c,<br/>
+&nbsp;&nbsp;(forall s, eval c s = eval (simpl_constraint c) s).<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="simpl_expr_b"></a>simpl_expr_b (b:expr_b) : expr_b :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> b <span class="keyword">with</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| eq_b e1 e2 =&gt; eq_b (simpl_constraint e1) (simpl_constraint e2)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| neq_b e1 e2 =&gt; neq_b (simpl_constraint e1) (simpl_constraint e2)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| ge_b e1 e2 =&gt; ge_b (simpl_constraint e1) (simpl_constraint e2)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| gt_b e1 e2 =&gt; gt_b (simpl_constraint e1) (simpl_constraint e2)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| and_b e1 e2 =&gt; and_b (simpl_expr_b e1) (simpl_expr_b e2)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| or_b e1 e2 =&gt; or_b (simpl_expr_b e1) (simpl_expr_b e2)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| neg_b e =&gt; neg_b (simpl_expr_b e)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; b<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="simpl_expr_b_correct"></a>simpl_expr_b_correct: forall b s,<br/>
+&nbsp;&nbsp;eval_b b s = eval_b (simpl_expr_b b) s.<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="simpl_andlist"></a>simpl_andlist (l:andlist) : andlist :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> l <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a name="nil"></a>nil =&gt; nil<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| hd :: tl =&gt; simpl_constraint hd :: simpl_andlist tl <br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="simpl_andlist_correct"></a>simpl_andlist_correct: forall l s,<br/>
+&nbsp;&nbsp;eval_b (andlist_semantic l) s = eval_b (andlist_semantic (simpl_andlist l)) s.<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="simpl_orlist"></a>simpl_orlist (l:orlist) : orlist :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> l <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a name="nil"></a>nil =&gt; nil<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| hd :: tl =&gt; simpl_andlist hd :: simpl_orlist tl<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="simpl_orlist_correct"></a>simpl_orlist_correct: forall l s,<br/>
+&nbsp;&nbsp;eval_b (orlist_semantic l) s = eval_b (orlist_semantic (simpl_orlist l)) s.<br/>
+&nbsp;&nbsp;Eval_b_hyp_clean.<br/>
+&nbsp;&nbsp;Eval_b_hyp_clean.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="expr_var_fact"></a>expr_var_fact (e:expr) (v:nat) : expr * expr :=<br/>
+&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> expr_var_fact' e v <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(e1, e2) =&gt; (simpl_constraint e1, simpl_constraint e2)<br/>
+&nbsp;&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="expr_var_fact_correct"></a>expr_var_fact_correct: forall c v e1 e2,<br/>
+&nbsp;&nbsp;expr_var_fact c v = (e1, e2) -&gt;<br/>
+&nbsp;&nbsp;(forall s, eval c s = eval ((var_e v *e e1) +e e2) s).<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="elim_var_constraint"></a>elim_var_constraint (c1 c2:constraint) (v:nat) : constraint :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> expr_var_fact c1 v <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| (e11, e12) =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> expr_var_fact c2 v <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| (e21, e22) =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> expr_compute (simpl_constraint e11) <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| None =&gt; simpl_constraint c2<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Some e11' =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> expr_compute (simpl_constraint e21) <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| None =&gt; simpl_constraint c2<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Some e21' =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span> andb (Zlt_bool e11' 0) (Zlt_bool 0 e21') <span class="keyword">then</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;simpl_constraint ((e21 *e e12) -e (e11 *e e22))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">else</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="keyword">if</span> andb (Zlt_bool 0 e11') (Zlt_bool e21' 0) <span class="keyword">then</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;simpl_constraint ((e11 *e e22) -e (e21 *e e12))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">else</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;simpl_constraint c2)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span>   <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span>   <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="fourier_motzkin_for_integers"></a>fourier_motzkin_for_integers: forall a1 b1 a2 b2 x,<br/>
+&nbsp;a1 &lt; 0 -&gt;<br/>
+&nbsp;0 &lt; a2 -&gt;<br/>
+&nbsp;0 &gt;= x * a1 + b1 -&gt;<br/>
+&nbsp;0 &gt;= x * a2 + b2 -&gt;<br/>
+&nbsp;a1 * b2 &gt;= a2 * b1.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="expr_b_semantic_good'"></a>expr_b_semantic_good' : forall e s,<br/>
+&nbsp;&nbsp;eval_b e s = true -&gt; expr_b_sem e s.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="elim_var_constraint_correct"></a>elim_var_constraint_correct: forall c1 c2 v s,<br/>
+&nbsp;&nbsp;((s |b=  (constraint_semantic c1) &amp;&amp;&amp; (constraint_semantic c2)) -&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(s |b= (constraint_semantic (elim_var_constraint c1 c2 v)))).<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="elim_var_andlist'"></a>elim_var_andlist' (c: constraint) (l l':andlist) (v: nat) {struct l} : andlist := <br/>
+&nbsp;&nbsp;<span class="keyword">match</span> l <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a name="nil"></a>nil =&gt; l'<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| hd :: tl =&gt; <span class="keyword">if</span> inb beq_nat (Expr_var (simpl_constraint hd)) v <span class="keyword">then</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;elim_var_andlist' c tl ((elim_var_constraint c hd v)::l') v<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">else</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;elim_var_andlist' c tl l' v<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="elim_var_andlist'_correct"></a>elim_var_andlist'_correct: forall l l' c v,<br/>
+&nbsp;&nbsp;(forall s, (s |b=  (andlist_semantic (c::l ++ l'))) -&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;s |b=  (andlist_semantic (elim_var_andlist' c l l' v))).<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="elim_var_andlist"></a>elim_var_andlist (l l': andlist) (v: nat) {struct l} : andlist :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> l <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a name="nil"></a>nil =&gt; l'<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| hd::tl =&gt; <span class="keyword">if</span> inb beq_nat (Expr_var (simpl_constraint hd)) v <span class="keyword">then</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;elim_var_andlist tl (l' ++ (elim_var_andlist' hd tl nil v)) v<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">else</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;elim_var_andlist tl (hd::l') v<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="elim_var_andlist_correct"></a>elim_var_andlist_correct: forall l l' v,<br/>
+&nbsp;&nbsp;(forall s, (s |b=  (andlist_semantic (l ++ l'))) -&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;s |b=  (andlist_semantic (elim_var_andlist l l' v))).<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="elim_var_orlist"></a>elim_var_orlist (l: orlist) (v: nat) {struct l} : orlist :=<br/>
+&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> l <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a name="nil"></a>nil =&gt; nil<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| hd::tl =&gt; (elim_var_andlist hd nil v)::(elim_var_orlist tl v)<br/>
+&nbsp;&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="elim_var_orlist_correct"></a>elim_var_orlist_correct: forall l v,<br/>
+&nbsp;&nbsp;(forall s, eval_b (orlist_semantic l) s = true -&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;eval_b (orlist_semantic (elim_var_orlist l v)) s = true ).<br/>
+Eval_b_hyp_clean.<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="elim_varlist_orlist"></a>elim_varlist_orlist (l: orlist) (v: list nat) {struct v} : orlist :=<br/>
+&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> v <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a name="nil"></a>nil =&gt; simpl_orlist l<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| hd::tl =&gt; (elim_varlist_orlist (elim_var_orlist l hd) tl)<br/>
+&nbsp;&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="elim_varlist_orlist_correct"></a>elim_varlist_orlist_correct: forall v l,<br/>
+&nbsp;(forall s, eval_b (orlist_semantic l) s = true -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;eval_b (orlist_semantic (elim_varlist_orlist l v)) s = true).<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="eval_constraint"></a>eval_constraint (c : constraint) : option bool :=<br/>
+&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> expr_compute c <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Some z =&gt; Some (Zge_bool 0 z)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; None<br/>
+&nbsp;&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="eval_constraint2constraint_semantic"></a>eval_constraint2constraint_semantic: forall c b,<br/>
+&nbsp;&nbsp;eval_constraint c = Some b -&gt;<br/>
+&nbsp;&nbsp;(forall s, eval_b (constraint_semantic c) s = b).<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="eval_andlist'"></a>eval_andlist' (a: andlist) : option bool :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> a <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a name="nil"></a>nil =&gt; Some true<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| hd :: tl =&gt; <span class="keyword">match</span> eval_constraint hd <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Some false =&gt; Some false<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| o =&gt; <span class="keyword">match</span> eval_andlist' tl <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| None =&gt; None<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Some false =&gt; Some false<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Some true =&gt; andb_option o (Some true)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="eval_andlist'2andlist_semantic"></a>eval_andlist'2andlist_semantic: forall a b,<br/>
+&nbsp;&nbsp;eval_andlist' a = Some b -&gt;<br/>
+&nbsp;&nbsp;(forall s, eval_b (andlist_semantic a) s = b).<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="eval_andlist"></a>eval_andlist (a: andlist) : option bool :=<br/>
+&nbsp;&nbsp;<span class="keyword">if</span> beq_nat (length a) 0 <span class="keyword">then</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;None <br/>
+&nbsp;&nbsp;<span class="keyword">else</span>     <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;eval_andlist' a.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="eval_andlist2andlist_semantic"></a>eval_andlist2andlist_semantic: forall a b,<br/>
+&nbsp;&nbsp;eval_andlist a = Some b -&gt;<br/>
+&nbsp;&nbsp;(forall s, eval_b (andlist_semantic a) s = b).<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="eval_orlist'"></a>eval_orlist' (o: orlist) : option bool :=<br/>
+&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> o <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a name="nil"></a>nil =&gt; Some false<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| hd :: tl =&gt; orb_option (eval_andlist hd) (eval_orlist' tl)<br/>
+&nbsp;&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="eval_orlist'2orlist_semantic"></a>eval_orlist'2orlist_semantic: forall a b,<br/>
+&nbsp;&nbsp;eval_orlist' a = Some b -&gt;<br/>
+&nbsp;&nbsp;(forall s, eval_b (orlist_semantic a) s = b).<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="eval_orlist"></a>eval_orlist (a: orlist) : option bool :=<br/>
+&nbsp;&nbsp;<span class="keyword">if</span> beq_nat (length a) 0 <span class="keyword">then</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;None <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">else</span>     <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;eval_orlist' a.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="eval_orlist2orlist_semantic"></a>eval_orlist2orlist_semantic: forall a b,<br/>
+&nbsp;&nbsp;eval_orlist a = Some b -&gt;<br/>
+&nbsp;&nbsp;(forall s, eval_b (orlist_semantic a) s = b).<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="expr_b_dp"></a>expr_b_dp (b: expr_b) : bool :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> eval_orlist (elim_varlist_orlist (simpl_orlist (expr_b2constraints (simpl_expr_b (!b)))) (Expr_B_var (simpl_expr_b b))) <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| None =&gt; false<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| Some res =&gt; negb res      <br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="expr_b_dp_correct"></a>expr_b_dp_correct: forall b,<br/>
+&nbsp;&nbsp;&nbsp;expr_b_dp b = true -&gt;<br/>
+&nbsp;&nbsp;&nbsp;(forall s, s |b= b).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="expr_b_impl_intro"></a>expr_b_impl_intro: forall b1 b2 s,<br/>
+&nbsp;&nbsp;(s |b= b1) -&gt;<br/>
+&nbsp;&nbsp;(s |b= (b1 =b&gt; b2)) -&gt;<br/>
+&nbsp;&nbsp;(s |b= b2).<br/>
+
+<br/>
+<span class="keyword">Ltac</span> Is_pos_var p :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> p <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;xH =&gt; false<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| xI ?n =&gt; false<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| xO ?n =&gt; false<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; true<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Ltac</span> Is_Z_var t :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> t <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| Z0 =&gt; false<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| Zpos ?e  =&gt; Is_pos_var e<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| Zneg ?e =&gt; Is_pos_var e<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; true<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Ltac</span> Add_list e l :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> l <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| e::?tl =&gt; l<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| ?hd::?tl =&gt; <span class="keyword">let</span> x := Add_list e tl <span class="keyword">in</span> ( constr:(hd::x) )      <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| (@nil Z) =&gt; constr:(e::nil)<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Ltac</span> Concat_list l1 l2 :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> l1 <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| ?hd::?tl =&gt; <span class="keyword">let</span> x:= Add_list hd l2 <span class="keyword">in</span> ( Concat_list tl x )<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| nil =&gt; l2<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Ltac</span> Build_env t :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> t <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| (?t1 + ?t2)%Z =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> x:= (Build_env t1) <span class="keyword">in</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> y:= (Build_env t2) <span class="keyword">in</span> (Concat_list x y)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| (?t1 - ?t2)%Z =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> x:= (Build_env t1) <span class="keyword">in</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> y:= (Build_env t2) <span class="keyword">in</span> (Concat_list x y)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| (?t1 * ?t2)%Z =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> x:= (Build_env t1) <span class="keyword">in</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> y:= (Build_env t2) <span class="keyword">in</span> (Concat_list x y)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| (?t1 = ?t2)%Z =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> x:= (Build_env t1) <span class="keyword">in</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> y:= (Build_env t2) <span class="keyword">in</span> (Concat_list x y)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| (?t1 -&gt; ?t2)%Z =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> x:= (Build_env t1) <span class="keyword">in</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> y:= (Build_env t2) <span class="keyword">in</span> (Concat_list x y)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| (?t1 &gt; ?t2)%Z =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> x:= (Build_env t1) <span class="keyword">in</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> y:= (Build_env t2) <span class="keyword">in</span> (Concat_list x y)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| (?t1 &lt; ?t2)%Z =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> x:= (Build_env t1) <span class="keyword">in</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> y:= (Build_env t2) <span class="keyword">in</span> (Concat_list x y)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| (?t1 &gt;= ?t2)%Z =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> x:= (Build_env t1) <span class="keyword">in</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> y:= (Build_env t2) <span class="keyword">in</span> (Concat_list x y)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| (?t1 &lt;= ?t2)%Z =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> x:= (Build_env t1) <span class="keyword">in</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> y:= (Build_env t2) <span class="keyword">in</span> (Concat_list x y)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| (?t1 /\ ?t2)%Z =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> x:= (Build_env t1) <span class="keyword">in</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> y:= (Build_env t2) <span class="keyword">in</span> (Concat_list x y)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| (?t1 \/ ?t2)%Z =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> x:= (Build_env t1) <span class="keyword">in</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> y:= (Build_env t2) <span class="keyword">in</span> (Concat_list x y)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| (?t1 &lt;&gt; ?t2)%Z =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> x:= (Build_env t1) <span class="keyword">in</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> y:= (Build_env t2) <span class="keyword">in</span> (Concat_list x y)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| (~ ?t1)%Z =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> x:= (Build_env t1) <span class="keyword">in</span> (x)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> x:=(Is_Z_var t) <span class="keyword">in</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> (eval compute <span class="keyword">in</span> x) <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;true =&gt; constr:(t::nil)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| false =&gt; constr:(@nil Z)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Ltac</span> Find_var v l c :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> l <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| v::?tl =&gt; constr:c<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| ?hd::?tl =&gt; <span class="keyword">let</span> x := eval compute <span class="keyword">in</span> (S c) <span class="keyword">in</span> Find_var v tl x<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| (@nil Z) =&gt; constr:0<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Ltac</span> Get_var_index v l := Find_var v l O.<br/>
+
+<br/>
+<span class="keyword">Ltac</span> <span class="keyword">Print</span> t := assert (t = t).<br/>
+
+<br/>
+<span class="keyword">Ltac</span> To_expr t l :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> t <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| (?t1 + ?t2)%Z =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> x:= (To_expr t1 l) <span class="keyword">in</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> y:= (To_expr t2 l) <span class="keyword">in</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;constr:(x +e y)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| (?t1 - ?t2)%Z =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> x:= (To_expr t1 l) <span class="keyword">in</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> y:= (To_expr t2 l) <span class="keyword">in</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;constr:(x -e y)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| (?t1 * ?t2)%Z =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> x:= (To_expr t1 l) <span class="keyword">in</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> y:= (To_expr t2 l) <span class="keyword">in</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;constr:(x *e y)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> x:= Is_Z_var t <span class="keyword">in</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> eval compute <span class="keyword">in</span> x <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| true =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> y:= (Get_var_index t l) <span class="keyword">in</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;constr:(var_e y)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| false =&gt;               <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;constr:(int_e t)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Ltac</span> To_expr_b t l :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> t <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| (?t1 = ?t2) =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> x := To_expr t1 l <span class="keyword">in</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> y := To_expr t2 l <span class="keyword">in</span> (constr:(x == y))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| (?t1 &gt; ?t2)%Z =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> x := To_expr t1 l <span class="keyword">in</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> y := To_expr t2 l <span class="keyword">in</span> (constr:(x &gt;&gt; y))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| (?t1 &gt;= ?t2)%Z =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> x := To_expr t1 l <span class="keyword">in</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> y := To_expr t2 l <span class="keyword">in</span> (constr:(x &gt;&gt;= y))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| (?t1 &lt; ?t2)%Z =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> x := To_expr t1 l <span class="keyword">in</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> y := To_expr t2 l <span class="keyword">in</span> (constr:(! (x &gt;&gt;= y))) &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| (?t1 &lt;= ?t2)%Z =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> x := To_expr t1 l <span class="keyword">in</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> y := To_expr t2 l <span class="keyword">in</span> (constr:(! (x &gt;&gt; y))) &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| (?t1 -&gt; ?t2) =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> x := To_expr_b t1 l <span class="keyword">in</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> y := To_expr_b t2 l <span class="keyword">in</span> (constr:(x =b&gt; y))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| (?t1 /\ ?t2) =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> x := To_expr_b t1 l <span class="keyword">in</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> y := To_expr_b t2 l <span class="keyword">in</span> (constr:(x &amp;&amp;&amp; y))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| (?t1 \/ ?t2) =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> x := To_expr_b t1 l <span class="keyword">in</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> y := To_expr_b t2 l <span class="keyword">in</span> (constr:(x ||| y))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| (?t1 &lt;&gt; ?t2) =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> x := To_expr_b t1 l <span class="keyword">in</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> y := To_expr_b t2 l <span class="keyword">in</span> (constr:(x =/= y))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| (~ ?t1) =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> x := To_expr_b t1 l <span class="keyword">in</span> (constr:(! x))<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Ltac</span> In_list v l :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> l <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| v::?tl =&gt; true<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| ?hd::?tl =&gt; In_list v tl<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| (@nil Z) =&gt; false<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Ltac</span> In_list_list l1 l2 :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> l1 <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| ?hd::?tl =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> x := In_list hd l2 <span class="keyword">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> eval compute <span class="keyword">in</span> x <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| true =&gt; true<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| false =&gt; (In_list_list tl l2)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| (@nil Z) =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;false<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="new_cut"></a>new_cut: forall P Q,<br/>
+&nbsp;&nbsp;P -&gt; (P -&gt; Q) -&gt; Q.<br/>
+
+<br/>
+<span class="keyword">Ltac</span> new_cut P :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> goal <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- ?Q =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;apply (new_cut P Q)<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="list2store"></a>list2store (l: list Z) {struct l} : store.s :=<br/>
+&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> l <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| nil =&gt; store.emp<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| hd::tl =&gt; store.update (length l - 1)%nat hd (list2store tl)<br/>
+&nbsp;&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="lookup_list2store"></a>lookup_list2store: forall l x,   <br/>
+&nbsp;&nbsp;&nbsp;store.lookup x (list2store l) = nth x (rev l) 0%Z.<br/>
+
+<br/>
+Opaque list2store.<br/>
+
+<br/>
+<span class="keyword">Ltac</span> expr_b_dp_decision := <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> goal <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- ?G =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> l := (Build_env G) <span class="keyword">in</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> x := (To_expr_b G l) <span class="keyword">in</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;new_cut (eval_b x (list2store (rev l)) = true); [<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;eapply expr_b_dp_correct; compute; apply refl_equal<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> h:= fresh <span class="keyword">in</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;intro h; <span class="keyword">let</span> y := fresh <span class="keyword">in</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;generalize (proj1 (expr_b_semantic_good x (list2store (rev l))) h); intro y; simpl <span class="keyword">in</span> y; repeat (rewrite lookup_list2store <span class="keyword">in</span> y); simpl <span class="keyword">in</span> y; firstorder<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]            <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Ltac</span> Intro_hyp_var_list l :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> goal <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| id: ?a%Z |- _ =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> l' := (Build_env a) <span class="keyword">in</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> x := In_list_list l' l <span class="keyword">in</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> (eval compute <span class="keyword">in</span> x) <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| true =&gt; generalize id; clear id; (Expr_b_dp || expr_b_dp_decision)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| false =&gt; fail<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; expr_b_dp_decision<br/>
+&nbsp;&nbsp;<span class="keyword">end</span><br/>
+<span class="keyword">with</span> Expr_b_dp :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> goal <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- ?G =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> l := (Build_env G) <span class="keyword">in</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Intro_hyp_var_list l<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Ltac</span> Contradiction_b :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> goal <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| id: ?A |- _ =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;assert (~A); [Expr_b_dp | tauto]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; fail<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+</code>
+</div>
+
+<div id="footer">
+<hr/><a href="index.html">Index</a><hr/><font size="-1">This page has been generated by <a href="http://coq.inria.fr">coqdoc</a></font>
+</div>
+
+</div>
+
+</body>
+</html>

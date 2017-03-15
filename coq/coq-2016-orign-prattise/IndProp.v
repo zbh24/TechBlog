@@ -703,17 +703,17 @@ Inductive empty_relation:nat->nat->Prop :=
 
 Lemma le_trans : forall m n o, m <= n -> n <= o -> m <= o.
 Proof.
-intros m n o lmn lno.
-generalize dependent lmn.
-generalize dependent m.
-induction lno as [| o' E' IHl].
-- intros.
-apply lmn.
--
-intros.
-apply le_S.
-apply IHl.
-apply lmn.
+  intros m n o lmn lno.
+  generalize dependent lmn.
+  generalize dependent m.
+  induction lno as [| o' E' IHl].
+  - intros.
+    apply lmn.
+  -
+    intros.
+    apply le_S.
+    apply IHl.
+    apply lmn.
 Qed.
 
 Theorem O_le_n : forall n,

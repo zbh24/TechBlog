@@ -1,0 +1,412 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"/>
+<link href="coqdoc.css" rel="stylesheet" type="text/css"/>
+<title>axiomatic</title>
+</head>
+
+<body>
+
+<div id="page">
+
+<div id="header">
+</div>
+
+<div id="main">
+
+<h1 class="libtitle">Library axiomatic</h1>
+
+<code>
+<span class="keyword">Require</span> <span class="keyword">Import</span> List.<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> ZArith.<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> List.<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> EqNat.<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> Classical.<br/>
+
+<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> <a class="modref" href="util.html">util</a>.<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> <a class="modref" href="heap.html">heap</a>.<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> <a class="modref" href="heap_tactic.html">heap_tactic</a>.<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> <a class="modref" href="bipl.html">bipl</a>.<br/>
+
+<br/>
+<span class="keyword">Inductive</span> <a name="cmd"></a>cmd : <span class="keyword">Set</span> :=<br/>
+&nbsp;&nbsp;<a name="skip"></a>skip : cmd<br/>
+&nbsp;&nbsp;| <a name="assign"></a>assign : var.v -&gt; expr -&gt; cmd<br/>
+&nbsp;&nbsp;| lookup : var.v -&gt; expr -&gt; cmd<br/>
+&nbsp;&nbsp;| mutation : expr -&gt; expr -&gt; cmd<br/>
+&nbsp;&nbsp;| malloc : var.v -&gt; expr -&gt; cmd<br/>
+&nbsp;&nbsp;| free : expr -&gt; cmd<br/>
+&nbsp;&nbsp;| while : expr_b -&gt; cmd -&gt; cmd<br/>
+&nbsp;&nbsp;| seq : cmd -&gt; cmd -&gt; cmd<br/>
+&nbsp;&nbsp;| ifte : expr_b -&gt; cmd -&gt; cmd -&gt; cmd.<br/>
+
+<br/>
+<span class="keyword">Notation</span> "x &lt;- e" := (assign x e) (at level 80) : sep_scope.<br/>
+<span class="keyword">Notation</span> "x '&lt;-*' e" := (lookup x e) (at level 80) : sep_scope.<br/>
+<span class="keyword">Notation</span> "e '*&lt;-' f" := (mutation e f) (at level 80) : sep_scope.<br/>
+<span class="keyword">Notation</span> "x '&lt;-malloc' e" := (malloc x e) (at level 80) : sep_scope.<br/>
+<span class="keyword">Notation</span> "c ; d" := (seq c d) (at level 81, right associativity) : sep_scope.<br/>
+<span class="keyword">Notation</span> "'ifte' a 'thendo' x 'elsedo' y" := (ifte a x y)(at level 80) : sep_scope.<br/>
+
+<br/>
+Open <span class="keyword">Local</span> Scope sep_scope.<br/>
+Open <span class="keyword">Local</span> Scope heap_scope.<br/>
+
+<br/>
+Close <span class="keyword">Local</span> Scope nat_scope.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="state"></a>state := prod store.s heap.h.<br/>
+
+<br/>
+Open <span class="keyword">Local</span> Scope nat_scope.<br/>
+
+<br/>
+</code>
+
+<div class="doc">
+operational semantics 
+</div>
+<code>
+
+<br/>
+<span class="keyword">Inductive</span> <a name="exec"></a>exec : option state -&gt; cmd -&gt; option state -&gt; <span class="keyword">Prop</span> :=<br/>
+&nbsp;&nbsp;<a name="exec_none"></a>exec_none : forall c, exec None c None<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;| <a name="exec_skip"></a>exec_skip:  forall s h,  exec (Some (s, h)) skip (Some (s, h))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;| <a name="exec_assign"></a>exec_assign : forall s h x e,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;exec (Some (s, h)) (x &lt;- e) (Some (store.update x (eval e s) s, h))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;| exec_lookup : forall s h x e p v,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;val2loc (eval e s) = p -&gt; &nbsp;&nbsp;&nbsp;&nbsp;heap.lookup p h = Some v -&gt; &nbsp;&nbsp;&nbsp;&nbsp;exec (Some (s, h)) (x &lt;-* e) (Some (store.update x v s, h))<br/>
+<br/>
+&nbsp;&nbsp;| exec_lookup_err : forall s h x e p,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;val2loc (eval e s) = p -&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;heap.lookup p h = None -&gt; &nbsp;&nbsp;&nbsp;&nbsp;exec (Some (s, h)) (x &lt;-* e) None<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;| exec_mutation : forall s h e e' p v,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;val2loc (eval e s) = p -&gt; &nbsp;&nbsp;&nbsp;&nbsp;heap.lookup p h = Some v -&gt; &nbsp;&nbsp;&nbsp;&nbsp;exec (Some (s, h)) (e *&lt;- e') (Some (s, heap.update p (eval e' s) h))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;| exec_mutation_err : forall s h e e' p,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;val2loc (eval e s) = p -&gt; &nbsp;&nbsp;&nbsp;&nbsp;heap.lookup p h = None -&gt; &nbsp;&nbsp;&nbsp;&nbsp;exec (Some (s, h)) (e *&lt;- e') None<br/>
+<br/>
+&nbsp;&nbsp;| exec_malloc : forall s h x e n,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;h # heap.singleton n (eval e s) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;exec (Some (s, h)) (x &lt;-malloc e) <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(Some (store.update x (Z_of_nat n) s, h +++ (heap.singleton n (eval e s))))<br/>
+<br/>
+&nbsp;&nbsp;| exec_free : forall s h e v p,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;val2loc (eval e s) = p -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;heap.lookup p h = Some v-&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;exec (Some (s, h)) (free e) (Some (s, h --- p))<br/>
+<br/>
+&nbsp;&nbsp;| exec_free_err : forall s h e p,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;val2loc (eval e s) = p -&gt; &nbsp;&nbsp;&nbsp;&nbsp;heap.lookup p h = None -&gt; &nbsp;&nbsp;&nbsp;&nbsp;exec (Some (s, h)) (free e) None<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;| exec_seq : forall s s' s'' c d,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;exec s c s' -&gt; exec s' d s'' -&gt; exec s (c ; d) s''<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;| exec_while_true : forall s h s' s'' b c,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;eval_b b s = true -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;exec (Some (s, h)) c s' -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;exec s' (while b c) s'' -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;exec (Some (s, h)) (while b c) s''<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;| exec_while_false : forall s h b c,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;eval_b b s = false -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;exec (Some (s, h)) (while b c) (Some (s, h))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;| exec_ifte_true : forall b c d s h s',<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;eval_b b s = true -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;exec (Some (s, h)) c s' -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;exec (Some (s, h)) (ifte b thendo c elsedo d) s'<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;| exec_ifte_false : forall b c d s h s',<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;eval_b b s = false -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;exec (Some (s, h)) d s' -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;exec (Some (s, h)) (ifte b thendo c elsedo d) s'.<br/>
+
+<br/>
+<span class="keyword">Notation</span> "s -- c --&gt; t" := (exec s c t) (at level 82) : sep_scope.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="from_none'"></a>from_none' : forall s0 c s, (s0 -- c --&gt; s) -&gt; s0 = None -&gt; s = None.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="from_none"></a>from_none : forall c s, (None -- c --&gt; s) -&gt; s = None.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="update_store2"></a>update_store2 (x:var.v) (e:expr) (P:assert) : assert :=<br/>
+&nbsp;&nbsp;<span class="keyword">fun</span> s h =&gt; P (store.update x (eval e s) s) h.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="lookup2"></a>lookup2 (x:var.v) (e:expr) (P:assert) : assert :=<br/>
+&nbsp;&nbsp;<span class="keyword">fun</span> s h =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;exists p, val2loc (eval e s) = p /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;exists z, heap.lookup p h = Some z /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;P (store.update x z s) h.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="update_heap2"></a>update_heap2 (e:expr) (e':expr) (P:assert) : assert :=<br/>
+&nbsp;&nbsp;<span class="keyword">fun</span> s h =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;exists p, val2loc (eval e s) = p /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;exists z, heap.lookup p h = Some z /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;P s (heap.update p (eval e' s) h).<br/>
+
+<br/>
+<span class="keyword">Inductive</span> <a name="semax"></a>semax : assert -&gt; cmd -&gt; assert -&gt; <span class="keyword">Prop</span> :=<br/>
+&nbsp;&nbsp;<a name="semax_skip"></a>semax_skip: forall P, semax P skip P<br/>
+&nbsp;&nbsp;| <a name="semax_assign"></a>semax_assign : forall P x e, <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;semax (update_store2 x e P) (x &lt;- e) P<br/>
+&nbsp;&nbsp;| <a name="semax_lookup"></a>semax_lookup : forall P x e,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;semax (lookup2 x e P) (x &lt;-* e) P<br/>
+&nbsp;&nbsp;| <a name="semax_mutation"></a>semax_mutation : forall P e e',<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;semax (update_heap2 e e' P) (e *&lt;- e') P<br/>
+&nbsp;&nbsp;| <a name="semax_malloc"></a>semax_malloc : forall P x e,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;semax (<span class="keyword">fun</span> s h =&gt; forall n, ((nat_e n)|-&gt;e -* update_store2 x (nat_e n) P) s h)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(x &lt;-malloc e) P<br/>
+&nbsp;&nbsp;| <a name="semax_free"></a>semax_free : forall P e,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;semax <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="keyword">fun</span> s h =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;exists l, val2loc (eval e s) = l /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;exists v, heap.lookup l h = Some v /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;P s (h --- l))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(free e)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;P<br/>
+&nbsp;&nbsp;| semax_seq : forall P Q R c d, <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;semax P c Q -&gt; semax Q d R -&gt; semax P (c ; d) R<br/>
+&nbsp;&nbsp;| semax_while : forall P b c, <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;semax (<span class="keyword">fun</span> s h =&gt; (P s h /\ eval_b b s = true)) c P -&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;semax P (while b c) (<span class="keyword">fun</span> s h =&gt; P s h /\ eval_b b s = false)<br/>
+&nbsp;&nbsp;| semax_conseq : forall (P P' Q Q':assert) c,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(Q' ==&gt; Q) -&gt; (P ==&gt; P') -&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;semax P' c Q' -&gt; semax P c Q<br/>
+&nbsp;&nbsp;| semax_ifte : forall P Q b c d,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;semax (<span class="keyword">fun</span> s h =&gt; P s h /\ eval_b b s = true) c Q -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;semax (<span class="keyword">fun</span> s h =&gt; P s h /\ eval_b b s = false) d Q -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;semax P (ifte b thendo c elsedo d) Q.<br/>
+
+<br/>
+<span class="keyword">Notation</span> "{{ P }} c {{ Q }}" := (semax P c Q) (at level 82) : sep_scope.<br/>
+
+<br/>
+</code>
+
+<div class="doc">
+axiomatic semantic lemmas 
+</div>
+<code>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="semax_weaken_post"></a>semax_weaken_post : forall P (Q Q':assert) c,<br/>
+&nbsp;&nbsp;(Q' ==&gt; Q) -&gt; {{ P }} c {{ Q' }} -&gt; {{ P }} c {{ Q }}.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="semax_strengthen_pre"></a>semax_strengthen_pre : forall (P P':assert) Q c,<br/>
+&nbsp;&nbsp;(P ==&gt; P') -&gt; {{ P' }} c {{ Q }} -&gt; {{ P }} c {{ Q }}.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="semax'"></a>semax' (P:assert) (c:cmd) (Q:assert) : <span class="keyword">Prop</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;forall s h, (P s h -&gt; ~(Some (s, h) -- c --&gt; None)) /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(forall s' h', P s h -&gt; (Some (s, h) -- c --&gt; Some (s', h')) -&gt; Q s' h').<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="semax_sound"></a>semax_sound : forall P Q c,<br/>
+&nbsp;&nbsp;{{ P }} c {{ Q }} -&gt; semax' P c Q.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="wp_semantics"></a>wp_semantics (c: cmd) (Q: assert): assert :=<br/>
+&nbsp;&nbsp;<span class="keyword">fun</span> s h =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;~ ((Some (s, h)) -- c --&gt; None) /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;forall s' h',<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Some (s, h)) -- c --&gt; (Some (s', h')) -&gt; Q s' h'.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="exec_lookup_not_None"></a>exec_lookup_not_None: forall s h v e,<br/>
+&nbsp;&nbsp;~ (Some (s, h) -- v &lt;-* e --&gt; None) -&gt;<br/>
+&nbsp;&nbsp;exists p : loc,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;val2loc (eval e s) = p /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(exists z : heap.v, heap.lookup p h = Some z).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="exec_mutation_not_None"></a>exec_mutation_not_None: forall s h e e0,<br/>
+&nbsp;&nbsp;~ (Some (s, h) -- e *&lt;- e0 --&gt; None) -&gt;<br/>
+&nbsp;&nbsp;exists p : loc,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;val2loc (eval e s) = p /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(exists z : heap.v, heap.lookup p h = Some z).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="exec_free_not_None"></a>exec_free_not_None: forall s h e,<br/>
+&nbsp;&nbsp;~ (Some (s, h) -- free e --&gt; None) -&gt;<br/>
+&nbsp;&nbsp;exists p : loc,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;val2loc (eval e s) = p /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(exists z : heap.v, heap.lookup p h = Some z).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="exec_seq1_not_None"></a>exec_seq1_not_None: forall s h c1 c2,<br/>
+&nbsp;&nbsp;~ (Some (s, h) -- (c1; c2) --&gt; None) -&gt;<br/>
+&nbsp;&nbsp;~ (Some (s, h) -- c1 --&gt; None).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="exec_seq2_not_None"></a>exec_seq2_not_None: forall s h c1 c2 s' h',<br/>
+&nbsp;&nbsp;~ (Some (s, h) -- (c1; c2) --&gt; None) -&gt;<br/>
+&nbsp;&nbsp;Some (s, h) -- c1 --&gt; Some (s',h') -&gt;<br/>
+&nbsp;&nbsp;~ (Some (s', h') -- c2 --&gt; None).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="exec_ifte1_not_None"></a>exec_ifte1_not_None: forall s h c1 c2 e,<br/>
+&nbsp;&nbsp;~ (Some (s, h) -- (ifte e thendo c1 elsedo c2) --&gt; None) -&gt;<br/>
+&nbsp;&nbsp;eval_b e s = true -&gt;<br/>
+&nbsp;&nbsp;(~ (Some (s, h) -- c1 --&gt; None)).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="exec_ifte2_not_None"></a>exec_ifte2_not_None: forall s h c1 c2 e,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;~ (Some (s, h) -- (ifte e thendo c1 elsedo c2) --&gt; None) -&gt;<br/>
+&nbsp;&nbsp;eval_b e s = false -&gt;<br/>
+&nbsp;&nbsp;~ (Some (s, h) -- c2 --&gt; None).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="exec_while1_not_None"></a>exec_while1_not_None: forall s h e c,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;~ (Some (s, h) -- while e c --&gt; None) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;eval_b e s = true -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;~ (Some (s, h) -- c --&gt; None).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="exec_while2_not_None"></a>exec_while2_not_None: forall s h e c s' h',<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;~ (Some (s, h) -- while e c --&gt; None) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;eval_b e s = true -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Some (s, h) -- c --&gt; Some (s', h') -&gt;<br/>
+&nbsp;&nbsp;&nbsp;~ (Some (s', h') -- while e c --&gt; None).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="wp_semantics_sound"></a>wp_semantics_sound: forall c Q,<br/>
+&nbsp;&nbsp;{{wp_semantics c Q}} c {{Q}}.<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="semax_complete"></a>semax_complete : forall P Q c,<br/>
+&nbsp;&nbsp;semax' P c Q -&gt; {{ P }} c {{ Q }}.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="semax_alternative"></a>semax_alternative (P:assert) (c:cmd) (Q:assert) : <span class="keyword">Prop</span> :=<br/>
+&nbsp;&nbsp;forall s h, P s h -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(forall s' h', ((Some (s, h)) -- c --&gt; (Some (s', h'))) -&gt; (Q s' h')).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="semax_sound_alternative"></a>semax_sound_alternative : forall P Q c,<br/>
+&nbsp;&nbsp;{{ P }} c {{ Q }} -&gt; semax_alternative P c Q.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="semax_lookup_backwards"></a>semax_lookup_backwards : forall x e P,<br/>
+&nbsp;&nbsp;{{ <span class="keyword">fun</span> s h =&gt; exists e0, (e|-&gt;e0 ** (e|-&gt;e0 -* update_store2 x e0 P)) s h }} x &lt;-* e {{ P }}.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="semax_lookup_backwards_alternative"></a>semax_lookup_backwards_alternative : forall x e P e0,<br/>
+&nbsp;&nbsp;{{ e|-&gt;e0 ** (e|-&gt;e0 -* update_store2 x e0 P) }} x &lt;-* e {{ P }}.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="semax_mutation_local"></a>semax_mutation_local: forall x v v',<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{ x |-&gt; v }} x *&lt;- v' {{ x |-&gt; v' }}.<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="modified_cmd_var"></a>modified_cmd_var (c:cmd) {struct c} : list var.v :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> c <span class="keyword">with</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;skip =&gt; nil<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| x &lt;- e =&gt; x::nil<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| x &lt;-* e =&gt; x::nil<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| e *&lt;- f =&gt; nil<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| x &lt;-malloc e =&gt; x::nil<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| free e =&gt; nil<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| c1 ; c2 =&gt; modified_cmd_var c1 ++ modified_cmd_var c2<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| ifte a thendo c1 elsedo c2 =&gt; modified_cmd_var c1 ++ modified_cmd_var c2<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| while a c1 =&gt; modified_cmd_var c1<br/>
+&nbsp;&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="modified_loc_expr"></a>modified_loc_expr (c:cmd) {struct c} : list expr :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> c <span class="keyword">with</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a name="skip"></a>skip =&gt; nil<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| x &lt;- e =&gt; nil<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| x &lt;-* e =&gt; nil<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| e *&lt;- f =&gt; e::nil<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| x &lt;-malloc e =&gt; nil<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| free e =&gt; e::nil<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| c1 ; c2 =&gt; modified_loc_expr c1 ++ modified_loc_expr c2<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| ifte a thendo c1 elsedo c2 =&gt; modified_loc_expr c1 ++ modified_loc_expr c2<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| while a c1 =&gt; modified_loc_expr c1<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="inde_seq"></a>inde_seq : forall R c d,<br/>
+&nbsp;&nbsp;inde (modified_cmd_var (c; d)) R -&gt;<br/>
+&nbsp;&nbsp;inde (modified_cmd_var c) R /\ inde (modified_cmd_var d) R.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="inde_ifte"></a>inde_ifte : forall R b c d,<br/>
+&nbsp;&nbsp;inde (modified_cmd_var (ifte b thendo c elsedo d)) R -&gt;<br/>
+&nbsp;&nbsp;inde (modified_cmd_var c) R /\ inde (modified_cmd_var d) R.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="frame_rule"></a>frame_rule : forall P c Q,<br/>
+&nbsp;&nbsp;{{P}} c {{Q}} -&gt; <br/>
+&nbsp;&nbsp;forall R , <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(inde (modified_cmd_var c) R -&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ P ** R }} c {{ Q ** R }}).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="semax_free_global_backwards"></a>semax_free_global_backwards : forall e v P, <br/>
+&nbsp;&nbsp;{{ (e |-&gt; v) ** P }} free e {{ sep.emp ** P }}.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="semax_mutation_global"></a>semax_mutation_global : forall P e e',<br/>
+&nbsp;&nbsp;{{(<span class="keyword">fun</span> s' h' =&gt; exists e'', ((e |-&gt; e'') s' h'))**P}} e *&lt;- e' {{(e |-&gt; e')**P}}.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="semax_mutation_global_alternative"></a>semax_mutation_global_alternative : forall P e e' e'',<br/>
+&nbsp;&nbsp;{{ (e |-&gt; e'') ** P }} e *&lt;- e' {{ (e |-&gt; e') ** P }}.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="semax_mutation_backwards"></a>semax_mutation_backwards : forall P e e',<br/>
+&nbsp;&nbsp;{{<span class="keyword">fun</span> s h =&gt; exists e'', (e|-&gt;e''**(e|-&gt;e'-*P)) s h}} e *&lt;- e' {{P}}.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="semax_mutation_backwards_alternative"></a>semax_mutation_backwards_alternative : forall P e e' e'',<br/>
+&nbsp;&nbsp;{{ (e |-&gt; e'') ** ((e |-&gt; e') -* P) }} e *&lt;- e' {{ P }}.<br/>
+
+<br/>
+</code>
+</div>
+
+<div id="footer">
+<hr/><a href="index.html">Index</a><hr/><font size="-1">This page has been generated by <a href="http://coq.inria.fr">coqdoc</a></font>
+</div>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,196 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"/>
+<link href="coqdoc.css" rel="stylesheet" type="text/css"/>
+<title>schorr_waite</title>
+</head>
+
+<body>
+
+<div id="page">
+
+<div id="header">
+</div>
+
+<div id="main">
+
+<h1 class="libtitle">Library schorr_waite</h1>
+
+<code>
+<span class="keyword">Load</span> seplog_header.<br/>
+
+<br/>
+<span class="keyword">Notation</span> " s '|b=' b " := (eval_b b s = true) (right associativity, at level 80).<br/>
+<span class="keyword">Notation</span> " s '|b!=' b " := (eval_b b s = false) (right associativity, at level 80).<br/>
+
+<br/>
+<span class="keyword">Ltac</span> Step  R :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> goal <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| id: {{?P'}} ?c {{?Q'}} |- {{?P}} ?c {{?Q}} =&gt; eapply apply_triple; [apply id | idtac | idtac]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| id: {{?P'}} ?c {{?Q'}} |- {{?P}} ?c; ?c' {{?Q}} =&gt; eapply apply_triple'; [apply id | idtac | idtac]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- {{?P}} ?x &lt;- ?e {{?Q}} =&gt; eapply semax_assign'; red<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- {{?P}} ?x &lt;- ?e ; ?c {{?Q}} =&gt; eapply semax_assign'' <span class="keyword">with</span> R; [red; intros | idtac]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- {{?P}} ?x &lt;-* ?e {{?Q}} =&gt; eapply semax_lookup_backwards'<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- {{?P}} ?x &lt;-* ?e ; ?c {{?Q}} =&gt;  eapply semax_lookup_backwards'' <span class="keyword">with</span> R; [red; intros | idtac]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- {{?P}} ?e1 *&lt;- ?e2 {{?Q}} =&gt; eapply semax_mutation_backwards'<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- {{?P}} ?e1 *&lt;- ?e2 ; ?c {{?Q}} =&gt; eapply semax_mutation_backwards'' <span class="keyword">with</span> R; [red; intros | idtac]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- {{?P}} while ?b ?c1 {{?Q}} =&gt; eapply semax_while' <span class="keyword">with</span> R<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- {{?P}} while ?b ?c1 ; ?c2 {{?Q}} =&gt; eapply semax_while'' <span class="keyword">with</span> R; [red; intros | idtac | idtac]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- {{?P}} skip {{?Q}} =&gt;  eapply semax_skip'<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- {{?P}} ifte ?b thendo ?c1 elsedo ?c2 {{?Q}} =&gt;  eapply semax_ifte<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- {{?P}} (ifte ?b thendo ?c1 elsedo ?c2); ?c' {{?Q}} =&gt; apply semax_seq <span class="keyword">with</span> R; [eapply semax_ifte; [idtac| idtac] | idtac]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- {{?P}} ?c1; ?c2 {{?Q}} =&gt; apply semax_seq <span class="keyword">with</span> R; [idtac| idtac]<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Ltac</span> Decompose_hyp := <br/>
+&nbsp;&nbsp;<span class="keyword">match</span> goal <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| id: ?P1 /\ ?P2 |- _ =&gt; (decompose [and] id; clear id); Decompose_hyp<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| id: (?P1 ** ?P2) ?s ?h |- _ =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="keyword">let</span> x:=fresh <span class="keyword">in</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;inversion_clear id <span class="keyword">as</span> [x X];<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> y:= fresh <span class="keyword">in</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;inversion_clear X <span class="keyword">as</span> [y Y];<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;decompose [and] Y; clear Y<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)); Decompose_hyp<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| id: ex ?P |- _ =&gt; (inversion_clear id); Decompose_hyp<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; idtac<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="expr_store_update_rewrite"></a>expr_store_update_rewrite: forall e x p s,<br/>
+&nbsp;&nbsp;eval (expr_rewrite e (var_e x) (int_e p)) s = eval e (store.update  x p s).<br/>
+
+<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="expr_b_store_update_rewrite"></a>expr_b_store_update_rewrite: forall b x p s,<br/>
+&nbsp;&nbsp;eval_b (expr_b_rewrite b (var_e x) (int_e p)) s = eval_b b (store.update  x p s).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="mapsto_store_update_rewrite"></a>mapsto_store_update_rewrite: forall e1 e2 x p s h,<br/>
+&nbsp;&nbsp;((expr_rewrite e1 (var_e x) (int_e p)) |-&gt; (expr_rewrite e2 (var_e x) (int_e p))) s h -&gt;<br/>
+&nbsp;&nbsp;(e1 |-&gt; e2) (store.update x p s) h.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="l"></a>l := 0%Z.<br/>
+<span class="keyword">Definition</span> <a name="r"></a>r := 1%Z.<br/>
+<span class="keyword">Definition</span> <a name="c"></a>c := 2%Z.<br/>
+<span class="keyword">Definition</span> <a name="m"></a>m := 3%Z.<br/>
+<span class="keyword">Hint</span> Unfold l.<br/>
+<span class="keyword">Hint</span> Unfold r.<br/>
+<span class="keyword">Hint</span> Unfold c.<br/>
+<span class="keyword">Hint</span> Unfold m.<br/>
+
+<br/>
+<span class="keyword">Ltac</span> Unfolds_fields :=<br/>
+&nbsp;&nbsp;unfold l; unfold r; unfold c; unfold m.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="SW"></a>SW (t p q:var.v) (root: nat):=<br/>
+&nbsp;&nbsp;&nbsp;(t &lt;- (nat_e root));<br/>
+&nbsp;&nbsp;&nbsp;(p &lt;- (nat_e 0));<br/>
+&nbsp;&nbsp;&nbsp;(q &lt;-* (t -.&gt; m));<br/>
+&nbsp;&nbsp;&nbsp;while (((var_e p) =/= (nat_e 0)) ||| (((var_e t) =/= (nat_e 0)) &amp;&amp;&amp; ((var_e q) =/= (nat_e 1)))) (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(ifte (((var_e t) == (nat_e 0)) ||| ((var_e q) == (nat_e 1))) thendo<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(q &lt;-* (p -.&gt; c));<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ifte ((var_e q) == (nat_e 1)) thendo (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(q &lt;- (var_e t)); (t &lt;- (var_e p)); (p &lt;-* (p -.&gt; r)); ((t -.&gt;r) *&lt;- (var_e q)) <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;) elsedo (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(q &lt;- (var_e t)); (t &lt;-* (p -.&gt; r)); ((p -.&gt; r) *&lt;- (p -.&gt; l)); ((p -.&gt; l) *&lt;- (var_e q)); ((p -.&gt; c) *&lt;- (nat_e 1))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;) elsedo (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(q &lt;- (var_e p)); (p &lt;- (var_e t)); (t &lt;-* (t -.&gt; l)); ((p -.&gt; l) *&lt;- (var_e q)); ((p -.&gt; m) *&lt;- (nat_e 1)); ((p -.&gt; c) *&lt;- (nat_e 0))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;); (q &lt;-* (t -.&gt; m))<br/>
+&nbsp;&nbsp;&nbsp;).<br/>
+
+<br/>
+<span class="keyword">Inductive</span> <a name="Graph"></a>Graph: list (nat * nat * nat) -&gt; list (nat * nat * nat) -&gt; store.s -&gt; heap.h -&gt; <span class="keyword">Prop</span> := <br/>
+<br/>
+empty_N: forall s h, sep.emp s h -&gt; Graph nil nil s h<br/>
+<br/>
+| empty_E: forall n l s h1 h2 h c m, <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;n &lt;&gt; 0 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;h1 # h2 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;h = h1 +++ h2 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;((nat_e n) |--&gt; ((nat_e 0)::(nat_e 0)::(nat_e c)::(nat_e m)::nil)) s h1 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Graph l nil s h2 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Graph ((n,c,m)::l) nil s h<br/>
+<br/>
+| elim_E: forall ln n1 n2 n3 le s h h1 h2 c m, <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(n2 = 0 \/ In (n2,c,m) ln) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(n3 = 0 \/ In (n3,c,m) ln) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;h1 # h2 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;h = h1 +++ h2 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;((nat_e n1)|--&gt;((nat_e n2)::(nat_e n3)::(nat_e c)::(nat_e m)::nil)) s h1 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(((nat_e n1)|--&gt;((nat_e 0)::(nat_e 0)::(nat_e c)::(nat_e m)::nil)) -* (Graph ln (le))) s h2 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Graph ln ((n1, n2, n3)::le) s h.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Graph_inde_store"></a>Graph_inde_store: forall N E s s' h,<br/>
+&nbsp;Graph N E s h -&gt; Graph N E s' h.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Graph_less_edge"></a>Graph_less_edge: forall N E s h,<br/>
+&nbsp;&nbsp;Graph N E s h -&gt; exists h', Graph N nil s h'.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Graph_node_unique_store"></a>Graph_node_unique_store: forall N E s h n m c,<br/>
+&nbsp;&nbsp;Graph N E s h -&gt;<br/>
+&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;<br/>
+&nbsp;<br/>
+<br/>
+<br/>
+<span class="keyword">Definition</span> <a name="SW_precond"></a>SW_precond (N: list nat) (E: list (nat * nat * nat)) (root: nat): assert := <br/>
+&nbsp;&nbsp;<span class="keyword">fun</span> s h =&gt; Graph N E s h /\  In root N.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="SW_postcond"></a>SW_postcond (N: list nat) (E: list (nat * nat * nat)) : assert := <br/>
+&nbsp;&nbsp;Graph N E.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="t"></a>t := 0.<br/>
+<span class="keyword">Definition</span> <a name="p"></a>p := 1.<br/>
+<span class="keyword">Definition</span> <a name="q"></a>q := 2.<br/>
+<span class="keyword">Hint</span> Unfold t.<br/>
+<span class="keyword">Hint</span> Unfold p.<br/>
+<span class="keyword">Hint</span> Unfold q.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="SW_specif"></a>SW_specif : <span class="keyword">Prop</span> := <br/>
+&nbsp;&nbsp;&nbsp;forall root N E,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{SW_precond N E root}}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SW t p q root<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{SW_postcond N E}}.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="SW_verif"></a>SW_verif : SW_specif.<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+</code>
+</div>
+
+<div id="footer">
+<hr/><a href="index.html">Index</a><hr/><font size="-1">This page has been generated by <a href="http://coq.inria.fr">coqdoc</a></font>
+</div>
+
+</div>
+
+</body>
+</html>

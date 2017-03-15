@@ -1,0 +1,159 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"/>
+<link href="coqdoc.css" rel="stylesheet" type="text/css"/>
+<title>forward</title>
+</head>
+
+<body>
+
+<div id="page">
+
+<div id="header">
+</div>
+
+<div id="main">
+
+<h1 class="libtitle">Library forward</h1>
+
+<code>
+<span class="keyword">Load</span> seplog_header.<br/>
+
+<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> Omega.<br/>
+
+<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> frag2.<br/>
+
+<br/>
+<span class="keyword">Import</span> Fresh.<br/>
+
+<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> <a class="modref" href="expr_b_dp.html">expr_b_dp</a>.<br/>
+
+<br/>
+<span class="keyword">Inductive</span> <a name="forward"></a>forward : assrt -&gt; assrt -&gt; cmd -&gt; assrt -&gt; <span class="keyword">Prop</span> :=<br/>
+<br/>
+&nbsp;&nbsp;| <a name="forward_str_precond"></a>forward_str_precond: forall P P' Q Q' c,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(assrt_interp P ==&gt; assrt_interp P') -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;forward Q P' c Q' -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;forward Q P c Q'<br/>
+<br/>
+&nbsp;&nbsp;| <a name="forward_skip"></a>forward_skip: forall P Q,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;forward Q P skip P<br/>
+<br/>
+&nbsp;&nbsp;| <a name="forward_assign"></a>forward_assign: forall pi sig x e x' Q,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;fresh_assrt x' (pi, sig) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;fresh_e x' e -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;fresh_e x' (var_e x) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;fresh_assrt x' Q -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;forward Q (pi, sig) (x &lt;- e) (((expr_b_rewrite pi (var_e x) (var_e x')) &amp;&amp;&amp; ((var_e x) == (expr_rewrite e (var_e x) (var_e x')))), subst_Sigma sig x (var_e x'))<br/>
+<br/>
+&nbsp;&nbsp;| <a name="forward_lookup"></a>forward_lookup: forall pi sig e1 e2 e x x' Q, <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(forall s, eval_b pi s = true -&gt; eval_b (e1 == e) s = true) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;fresh_assrt x' (pi, star sig (singl e1 e2)) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;fresh_e x' e -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;fresh_e x' (var_e x) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;fresh_assrt x' Q -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;forward Q (pi,star sig (singl e1 e2)) (x &lt;-* e) (((expr_b_rewrite pi (var_e x) (var_e x')) &amp;&amp;&amp; ((var_e x) == (expr_rewrite e2 (var_e x) (var_e x')))), subst_Sigma (star sig (singl e1 e2)) x (var_e x'))<br/>
+<br/>
+&nbsp;&nbsp;| <a name="forward_mutation"></a>forward_mutation: forall pi1 sig1 e1 e2 e3 e4 Q, <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(forall s, eval_b pi1 s = true -&gt; eval_b (e1 == e3) s = true) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;forward Q (pi1,star sig1 (singl e1 e2)) (e3 *&lt;- e4) (pi1,star sig1 (singl e1 e4))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;| <a name="forward_mutation'"></a>forward_mutation': forall pi1 sig1 e1 e3 e4 Q, <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(forall s, eval_b pi1 s = true -&gt; eval_b (e1 == e3) s = true) -&gt;    <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;forward Q (pi1,star sig1 (cell e1)) (e3 *&lt;- e4) (pi1,star sig1 (singl e1 e4))<br/>
+<br/>
+&nbsp;&nbsp;| <a name="forward_unroll_lst"></a>forward_unroll_lst: forall pi sig e1 e2 c x' Q Q', <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;fresh_assrt x' (pi, star sig (lst e1 e2)) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;fresh_cmd x' c -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(forall s, s |<a name="b"></a>b= (pi =b&gt; (e1 =/= e2))) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;forward Q (pi &amp;&amp;&amp; (e1 == (var_e x')),star sig (star (star (singl e1 (var_e x')) (cell (e1 +e (nat_e 1)))) (lst (var_e x') e2))) c Q' -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;forward Q (pi,star sig (lst e1 e2)) c Q'.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="forward_sound"></a>forward_sound: forall P c Q Q',<br/>
+&nbsp;&nbsp;forward Q P c Q' -&gt;<br/>
+&nbsp;&nbsp;((assrt_interp Q') ==&gt; (assrt_interp Q)) -&gt;<br/>
+&nbsp;&nbsp;{{assrt_interp P}} c {{assrt_interp Q}}.<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> Max.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="forward_fct"></a>forward_fct (Q: assrt) (pi: expr_b) (sig: Sigma) (c:cmd) : option assrt :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> c <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| x &lt;- e =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> x' := ((max (var_max_assrt Q) (max (var_max_assrt (pi,sig)) (max x (var_max_expr e)))) +1)  <span class="keyword">in</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Some (((expr_b_rewrite pi (var_e x) (var_e x')) &amp;&amp;&amp; ((var_e x) == (expr_rewrite e (var_e x) (var_e x')))), subst_Sigma sig x (var_e x'))        <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| x &lt;-* e =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> sig <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| (singl e1 e2) =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span> (expr_b_dp (pi =b&gt; (e1 == e))) <span class="keyword">then</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> x' := ((max (var_max_assrt Q) (max (var_max_assrt (pi,sig)) (max x (var_max_expr e)))) +1)  <span class="keyword">in</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Some (((expr_b_rewrite pi (var_e x) (var_e x')) &amp;&amp;&amp; ((var_e x) == (expr_rewrite e (var_e x) (var_e x')))), subst_Sigma sig x (var_e x'))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;) <span class="keyword">else</span> None<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| star sig' (singl e1 e2) =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span> (expr_b_dp (pi =b&gt; (e1 == e))) <span class="keyword">then</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> x' := ((max (var_max_assrt Q) (max (var_max_assrt (pi,sig)) (max x (var_max_expr e)))) +1)  <span class="keyword">in</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Some (((expr_b_rewrite pi (var_e x) (var_e x')) &amp;&amp;&amp; ((var_e x) == (expr_rewrite e (var_e x) (var_e x')))), subst_Sigma sig x (var_e x'))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;) <span class="keyword">else</span> Some (pi,(Sigma_clean_epsi (Sigma_assoc_left (Sigma_com sig) epsi) pi))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; Some (pi,(Sigma_clean_epsi (Sigma_assoc_left (Sigma_com sig) epsi) pi))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; None<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+</code>
+</div>
+
+<div id="footer">
+<hr/><a href="index.html">Index</a><hr/><font size="-1">This page has been generated by <a href="http://coq.inria.fr">coqdoc</a></font>
+</div>
+
+</div>
+
+</body>
+</html>

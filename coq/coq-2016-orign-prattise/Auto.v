@@ -366,6 +366,11 @@ Ltac find_rwinv :=
     H1: ?E = true, H2: ?E = false |- _ => rwinv H1 H2
   end.
 
+Ltac find_rwinv' :=
+  match goal with
+    H1: _ = true, H2: _ = false |- _ => rwinv H1 H2
+  end.
+
 (** In words, this [match goal] looks for two distinct hypotheses that
     have the form of equalities with the same arbitrary expression [E]
     on the left and conflicting boolean values on the right; if such
@@ -419,8 +424,10 @@ Proof.
 
 Ltac find_eqn :=
   match goal with
-    H1: forall x, ?P x -> ?L = ?R, H2: ?P ?X |- _ =>
-         rewrite (H1 X H2) in *
+    H1: forall x, ?P x -> ?L = ?R, 
+    H2: ?P ?X 
+    |- _ =>
+       rewrite (H1 X H2) in *
   end.
 
 (** But there are several pairs of hypotheses that have the right
@@ -550,6 +557,21 @@ Proof.
 Qed.
 
 End Repeat.
+
+Example ceval'_example1:
+    (X ::= ANum 2;;
+     IFB BLe (AId X) (ANum 1)
+       THEN Y ::= ANum 3
+       ELSE Z ::= ANum 4
+     FI)
+   / empty_state
+   \\ (t_update (t_update empty_state X 2) Z 4).
+Proof.
+  eapply E_Seq. (* 1 *)
+  - apply E_Ass. (* 2 *)
+    reflexivity. (* 3 *)
+  - (* 4 *) apply E_IfFalse. reflexivity. apply E_Ass. reflexivity.
+Qed.
 
 (** These examples just give a flavor of what "hyper-automation" can
     do.  The details of using [match goal] are a bit tricky, and

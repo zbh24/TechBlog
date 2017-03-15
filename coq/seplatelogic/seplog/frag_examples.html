@@ -1,0 +1,212 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"/>
+<link href="coqdoc.css" rel="stylesheet" type="text/css"/>
+<title>frag_examples</title>
+</head>
+
+<body>
+
+<div id="page">
+
+<div id="header">
+</div>
+
+<div id="main">
+
+<h1 class="libtitle">Library frag_examples</h1>
+
+<code>
+<span class="keyword">Load</span> seplog_header.<br/>
+
+<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> <a class="modref" href="frag.html">frag</a>.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="i"></a>i : var.v := 1.<br/>
+<span class="keyword">Definition</span> <a name="j"></a>j : var.v := 2.<br/>
+<span class="keyword">Definition</span> <a name="x"></a>x : var.v := 4.<br/>
+<span class="keyword">Definition</span> <a name="y"></a>y : var.v := 3.<br/>
+<span class="keyword">Definition</span> <a name="vx"></a>vx : var.v := 5.<br/>
+<span class="keyword">Definition</span> <a name="vy"></a>vy : var.v := 6.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="swap"></a>swap (x y:var.v) : cmd :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;i &lt;-* var_e x;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;j &lt;-* var_e y;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;var_e x *&lt;- var_e j;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;var_e y *&lt;- var_e i.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="swap_precond"></a>swap_precond (x y:var.v) (vx vy : nat) : assrt := <br/>
+&nbsp;&nbsp;(true_b, star (singl (var_e x) (var_e vx)) (singl (var_e y) (var_e vy))).<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="swap_postcond"></a>swap_postcond (x y:var.v) (vx vy : nat) : assrt := <br/>
+&nbsp;&nbsp;(true_b, star (singl (var_e x) (var_e vy)) (singl (var_e y) (var_e vx))).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="swap_verif"></a>swap_verif: <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{ assrt_interp (swap_precond x y vx vy) }}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;swap x y<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{ assrt_interp (swap_postcond x y vx vy) }}.<br/>
+
+<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="swap_verif'"></a>swap_verif': <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{ assrt_interp (swap_precond x y vx vy) }}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;swap x y<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{ assrt_interp (swap_postcond x y vx vy) }}.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="ptr"></a>ptr : var.v := 1.<br/>
+<span class="keyword">Definition</span> <a name="startl"></a>startl : var.v := 2.<br/>
+<span class="keyword">Definition</span> <a name="size"></a>size: var.v := 3.<br/>
+<span class="keyword">Definition</span> <a name="idx"></a>idx: var.v := 4.<br/>
+<span class="keyword">Definition</span> <a name="init_val"></a>init_val: var.v := 5.<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="init_body"></a>init_body (n: nat) {struct n} : cmd := <br/>
+&nbsp;&nbsp;<span class="keyword">match</span> n <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;0 =&gt; skip<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| S n' =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(var_e ptr +e var_e idx) *&lt;- var_e init_val;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ptr &lt;- var_e ptr +e var_e size;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;init_body n'<br/>
+&nbsp;&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="init"></a>init (n: nat) : cmd :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;ptr &lt;- var_e startl;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;init_body n.<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="init_precond_sigma"></a>init_precond_sigma (n: nat) {struct n} : Sigma :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> n <span class="keyword">with</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;0 =&gt; epsi<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| S n' =&gt; star <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cell ((var_e startl +e var_e idx) +e (var_e size *e (int_e (Z_of_nat n')))) ) <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(init_precond_sigma n')<br/>
+<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="init_precond"></a>init_precond (n : nat) : assrt :=<br/>
+&nbsp;&nbsp;(var_e startl &gt;&gt; int_e 0%Z, init_precond_sigma n).<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="init_postcond_sigma"></a>init_postcond_sigma (n : nat) {struct n} : Sigma :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> n <span class="keyword">with</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;0 =&gt; epsi<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| S n' =&gt; star <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(singl ((var_e startl +e var_e idx) +e (var_e size *e (int_e (Z_of_nat n')))) (var_e init_val)) <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(init_postcond_sigma n')<br/>
+<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="init_postcond"></a>init_postcond (n : nat) : assrt :=<br/>
+&nbsp;&nbsp;(var_e startl &gt;&gt; int_e 0%Z, init_postcond_sigma n).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="init_verif"></a>init_verif: forall n,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;n = 6 -&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{ assrt_interp (init_precond n) }}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;init n<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{ assrt_interp (init_postcond n) }}.<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="init_verif'"></a>init_verif': forall n,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;n = 5 -&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{ assrt_interp (init_precond n) }}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;init n<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{ assrt_interp (init_postcond n) }}.<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+<span class="keyword">Goal</span> <br/>
+&nbsp;&nbsp;{{ assrt_interp (true_b, epsi) }}<br/>
+&nbsp;&nbsp;ifte (var_e 1 &gt;&gt;= var_e 2) thendo<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;ifte (var_e 1 &gt;&gt;= var_e 3) thendo<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(0 &lt;- var_e 1)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;elsedo<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(0 &lt;- var_e 3)<br/>
+&nbsp;&nbsp;elsedo<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;ifte (var_e 2 &gt;&gt;= var_e 3) thendo<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(0 &lt;- var_e 2)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;elsedo<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(0 &lt;- var_e 3)<br/>
+&nbsp;&nbsp;{{ assrt_interp (true_b,epsi) }}.<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+<span class="keyword">Goal</span><br/>
+&nbsp;&nbsp;{{ assrt_interp (true_b, epsi) }}<br/>
+&nbsp;&nbsp;ifte (var_e 1 &gt;&gt;= var_e 2) thendo<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;ifte (var_e 1 &gt;&gt;= var_e 3) thendo<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(0 &lt;- var_e 1)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;elsedo<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(0 &lt;- var_e 3)<br/>
+&nbsp;&nbsp;elsedo<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;ifte (var_e 2 &gt;&gt;= var_e 3) thendo<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(0 &lt;- var_e 2)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;elsedo<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(0 &lt;- var_e 3)<br/>
+&nbsp;&nbsp;{{ assrt_interp (((var_e 0 == var_e 1) ||| (var_e 0 == var_e 2) ||| (var_e 0 == var_e 3), epsi)) }}.<br/>
+
+<br/>
+
+<br/>
+<span class="keyword">Goal</span><br/>
+&nbsp;&nbsp;{{ assrt_interp (true_b, epsi) }}<br/>
+&nbsp;&nbsp;ifte (var_e 1 &gt;&gt;= var_e 2) thendo<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;ifte (var_e 1 &gt;&gt;= var_e 3) thendo<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(0 &lt;- var_e 1)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;elsedo<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(0 &lt;- var_e 3)<br/>
+&nbsp;&nbsp;elsedo<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;ifte (var_e 2 &gt;&gt;= var_e 3) thendo<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(0 &lt;- (var_e 2))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;elsedo<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(0 &lt;- (var_e 3))<br/>
+&nbsp;&nbsp;{{ assrt_interp ((var_e 0 == var_e 1) ||| (var_e 0 == var_e 2) ||| (var_e 0 == var_e 3), epsi) }}.<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+<span class="keyword">Inductive</span> <a name="LWP_Step"></a>LWP_Step : list (Pi * Sigma * L_assrt) -&gt; <span class="keyword">Prop</span> :=<br/>
+&nbsp;&nbsp;<a name="finish"></a>finish: LWP_Step nil<br/>
+&nbsp;&nbsp;| <a name="step"></a>step: forall l l' p s L,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;LWP_step p s L = Some l' -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;LWP_Step (l' ++ l) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;LWP_Step ((p,s,L)::l).<br/>
+
+<br/>
+</code>
+</div>
+
+<div id="footer">
+<hr/><a href="index.html">Index</a><hr/><font size="-1">This page has been generated by <a href="http://coq.inria.fr">coqdoc</a></font>
+</div>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,221 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"/>
+<link href="coqdoc.css" rel="stylesheet" type="text/css"/>
+<title>topsy_threadBuild</title>
+</head>
+
+<body>
+
+<div id="page">
+
+<div id="header">
+</div>
+
+<div id="main">
+
+<h1 class="libtitle">Library topsy_threadBuild</h1>
+
+<code>
+<span class="keyword">Load</span> seplog_header.<br/>
+
+<br/>
+Open <span class="keyword">Local</span> Scope Z_scope.<br/>
+Open <span class="keyword">Local</span> Scope vc_scope.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="pcp_tf_gs"></a>pcp_tf_gs := 0.<br/>
+<span class="keyword">Definition</span> <a name="pcp_tf_fs"></a>pcp_tf_fs := 1.<br/>
+<span class="keyword">Definition</span> <a name="pcp_tf_es"></a>pcp_tf_es := 2.<br/>
+<span class="keyword">Definition</span> <a name="pcp_tf_ds"></a>pcp_tf_ds := 3.<br/>
+<span class="keyword">Definition</span> <a name="pcp_tf_trapno"></a>pcp_tf_trapno := 4.<br/>
+<span class="keyword">Definition</span> <a name="pcp_tf_edi"></a>pcp_tf_edi := 5.<br/>
+<span class="keyword">Definition</span> <a name="pcp_tf_esi"></a>pcp_tf_esi := 6.<br/>
+<span class="keyword">Definition</span> <a name="pcp_tf_ebp"></a>pcp_tf_ebp := 7.<br/>
+<span class="keyword">Definition</span> <a name="pcp_tf_temp_esp"></a>pcp_tf_temp_esp := 8.<br/>
+<span class="keyword">Definition</span> <a name="pcp_tf_ebx"></a>pcp_tf_ebx := 9.<br/>
+<span class="keyword">Definition</span> <a name="pcp_tf_edx"></a>pcp_tf_edx := 10.<br/>
+<span class="keyword">Definition</span> <a name="pcp_tf_ecx"></a>pcp_tf_ecx := 11.<br/>
+<span class="keyword">Definition</span> <a name="pcp_tf_eax"></a>pcp_tf_eax := 12.<br/>
+<span class="keyword">Definition</span> <a name="pcp_tf_err"></a>pcp_tf_err := 13.<br/>
+<span class="keyword">Definition</span> <a name="pcp_tf_eip"></a>pcp_tf_eip := 14.<br/>
+<span class="keyword">Definition</span> <a name="pcp_tf_cs"></a>pcp_tf_cs := 15.<br/>
+<span class="keyword">Definition</span> <a name="pcp_tf_eflags"></a>pcp_tf_eflags := 16.<br/>
+<span class="keyword">Definition</span> <a name="pcp_tf_esp"></a>pcp_tf_esp := 17.<br/>
+<span class="keyword">Definition</span> <a name="pcp_tf_ss"></a>pcp_tf_ss := 18.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="th_contextPtr"></a>th_contextPtr := 0.<br/>
+<span class="keyword">Definition</span> <a name="th_id"></a>th_id := 1.<br/>
+<span class="keyword">Definition</span> <a name="th_name"></a>th_name :=2.<br/>
+<span class="keyword">Definition</span> <a name="th_parentId"></a>th_parentId := 3.<br/>
+<span class="keyword">Definition</span> <a name="th_stackStart"></a>th_stackStart := 4.<br/>
+<span class="keyword">Definition</span> <a name="th_stackEnd"></a>th_stackEnd := 5.<br/>
+<span class="keyword">Definition</span> <a name="th_msgQueue"></a>th_msgQueue := 6.<br/>
+<span class="keyword">Definition</span> <a name="th_schedInfo"></a>th_schedInfo := 7.<br/>
+<span class="keyword">Definition</span> <a name="th_stat"></a>th_stat := 8.<br/>
+
+<br/>
+Close <span class="keyword">Local</span> Scope Z_scope.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="USER"></a>USER : Z := 1%Z.<br/>
+<span class="keyword">Definition</span> <a name="KERNEL"></a>KERNEL : Z := 0%Z.<br/>
+
+<br/>
+<span class="keyword">Axiom</span> <a name="sizeof_Message"></a>sizeof_Message:nat.<br/>
+<span class="keyword">Axiom</span> <a name="exitCodeLength"></a>exitCodeLength:nat.<br/>
+<span class="keyword">Axiom</span> <a name="MAXNAMESIZE"></a>MAXNAMESIZE : nat.<br/>
+<span class="keyword">Axiom</span> <a name="STATUS_INT_ENABLE_USER_PREV"></a>STATUS_INT_ENABLE_USER_PREV:nat.<br/>
+<span class="keyword">Axiom</span> <a name="STATUS_INT_ENABLE_KERNEL_PREV"></a>STATUS_INT_ENABLE_KERNEL_PREV:nat.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="skip"></a>skip : cmd' := (0) &lt;- (var_e 0).<br/>
+
+<br/>
+Open <span class="keyword">Local</span> Scope Z_scope.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="stringNCopy"></a>stringNCopy (tmp:nat) (target:nat) (source:nat) (size:nat) := <br/>
+&nbsp;&nbsp;tmp &lt;-* var_e source;<br/>
+&nbsp;&nbsp;var_e target *&lt;- var_e tmp;<br/>
+&nbsp;&nbsp;size &lt;- var_e size -e int_e 1%Z;<br/>
+&nbsp;&nbsp;while' ((var_e tmp == int_e 0) &amp;&amp;&amp; (var_e size =/= int_e 0)) (TT) (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;tmp &lt;-* var_e source;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;var_e target *&lt;- var_e tmp;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;size &lt;- var_e size -e int_e 1<br/>
+&nbsp;&nbsp;).<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="tmSetMachineDependentRegisters"></a>tmSetMachineDependentRegisters (context_ptr space:nat) :=<br/>
+&nbsp;&nbsp;ifte (var_e space == int_e USER) thendo (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(context_ptr -.&gt; pcp_tf_cs) *&lt;- int_e 3;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(context_ptr -.&gt; pcp_tf_ds) *&lt;- int_e 3;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(context_ptr -.&gt; pcp_tf_es) *&lt;- int_e 3;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(context_ptr -.&gt; pcp_tf_fs) *&lt;- int_e 3;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(context_ptr -.&gt; pcp_tf_gs) *&lt;- int_e 3;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(context_ptr -.&gt; pcp_tf_ss) *&lt;- int_e 3<br/>
+&nbsp;&nbsp;) elsedo (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(context_ptr -.&gt; pcp_tf_cs) *&lt;- int_e 0;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(context_ptr -.&gt; pcp_tf_ds) *&lt;- int_e 0;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(context_ptr -.&gt; pcp_tf_es) *&lt;- int_e 0;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(context_ptr -.&gt; pcp_tf_fs) *&lt;- int_e 0;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(context_ptr -.&gt; pcp_tf_gs) *&lt;- int_e 0;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(context_ptr -.&gt; pcp_tf_ss) *&lt;- int_e 0<br/>
+&nbsp;&nbsp;) .<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="precond"></a>precond (cs0 ds0 es0 fs0 gs0 ss0:expr) (context_ptr space:var.v) := <span class="keyword">fun</span> s h =&gt; <br/>
+&nbsp;&nbsp;eval (var_e space) s = USER /\ (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(context_ptr -.&gt; pcp_tf_cs |-&gt; cs0) **<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(context_ptr -.&gt; pcp_tf_ds |-&gt; ds0) **<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(context_ptr -.&gt; pcp_tf_es |-&gt; es0) **<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(context_ptr -.&gt; pcp_tf_fs |-&gt; fs0) **<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(context_ptr -.&gt; pcp_tf_gs |-&gt; gs0) **<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(context_ptr -.&gt; pcp_tf_ss |-&gt; ss0)) s h.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="postcond"></a>postcond (context_ptr space:var.v) := <br/>
+&nbsp;&nbsp;(context_ptr -.&gt; pcp_tf_cs |-&gt; int_e 3) **<br/>
+&nbsp;&nbsp;(context_ptr -.&gt; pcp_tf_ds |-&gt; int_e 3) **<br/>
+&nbsp;&nbsp;(context_ptr -.&gt; pcp_tf_es |-&gt; int_e 3) **<br/>
+&nbsp;&nbsp;(context_ptr -.&gt; pcp_tf_fs |-&gt; int_e 3) **<br/>
+&nbsp;&nbsp;(context_ptr -.&gt; pcp_tf_gs |-&gt; int_e 3) **<br/>
+&nbsp;&nbsp;(context_ptr -.&gt; pcp_tf_ss |-&gt; int_e 3) .<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="threadBuild"></a>threadBuild <br/>
+&nbsp;&nbsp;(stringNCopy_source:nat) (stringNCopy_target:nat) (stringNCopy_size:nat)<br/>
+&nbsp;&nbsp;(tmp:nat)<br/>
+&nbsp;&nbsp;(sp:nat) (mode:nat)<br/>
+&nbsp;&nbsp;(id:nat) (parentId:nat) (name:nat) (contextPtr:nat) (stackBaseAddress:nat)<br/>
+&nbsp;&nbsp;(stackSize:nat) (mainFunction:nat) (parameter:nat) (space:nat) (threadPtr:nat) (priority:nat) :=<br/>
+<br/>
+&nbsp;&nbsp;(threadPtr -.&gt; th_id) *&lt;- var_e id;<br/>
+&nbsp;&nbsp;(threadPtr -.&gt; th_parentId) *&lt;- var_e parentId;<br/>
+&nbsp;&nbsp;ifte (var_e name =/= int_e 0) thendo (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;stringNCopy_source &lt;-* (threadPtr -.&gt; th_name);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;stringNCopy_target &lt;- var_e name;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;stringNCopy_size &lt;- int_e (Z_of_nat MAXNAMESIZE);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;stringNCopy tmp stringNCopy_source stringNCopy_target stringNCopy_size)<br/>
+&nbsp;&nbsp;elsedo (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;stringNCopy_source &lt;-* (threadPtr -.&gt; th_name);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;stringNCopy tmp stringNCopy_source stringNCopy_target stringNCopy_size);<br/>
+&nbsp;&nbsp;ifte (var_e space == int_e USER) thendo (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;skip;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;mode &lt;- int_e (Z_of_nat STATUS_INT_ENABLE_USER_PREV)) <br/>
+&nbsp;&nbsp;elsedo (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;skip;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;mode &lt;- int_e (Z_of_nat STATUS_INT_ENABLE_KERNEL_PREV));<br/>
+&nbsp;&nbsp;(threadPtr -.&gt; th_stackStart) *&lt;- var_e stackBaseAddress +e var_e stackSize -e int_e 4;<br/>
+&nbsp;&nbsp;(threadPtr -.&gt; th_stackEnd) *&lt;- var_e stackBaseAddress;<br/>
+&nbsp;&nbsp;(threadPtr -.&gt; th_contextPtr) *&lt;- var_e contextPtr;<br/>
+&nbsp;&nbsp;tmp &lt;-* (threadPtr -.&gt; th_stackStart);<br/>
+&nbsp;&nbsp;sp &lt;- var_e tmp -e int_e (Z_of_nat sizeof_Message) -e int_e (Z_of_nat exitCodeLength)<br/>
+.<br/>
+
+<br/>
+Close <span class="keyword">Local</span> Scope vc_scope.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="false_imp"></a>false_imp : forall c P, {{ FF }} c {{ P }}.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="tmSetMachineDependentRegisters_Lemma"></a>tmSetMachineDependentRegisters_Lemma: forall (cs0 ds0 es0 fs0 gs0 ss0:expr),<br/>
+&nbsp;&nbsp;forall (context_ptr space:var.v), (var.set (context_ptr::space::nil)) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{ (precond cs0 ds0 es0 fs0 gs0 ss0) context_ptr space}}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;proj_cmd (tmSetMachineDependentRegisters context_ptr space)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{ postcond context_ptr space}}.<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+</code>
+</div>
+
+<div id="footer">
+<hr/><a href="index.html">Index</a><hr/><font size="-1">This page has been generated by <a href="http://coq.inria.fr">coqdoc</a></font>
+</div>
+
+</div>
+
+</body>
+</html>

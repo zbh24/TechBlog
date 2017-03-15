@@ -1,0 +1,217 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"/>
+<link href="coqdoc.css" rel="stylesheet" type="text/css"/>
+<title>frag_list_vcg</title>
+</head>
+
+<body>
+
+<div id="page">
+
+<div id="header">
+</div>
+
+<div id="main">
+
+<h1 class="libtitle">Library frag_list_vcg</h1>
+
+<code>
+<span class="keyword">Load</span> seplog_header.<br/>
+
+<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> Omega.<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> Bool.<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> <a class="modref" href="frag_list_entail.html">frag_list_entail</a>.<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> <a class="modref" href="frag_list_triple.html">frag_list_triple</a>.<br/>
+
+<br/>
+<span class="keyword">Inductive</span> <a name="cmd'"></a>cmd' : <span class="keyword">Type</span> :=<br/>
+| <a name="skip'"></a>skip' : cmd'<br/>
+| <a name="assign'"></a>assign' : var.v -&gt; expr -&gt; cmd'<br/>
+| lookup' : var.v -&gt; expr -&gt; cmd'<br/>
+| mutation' : expr -&gt; expr -&gt; cmd'<br/>
+| malloc' : var.v -&gt; expr -&gt; cmd'<br/>
+| free' : expr -&gt; cmd'<br/>
+| while' : expr_b -&gt; Assrt -&gt; cmd' -&gt; cmd'<br/>
+| seq' : cmd' -&gt; cmd' -&gt; cmd'<br/>
+| ifte' : expr_b -&gt; cmd' -&gt; cmd' -&gt; cmd'.<br/>
+
+<br/>
+<span class="keyword">Notation</span> "x &lt;- e" := (assign' x e) (at level 80) : frag2_scope.<br/>
+<span class="keyword">Notation</span> "x '&lt;-*' e" := (lookup' x e) (at level 80) : frag2_scope.<br/>
+<span class="keyword">Notation</span> "e '*&lt;-' f" := (mutation' e f) (at level 80) : frag2_scope.<br/>
+<span class="keyword">Notation</span> "x '&lt;-malloc' e" := (malloc' x e) (at level 80) : frag2_scope.<br/>
+<span class="keyword">Notation</span> "c ; d" := (seq' c d) (at level 81, right associativity) : frag2_scope.<br/>
+<span class="keyword">Notation</span> "'ifte' a 'thendo' x 'elsedo' y" := (ifte' a x y) (at level 80) : frag2_scope.<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="proj_cmd"></a>proj_cmd (c':cmd') : cmd :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> c' <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a name="skip'"></a>skip' =&gt; skip<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| assign' x e =&gt; x &lt;- e<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| lookup' x e =&gt; x &lt;-* e<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| mutation' e f =&gt; e *&lt;- f<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| malloc' x e =&gt; x &lt;-malloc e<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| free' e =&gt; free e<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| while' b Q c''  =&gt; while b (proj_cmd c'')<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| seq' c1 c2 =&gt; (seq (proj_cmd c1) (proj_cmd c2))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| ifte' b c1 c2 =&gt; (ifte b thendo (proj_cmd c1) elsedo (proj_cmd c2))<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="Assrt_and_expr_b"></a>Assrt_and_expr_b (A: Assrt) (b: expr_b) {struct A} : Assrt :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> A <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| nil =&gt; nil<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| (pi,sig)::tl =&gt; (pi &amp;&amp;&amp; b, sig) :: (Assrt_and_expr_b tl b)<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Assrt_and_expr_b_sem"></a>Assrt_and_expr_b_sem: forall A b s h,<br/>
+&nbsp;&nbsp;(Assrt_interp (Assrt_and_expr_b A b) s h) -&gt; (Assrt_interp A s h /\ eval_b b s = true).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Assrt_and_expr_b_sem'"></a>Assrt_and_expr_b_sem': forall A b s h,<br/>
+&nbsp;&nbsp;(Assrt_interp A s h /\ eval_b b s = true) -&gt; (Assrt_interp (Assrt_and_expr_b A b) s h).<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="vcg"></a>vcg (c: cmd') (Q: wpAssrt) {struct c} : option (wpAssrt * (list (Assrt * wpAssrt))) :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> c <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a name="skip'"></a>skip' =&gt; Some (Q, nil)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| assign' x e =&gt; Some (wpSubst ((x,e)::nil) Q, nil)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| lookup' x e =&gt; Some (wpLookup x e Q, nil)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| mutation' e f =&gt; Some (wpMutation e f Q, nil)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| seq' c1 c2 =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> vcg c2 Q <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| None =&gt; None<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Some (Q2,l2) =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> vcg c1 Q2 <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| None =&gt; None<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Some (Q1, l1) =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Some (Q1, l1 ++ l2)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| ifte' b c1 c2 =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> vcg c2 Q <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| None =&gt; None<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Some (Q2,l2) =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> vcg c1 Q <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| None =&gt; None<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Some (Q1,l1) =&gt; Some (wpIf b Q1 Q2, (l1 ++ l2))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| while' b Inv c'  =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> vcg c' (wpElt Inv) <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| None =&gt; None<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Some (Q',l') =&gt; Some (wpElt Inv, &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Assrt_and_expr_b Inv (neg_b b), Q) &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:: (Assrt_and_expr_b Inv b, Q') &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:: l')<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span>      <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; None<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="vcg_None_is_None"></a>vcg_None_is_None: forall c, wp_frag None c = None.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="vcg_correct"></a>vcg_correct  : forall c Q Q' l, <br/>
+&nbsp;&nbsp;vcg c Q = Some (Q', l) -&gt; <br/>
+&nbsp;&nbsp;(forall A L,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;In (A,L) l -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;((Assrt_interp A) ==&gt; (wpAssrt_interp L))<br/>
+&nbsp;&nbsp;) -&gt;    <br/>
+&nbsp;&nbsp;{{ wpAssrt_interp Q' }} (proj_cmd c) {{ wpAssrt_interp Q }}.<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="triple_transformations"></a>triple_transformations (l: list (Assrt * wpAssrt)) : option (list ((Pi * Sigma) * wpAssrt)) :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> l <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| nil =&gt; Some nil<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| (A,L)::tl =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> triple_transformation A L <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Some l =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> triple_transformations tl <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Some l' =&gt; Some (l ++ l')<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| None =&gt; None<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| None =&gt; None<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="triple_transformations_correct"></a>triple_transformations_correct: forall l,<br/>
+&nbsp;&nbsp;triple_transformations l = Some nil -&gt;<br/>
+&nbsp;&nbsp;forall A L, In (A,L) l -&gt; (Assrt_interp A) ==&gt; (wpAssrt_interp L).<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="bigtoe_fct"></a>bigtoe_fct (c: cmd') (P Q: Assrt): option (list ((Pi * Sigma) * wpAssrt)) :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> vcg c (wpElt Q) <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| None =&gt; None<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| Some (Q', l) =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> triple_transformation P Q' <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Some l' =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> triple_transformations l <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Some l'' =&gt; Some (l' ++ l'')<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| None =&gt; None <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span>            <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| None =&gt; None <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="bigtoe_fct_correct"></a>bigtoe_fct_correct: forall P Q c,<br/>
+&nbsp;&nbsp;bigtoe_fct c P Q = Some nil -&gt;<br/>
+&nbsp;&nbsp;{{ Assrt_interp P }} proj_cmd c {{ Assrt_interp Q }}.<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="resolve_list_Assrt_wpAssrt2"></a>resolve_list_Assrt_wpAssrt2 (l: list (Assrt * wpAssrt)) : bool :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> l <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| nil =&gt; true<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| (A,L)::tl =&gt; andb (triple_transformation2 A L) (resolve_list_Assrt_wpAssrt2 tl)<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="resolve_list_Assrt_wpAssrt2_correct"></a>resolve_list_Assrt_wpAssrt2_correct: forall l,<br/>
+&nbsp;&nbsp;resolve_list_Assrt_wpAssrt2 l = true -&gt;<br/>
+&nbsp;&nbsp;forall A L, In (A,L) l -&gt; Assrt_interp A ==&gt; wpAssrt_interp L.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="frag2_hoare"></a>frag2_hoare (c: cmd') (P Q: Assrt): bool :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> vcg c (wpElt Q) <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| None =&gt; false<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| Some (Q',l) =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;andb (triple_transformation2 P Q') (resolve_list_Assrt_wpAssrt2 l)<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="frag2_hoare_correct"></a>frag2_hoare_correct: forall P Q c,<br/>
+&nbsp;&nbsp;frag2_hoare c P Q = true -&gt;<br/>
+&nbsp;&nbsp;{{ Assrt_interp P }} (proj_cmd c) {{ Assrt_interp Q }}.<br/>
+
+<br/>
+</code>
+</div>
+
+<div id="footer">
+<hr/><a href="index.html">Index</a><hr/><font size="-1">This page has been generated by <a href="http://coq.inria.fr">coqdoc</a></font>
+</div>
+
+</div>
+
+</body>
+</html>

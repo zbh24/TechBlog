@@ -1,0 +1,504 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"/>
+<link href="coqdoc.css" rel="stylesheet" type="text/css"/>
+<title>topsy_hmAlloc</title>
+</head>
+
+<body>
+
+<div id="page">
+
+<div id="header">
+</div>
+
+<div id="main">
+
+<h1 class="libtitle">Library topsy_hmAlloc</h1>
+
+<code>
+<span class="keyword">Load</span> seplog_header.<br/>
+
+<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> <a class="modref" href="topsy_hm.html">topsy_hm</a>.<br/>
+
+<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> Bool.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="ENTRYSIZE"></a>ENTRYSIZE (x:var.v) (tmp:var.v) := <br/>
+&nbsp;&nbsp;tmp &lt;-* (x -.&gt; next);<br/>
+&nbsp;&nbsp;tmp &lt;- (var_e tmp -e var_e x -e int_e 2%Z);<br/>
+&nbsp;&nbsp;ifte (nat_e 0 &gt;&gt; var_e tmp) thendo <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;tmp &lt;- nat_e 0<br/>
+&nbsp;&nbsp;elsedo <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;skip.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="findFree"></a>findFree (size:nat) (entry fnd sz stts:var.v) :=<br/>
+&nbsp;&nbsp;entry &lt;- var_e hmStart;<br/>
+&nbsp;&nbsp;stts &lt;-* (entry -.&gt; status);<br/>
+&nbsp;&nbsp;fnd &lt;- int_e 0%Z;<br/>
+&nbsp;&nbsp;while ((var_e entry =/= null) &amp;&amp;&amp; (var_e fnd =/= int_e 1%Z)) (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;stts &lt;-* (entry -.&gt; status);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;ENTRYSIZE entry sz;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;ifte ((var_e stts == Free) &amp;&amp;&amp; (var_e sz &gt;&gt;= nat_e size)) thendo <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(fnd &lt;- int_e 1%Z)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;elsedo <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(entry &lt;-* (entry -.&gt; next))).<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="LEFTOVER"></a>LEFTOVER : nat := 8.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="compact'"></a>compact' (cptr nptr brk tmp cstts nstts:var.v) :=<br/>
+&nbsp;&nbsp;while (var_e cptr =/= null) (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;nptr &lt;-* (cptr -.&gt; next);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;brk &lt;- nat_e 1 ;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;cstts &lt;-* (cptr -.&gt; status);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;while ((var_e cstts == Free) &amp;&amp;&amp; (var_e nptr =/= null) &amp;&amp;&amp; (var_e brk == nat_e 1)) (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;nstts &lt;-* (nptr -.&gt; status);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ifte (var_e nstts =/= Free) thendo (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;brk &lt;- nat_e 0<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;) elsedo (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tmp &lt;-* nptr -.&gt; next;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;cptr -.&gt; next *&lt;- var_e tmp ;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;nptr &lt;- (var_e tmp)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;cptr &lt;-* (cptr -.&gt; next)<br/>
+&nbsp;&nbsp;).<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="compact"></a>compact (cptr nptr stts:var.v) :=<br/>
+&nbsp;&nbsp;while (var_e cptr =/= null) (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;stts &lt;-* (cptr -.&gt; status);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;ifte (var_e stts ==  Free) thendo (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;nptr &lt;-* (cptr -.&gt; next); <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;stts &lt;-* (nptr -.&gt; status);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;while (var_e stts == Free) (<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;stts &lt;-* (nptr -.&gt; next);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cptr -.&gt; next) *&lt;- var_e stts;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;nptr &lt;- var_e stts;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;stts &lt;-* (nptr -.&gt; status))) <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;elsedo <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;skip;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;cptr &lt;-* (cptr -.&gt; next)).<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="split"></a>split (entry:var.v) (size:nat) (cptr sz:var.v) :=<br/>
+&nbsp;&nbsp;ENTRYSIZE entry sz;<br/>
+&nbsp;&nbsp;ifte (var_e sz &gt;&gt;= (nat_e size +e nat_e LEFTOVER +e nat_e 2)) thendo (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;cptr &lt;- var_e entry +e nat_e 2 +e nat_e size;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;sz &lt;-* (entry -.&gt; next);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(cptr -.&gt; next) *&lt;- var_e sz;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(cptr -.&gt; status) *&lt;- Free;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(entry -.&gt; next) *&lt;- var_e cptr) <br/>
+&nbsp;&nbsp;&nbsp;elsedo <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;skip<br/>
+&nbsp;&nbsp;;<br/>
+&nbsp;&nbsp;(entry -.&gt; status) *&lt;- Allocated.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="HM_ALLOCFAILED"></a>HM_ALLOCFAILED := int_e 0%Z.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="HM_ALLOCOK"></a>HM_ALLOCOK := int_e 1%Z.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="hmAlloc"></a>hmAlloc (result:var.v) (size: nat) (entry:var.v) (cptr fnd stts nptr sz:var.v) :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;result &lt;- null;<br/>
+&nbsp;&nbsp;findFree size entry fnd sz stts;<br/>
+&nbsp;&nbsp;ifte (var_e entry == null) thendo (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;cptr &lt;- var_e hmStart;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;compact cptr nptr stts;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;findFree size entry fnd sz stts<br/>
+&nbsp;&nbsp;) elsedo<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;skip<br/>
+&nbsp;&nbsp;;<br/>
+&nbsp;&nbsp;ifte (var_e entry == null) thendo (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;result &lt;- HM_ALLOCFAILED<br/>
+&nbsp;&nbsp;) elsedo (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;split entry size cptr sz;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;result &lt;- var_e entry +e nat_e 2<br/>
+&nbsp;&nbsp;).<br/>
+
+<br/>
+<span class="keyword">Ltac</span> Resolve_topsy :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> goal <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| id: Heap_List ?l ?adr ?s1 ?h |-<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Heap_List ?l ?adr ?s2 ?h =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;eapply Heap_List_inde_store; apply id<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- (?s |b= ?b) =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(rewrite &lt;- expr_b_store_update_rewrite; Omega_exprb) ||<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Omega_exprb<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- ?P /\ ?Q =&gt; split; Resolve_topsy<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- _ =&gt; auto<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="findFree_specif"></a>findFree_specif := forall adr x sizex size,<br/>
+&nbsp;&nbsp;size &gt; 0 -&gt; adr &gt; 0 -&gt;<br/>
+&nbsp;&nbsp;{{ <span class="keyword">fun</span> s h =&gt; exists l,  Heap_List l adr s h /\ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;In_hl l (x,sizex,alloc) adr /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(s |b= (var_e hmStart == nat_e adr) &amp;&amp;&amp; (var_e result == null)) }}<br/>
+&nbsp;&nbsp;findFree size entry fnd sz stts<br/>
+&nbsp;&nbsp;{{ <span class="keyword">fun</span> s h =&gt; exists l, Heap_List l adr s h /\ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;In_hl l (x,sizex,alloc) adr /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(s |b= (var_e hmStart == nat_e adr) &amp;&amp;&amp; (var_e result == null)) /\    <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;((exists y, exists size'', size'' &gt;= size /\ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;In_hl l (y,size'',free) adr /\ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(s |b= (var_e entry == nat_e y) &amp;&amp;&amp; (nat_e y &gt;&gt; null)))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\/<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;s |b= var_e entry == null) }}.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="findFree_verif"></a>findFree_verif : findFree_specif.<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="brk"></a>brk := 10.<br/>
+<span class="keyword">Hint</span> Unfold brk.<br/>
+<span class="keyword">Definition</span> <a name="tmp"></a>tmp := 11.<br/>
+<span class="keyword">Hint</span> Unfold tmp.<br/>
+<span class="keyword">Definition</span> <a name="cstts"></a>cstts := 12.<br/>
+<span class="keyword">Hint</span> Unfold cstts.<br/>
+<span class="keyword">Definition</span> <a name="nstts"></a>nstts := 13.<br/>
+<span class="keyword">Hint</span> Unfold nstts.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="compact'_specif"></a>compact'_specif:= forall adr size x sizex,<br/>
+&nbsp;&nbsp;size &gt; 0 -&gt; adr &gt; 0 -&gt;<br/>
+&nbsp;&nbsp;{{ <span class="keyword">fun</span> s h =&gt; exists l, Heap_List l adr s h /\ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;In_hl l (x,sizex,alloc) adr /\ (s |b= (var_e hmStart == nat_e adr) &amp;&amp;&amp; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(var_e result == null) &amp;&amp;&amp; (var_e cptr == nat_e adr)) }}<br/>
+&nbsp;&nbsp;compact' cptr nptr brk tmp cstts nstts<br/>
+&nbsp;&nbsp;{{ <span class="keyword">fun</span> s h =&gt; exists l, Heap_List l adr s h /\ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;In_hl l (x,sizex,alloc) adr /\ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(s |b= (var_e hmStart == nat_e adr) &amp;&amp;&amp; (var_e result == null)) }}.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="compact'_verif"></a>compact'_verif: compact'_specif.<br/>
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="compact_specif"></a>compact_specif:= forall adr size sizex x,<br/>
+&nbsp;size &gt; 0 -&gt; adr &gt; 0 -&gt;<br/>
+&nbsp;{{ <span class="keyword">fun</span> s h =&gt; exists l, Heap_List l adr s h /\<br/>
+&nbsp;&nbsp;&nbsp;In_hl l (x,sizex,alloc) adr /\ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(s |b= (var_e hmStart == nat_e adr) &amp;&amp;&amp; (var_e result == null) &amp;&amp;&amp; (var_e cptr == nat_e adr)) }}<br/>
+&nbsp;compact cptr nptr stts<br/>
+&nbsp;{{ <span class="keyword">fun</span> s h =&gt; exists l, Heap_List l adr s h /\ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;In_hl l (x,sizex,alloc) adr /\ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(s |b= (var_e hmStart == nat_e adr) &amp;&amp;&amp; (var_e result == null)) }}.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="compact_verif"></a>compact_verif : compact_specif.<br/>
+
+<br/>
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="split_specif"></a>split_specif := forall adr size sizex x, <br/>
+&nbsp;&nbsp;size &gt; 0 -&gt; adr &gt; 0 -&gt;<br/>
+&nbsp;&nbsp;{{ <span class="keyword">fun</span> s h =&gt;  exists l, Heap_List l adr s h /\ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;In_hl l (x,sizex,alloc) adr /\ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(s |b= (var_e hmStart == nat_e adr) &amp;&amp;&amp; (var_e result == null)) /\    <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(exists y, exists size'', size'' &gt;= size /\ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;In_hl l (y,size'',free) adr /\ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(s |b= var_e entry == nat_e y) /\ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;y &gt; 0 /\ y &lt;&gt; x) }}<br/>
+&nbsp;&nbsp;split entry size cptr sz<br/>
+&nbsp;&nbsp;{{ <span class="keyword">fun</span> s h =&gt; exists l, In_hl l (x,sizex,alloc) adr /\ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(exists y, y &gt; 0 /\ (s |b= var_e entry == nat_e y) /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(exists size'', size'' &gt;= size /\      <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Heap_List l adr ** Array (y+2) size'') s h /\ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;In_hl l (y,size'',alloc) adr /\ y &lt;&gt; x)) }}.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="split_verif"></a>split_verif : split_specif.<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="hmAlloc_specif"></a>hmAlloc_specif := forall adr x sizex size, <br/>
+&nbsp;&nbsp;adr &gt; 0 -&gt; size &gt; 0 -&gt;<br/>
+&nbsp;&nbsp;{{ <span class="keyword">fun</span> s h =&gt; exists l, Heap_List l adr s h /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;In_hl l (x,sizex,alloc) adr /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(s |b= var_e hmStart == nat_e adr) }}<br/>
+&nbsp;&nbsp;hmAlloc result size entry cptr fnd stts nptr sz<br/>
+&nbsp;&nbsp;{{ <span class="keyword">fun</span> s h =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(exists l, exists y, y &gt; 0 /\ (s |b= var_e result == nat_e (y+2)) /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;exists size'', size'' &gt;= size /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Heap_List l adr ** Array (y + 2) size'') s h /\ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;In_hl l (x,sizex,alloc) adr /\ In_hl l (y,size'',alloc) adr /\ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;x &lt;&gt; y)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\/<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(exists l, (s |b= var_e result == nat_e 0) /\ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Heap_List l adr s h /\ In_hl l (x,sizex,alloc) adr) }}.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="hmAlloc_verif"></a>hmAlloc_verif: hmAlloc_specif.<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+Eval_b_hyp H8.<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+Eval_b_hyp H9.<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+</code>
+</div>
+
+<div id="footer">
+<hr/><a href="index.html">Index</a><hr/><font size="-1">This page has been generated by <a href="http://coq.inria.fr">coqdoc</a></font>
+</div>
+
+</div>
+
+</body>
+</html>

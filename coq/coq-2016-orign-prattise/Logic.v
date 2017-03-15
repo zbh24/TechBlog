@@ -1111,51 +1111,52 @@ Lemma All_In :
     All P l.
 Proof.
   (* FILL IN HERE *)
-induction l as [| n' l' IHl].
--  (* l = nil *)
-split.
-intros.
-simpl.
-apply I.
-intros.
-inversion H0.
-- 
-split.
-+
-intros.
-simpl.
-split.
-assert(HN:In n' (n' :: l') -> P n').
- apply (H n').
-apply HN.
-simpl.
-left.
-reflexivity.
-apply IHl.
-intros a.
-assert (HN1:In a (n'::l') -> P a).
-apply (H a).
-intros.
-apply HN1.
-simpl.
-right.
-apply H0.
-+
-intros HA.
-simpl.
-intros a.
-intros.
-destruct H as [H1 | H2]. 
-rewrite H1 in HA.
-simpl in HA.
-destruct HA as [HB HC].
-apply HB.
-simpl in HA.
-destruct HA as [HB HC].
-destruct IHl as [ha hb].
-apply hb with (x:=a) in HC.
-apply HC.
-apply H2.
+  induction l as [| n' l' IHl].
+  -  (* l = nil *)
+    split.
+    intros.
+    simpl.
+    apply I.
+    intros.
+    inversion H0.
+  - 
+    split.
+    +
+      intros.
+      simpl.
+      split.
+      assert(HN:In n' (n' :: l') -> P n').
+      apply (H n').
+      apply HN.
+      simpl.
+      left.
+      reflexivity.
+      apply IHl.
+      intros a.
+      assert (HN1:In a (n'::l') -> P a).
+      apply (H a).
+      intros.
+      apply HN1.
+      simpl.
+      right.
+      apply H0.
+    +
+      intros HA.
+      simpl.
+      intros a.
+      intros.
+      destruct H as [H1 | H2]. 
+      rewrite H1 in HA.
+      simpl in HA.
+      destruct HA as [HB HC].
+      apply HB.
+      simpl in HA.
+      destruct HA as [HB HC].
+      destruct IHl as [ha hb].
+      eapply hb in HC.
+      (* apply hb with (x:=a) in HC . *)
+      apply HC.
+      apply H2.
 Qed.
 (** [] *)
 
@@ -1438,6 +1439,24 @@ Definition tr_rev {X} (l : list X) : list X :=
     call); a decent compiler will generate very efficient code in this
     case.  Prove that both definitions are indeed equivalent. *)
 
+Lemma tr_rev1: forall X (l1 l2:list X), rev_append l1 l2 = rev l1 ++ l2.
+Proof.
+intros.
+generalize dependent l2.
+induction l1.
+intros.
+simpl.
+reflexivity.
+intros.
+simpl.
+rewrite IHl1 with (l2:= (x::l2)).
+simpl.
+SearchAbout app.
+rewrite <- app_assoc.
+simpl.
+reflexivity.
+Qed.
+
 Lemma tr_rev_correct : forall X, @tr_rev X = @rev X.
 (* FILL IN HERE *) 
 Proof.
@@ -1453,18 +1472,12 @@ reflexivity.
 simpl.
 unfold tr_rev.
 unfold tr_rev in IHl.
-destruct l0.
+rewrite tr_rev1.
 simpl.
+SearchAbout app.
+rewrite app_nil_r.
 reflexivity.
-simpl.
-simpl in IHl.
-rewrite <- IHl.
-destruct l0.
-simpl.
-reflexivity.
-simpl.
-Admitted.
-(** [] *)
+Qed.
 
 (** ** Propositions and Booleans *)
 

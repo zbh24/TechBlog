@@ -1,0 +1,18 @@
+topsy_hm.vo: topsy_hm.v ./seplog_header.v
+topsy_hm.vi: topsy_hm.v ./seplog_header.v
+topsy_hmInit.vo: topsy_hmInit.v ./seplog_header.v topsy_hm.vo ./frag.vo
+topsy_hmInit.vi: topsy_hmInit.v ./seplog_header.v topsy_hm.vo ./frag.vo
+topsy_hmAlloc.vo: topsy_hmAlloc.v ./seplog_header.v topsy_hm.vo
+topsy_hmAlloc.vi: topsy_hmAlloc.v ./seplog_header.v topsy_hm.vo
+topsy_hmAlloc2.vo: topsy_hmAlloc2.v ./seplog_header.v topsy_hm.vo topsy_hmAlloc.vo
+topsy_hmAlloc2.vi: topsy_hmAlloc2.v ./seplog_header.v topsy_hm.vo topsy_hmAlloc.vo
+topsy_hmFree.vo: topsy_hmFree.v ./seplog_header.v topsy_hm.vo
+topsy_hmFree.vi: topsy_hmFree.v ./seplog_header.v topsy_hm.vo
+hmAlloc_example.vo: hmAlloc_example.v ./seplog_header.v topsy_hm.vo topsy_hmAlloc.vo
+hmAlloc_example.vi: hmAlloc_example.v ./seplog_header.v topsy_hm.vo topsy_hmAlloc.vo
+topsy_hm.html: topsy_hm.v ./seplog_header.v
+topsy_hmInit.html: topsy_hmInit.v ./seplog_header.v topsy_hm.html ./frag.html
+topsy_hmAlloc.html: topsy_hmAlloc.v ./seplog_header.v topsy_hm.html
+topsy_hmAlloc2.html: topsy_hmAlloc2.v ./seplog_header.v topsy_hm.html topsy_hmAlloc.html
+topsy_hmFree.html: topsy_hmFree.v ./seplog_header.v topsy_hm.html
+hmAlloc_example.html: hmAlloc_example.v ./seplog_header.v topsy_hm.html topsy_hmAlloc.html

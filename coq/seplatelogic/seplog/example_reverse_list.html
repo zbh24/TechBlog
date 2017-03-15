@@ -1,0 +1,166 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"/>
+<link href="coqdoc.css" rel="stylesheet" type="text/css"/>
+<title>example_reverse_list</title>
+</head>
+
+<body>
+
+<div id="page">
+
+<div id="header">
+</div>
+
+<div id="main">
+
+<h1 class="libtitle">Library example_reverse_list</h1>
+
+<code>
+<span class="keyword">Load</span> seplog_header.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="data"></a>data := 0%Z.<br/>
+<span class="keyword">Definition</span> <a name="next"></a>next := 1%Z.<br/>
+
+<br/>
+<span class="keyword">Ltac</span> Unfolds_fields := unfold data; unfold next.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="reverse_list"></a>reverse_list (i j k:var.v) :=<br/>
+&nbsp;&nbsp;j &lt;- nat_e 0;<br/>
+&nbsp;&nbsp;while (var_e i =/= nat_e 0) (<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;k &lt;-* (i -.&gt; next);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(i -.&gt; next) *&lt;- var_e j;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;j &lt;- var_e i;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;i &lt;- var_e k<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;).<br/>
+
+<br/>
+<span class="keyword">Inductive</span> <a name="list_assert"></a>list_assert : list Z -&gt; nat -&gt; nat -&gt;  store.s -&gt; heap.h -&gt; <span class="keyword">Prop</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;list_end : forall i j l s h,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sep.emp s h -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;i = j -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;l = nil -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;list_assert l i j s h<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| list_suiv: forall l l' d i j k s h h1 h2,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;h1 # h2 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;h = (h1 +++ h2) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;i &lt;&gt; k -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;i &lt;&gt; j -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;l = d::l' -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(nat_e i |--&gt; int_e d::nat_e j::nil) s h1 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(list_assert l' j k) s h2 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;list_assert l i k s h.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="list_empty"></a>list_empty : list Z := nil.<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="list_reverse_coq"></a>list_reverse_coq (l:list Z) : list Z :=<br/>
+&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> l <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a name="nil"></a>nil =&gt; nil<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| a :: l' =&gt; list_reverse_coq l' ++ a::nil <br/>
+&nbsp;&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+Eval compute <span class="keyword">in</span> (list_reverse_coq (3::6::8::1::8::9::13::nil)%Z).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="list_reverse_coq_lemma1"></a>list_reverse_coq_lemma1: forall l a,<br/>
+&nbsp;&nbsp;list_reverse_coq (l ++ a::nil) = a::list_reverse_coq l.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="list_reverse_coq_lemma2"></a>list_reverse_coq_lemma2: forall l,<br/>
+&nbsp;&nbsp;list_reverse_coq (list_reverse_coq l) = l.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="list_assert_inde_store"></a>list_assert_inde_store: forall l i j s1 s2 h,<br/>
+&nbsp;&nbsp;list_assert l i j s1 h -&gt; list_assert l i j s2 h.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="reverse_precondition"></a>reverse_precondition (l: list Z) (hd: var.v) : assert := <br/>
+&nbsp;&nbsp;<span class="keyword">fun</span> s h =&gt; exists v, eval (var_e hd) s = Z_of_nat v /\ (list_assert l v 0) s h.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="reverse_postcondition"></a>reverse_postcondition (l: list Z) (hd: var.v) : assert := <br/>
+&nbsp;&nbsp;<span class="keyword">fun</span> s h =&gt; exists v, eval (var_e hd) s = Z_of_nat v /\ (list_assert (list_reverse_coq l) v 0) s h.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="reverse_list_specif"></a>reverse_list_specif: <span class="keyword">Prop</span> := forall l i j k,<br/>
+&nbsp;&nbsp;var.set (i::j::k::nil) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{reverse_precondition l i}}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;reverse_list i j k<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{reverse_postcondition l j}}.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="list_assert_hd_uneq"></a>list_assert_hd_uneq: forall l1 l2 hd1 hd2 s h,<br/>
+&nbsp;&nbsp;&nbsp;(list_assert l1 hd1 0 ** list_assert l2 hd2 0) s h -&gt; hd1 &lt;&gt; 0 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;hd1 &lt;&gt; hd2.<br/>
+
+<br/>
+<span class="keyword">Ltac</span> Decompose_inverse_list_hyp := red; intros; Decompose_hyp.<br/>
+
+<br/>
+<span class="keyword">Ltac</span> Resolve_inverse_list_goal := <br/>
+&nbsp;&nbsp;<span class="keyword">match</span> goal <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- ?P1 /\ ?P2 =&gt; split; [Resolve_inverse_list_goal | Resolve_inverse_list_goal]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| id: list_assert ?l ?st ?ed ?s1 ?h1 |- list_assert ?l ?st ?ed ?s2 ?h2 =&gt; assert (A1: h2 = h1); [Heap_emp_clean; Equal_heap | rewrite A1; clear A1; eapply (list_assert_inde_store); apply id] <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| id: list_assert ?l ?st ?ed ?s1 ?h |- list_assert ?l ?st ?ed ?s2 ?h =&gt; eapply (list_assert_inde_store); apply id<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- update_store2 ?x ?v ?P =&gt; red; Resolve_inverse_list_goal<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- _ =&gt; (Store_update || auto)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; idtac<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Ltac</span> Resolve_inverse_list:= Decompose_inverse_list_hyp; Resolve_inverse_list_goal.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="reverse_list_verif"></a>reverse_list_verif: reverse_list_specif.<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+</code>
+</div>
+
+<div id="footer">
+<hr/><a href="index.html">Index</a><hr/><font size="-1">This page has been generated by <a href="http://coq.inria.fr">coqdoc</a></font>
+</div>
+
+</div>
+
+</body>
+</html>

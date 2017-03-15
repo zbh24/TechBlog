@@ -1,0 +1,391 @@
+ (*
+  *  Seplog is an implementation of separation logic (an extension of Hoare
+  *  logic by John C. Reynolds, Peter W. O'Hearn, and colleagues) in the
+  *  Coq proof assistant (version 8, http://coq.inria.fr) together with a
+  *  sample verification of the heap manager of the Topsy operating system
+  *  (version 2, http://www.topsy.net). More information is available at
+  *  http://staff.aist.go.jp/reynald.affeldt/seplog.
+  *
+  *  Copyright (c) 2005, 2006 Reynald Affeldt and Nicolas Marti
+  *
+  *  This program is free software; you can redistribute it and/or modify
+  *  it under the terms of the GNU General Public License as published by
+  *  the Free Software Foundation; either version 2 of the License, or
+  *  (at your option) any later version.
+  *
+  *  This program is distributed in the hope that it will be useful,
+  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  *  GNU General Public License for more details.
+  *
+  *  You should have received a copy of the GNU General Public License
+  *  along with this program; if not, write to the Free Software
+  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+  *)
+
+Load seplog_header.
+
+Require Import Omega.
+Require Import Bool.
+Require Import frag_list_entail.
+Require Import frag_list_triple.
+
+Inductive cmd' : Type :=
+| skip' : cmd'
+| assign' : var.v -> expr -> cmd'
+| lookup' : var.v -> expr -> cmd'
+| mutation' : expr -> expr -> cmd'
+| malloc' : var.v -> expr -> cmd'
+| free' : expr -> cmd'
+| while' : expr_b -> Assrt -> cmd' -> cmd'
+| seq' : cmd' -> cmd' -> cmd'
+| ifte' : expr_b -> cmd' -> cmd' -> cmd'.
+
+Notation "x <- e" := (assign' x e) (at level 80) : frag2_scope.
+Notation "x '<-*' e" := (lookup' x e) (at level 80) : frag2_scope.
+Notation "e '*<-' f" := (mutation' e f) (at level 80) : frag2_scope.
+Notation "x '<-malloc' e" := (malloc' x e) (at level 80) : frag2_scope.
+Notation "c ; d" := (seq' c d) (at level 81, right associativity) : frag2_scope.
+Notation "'ifte' a 'thendo' x 'elsedo' y" := (ifte' a x y) (at level 80) : frag2_scope.
+
+Fixpoint proj_cmd (c':cmd') : cmd :=
+  match c' with
+    skip' => skip
+    | assign' x e => x <- e
+    | lookup' x e => x <-* e
+    | mutation' e f => e *<- f
+    | malloc' x e => x <-malloc e
+    | free' e => free e
+    | while' b Q c''  => while b (proj_cmd c'')
+    | seq' c1 c2 => (seq (proj_cmd c1) (proj_cmd c2))
+    | ifte' b c1 c2 => (ifte b thendo (proj_cmd c1) elsedo (proj_cmd c2))
+  end.
+
+Fixpoint Assrt_and_expr_b (A: Assrt) (b: expr_b) {struct A} : Assrt :=
+  match A with
+    | nil => nil
+    | (pi,sig)::tl => (pi &&& b, sig) :: (Assrt_and_expr_b tl b)
+  end.
+
+Lemma Assrt_and_expr_b_sem: forall A b s h,
+  (Assrt_interp (Assrt_and_expr_b A b) s h) -> (Assrt_interp A s h /\ eval_b b s = true).
+  induction A; simpl; intros; auto.
+  destruct a.
+  simpl in H.
+  inversion_clear H.
+  inversion_clear H0.
+  assert (eval_pi p s = true /\ eval_pi b s = true ).
+  destruct (eval_pi p s); destruct (eval_pi b s); simpl in H; try discriminate; auto.
+  inversion_clear H0.
+  clear H.  
+  simpl; split; auto.
+  generalize (IHA _ _ _ H0); intros.
+  inversion_clear H.
+  split; auto.
+Qed.
+
+Lemma Assrt_and_expr_b_sem': forall A b s h,
+  (Assrt_interp A s h /\ eval_b b s = true) -> (Assrt_interp (Assrt_and_expr_b A b) s h).
+  induction A; simpl; intros.
+  inversion_clear H.
+  contradiction.  
+  destruct a.
+  simpl.
+  inversion_clear H.
+  inversion_clear H0.
+  simpl in H.
+  inversion_clear H.
+  left.
+  split; auto.
+  unfold eval_pi; unfold eval_pi in H0.
+  destruct (eval_b p s); destruct (eval_b b s); try discriminate; auto.
+  right.
+  eapply IHA.
+  tauto.
+Qed.
+
+(*
+ * input : a program with invariants and a post-condition
+ * output : the pre-condition and a list of "triples" (actually, Assrt -> wpAssrt)
+*)
+
+Fixpoint vcg (c: cmd') (Q: wpAssrt) {struct c} : option (wpAssrt * (list (Assrt * wpAssrt))) :=
+  match c with
+    skip' => Some (Q, nil)
+    | assign' x e => Some (wpSubst ((x,e)::nil) Q, nil)
+    | lookup' x e => Some (wpLookup x e Q, nil)
+    | mutation' e f => Some (wpMutation e f Q, nil)
+    | seq' c1 c2 => 
+      match vcg c2 Q with
+        | None => None
+        | Some (Q2,l2) => 
+          match vcg c1 Q2 with
+            | None => None
+            | Some (Q1, l1) =>
+              Some (Q1, l1 ++ l2)
+          end
+      end
+    | ifte' b c1 c2 => 
+      match vcg c2 Q with
+        | None => None
+        | Some (Q2,l2) =>
+          match vcg c1 Q with
+            | None => None
+            | Some (Q1,l1) => Some (wpIf b Q1 Q2, (l1 ++ l2))
+          end
+      end
+    | while' b Inv c'  => 
+      match vcg c' (wpElt Inv) with
+        | None => None
+        | Some (Q',l') => Some (wpElt Inv, (* post-condition courante *)
+          (Assrt_and_expr_b Inv (neg_b b), Q) (* Inv /\ ~ b => Q *)
+          :: (Assrt_and_expr_b Inv b, Q') (* Inv /\ b => Q' (wp c' Inv) *)
+          :: l')
+      end      
+    | _ => None
+  end.
+
+Lemma vcg_None_is_None: forall c, wp_frag None c = None.
+  induction c; simpl; auto.
+  rewrite IHc2.
+  auto.
+  rewrite IHc1.
+  auto.
+Qed.
+
+Lemma vcg_correct  : forall c Q Q' l, 
+  vcg c Q = Some (Q', l) -> 
+  (forall A L,
+    In (A,L) l ->
+    ((Assrt_interp A) ==> (wpAssrt_interp L))
+  ) ->    
+  {{ wpAssrt_interp Q' }} (proj_cmd c) {{ wpAssrt_interp Q }}.
+
+  induction c; simpl; intros; try discriminate.
+
+  injection H; clear H; intros; subst Q' l.
+  eapply semax_skip.
+  
+  injection H; clear H; intros; subst Q' l.
+  simpl.
+  apply semax_assign.
+  
+  injection H; clear H; intros; subst Q' l.
+  simpl.
+  apply semax_lookup_backwards.
+  
+  injection H; clear H; intros; subst Q' l.
+  simpl.
+  apply semax_mutation_backwards.
+
+  generalize (IHc (wpElt a)); intros.
+  destruct (vcg c (wpElt a)); try discriminate.
+  destruct p.
+  injection H; clear H; intros; subst Q' l.
+  simpl.
+  eapply semax_weaken_post; [idtac | eapply semax_while].
+  red in H0; red; intros.
+  eapply H0.
+  simpl; left; intuition.
+  eapply Assrt_and_expr_b_sem'.
+  inversion_clear H.
+  split; auto.
+  Omega_exprb.
+  simpl in H1.
+  eapply semax_strengthen_pre with (
+    wpAssrt_interp w 
+  ).
+  red; intros.
+  red in H0; eapply H0.
+  simpl; right; left; intuition.
+  simpl.
+  eapply Assrt_and_expr_b_sem'.
+  auto.  
+  eapply H1.
+  intuition.
+  red; intros.
+  red in H0; eapply H0.
+  simpl; right; right; apply H.
+  auto.
+  
+  generalize (IHc2 Q); intros.
+  destruct (vcg c2 Q); try discriminate.
+  destruct p.
+  generalize (IHc1 w); intros.
+  destruct (vcg c1 w); try discriminate.
+  destruct p.
+  injection H; clear H; intros; subst Q' l.
+  eapply semax_seq.
+  eapply H2.
+  intuition.
+  red; intros.
+  red in H0; eapply H0.
+  eapply in_or_app.
+  left.
+  apply H.
+  auto.
+  clear H2.
+  eapply H1.
+  intuition.
+  red; intros.
+  red in H0; eapply H0.
+  eapply in_or_app.
+  right.
+  apply H.
+  auto.
+  
+  generalize (IHc2 Q); intros.
+  destruct (vcg c2 Q); try discriminate.
+  destruct p as [Q2].
+  generalize (IHc1 Q); intros.
+  destruct (vcg c1 Q); try discriminate.
+  destruct p as [Q1].
+  injection H; clear H; intros; subst Q' l.
+  eapply semax_ifte.
+  eapply semax_strengthen_pre; [idtac | eapply H2; [intuition | idtac] ].
+  simpl.
+  red; intros.
+  inversion_clear H.
+  inversion_clear H3.
+  eapply H; auto.
+  intros.
+  eapply H0.
+  eapply in_or_app.
+  left; auto.
+  eapply semax_strengthen_pre; [idtac | eapply H1; [intuition | idtac] ].
+  simpl.
+  red; intros.
+  inversion_clear H.
+  inversion_clear H3.
+  eapply H5; auto.
+  intros.
+  eapply H0.
+  eapply in_or_app.
+  right; auto.
+Qed.
+
+(* *)
+
+Fixpoint triple_transformations (l: list (Assrt * wpAssrt)) : option (list ((Pi * Sigma) * wpAssrt)) :=
+  match l with
+    | nil => Some nil
+    | (A,L)::tl => 
+      match triple_transformation A L with
+        | Some l => 
+          match triple_transformations tl with
+            | Some l' => Some (l ++ l')
+            | None => None
+          end
+        | None => None
+      end
+  end.
+  
+Lemma triple_transformations_correct: forall l,
+  triple_transformations l = Some nil ->
+  forall A L, In (A,L) l -> (Assrt_interp A) ==> (wpAssrt_interp L).
+  induction l.
+  simpl; red; intros; contradiction.
+  simpl; red; intros.
+  inversion_clear H0.
+  destruct a.
+  generalize (triple_transformation_correct A L); intros.
+  red in H0; apply H0.
+  injection H2; intros; subst a w.
+  destruct (triple_transformation A L); destruct (triple_transformations l); simpl in H; try discriminate.
+  destruct l0; destruct l1; try discriminate.
+  auto.
+  auto.
+  destruct a.
+  destruct (triple_transformation a w); destruct (triple_transformations l); simpl in H; try discriminate.
+  destruct l1; destruct l0; try discriminate.
+  red in IHl; eapply IHl; auto.
+  apply H2.
+  auto.
+Qed.
+
+(* entry point *)
+Definition bigtoe_dp (c: cmd') (P Q: Assrt): option (list ((Pi * Sigma) * wpAssrt)) :=
+  match vcg c (wpElt Q) with
+    | None => None
+    | Some (Q', l) =>
+      match triple_transformation P Q' with
+        | Some l' => 
+          match triple_transformations l with
+            | Some l'' => Some (l' ++ l'')
+            | None => None 
+          end            
+        | None => None 
+      end
+  end.
+
+Lemma bigtoe_dp_correct: forall P Q c,
+  bigtoe_dp c P Q = Some nil ->
+  {{ Assrt_interp P }} proj_cmd c {{ Assrt_interp Q }}.
+  intros.
+  unfold bigtoe_dp in H.
+  generalize (vcg_correct c (wpElt Q)); intros.
+  destruct (vcg c (wpElt Q)); try discriminate.
+  destruct p.
+  generalize (triple_transformation_correct P w); intros.
+  generalize (triple_transformations_correct l); intros.
+  destruct (triple_transformation P w); destruct (triple_transformations l); simpl in H; try discriminate.
+  destruct l0; destruct l1; try discriminate.
+  simpl in H0.
+  eapply semax_strengthen_pre; [idtac | eapply H0].
+  eapply H1; auto.
+  intuition.
+  auto.
+Qed.
+
+Fixpoint resolve_list_Assrt_wpAssrt2 (l: list (Assrt * wpAssrt)) : bool :=
+  match l with
+    | nil => true
+    | (A,L)::tl => andb (triple_transformation2 A L) (resolve_list_Assrt_wpAssrt2 tl)
+  end.
+  
+Lemma resolve_list_Assrt_wpAssrt2_correct: forall l,
+  resolve_list_Assrt_wpAssrt2 l = true ->
+  forall A L, In (A,L) l -> Assrt_interp A ==> wpAssrt_interp L.
+  induction l.
+  simpl; red; intros; contradiction.
+  simpl; red; intros.
+  inversion_clear H0.
+  destruct a.
+  generalize (triple_transformation2_correct A L); intros.
+  red in H0; apply H0.
+  injection H2; intros; subst a w.
+  destruct (triple_transformation2 A L); destruct (resolve_list_Assrt_wpAssrt2 l); simpl in H; try discriminate.
+  auto.
+  auto.
+  destruct a.
+  destruct (triple_transformation2 a w); destruct (resolve_list_Assrt_wpAssrt2 l); simpl in H; try discriminate.
+  red in IHl; eapply IHl; auto.
+  apply H2.
+  auto.
+Qed.
+
+Definition frag2_hoare (c: cmd') (P Q: Assrt): bool :=
+  match vcg c (wpElt Q) with
+    | None => false
+    | Some (Q',l) =>
+      andb (triple_transformation2 P Q') (resolve_list_Assrt_wpAssrt2 l)
+  end.
+
+Lemma frag2_hoare_correct: forall P Q c,
+  frag2_hoare c P Q = true ->
+  {{ Assrt_interp P }} (proj_cmd c) {{ Assrt_interp Q }}.
+  intros.
+  unfold frag2_hoare in H.
+  generalize (vcg_correct c (wpElt Q)); intros.
+  destruct (vcg c (wpElt Q)); try discriminate.
+  destruct p.
+  generalize (triple_transformation2_correct P w); intros.
+  generalize (resolve_list_Assrt_wpAssrt2_correct l); intros.
+  destruct (triple_transformation2 P w); destruct (resolve_list_Assrt_wpAssrt2 l); simpl in H; try discriminate.
+  simpl in H0.
+  eapply semax_strengthen_pre; [idtac | eapply H0].
+  eapply H1; auto.
+  intuition.
+  auto.
+Qed.
+

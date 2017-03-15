@@ -1,0 +1,375 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"/>
+<link href="coqdoc.css" rel="stylesheet" type="text/css"/>
+<title>topsy_hm_old</title>
+</head>
+
+<body>
+
+<div id="page">
+
+<div id="header">
+</div>
+
+<div id="main">
+
+<h1 class="libtitle">Library topsy_hm_old</h1>
+
+<code>
+<span class="keyword">Load</span> seplog_header.<br/>
+
+<br/>
+Open <span class="keyword">Local</span> Scope Z_scope.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="HM_FREEFAILED"></a>HM_FREEFAILED := int_e 0.<br/>
+<span class="keyword">Definition</span> <a name="HM_FREEOK"></a>HM_FREEOK := int_e 1.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="Allocated"></a>Allocated := int_e 0.<br/>
+<span class="keyword">Definition</span> <a name="Free"></a>Free := int_e 1.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="status"></a>status := 0.<br/>
+<span class="keyword">Definition</span> <a name="next"></a>next := 1.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="hmStart"></a>hmStart : var.v := 0%nat.<br/>
+<span class="keyword">Definition</span> <a name="hmEnd"></a>hmEnd : var.v := 1%nat.<br/>
+
+<br/>
+Close <span class="keyword">Local</span> Scope Z_scope.<br/>
+
+<br/>
+<span class="keyword">Inductive</span> <a name="Heap_List"></a>Heap_List : list (loc * nat * expr) -&gt; loc -&gt; loc -&gt; store.s -&gt; heap.h -&gt; <span class="keyword">Prop</span> :=<br/>
+<br/>
+&nbsp;&nbsp;Heap_List_last: forall s next startl endl h, endl = 0 -&gt; next = 0 -&gt; startl &gt; 0 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(nat_e startl |--&gt; Allocated::nat_e next::nil) s h -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Heap_List nil startl endl s h<br/>
+<br/>
+&nbsp;&nbsp;| Heap_List_trans: forall s startl endl h, endl &gt; 0 -&gt; startl = endl -&gt;  <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;sep.emp s h -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Heap_List nil startl endl s h<br/>
+<br/>
+&nbsp;&nbsp;| Heap_List_suiv_Free: forall s h next startl endl h1 h2 hd_adr hd_size hd_expr tl ,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;h1 # h2 -&gt; h = h1 +++ h2 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;hd_expr = Free -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;next = startl + 2 + hd_size -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;startl = hd_adr -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;startl &gt; 0 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;((nat_e startl |--&gt; hd_expr::nat_e next::nil) ** (Array (startl+2) hd_size)) s h1 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Heap_List tl next endl s h2 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Heap_List ((hd_adr, hd_size,hd_expr)::tl) startl endl s h<br/>
+<br/>
+&nbsp;&nbsp;| Heap_List_suiv_Allocated: forall s h next startl endl h1 h2 hd_adr hd_size hd_expr tl ,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;h1 # h2 -&gt; h = h1 +++ h2 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;hd_expr = Allocated -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;next = startl + 2 + hd_size -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;startl = hd_adr -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;startl &gt; 0 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(nat_e startl |--&gt; hd_expr::nat_e next::nil) s h1 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Heap_List tl next endl s h2 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Heap_List ((hd_adr, hd_size,hd_expr)::tl) startl endl s h.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="hl_nil"></a>hl_nil :  list (loc * nat * expr) := nil.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Heap_List_start_pos"></a>Heap_List_start_pos: forall l startl endl s h,<br/>
+&nbsp;&nbsp;&nbsp;(Heap_List l startl endl) s h -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;startl &gt; 0.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Heap_List_inde_store"></a>Heap_List_inde_store: forall l startl endl s h,<br/>
+&nbsp;&nbsp;Heap_List l startl endl s h -&gt; forall s', Heap_List l startl endl s' h.<br/>
+
+<br/>
+<span class="keyword">Ltac</span> Heap_List_equiv := <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> goal <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| id: Heap_List ?l ?start1 ?end1 ?s1 ?h |-  Heap_List ?l ?start2 ?end2 ?s2 ?h =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;assert (Heap_List_equivA1: start2 = start1); [omega |<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;assert (Heap_List_equivA2: end2 = end1); [omega |
+                        ((rewrite Heap_List_equivA1) || idtac); ((rewrite  Heap_List_equivA2) || idtac);
+                        eapply (Heap_List_inde_store); apply id
+                     ]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Heap_List_equal_start"></a>Heap_List_equal_start: forall x sizex status startl endl l s h,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Heap_List ((x,sizex,status)::l) startl endl s h -&gt;	    <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;startl = x.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Heap_List_suiv_ge"></a>Heap_List_suiv_ge: forall l x sizex status a b c startl endl s h,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Heap_List ((a,b,c) ::l) startl endl s h -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;In (x,sizex,status) l -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;x &gt; a.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Heap_List_block_adr_pos"></a>Heap_List_block_adr_pos: forall l x sizex status startl endl s h,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Heap_List l startl endl s h -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;In (x,sizex,status) l -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;x &gt; 0.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Heap_List_app"></a>Heap_List_app : forall a b startl s h,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;startl &gt; 0 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Heap_List (a ++ b) startl 0 s h <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;-&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(exists j, ((Heap_List a startl j) ** (Heap_List b j 0)) s h)).<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+<span class="keyword">Ltac</span> THeap_List_app_hyp id :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> goal <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| id : Heap_List (?l1 ++ ?l2) ?startl 0 ?s ?h |- _ =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;assert (THeap_List_app_H1: startl &gt; 0); [apply (Heap_List_start_pos (l1 ++ l2) startl 0 s h id) | <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;generalize (Heap_List_app l1 l2 startl s h THeap_List_app_H1); clear THeap_List_app_H1; intros THeap_List_app_H1; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;inversion_clear THeap_List_app_H1 <span class="keyword">as</span> [THeap_List_app_H11 THeap_List_app_H12]; clear THeap_List_app_H12;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;generalize (THeap_List_app_H11 id); clear THeap_List_app_H11; intro THeap_List_app_H1; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;inversion_clear THeap_List_app_H1<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Ltac</span> THeap_List_app_goal:=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> goal <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| |- Heap_List (?l1 ++ ?l2) ?startl 0 ?s ?h =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;assert (THeap_List_app_H1: startl &gt; 0); [(omega || tauto) | <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;generalize (Heap_List_app l1 l2 startl s h THeap_List_app_H1); clear THeap_List_app_H1; intros THeap_List_app_H1; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;inversion_clear THeap_List_app_H1 <span class="keyword">as</span> [THeap_List_app_H11 THeap_List_app_H12]; clear THeap_List_app_H11;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;eapply THeap_List_app_H12; clear THeap_List_app_H12<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Heap_List_block_status"></a>Heap_List_block_status: forall l x sizex status startl s h,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Heap_List l startl 0 s h -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;In (x,sizex,status) l -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;status = Allocated \/ status = Free.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Heap_List_block_status'"></a>Heap_List_block_status': forall l x sizex status startl endl s h,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Heap_List l startl endl s h -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;In (x,sizex,status) l -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;status = Allocated \/ status = Free.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Heap_List_app'"></a>Heap_List_app' : forall a b startl endl s h,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;startl &gt; 0 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;endl &gt; 0 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Heap_List (a ++ b) startl endl s h <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;-&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(exists j, ((Heap_List a startl j) ** (Heap_List b j endl)) s h)).<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Heap_List_last_bloc"></a>Heap_List_last_bloc: forall adr size status l s h startl,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Heap_List (l ++ ((adr,size,status)::nil)) startl 0 s h -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Heap_List (l ++ ((adr,size,status)::nil)) startl (adr + 2 + size) ** Heap_List nil (adr + 2 + size) 0) s h.<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Heap_List_next_bloc"></a>Heap_List_next_bloc: forall adr size status adr' size' status' l1 l2 s h startl,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Heap_List (l1 ++ ((adr,size,status)::(adr',size',status')::nil) ++ l2) startl 0 s h -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;adr' = (adr + 2 + size).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Compaction"></a>Compaction: forall l1 l2 x1 sizex1 sizex2 startl s h,<br/>
+&nbsp;&nbsp;&nbsp;startl &gt; 0 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;(Heap_List (l1 ++ ((x1,sizex1,Free)::(x1 + 2 + sizex1,sizex2,Free)::nil) ++ l2) startl 0) s h -&gt;<br/>
+&nbsp;&nbsp;&nbsp;(((nat_e x1 +e (int_e 1%Z))|-&gt;(nat_e (x1 + 2 + sizex1))) ** <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(((nat_e x1 +e (int_e 1%Z))|-&gt; nat_e (x1 + sizex1 + 4 + sizex2)) -*<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Heap_List (l1 ++ ((x1, sizex1 + 2 + sizex2, Free)::nil) ++ l2 ) startl 0))) s h.<br/>
+
+<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="change_status_Free_to_Alloc"></a>change_status_Free_to_Alloc: forall l1 l2 startl s h x sizex,<br/>
+&nbsp;&nbsp;&nbsp;startl &gt; 0 -&gt; <br/>
+&nbsp;&nbsp;&nbsp;(Heap_List (l1 ++ ((x, sizex, Free)::nil) ++ l2) startl 0)  s h -&gt;<br/>
+&nbsp;&nbsp;&nbsp;exists e,<br/>
+&nbsp;&nbsp;&nbsp;(((nat_e x) |-&gt; e) **<br/>
+&nbsp;&nbsp;&nbsp;(((nat_e x) |-&gt; Allocated) -* ((Heap_List (l1 ++ ((x, sizex, Allocated)::nil) ++ l2) startl 0) ** (Array (x+2) sizex)))) s h.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="change_status_Alloc_to_Free"></a>change_status_Alloc_to_Free: forall l1 l2 startl s h x sizex,<br/>
+&nbsp;&nbsp;&nbsp;startl &gt; 0 -&gt; <br/>
+&nbsp;&nbsp;&nbsp;((Heap_List (l1 ++ ((x, sizex, Allocated)::nil) ++ l2) startl 0) ** (Array (x + 2) (sizex))) s h -&gt;<br/>
+&nbsp;&nbsp;&nbsp;exists e,<br/>
+&nbsp;&nbsp;&nbsp;(((nat_e x) |-&gt; e) **<br/>
+&nbsp;&nbsp;&nbsp;(((nat_e x) |-&gt; Free) -* (Heap_List (l1 ++ ((x, sizex, Free)::nil) ++ l2) startl 0))) s h.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="change_status_Free_to_Free"></a>change_status_Free_to_Free: forall l1 l2 startl s h x sizex,<br/>
+&nbsp;&nbsp;&nbsp;startl &gt; 0 -&gt; <br/>
+&nbsp;&nbsp;&nbsp;(Heap_List (l1 ++ ((x, sizex, Free)::nil) ++ l2) startl 0 s h) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;exists e,<br/>
+&nbsp;&nbsp;&nbsp;(((nat_e x) |-&gt; e) **<br/>
+&nbsp;&nbsp;&nbsp;(((nat_e x) |-&gt; Free) -* (Heap_List (l1 ++ ((x, sizex, Free)::nil) ++ l2) startl 0))) s h.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Splitting"></a>Splitting: forall l1 l2 x size1 size2 s h startl,<br/>
+&nbsp;&nbsp;&nbsp;startl &gt; 0 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;Heap_List (l1 ++ ((x, size1 + 2 + size2, Free)::nil) ++ l2) startl 0 s h -&gt;<br/>
+&nbsp;&nbsp;&nbsp;exists e'' : expr,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(((nat_e (x + 3 + size1)) |-&gt; e'') **<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(((nat_e (x + 3 + size1)) |-&gt; (nat_e (x + 4 + size1 + size2))) -*<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="keyword">fun</span> (s1 : store.s) (h1 : heap.h) =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;exists e''0 : expr,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(((nat_e (x + 2 + size1)) |-&gt; e''0) **<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(((nat_e (x + 2 + size1)) |-&gt; Free) -*<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="keyword">fun</span> (s2 : store.s) (h2 : heap.h) =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;exists e''1 : expr,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(((nat_e (x + 1)) |-&gt; e''1) **<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(((nat_e (x + 1)) |-&gt; (nat_e (x + 2 + size1))) -*<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="keyword">fun</span> (s : store.s) (h : heap.h) =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Heap_List (l1 ++ ((x, size1,Free)::(x + 2 + size1, size2,Free)::nil) ++ l2) startl 0 s h))) s2 h2))) s1 h1))) s h.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Heap_List_header"></a>Heap_List_header: forall x sizex statusx startl endl l s h,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Heap_List ((x, sizex, statusx)::l) startl endl s h -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;x = startl /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Heap_List ((x, sizex, statusx)::nil) x (x + 2 + sizex) ** Heap_List l (x + 2 + sizex) endl) s h.<br/>
+
+<br/>
+<span class="keyword">Ltac</span> Heap_List_Trans := <br/>
+eapply Heap_List_trans; [auto | (Omega_exprb || auto) | red; Equal_heap].<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Heap_List_next"></a>Heap_List_next: forall l1 l2 bloc_adr bloc_size bloc_status startl s h e x P,<br/>
+(Heap_List (l1 ++ ((bloc_adr, bloc_size, bloc_status) :: nil) ++ l2) startl 0 ** TT) s h -&gt;<br/>
+eval e s = eval (nat_e (bloc_adr + 1)) s -&gt;<br/>
+((update_store2 x (nat_e (bloc_adr + 2 +bloc_size)) P) s h) -&gt;<br/>
+exists e0, ((e |-&gt; e0) ** ((e |-&gt; e0)  -* update_store2 x e0 P)) s h.<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Heap_List_next'"></a>Heap_List_next': forall l bloc_adr bloc_size bloc_status startl s h e x P,<br/>
+In (bloc_adr, bloc_size, bloc_status) l -&gt;<br/>
+(Heap_List l startl 0 ** TT) s h -&gt;<br/>
+eval e s = eval (nat_e (bloc_adr + 1)) s -&gt;<br/>
+((update_store2 x (nat_e (bloc_adr + 2 +bloc_size)) P) s h) -&gt;<br/>
+exists e0, ((e |-&gt; e0) ** ((e |-&gt; e0)  -* update_store2 x e0 P)) s h.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Heap_List_next_last"></a>Heap_List_next_last: forall bloc_adr s h e x P,<br/>
+bloc_adr &gt; 0 -&gt; <br/>
+(Heap_List nil bloc_adr 0 ** TT) s h -&gt;<br/>
+eval e s = eval (nat_e (bloc_adr + 1)) s -&gt;<br/>
+((update_store2 x (nat_e 0) P) s h) -&gt;<br/>
+exists e0, ((e |-&gt; e0) ** ((e |-&gt; e0)  -* update_store2 x e0 P)) s h.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Heap_List_status"></a>Heap_List_status: forall l adr size status e x P startl s h ,<br/>
+In (adr,size,status) l -&gt;<br/>
+(Heap_List l startl 0 ** TT) s h -&gt;<br/>
+eval e s = eval (nat_e adr) s -&gt;<br/>
+(update_store2 x status P) s h -&gt;<br/>
+exists e0, ((e |-&gt; e0) ** ((e |-&gt; e0)  -* update_store2 x e0 P)) s h.<br/>
+
+<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Heap_List_status_last"></a>Heap_List_status_last: forall bloc_adr s h e x P,<br/>
+bloc_adr &gt; 0 -&gt; <br/>
+(Heap_List nil bloc_adr 0 ** TT) s h -&gt;<br/>
+eval e s = eval (nat_e bloc_adr) s -&gt;<br/>
+(update_store2 x Allocated P) s h  -&gt;<br/>
+exists e0, ((e |-&gt; e0) ** ((e |-&gt; e0)  -* update_store2 x e0 P)) s h.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Heap_List_bloc_unique"></a>Heap_List_bloc_unique: forall l startl s h adr size size' status status',<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Heap_List l startl 0 s h -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;In (adr, size, status) l -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;In (adr, size', status') l -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;status = status' /\ size = size'.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Heap_List_list_split_cont"></a>Heap_List_list_split_cont: forall l adr size stat size' stat' startl s h,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Heap_List l startl 0 s h -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;In (adr, size, stat) l -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;In (adr + 2 + size, size', stat') l -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(exists l1, exists l2, l = l1 ++ (adr, size, stat)::(adr + 2 + size, size', stat')::l2 ).<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+<span class="keyword">Ltac</span> Resolve_topsy:=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(simpl; red; intuition; repeat (Store_update || Heap_List_equiv)).<br/>
+
+<br/>
+<span class="keyword">Ltac</span> Step  R :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> goal <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| id: {{?P'}} ?c {{?Q'}} |- {{?P}} ?c {{?Q}} =&gt; eapply apply_triple; [apply id | idtac | idtac]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| id: {{?P'}} ?c {{?Q'}} |- {{?P}} ?c; ?c' {{?Q}} =&gt; eapply apply_triple'; [apply id | idtac | idtac]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| |- {{?P}} ?x &lt;- ?e {{?Q}} =&gt; eapply semax_assign'<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| |- {{?P}} ?x &lt;- ?e ; ?c {{?Q}} =&gt; eapply semax_assign'' <span class="keyword">with</span> R; [red; intros | idtac]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| |- {{?P}} ?x &lt;-* ?e {{?Q}} =&gt; eapply semax_lookup_backwards'<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| |- {{?P}} ?x &lt;-* ?e ; ?c {{?Q}} =&gt;  eapply semax_lookup_backwards'' <span class="keyword">with</span> R; [red; intros | idtac]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| |- {{?P}} ?e1 *&lt;- ?e2 {{?Q}} =&gt; eapply semax_mutation_backwards'<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| |- {{?P}} ?e1 *&lt;- ?e2 ; ?c {{?Q}} =&gt; eapply semax_mutation_backwards'' <span class="keyword">with</span> R; [red; intros | idtac]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| |- {{?P}} while ?b ?c1 {{?Q}} =&gt; eapply semax_while' <span class="keyword">with</span> R<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| |- {{?P}} while ?b ?c1 ; ?c2 {{?Q}} =&gt; eapply semax_while'' <span class="keyword">with</span> R; [red; intros | idtac | idtac]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| |- {{?P}} skip {{?Q}} =&gt;  eapply semax_skip'<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| |- {{?P}} ifte ?b thendo ?c1 elsedo ?c2 {{?Q}} =&gt;  eapply semax_ifte<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| |- {{?P}} (ifte ?b thendo ?c1 elsedo ?c2); ?c' {{?Q}} =&gt; apply semax_seq <span class="keyword">with</span> R; [eapply semax_ifte; [idtac| idtac] | idtac]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| |- {{?P}} ?c1; ?c2 {{?Q}} =&gt; apply semax_seq <span class="keyword">with</span> R; [idtac| idtac]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+</code>
+</div>
+
+<div id="footer">
+<hr/><a href="index.html">Index</a><hr/><font size="-1">This page has been generated by <a href="http://coq.inria.fr">coqdoc</a></font>
+</div>
+
+</div>
+
+</body>
+</html>

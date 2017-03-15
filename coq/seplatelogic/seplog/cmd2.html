@@ -1,0 +1,181 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"/>
+<link href="coqdoc.css" rel="stylesheet" type="text/css"/>
+<title>cmd2</title>
+</head>
+
+<body>
+
+<div id="page">
+
+<div id="header">
+</div>
+
+<div id="main">
+
+<h1 class="libtitle">Library cmd2</h1>
+
+<code>
+<span class="keyword">Require</span> <span class="keyword">Import</span> List.<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> ZArith.<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> List.<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> EqNat.<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> Classical.<br/>
+
+<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> <a class="modref" href="util.html">util</a>.<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> <a class="modref" href="heap.html">heap</a>.<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> <a class="modref" href="heap_tactic.html">heap_tactic</a>.<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> <a class="modref" href="bipl.html">bipl</a>.<br/>
+
+<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> <a class="modref" href="axiomatic.html">axiomatic</a>.<br/>
+
+<br/>
+<span class="keyword">Import</span> valandloc.<br/>
+
+<br/>
+<span class="keyword">Inductive</span> <a name="cmd2"></a>cmd2 : <span class="keyword">Set</span> :=<br/>
+&nbsp;&nbsp;<a name="skip2"></a>skip2 : cmd2<br/>
+&nbsp;&nbsp;| <a name="assign2"></a>assign2 : var.v -&gt; expr -&gt; cmd2<br/>
+&nbsp;&nbsp;| lookup2 : var.v -&gt; expr -&gt; cmd2<br/>
+&nbsp;&nbsp;| mutation2 : expr -&gt; expr -&gt; cmd2<br/>
+&nbsp;&nbsp;| test_equal2 : var.v -&gt; expr -&gt; expr -&gt; cmd2<br/>
+&nbsp;&nbsp;| test_lt2: var.v -&gt; expr -&gt; expr -&gt; cmd2<br/>
+&nbsp;&nbsp;| test_not2: var.v -&gt; var.v -&gt; cmd2<br/>
+&nbsp;&nbsp;| test_and2: var.v -&gt; var.v -&gt; var.v -&gt; cmd2<br/>
+&nbsp;&nbsp;| test_or2: var.v -&gt; var.v -&gt; var.v -&gt; cmd2<br/>
+&nbsp;&nbsp;| while2 : expr -&gt; cmd2 -&gt; cmd2<br/>
+&nbsp;&nbsp;| seq2 : cmd2 -&gt; cmd2 -&gt; cmd2<br/>
+&nbsp;&nbsp;| ifte2 : expr -&gt; cmd2 -&gt; cmd2 -&gt; cmd2.<br/>
+
+<br/>
+Open <span class="keyword">Local</span> Scope sep_scope.<br/>
+Open <span class="keyword">Local</span> Scope heap_scope.<br/>
+
+<br/>
+Close <span class="keyword">Local</span> Scope nat_scope.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="state"></a>state := prod store.s heap.h.<br/>
+
+<br/>
+Open <span class="keyword">Local</span> Scope nat_scope.<br/>
+
+<br/>
+</code>
+
+<div class="doc">
+operational semantics 
+</div>
+<code>
+
+<br/>
+<span class="keyword">Inductive</span> <a name="exec2"></a>exec2 : option state -&gt; cmd2 -&gt; option state -&gt; <span class="keyword">Prop</span> :=<br/>
+&nbsp;&nbsp;<a name="exec_none2"></a>exec_none2 : forall c, exec2 None c None<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;| <a name="exec_skip2"></a>exec_skip2:  forall s h,  exec2 (Some (s, h)) skip2 (Some (s, h))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;| <a name="exec_assign2"></a>exec_assign2 : forall s h x e,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;exec2 (Some (s, h)) (assign2 x e) (Some (store.update x (eval e s) s, h))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;| exec_lookup2 : forall s h x e p v,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;val2loc (eval e s) = p -&gt; &nbsp;&nbsp;&nbsp;&nbsp;heap.lookup p h = Some v -&gt; &nbsp;&nbsp;&nbsp;&nbsp;exec2 (Some (s, h)) (lookup2 x  e) (Some (store.update x v s, h))<br/>
+<br/>
+&nbsp;&nbsp;| exec_lookup_err2 : forall s h x e p,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;val2loc (eval e s) = p -&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;heap.lookup p h = None -&gt; &nbsp;&nbsp;&nbsp;&nbsp;exec2 (Some (s, h)) (lookup2 x  e) None<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;| exec_mutation2 : forall s h e e' p v,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;val2loc (eval e s) = p -&gt; &nbsp;&nbsp;&nbsp;&nbsp;heap.lookup p h = Some v -&gt; &nbsp;&nbsp;&nbsp;&nbsp;exec2 (Some (s, h)) (mutation2 e e') (Some (s, heap.update p (eval e' s) h))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;| exec_mutation_err2 : forall s h e e' p,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;val2loc (eval e s) = p -&gt; &nbsp;&nbsp;&nbsp;&nbsp;heap.lookup p h = None -&gt; &nbsp;&nbsp;&nbsp;&nbsp;exec2 (Some (s, h)) (mutation2 e e') None<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<br/>
+<br/>
+&nbsp;&nbsp;| exec_test2_ok: forall s h v e1 e2,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(eval e1 s = eval e2 s)%Z -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;exec2 (Some (s, h)) (test_equal2 v e1 e2) (Some (store.update v 1%Z s, h))<br/>
+<br/>
+&nbsp;&nbsp;| exec_test2_nok: forall s h v e1 e2,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(eval e1 s &lt;&gt; eval e2 s)%Z -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;exec2 (Some (s, h)) (test_equal2 v e1 e2) (Some (store.update v 0%Z s, h))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;| exec_lt2_ok: forall s h v e1 e2,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(eval e1 s &lt; eval e2 s)%Z -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;exec2 (Some (s, h)) (test_lt2 v e1 e2) (Some (store.update v 1%Z s, h))<br/>
+<br/>
+&nbsp;&nbsp;| exec_lt2_nok: forall s h v e1 e2,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(eval e1 s &gt;= eval e2 s)%Z -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;exec2 (Some (s, h)) (test_lt2 v e1 e2) (Some (store.update v 0%Z s, h))<br/>
+<br/>
+&nbsp;&nbsp;| exec_not2_ok: forall s h v e,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(eval (var_e e) s = 0)%Z -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;exec2 (Some (s, h)) (test_not2 v e) (Some (store.update v 1%Z s, h))<br/>
+<br/>
+&nbsp;&nbsp;| exec_not2_nok: forall s h v e,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(eval (var_e e) s &lt;&gt; 0)%Z -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;exec2 (Some (s, h)) (test_not2 v e) (Some (store.update v 0%Z s, h))<br/>
+<br/>
+&nbsp;&nbsp;| exec_and2_ok: forall s h v e1 e2,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(eval (var_e e1) s &lt;&gt; 0 /\ eval (var_e e2) s &lt;&gt; 0)%Z -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;exec2 (Some (s, h)) (test_and2 v e1 e2) (Some (store.update v 1%Z s, h))<br/>
+<br/>
+&nbsp;&nbsp;| exec_and2_nok: forall s h v e1 e2,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(eval (var_e e1) s = 0 \/ eval (var_e e2) s = 0)%Z -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;exec2 (Some (s, h)) (test_and2 v e1 e2) (Some (store.update v 0%Z s, h))<br/>
+<br/>
+&nbsp;&nbsp;| exec_or2_ok: forall s h v e1 e2,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(eval (var_e e1) s &lt;&gt; 0 \/ eval (var_e e2) s &lt;&gt; 0)%Z -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;exec2 (Some (s, h)) (test_or2 v e1 e2) (Some (store.update v 1%Z s, h))<br/>
+<br/>
+&nbsp;&nbsp;| exec_or2_nok: forall s h v e1 e2,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(eval (var_e e1) s = 0 /\ eval (var_e e2) s = 0)%Z -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;exec2 (Some (s, h)) (test_and2 v e1 e2) (Some (store.update v 0%Z s, h))<br/>
+<br/>
+&nbsp;&nbsp;| exec_seq2 : forall s s' s'' c d,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;exec2 s c s' -&gt; exec2 s' d s'' -&gt; exec2 s (seq2 c d) s''<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;| exec_while_true2 : forall s h s' s'' b c,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(eval b s &lt;&gt; 0)%Z -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;exec2 (Some (s, h)) c s' -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;exec2 s' (while2 b c) s'' -&gt;    <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;exec2 (Some (s, h)) (while2 b c) s''<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;| exec_while_false2 : forall s h b c,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(eval b s = 0)%Z -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;exec2 (Some (s, h)) (while2 b c) (Some (s, h))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;| exec_ifte_true2 : forall b c d s h s',<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(eval b s &lt;&gt; 0)%Z -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;exec2 (Some (s, h)) c s' -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;exec2 (Some (s, h)) (ifte2 b c d) s'<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;| exec_ifte_false2 : forall b c d s h s',<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(eval b s = 0)%Z -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;exec2 (Some (s, h)) d s' -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;exec2 (Some (s, h)) (ifte2 b c d) s'.<br/>
+
+<br/>
+<span class="keyword">Axiom</span> <a name="trad12_fp"></a>trad12_fp: cmd -&gt; var.v -&gt; cmd2.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="trad12"></a>trad12 (c: cmd) : cmd2 :=<br/>
+&nbsp;&nbsp;<span class="keyword">let</span> x := (modified_cmd_var c) <span class="keyword">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(trad12_fp c 0 ).<br/>
+
+<br/>
+</code>
+</div>
+
+<div id="footer">
+<hr/><a href="index.html">Index</a><hr/><font size="-1">This page has been generated by <a href="http://coq.inria.fr">coqdoc</a></font>
+</div>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,635 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"/>
+<link href="coqdoc.css" rel="stylesheet" type="text/css"/>
+<title>topsy_hm</title>
+</head>
+
+<body>
+
+<div id="page">
+
+<div id="header">
+</div>
+
+<div id="main">
+
+<h1 class="libtitle">Library topsy_hm</h1>
+
+<code>
+<span class="keyword">Load</span> seplog_header.<br/>
+
+<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> Bool.<br/>
+
+<br/>
+<span class="keyword">Ltac</span> Step R :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> goal <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| id: {{?P'}} ?c {{?Q'}} |- {{?P}} ?c {{?Q}} =&gt; eapply apply_triple; [apply id | idtac | idtac]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| id: {{?P'}} ?c {{?Q'}} |- {{?P}} ?c; ?c' {{?Q}} =&gt; eapply apply_triple'; [apply id | idtac | idtac]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- {{?P}} ?x &lt;- ?e {{?Q}} =&gt; eapply semax_assign'; red<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- {{?P}} ?x &lt;- ?e ; ?c {{?Q}} =&gt; eapply semax_assign'' <span class="keyword">with</span> R; [red; intros | idtac]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- {{?P}} ?x &lt;-* ?e {{?Q}} =&gt; eapply semax_lookup_backwards'<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- {{?P}} ?x &lt;-* ?e ; ?c {{?Q}} =&gt;  eapply semax_lookup_backwards'' <span class="keyword">with</span> R; [red; intros | idtac]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- {{?P}} ?e1 *&lt;- ?e2 {{?Q}} =&gt; eapply semax_mutation_backwards'<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- {{?P}} ?e1 *&lt;- ?e2 ; ?c {{?Q}} =&gt; eapply semax_mutation_backwards'' <span class="keyword">with</span> R; [red; intros | idtac]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- {{?P}} while ?b ?c1 {{?Q}} =&gt; eapply semax_while' <span class="keyword">with</span> R<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- {{?P}} while ?b ?c1 ; ?c2 {{?Q}} =&gt; eapply semax_while'' <span class="keyword">with</span> R; [red; intros | idtac | idtac]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- {{?P}} skip {{?Q}} =&gt;  eapply semax_skip'<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- {{?P}} ifte ?b thendo ?c1 elsedo ?c2 {{?Q}} =&gt;  eapply semax_ifte<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- {{?P}} (ifte ?b thendo ?c1 elsedo ?c2); ?c' {{?Q}} =&gt; apply semax_seq <span class="keyword">with</span> R; [eapply semax_ifte; [idtac| idtac] | idtac]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- {{?P}} ?c1; ?c2 {{?Q}} =&gt; apply semax_seq <span class="keyword">with</span> R; [idtac| idtac]<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Notation</span> " s '|b=' b " := (eval_b b s = true) (right associativity, at level 80).<br/>
+
+<br/>
+<span class="keyword">Notation</span> " s '|b/=' b " := (eval_b b s = false) (right associativity, at level 80).<br/>
+
+<br/>
+<span class="keyword">Ltac</span> Decompose_hyp := <br/>
+&nbsp;&nbsp;<span class="keyword">match</span> goal <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| id: ?P1 /\ ?P2 |- _ =&gt; (decompose [and] id; clear id); Decompose_hyp<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| id: (?P1 ** ?P2) ?s ?h |- _ =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="keyword">let</span> x:=fresh <span class="keyword">in</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;inversion_clear id <span class="keyword">as</span> [x X];<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> y:= fresh <span class="keyword">in</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;inversion_clear X <span class="keyword">as</span> [y Y];<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;decompose [and] Y; clear Y<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)); Decompose_hyp<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| id: ex ?P |- _ =&gt; (inversion_clear id); Decompose_hyp<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; idtac<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Ltac</span> Rewrite_heap h :=<br/>
+&nbsp;&nbsp;(<span class="keyword">match</span> goal <span class="keyword">with</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| id: h = (?h1 +++ ?h2) |- _ =&gt; rewrite id; (Rewrite_heap h1); (Rewrite_heap h2)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; idtac<br/>
+&nbsp;&nbsp;&nbsp;<span class="keyword">end</span>) .<br/>
+
+<br/>
+<span class="keyword">Ltac</span> Resolve_assert1 :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> goal <span class="keyword">with</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- (?P1 ** ?P2) ?s ?h  =&gt; Rewrite_heap h; repeat rewrite sep.con_assoc_equiv<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- (?P1 -* ?P2) ?s ?h =&gt; red; intro; intro X; inversion_clear X; intros<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; idtac<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="expr_store_update_rewrite"></a>expr_store_update_rewrite: forall e x p s,<br/>
+&nbsp;&nbsp;eval (expr_rewrite e (var_e x) (int_e p)) s = eval e (store.update  x p s).<br/>
+
+<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="expr_b_store_update_rewrite"></a>expr_b_store_update_rewrite: forall b x p s,<br/>
+&nbsp;&nbsp;eval_b (expr_b_rewrite b (var_e x) (int_e p)) s = eval_b b (store.update  x p s).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="mapsto_store_update_rewrite"></a>mapsto_store_update_rewrite: forall e1 e2 x p s h,<br/>
+&nbsp;&nbsp;((expr_rewrite e1 (var_e x) (int_e p)) |-&gt; (expr_rewrite e2 (var_e x) (int_e p))) s h -&gt;<br/>
+&nbsp;&nbsp;(e1 |-&gt; e2) (store.update x p s) h.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="bool_eq"></a>bool_eq (a b: bool) :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> (a,b) <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| (true, true) =&gt; true<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| (false, false) =&gt; true<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; false<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="bool_eq_classic"></a>bool_eq_classic: forall a b,<br/>
+&nbsp;&nbsp;bool_eq a b = true \/ bool_eq a b = false.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="bool_eq_true"></a>bool_eq_true: forall a b,<br/>
+&nbsp;&nbsp;bool_eq a b = true -&gt; a = b.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="bool_eq_false"></a>bool_eq_false: forall a b,<br/>
+&nbsp;&nbsp;bool_eq a b = false -&gt; a &lt;&gt; b.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="bool_eq_dif"></a>bool_eq_dif: forall a b,<br/>
+&nbsp;&nbsp;a &lt;&gt; b -&gt; bool_eq a b = false.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="bool_eq_refl"></a>bool_eq_refl: forall a,<br/>
+&nbsp;&nbsp;bool_eq a a = true.<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="get_endl"></a>get_endl (l:list (nat * bool)) (startl: nat) {struct l} : nat :=<br/>
+&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> l <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a name="nil"></a>nil =&gt; startl<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| (b,c)::tl =&gt; get_endl tl (startl + 2 + b)<br/>
+&nbsp;&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="get_endl_app"></a>get_endl_app: forall a b startl,<br/>
+&nbsp;&nbsp;get_endl (a++b) startl = get_endl b (get_endl a startl).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="get_endl_gt"></a>get_endl_gt: forall l startl,<br/>
+&nbsp;&nbsp;startl &lt;= get_endl l startl.<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="In_hl"></a>In_hl (l:list (nat*bool)) (block:nat*nat*bool) (startp: nat) {struct l}: <span class="keyword">Prop</span> :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> l <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a name="nil"></a>nil =&gt; False<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| (size , stat)::tl =&gt; <span class="keyword">match</span> block <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(adr,sz,st) =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span> (andb (andb (beq_nat startp adr) (bool_eq st stat)) (beq_nat size sz)) <span class="keyword">then</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;True<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">else</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;In_hl tl block (get_endl ((size,stat)::nil) startp)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="In_hl_app_or"></a>In_hl_app_or: forall l1 l2 a b c startp,<br/>
+&nbsp;&nbsp;In_hl (l1 ++ l2) (a,b,c) startp -&gt; <br/>
+&nbsp;&nbsp;(In_hl l1 (a,b,c) startp \/ In_hl l2 (a,b,c) (get_endl l1 startp)).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="In_hl_or_app"></a>In_hl_or_app: forall l1 l2 a b c startp,<br/>
+&nbsp;&nbsp;(In_hl l1 (a,b,c) startp \/ In_hl l2 (a,b,c) (get_endl l1 startp)) -&gt;<br/>
+&nbsp;&nbsp;In_hl (l1 ++ l2) (a,b,c) startp.<br/>
+
+<br/>
+Open <span class="keyword">Local</span> Scope Z_scope.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="HM_FREEFAILED"></a>HM_FREEFAILED := int_e 0.<br/>
+<span class="keyword">Definition</span> <a name="HM_FREEOK"></a>HM_FREEOK := int_e 1.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="Allocated"></a>Allocated := int_e 0.<br/>
+<span class="keyword">Definition</span> <a name="Free"></a>Free := int_e 1.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="alloc"></a>alloc := false.<br/>
+<span class="keyword">Definition</span> <a name="free"></a>free := true.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="status"></a>status := 0.<br/>
+<span class="keyword">Definition</span> <a name="next"></a>next := 1.<br/>
+
+<br/>
+Close <span class="keyword">Local</span> Scope Z_scope.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="hmStart"></a>hmStart := 0.<br/>
+<span class="keyword">Definition</span> <a name="hmEnd"></a>hmEnd := 1.<br/>
+<span class="keyword">Definition</span> <a name="entry"></a>entry := 3.<br/>
+<span class="keyword">Definition</span> <a name="cptr"></a>cptr := 4.<br/>
+<span class="keyword">Definition</span> <a name="nptr"></a>nptr := 5.<br/>
+<span class="keyword">Definition</span> <a name="result"></a>result := 6.<br/>
+<span class="keyword">Definition</span> <a name="fnd"></a>fnd := 7.<br/>
+<span class="keyword">Definition</span> <a name="stts"></a>stts := 8.<br/>
+<span class="keyword">Definition</span> <a name="sz"></a>sz := 9.<br/>
+
+<br/>
+<span class="keyword">Hint</span> Unfold fnd.<br/>
+<span class="keyword">Hint</span> Unfold stts.<br/>
+<span class="keyword">Hint</span> Unfold sz.<br/>
+<span class="keyword">Hint</span> Unfold entry.<br/>
+<span class="keyword">Hint</span> Unfold cptr.<br/>
+<span class="keyword">Hint</span> Unfold nptr.<br/>
+<span class="keyword">Hint</span> Unfold result.<br/>
+<span class="keyword">Hint</span> Unfold HM_FREEFAILED.<br/>
+<span class="keyword">Hint</span> Unfold HM_FREEOK.<br/>
+<span class="keyword">Hint</span> Unfold Allocated.<br/>
+<span class="keyword">Hint</span> Unfold Free.<br/>
+<span class="keyword">Hint</span> Unfold status.<br/>
+<span class="keyword">Hint</span> Unfold next.<br/>
+<span class="keyword">Hint</span> Unfold hmStart.<br/>
+<span class="keyword">Hint</span> Unfold hmEnd.<br/>
+
+<br/>
+<span class="keyword">Inductive</span> <a name="hl"></a>hl : loc -&gt; list (nat * bool) -&gt; assert :=<br/>
+<br/>
+&nbsp;&nbsp;| <a name="hl_last"></a>hl_last: forall s p h,  <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;sep.emp s h -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;hl p nil s h<br/>
+<br/>
+&nbsp;&nbsp;| hl_Free: forall s h next p h1 h2 size flag tl,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;h1 # h2 -&gt; h = h1 +++ h2 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;flag = true -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;next = p + 2 + size -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(nat_e p |--&gt; Free::nat_e next::nil ** Array (p+2) size) s h1 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;hl next tl s h2 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;hl p ((size,flag)::tl) s h<br/>
+<br/>
+&nbsp;&nbsp;| hl_Allocated: forall s h next p h1 h2 size flag tl,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;h1 # h2 -&gt; h = h1 +++ h2 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;flag = false -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;next = p + 2 + size -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(nat_e p |--&gt; Allocated::nat_e next::nil) s h1 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;hl next tl s h2 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;hl p ((size,flag)::tl) s h.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="hlstat_bool2expr"></a>hlstat_bool2expr (b: bool) : expr := <br/>
+&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> b <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;true =&gt; Free<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| false =&gt; Allocated<br/>
+&nbsp;&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="Heap_List"></a>Heap_List (l:list (nat * bool)) (p:nat) : assert :=<br/>
+&nbsp;&nbsp;(hl p l) ** (nat_e (get_endl l p) |--&gt; Allocated::null::nil).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Heap_List_inde_store"></a>Heap_List_inde_store: forall l startl s h,<br/>
+&nbsp;&nbsp;Heap_List startl l s h -&gt; forall s', Heap_List startl l s' h.<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+<span class="keyword">Ltac</span> Heap_List_equiv := <br/>
+&nbsp;&nbsp;<span class="keyword">match</span> goal <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| id: Heap_List ?l ?start1 ?s1 ?h |-  Heap_List ?l ?start2 ?s2 ?h =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;assert (Heap_List_equivA1: start2 = start1); [omega |
+        ((rewrite Heap_List_equivA1) || idtac); 
+        eapply (Heap_List_inde_store); apply id
+      ]<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="hl_app"></a>hl_app : forall a b startl s h,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(hl startl (a ++ b) s h)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;-&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;((hl startl a ** hl (get_endl a startl) b) s h).<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="hl_compaction"></a>hl_compaction: forall l1 l2 size size' p s h,<br/>
+&nbsp;&nbsp;Heap_List (l1++(size,free)::(size',free)::nil++l2) p s h -&gt;<br/>
+&nbsp;&nbsp;exists y, (nat_e (get_endl l1 p + 1) |-&gt; y **<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(nat_e (get_endl l1 p + 1) |-&gt; nat_e (get_endl l1 p + size + size' + 4) -*<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Heap_List (l1 ++ (size+size'+2,free)::nil ++ l2) p)) s h.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="compaction_example"></a>compaction_example: forall p,<br/>
+&nbsp;{{ Heap_List ((8,free)::(10,free)::nil) p }}<br/>
+&nbsp;nat_e p +e int_e 1%Z *&lt;- nat_e (p + 22)<br/>
+&nbsp;{{ Heap_List ((20,free)::nil) p }}.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="hl_splitting"></a>hl_splitting: forall l1 l2 a b startp s h,<br/>
+&nbsp;&nbsp;&nbsp;Heap_List (l1 ++ (a + 2 + b,true)::l2) startp s h -&gt;<br/>
+&nbsp;&nbsp;&nbsp;(exists y, ((nat_e (get_endl l1 startp + a + 3) |-&gt; y) **<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;((nat_e (get_endl l1 startp + a + 3) |-&gt; (nat_e (get_endl l1 startp + a + b + 4))) -*<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="keyword">fun</span> s h =&gt; exists y, ((nat_e (get_endl l1 startp + a + 2) |-&gt; y) **<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;((nat_e (get_endl l1 startp + a + 2) |-&gt; Free) -*<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="keyword">fun</span> s h =&gt; exists y, ((nat_e (get_endl l1 startp + 1) |-&gt; y) **<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;((nat_e (get_endl l1 startp + 1) |-&gt; (nat_e (get_endl l1 startp + a + 2))) -*<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Heap_List (l1 ++ (a,true)::(b,true)::l2) startp<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)) s h  <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;) <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)) s h    <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;) <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)) s h    <br/>
+&nbsp;&nbsp;&nbsp;) .<br/>
+
+<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="hl_free2alloc"></a>hl_free2alloc: forall l1 l2 a startp s h,<br/>
+&nbsp;&nbsp;&nbsp;Heap_List (l1 ++ (a,true)::l2) startp s h -&gt;<br/>
+&nbsp;&nbsp;&nbsp;exists y, ((nat_e (get_endl l1 startp) |-&gt; y) **<br/>
+&nbsp;&nbsp;&nbsp;((nat_e (get_endl l1 startp) |-&gt; Allocated) -*<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Heap_List (l1 ++ (a,false)::l2) startp ** Array (get_endl l1 startp + 2) a)))  s h.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="hl_alloc2free"></a>hl_alloc2free: forall l1 l2 a startp s h,<br/>
+&nbsp;&nbsp;&nbsp;(Heap_List (l1 ++ (a,false)::l2) startp  ** Array (get_endl l1 startp + 2) a) s h -&gt;<br/>
+&nbsp;&nbsp;&nbsp;exists y, ((nat_e (get_endl l1 startp) |-&gt; y) **<br/>
+&nbsp;&nbsp;&nbsp;( (nat_e (get_endl l1 startp) |-&gt; Free) -*<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Heap_List (l1 ++ (a,true)::l2) startp)))  s h.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="hl_free2free"></a>hl_free2free: forall l1 l2 a startp s h,<br/>
+&nbsp;&nbsp;&nbsp;Heap_List (l1 ++ (a,true)::l2) startp s h -&gt;<br/>
+&nbsp;&nbsp;&nbsp;exists y, ((nat_e (get_endl l1 startp) |-&gt; y) **<br/>
+&nbsp;&nbsp;&nbsp;( (nat_e (get_endl l1 startp) |-&gt; Free) -*<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Heap_List (l1 ++ (a,true)::l2) startp)))  s h.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="hl_getnext"></a>hl_getnext: forall l1 l2 a b startp s h,<br/>
+&nbsp;&nbsp;&nbsp;Heap_List (l1 ++ (a,b)::l2) startp s h -&gt;<br/>
+&nbsp;&nbsp;&nbsp;((nat_e (get_endl l1 startp + 1) |-&gt; (nat_e (get_endl l1 startp + 2 + a))) **<br/>
+&nbsp;&nbsp;&nbsp;((nat_e (get_endl l1 startp + 1) |-&gt; (nat_e (get_endl l1 startp + 2 + a))) -*<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Heap_List (l1 ++ (a,b)::l2) startp)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;))  s h.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="hl_getstatus"></a>hl_getstatus: forall l1 l2 a b startp s h,<br/>
+&nbsp;&nbsp;&nbsp;Heap_List (l1 ++ (a,b)::l2) startp s h -&gt;<br/>
+&nbsp;&nbsp;&nbsp;((nat_e (get_endl l1 startp) |-&gt; (hlstat_bool2expr b)) **<br/>
+&nbsp;&nbsp;&nbsp;((nat_e (get_endl l1 startp) |-&gt; (hlstat_bool2expr b)) -*<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Heap_List (l1 ++ (a,b)::l2) startp)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;))  s h.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="hl_getnext'"></a>hl_getnext': forall l startp s h,<br/>
+&nbsp;&nbsp;&nbsp;Heap_List l startp s h -&gt;<br/>
+&nbsp;&nbsp;&nbsp;((nat_e (get_endl l startp + 1) |-&gt; (nat_e 0)) **<br/>
+&nbsp;&nbsp;&nbsp;((nat_e (get_endl l startp + 1) |-&gt; (nat_e 0)) -*<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Heap_List l startp)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;))  s h.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="hl_getstat'"></a>hl_getstat': forall l startp s h,<br/>
+&nbsp;&nbsp;&nbsp;Heap_List l startp s h -&gt;<br/>
+&nbsp;&nbsp;&nbsp;((nat_e (get_endl l startp) |-&gt; Allocated) **<br/>
+&nbsp;&nbsp;&nbsp;((nat_e (get_endl l startp) |-&gt; Allocated) -*<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Heap_List l startp)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;))  s h.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="In_hl_lt"></a>In_hl_lt: forall l a b c startp,<br/>
+&nbsp;&nbsp;In_hl l (a,b,c) startp -&gt;<br/>
+&nbsp;&nbsp;a &lt; get_endl l startp.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="In_hl_destruct"></a>In_hl_destruct: forall l a b c adr,   <br/>
+&nbsp;&nbsp;&nbsp;In_hl l (a,b,c) adr -&gt;<br/>
+&nbsp;&nbsp;&nbsp;exists l1, exists l2, l = l1 ++ (b,c)::l2 /\ get_endl l1 adr = a.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="In_hl_ge_start"></a>In_hl_ge_start: forall l x y z adr,<br/>
+&nbsp;In_hl l (x,y,z) adr -&gt; x &gt;= adr.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="In_hl_dif"></a>In_hl_dif: forall l x y a b adr,<br/>
+&nbsp;In_hl l (x,y,alloc) adr -&gt; In_hl l (a,b,free) adr -&gt; a &lt;&gt; x.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="In_hl_match"></a>In_hl_match: forall l1 l2 x y size stat startp,<br/>
+&nbsp;&nbsp;In_hl (l1 ++ (x,y)::l2) (get_endl l1 startp, size, stat) startp -&gt;<br/>
+&nbsp;&nbsp;(size = x /\ stat = y).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="In_hl_next"></a>In_hl_next: forall l x y z b c adr,<br/>
+&nbsp;&nbsp;In_hl l (x,y,z) adr -&gt;<br/>
+&nbsp;&nbsp;In_hl l (x + 2 + y,b,c) adr -&gt;<br/>
+&nbsp;&nbsp;exists l1,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;exists l2,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;l = l1 ++ (y,z)::(b,c)::l2 /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;x = get_endl l1 adr.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="In_hl_last"></a>In_hl_last: forall l a b c adr,<br/>
+&nbsp;&nbsp;In_hl l (a,b,c) adr -&gt;<br/>
+&nbsp;&nbsp;get_endl l adr = a + 2 + b -&gt;<br/>
+&nbsp;&nbsp;exists l', l = l'++ (b,c)::nil.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="In_hl_first"></a>In_hl_first: forall l adr sz st,<br/>
+&nbsp;&nbsp;In_hl l (adr,sz,st) adr -&gt;  <br/>
+&nbsp;&nbsp;exists l', l = (sz,st)::l'.<br/>
+
+<br/>
+<span class="keyword">Ltac</span> <span class="keyword">Print</span> x := assert (x=x); [auto | idtac].<br/>
+
+<br/>
+<span class="keyword">Ltac</span> Cutrewrite_hyp H A :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> A <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| ?x = ?x =&gt; idtac<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> x:= fresh <span class="keyword">in</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;assert (x: A); [idtac | rewrite x in H; clear x]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Ltac</span> Omega_exprb_contradiction_assert P :=<br/>
+&nbsp;&nbsp;assert (P); Omega_exprb.<br/>
+
+<br/>
+<span class="keyword">Ltac</span> Omega_exprb_contradiction :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> goal <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| id: ?s |b= ?P |- _ =&gt; assert (False); [Omega_exprb_contradiction_assert (s |b/= P) | contradiction]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| id: ?s |b/= ?P |- _ =&gt; assert (False); [Omega_exprb_contradiction_assert (s |b= P) | contradiction]<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Ltac</span> In_hl_destruct_hyp H :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> goal <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| H: In_hl ?l (?adr, ?size, ?status) ?start |- _ =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;generalize (In_hl_destruct l adr size status start H); intros; Decompose_hyp; subst l<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Ltac</span> HLList_head l :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> l <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| ?hd::?tl =&gt; constr:(hd::nil)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| ?l1 ++ ?l2 =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> x:=(HLList_head l1) <span class="keyword">in</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> x <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| nil =&gt; l1<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; x<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)   <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; l<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Ltac</span> HLList_tail l :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> l <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| ?hd::?tl =&gt; tl<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| ?l1 ++ ?l2 =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> x:=(HLList_tail l1) <span class="keyword">in</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> x <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| nil =&gt; l2<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; constr:(x ++ l2)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)   <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; constr:(@nil (nat*bool))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Ltac</span> Normalize_HLList l :=    <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> l <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| nil =&gt; constr:(@nil (nat*bool))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> hd := (HLList_head l) <span class="keyword">in</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> tl := (HLList_tail l) <span class="keyword">in</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> tl' := (Normalize_HLList tl) <span class="keyword">in</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> tl' <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| nil =&gt; hd<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; constr:(hd ++ tl')<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Ltac</span> Format_HLList_head l elt :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> l <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| ((elt,?st)::nil) =&gt; constr:(@nil (nat*bool))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| ((elt,?st)::nil) ++ ?l2 =&gt; constr:(@nil (nat*bool))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| ?l1 ++ ?l2 =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> hd:= (Format_HLList_head l2 elt) <span class="keyword">in</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> hd <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| nil =&gt; l1<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; constr:(l1 ++ hd)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span>          <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)        <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Ltac</span> Format_HLList_tail l elt :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> l <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| ((elt,?st)::nil) =&gt; l<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| ((elt,?st)::nil) ++ ?l2 =&gt; constr:((elt,st)::l2)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| ?l1 ++ ?l2 =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> tl := (Format_HLList_tail l1 elt) <span class="keyword">in</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> tl <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| nil =&gt; (Format_HLList_tail l2 elt)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; constr:(tl ++ l2)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;) <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; constr:(@nil (nat*bool))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Ltac</span> Format_HLList l elt :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> y:= (Normalize_HLList l) <span class="keyword">in</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> hd:= (Format_HLList_head y elt) <span class="keyword">in</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> tl:= (Format_HLList_tail y elt) <span class="keyword">in</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;constr:(hd ++ tl)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;).<br/>
+
+<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Ltac</span> List_eq :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;repeat rewrite &lt;- ass_app; repeat rewrite &lt;- app_nil_end; repeat rewrite &lt;- app_comm_cons; auto.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Ltac</span> Hl_getstatus H elt :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> goal <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| H: Heap_List ?l ?start ?s ?h |- _ =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> l' := (Format_HLList l elt) <span class="keyword">in</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> l <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| l' =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> h1:= fresh <span class="keyword">in</span>(<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> h2:= fresh <span class="keyword">in</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> x:= fresh <span class="keyword">in</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;generalize (hl_getstatus _ _ _ _ _ _ _ H); intro x; Decompose_sepcon x h1 h2;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Compose_sepcon h1 h2; [idtac | red; auto]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)              <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Cutrewrite_hyp H (l = l'); [List_eq |<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="keyword">let</span> h1:= fresh <span class="keyword">in</span>(<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> h2:= fresh <span class="keyword">in</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> x:= fresh <span class="keyword">in</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;generalize (hl_getstatus _ _ _ _ _ _ _ H); intro x; Decompose_sepcon x h1 h2;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Compose_sepcon h1 h2; [idtac | red; auto]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Ltac</span> Hl_getstat' H :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> h1:= fresh <span class="keyword">in</span>(<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> h2:= fresh <span class="keyword">in</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> x:= fresh <span class="keyword">in</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;generalize (hl_getstat' _ _ _ _ H); intro x; Decompose_sepcon x h1 h2;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Compose_sepcon h1 h2; [idtac | red; auto]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Ltac</span> Hl_getnext H elt :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> goal <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| H: Heap_List ?l ?start ?s ?h |- _ =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> l' := (Format_HLList l elt) <span class="keyword">in</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> l <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| l' =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> h1:= fresh <span class="keyword">in</span>(<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> h2:= fresh <span class="keyword">in</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> x:= fresh <span class="keyword">in</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;generalize (hl_getnext _ _ _ _ _ _ _ H); intro x; Decompose_sepcon x h1 h2;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Compose_sepcon h1 h2; [idtac | red; auto]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)              <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Cutrewrite_hyp H (l = l'); [List_eq |<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="keyword">let</span> h1:= fresh <span class="keyword">in</span>(<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> h2:= fresh <span class="keyword">in</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> x:= fresh <span class="keyword">in</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;generalize (hl_getnext _ _ _ _ _ _ _ H); intro x; Decompose_sepcon x h1 h2;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Compose_sepcon h1 h2; [idtac | red; auto]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Ltac</span> Hl_getnext' H :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> h1:= fresh <span class="keyword">in</span>(<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> h2:= fresh <span class="keyword">in</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> x:= fresh <span class="keyword">in</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;generalize (hl_getnext' _ _ _ _ H); intro x; Decompose_sepcon x h1 h2;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Compose_sepcon h1 h2; [idtac | red; auto]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;).<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+</code>
+</div>
+
+<div id="footer">
+<hr/><a href="index.html">Index</a><hr/><font size="-1">This page has been generated by <a href="http://coq.inria.fr">coqdoc</a></font>
+</div>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,433 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"/>
+<link href="coqdoc.css" rel="stylesheet" type="text/css"/>
+<title>examples</title>
+</head>
+
+<body>
+
+<div id="page">
+
+<div id="header">
+</div>
+
+<div id="main">
+
+<h1 class="libtitle">Library examples</h1>
+
+<code>
+<span class="keyword">Load</span> seplog_header.<br/>
+
+<br/>
+Open <span class="keyword">Local</span> Scope Z_scope.<br/>
+
+<br/>
+<span class="keyword">Module</span> <a name="GCD"></a>GCD.<br/>
+
+<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> Znumtheory.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="GCD.gcd0"></a>gcd0 a b x y :=<br/>
+&nbsp;&nbsp;x &lt;- int_e a;<br/>
+&nbsp;&nbsp;y &lt;- int_e b;<br/>
+&nbsp;&nbsp;while (var_e x =/= var_e y) (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;ifte (var_e y &gt;&gt; var_e x) thendo<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(y &lt;- var_e y -e var_e x)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;elsedo<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(x &lt;- var_e x -e var_e y)<br/>
+&nbsp;&nbsp;).<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="GCD.x"></a>x := 0%nat.<br/>
+<span class="keyword">Definition</span> <a name="GCD.y"></a>y := 1%nat.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="GCD.gcd0_verif"></a>gcd0_verif : forall a b,<br/>
+&nbsp;&nbsp;{{ <span class="keyword">fun</span> s h =&gt; 0 &lt; a /\ 0 &lt; b }}<br/>
+&nbsp;&nbsp;gcd0 a b x y<br/>
+&nbsp;&nbsp;{{ <span class="keyword">fun</span> s h =&gt; exists d, store.lookup x s = d /\ Zis_gcd a b d }}.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="GCD.a"></a>a := 0%nat.<br/>
+<span class="keyword">Definition</span> <a name="GCD.b"></a>b := 1%nat.<br/>
+<span class="keyword">Definition</span> <a name="GCD.r"></a>r := 2%nat.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="GCD.gcd1"></a>gcd1 a b r :=<br/>
+&nbsp;&nbsp;while (var_e b =/= int_e 0) (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;r &lt;- (var_e a) mode (var_e b);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;a &lt;- var_e b;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;b &lt;- var_e r<br/>
+&nbsp;&nbsp;).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="GCD.gcd1_verif"></a>gcd1_verif : forall va vb, 0 &lt;= va -&gt; 0 &lt;= vb -&gt;<br/>
+&nbsp;&nbsp;{{ <span class="keyword">fun</span> s h =&gt; store.lookup a s = va /\ store.lookup b s = vb }}<br/>
+&nbsp;&nbsp;gcd1 a b r<br/>
+&nbsp;&nbsp;{{ <span class="keyword">fun</span> s h =&gt; exists wa, exists wb, exists d,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;store.lookup a s = wa /\ store.lookup b s = wb /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Zis_gcd wa wb d /\ Zis_gcd va vb d }}.<br/>
+
+<br/>
+<span class="keyword">End</span> GCD.<br/>
+
+<br/>
+<span class="keyword">Module</span> <a name="Factorial"></a>Factorial.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="Factorial.Zfact"></a>Zfact (z:Z) : Z :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> z <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Zpos p =&gt; Z_of_nat (fact (nat_of_P p))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; 1<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Factorial.Zfact_neg"></a>Zfact_neg : forall z, z &lt; 0 -&gt; Zfact z = 1.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Factorial.Zfact_zero"></a>Zfact_zero : Zfact 0 = 1.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Factorial.fact_lemma"></a>fact_lemma : forall n, (0 &lt; n)%nat -&gt; (fact n = n * fact (n - 1))%nat.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Factorial.Zfact_pos"></a>Zfact_pos : forall z, z &gt; 0 -&gt; Zfact z = z * Zfact (z - 1).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Factorial.factorial"></a>factorial : forall n, 0 &lt;= n -&gt;<br/>
+&nbsp;&nbsp;forall x m, var.set (x::m::nil) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{ <span class="keyword">fun</span> s h =&gt; store.lookup m s = n /\ store.lookup x s = 1 }}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;while (var_e m =/= int_e 0%Z) (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;x &lt;- var_e x *e var_e m;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m &lt;- var_e m -e int_e 1<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{ <span class="keyword">fun</span> s h =&gt; store.lookup x s = Zfact n }}.<br/>
+
+<br/>
+Open <span class="keyword">Local</span> Scope vc_scope.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Factorial.vc_factorial"></a>vc_factorial : forall n, n &gt;= 0 -&gt;<br/>
+&nbsp;&nbsp;forall x m, var.set (x::m::nil) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{ <span class="keyword">fun</span> s (_:heap.h) =&gt; store.lookup m s = n /\ store.lookup x s = 1 }} proj_cmd <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(while' ((var_e m) =/= int_e 0)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="keyword">fun</span> s (_:heap.h) =&gt; store.lookup x s * Zfact (store.lookup m s) = Zfact n /\ store.lookup m s &gt;= 0)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(x &lt;- var_e x *e var_e m;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m &lt;- var_e m -e int_e 1))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{ <span class="keyword">fun</span> s (_:heap.h) =&gt; store.lookup x s = Zfact n }}.<br/>
+
+<br/>
+Close <span class="keyword">Local</span> Scope vc_scope.<br/>
+
+<br/>
+<span class="keyword">End</span> Factorial.<br/>
+
+<br/>
+<span class="keyword">Module</span> <a name="Swap"></a>Swap.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Swap.swap"></a>swap: forall x y z v a b, var.set (x::y::z::v::nil) -&gt;<br/>
+&nbsp;&nbsp;{{ (var_e x |-&gt; int_e a) ** (var_e y |-&gt; int_e b) }}<br/>
+&nbsp;&nbsp;z &lt;-* var_e x; <br/>
+&nbsp;&nbsp;v &lt;-* var_e y; <br/>
+&nbsp;&nbsp;var_e x *&lt;- var_e v; <br/>
+&nbsp;&nbsp;var_e y *&lt;- var_e z<br/>
+&nbsp;&nbsp;{{ (var_e x |-&gt; int_e b) ** (var_e y |-&gt; int_e a) }}.<br/>
+
+<br/>
+Open <span class="keyword">Local</span> Scope vc_scope.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Swap.vc_swap"></a>vc_swap: forall x y z v a b, var.set (x::y::z::v::nil) -&gt;<br/>
+&nbsp;&nbsp;{{ (var_e x |-&gt; int_e a) ** (var_e y |-&gt; int_e b) }}<br/>
+&nbsp;&nbsp;proj_cmd<br/>
+&nbsp;&nbsp;(z &lt;-*var_e x; <br/>
+&nbsp;&nbsp;&nbsp;v &lt;-* var_e y;<br/>
+&nbsp;&nbsp;&nbsp;var_e x *&lt;- var_e v;<br/>
+&nbsp;&nbsp;&nbsp;var_e y *&lt;- var_e z)<br/>
+&nbsp;&nbsp;{{ (var_e x |-&gt; int_e b) ** (var_e y |-&gt; int_e a) }}.<br/>
+
+<br/>
+Close <span class="keyword">Local</span> Scope vc_scope.<br/>
+
+<br/>
+<span class="keyword">End</span> Swap.<br/>
+
+<br/>
+<span class="keyword">Module</span> <a name="StringCopy"></a>StringCopy.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="StringCopy.StringCopy"></a>StringCopy c1 c2 buf str str_tmp :=<br/>
+&nbsp;&nbsp;c1 &lt;- var_e buf;<br/>
+&nbsp;&nbsp;c2 &lt;- var_e str;<br/>
+&nbsp;&nbsp;str_tmp &lt;-* var_e c2;<br/>
+&nbsp;&nbsp;while (var_e str_tmp =/= int_e 0) (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;var_e c1 *&lt;- var_e str_tmp;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;c1 &lt;- var_e c1 +e int_e 1;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;c2 &lt;- var_e c2 +e int_e 1;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;str_tmp &lt;-* var_e c2<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;);<br/>
+&nbsp;&nbsp;var_e c1 *&lt;- var_e str_tmp.<br/>
+
+<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="StringCopy.fold_right_app_map_nil"></a>fold_right_app_map_nil : forall (A:<span class="keyword">Set</span>) (lst:list A) (B:<span class="keyword">Set</span>),<br/>
+&nbsp;&nbsp;fold_right (@app B) nil (map (<span class="keyword">fun</span> _ =&gt; nil) lst) = nil.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="StringCopy.in_map'"></a>in_map' : forall (A:<span class="keyword">Set</span>) (lst:list A) (B:<span class="keyword">Set</span>) x (f:A-&gt;B),<br/>
+&nbsp;&nbsp;In x (map f lst) -&gt; exists x', In x' lst /\ x = f x'.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="StringCopy.map_length"></a>map_length : forall (A:<span class="keyword">Set</span>) (lst:list A) (B:<span class="keyword">Set</span>) (f:A-&gt;B),<br/>
+&nbsp;&nbsp;length (map f lst) = length lst.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="StringCopy.del_heads_destruct"></a>del_heads_destruct: forall (A: <span class="keyword">Set</span>) (l: list A) i a,<br/>
+&nbsp;&nbsp;(length l &gt; i)%nat -&gt;<br/>
+&nbsp;&nbsp;del_heads l i = nth i l a :: del_heads l (i+1)%nat.<br/>
+<span class="keyword">Implicit</span> Arguments del_heads_destruct [A].<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="StringCopy.heads_destruct"></a>heads_destruct: forall (A: <span class="keyword">Set</span>) (l: list A) i a,<br/>
+&nbsp;&nbsp;(length l &gt; i)%nat -&gt;<br/>
+&nbsp;&nbsp;heads l (i+1) = heads l i ++ (nth i l a)::nil.<br/>
+<span class="keyword">Implicit</span> Arguments heads_destruct [A].<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="StringCopy.nth_last"></a>nth_last: forall (A:<span class="keyword">Set</span>) (l: list A) n a,<br/>
+&nbsp;&nbsp;n = length l -&gt;<br/>
+&nbsp;&nbsp;nth n l a = a.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="StringCopy.heads_last"></a>heads_last : forall l i,<br/>
+&nbsp;&nbsp;l &lt;&gt; nil -&gt;<br/>
+&nbsp;&nbsp;i = (length l - 1)%nat -&gt;<br/>
+&nbsp;&nbsp;l = heads l i ++ (nth i l (-1))::nil.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="StringCopy.map_expr_var_list_Z"></a>map_expr_var_list_Z : forall (lst:list expr),<br/>
+&nbsp;&nbsp;(forall e, In e lst -&gt; expr_var e = nil) -&gt;<br/>
+&nbsp;&nbsp;map expr_var lst = map (<span class="keyword">fun</span> _ =&gt; nil) lst.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="StringCopy.mapstos_equiv"></a>mapstos_equiv : forall l s h e1 e3,<br/>
+&nbsp;&nbsp;(e1 |--&gt; l) s h -&gt;<br/>
+&nbsp;&nbsp;eval e1 s = eval e3 s -&gt;<br/>
+&nbsp;&nbsp;(e3 |--&gt; l) s h.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="StringCopy.mapstos'"></a>mapstos' (e:expr) (lst:list Z) :=<br/>
+&nbsp;&nbsp;sep.mapstos e (map (<span class="keyword">fun</span> x =&gt; int_e x) lst).<br/>
+
+<br/>
+<span class="keyword">Notation</span> "x '|---&gt;' l" := (mapstos' x l) (at level 80).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="StringCopy.inde_mapstos'"></a>inde_mapstos' : forall lst l p,<br/>
+&nbsp;&nbsp;inter (expr_var p) l nil -&gt;<br/>
+&nbsp;&nbsp;inde l (p |---&gt; lst).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="StringCopy.mapstos'_app_sepcon"></a>mapstos'_app_sepcon: forall l1 l2 st s h,<br/>
+&nbsp;&nbsp;(st |---&gt; l1 ++ l2) s h -&gt;<br/>
+&nbsp;&nbsp;((st |---&gt; l1) ** ((st +e (nat_e (length l1))) |---&gt; l2)) s h.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="StringCopy.mapstos'_cons_sepcon"></a>mapstos'_cons_sepcon: forall a l st s h,<br/>
+&nbsp;&nbsp;(st |---&gt; a::l) s h -&gt;<br/>
+&nbsp;&nbsp;((st |-&gt; int_e a) ** ((st +e (nat_e 1)) |---&gt; l)) s h.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="StringCopy.mapstos'_sepcon_app"></a>mapstos'_sepcon_app: forall l1 l2 st s h,<br/>
+&nbsp;&nbsp;((st |---&gt; l1) ** ((st +e (nat_e (length l1))) |---&gt; l2)) s h -&gt;<br/>
+&nbsp;&nbsp;(st |---&gt; l1 ++ l2) s h.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="StringCopy.string'"></a>string' (lst:list nat) := ~ In O lst.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="StringCopy.string"></a>string (lst:list Z) := <br/>
+&nbsp;&nbsp;exists lst',<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;string' lst' /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;lst = (map (<span class="keyword">fun</span> x =&gt; Z_of_nat x) lst') ++ (0::nil).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="StringCopy.string_nil"></a>string_nil : ~ string nil.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="StringCopy.string'_sub"></a>string'_sub : forall lst, <br/>
+&nbsp;&nbsp;string' lst -&gt;<br/>
+&nbsp;&nbsp;string' (tail lst).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="StringCopy.string_sub"></a>string_sub : forall lst, <br/>
+&nbsp;&nbsp;(2 &lt;= length lst)%nat -&gt;<br/>
+&nbsp;&nbsp;string lst -&gt;<br/>
+&nbsp;&nbsp;string (tail lst).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="StringCopy.string_sup"></a>string_sup : forall lst, <br/>
+&nbsp;&nbsp;string lst -&gt;<br/>
+&nbsp;&nbsp;forall lst',<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;string' lst' -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;string (map (<span class="keyword">fun</span> x =&gt; Z_of_nat x) lst' ++ lst).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="StringCopy.string_last"></a>string_last : forall lst, string lst -&gt;<br/>
+&nbsp;&nbsp;forall i, nth i lst (-1) = 0 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(i = length lst - 1)%nat.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="StringCopy.string_hd_ge0"></a>string_hd_ge0: forall a l,<br/>
+&nbsp;&nbsp;string (a::l) -&gt;<br/>
+&nbsp;&nbsp;a &gt;= 0.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="StringCopy.string_last'"></a>string_last' : forall i lst, <br/>
+&nbsp;&nbsp;string lst -&gt;<br/>
+&nbsp;&nbsp;(i = length lst - 1)%nat -&gt;<br/>
+&nbsp;&nbsp;nth i lst (-1) = 0.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="StringCopy.string_last''"></a>string_last'' : forall i lst, <br/>
+&nbsp;&nbsp;string lst -&gt;<br/>
+&nbsp;&nbsp;(i &lt; length lst)%nat -&gt;<br/>
+&nbsp;&nbsp;nth i lst (-1) &gt;= 0.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="StringCopy.c1"></a>c1 := O.<br/>
+<span class="keyword">Definition</span> <a name="StringCopy.c2"></a>c2 := 1%nat.<br/>
+<span class="keyword">Definition</span> <a name="StringCopy.buf"></a>buf := 2%nat.<br/>
+<span class="keyword">Definition</span> <a name="StringCopy.str"></a>str := 3%nat.<br/>
+<span class="keyword">Definition</span> <a name="StringCopy.str_tmp"></a>str_tmp := 4%nat.<br/>
+
+<br/>
+<span class="keyword">Hint</span> Unfold c1 c2 buf str str_tmp.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="StringCopy.StringCopy_specif"></a>StringCopy_specif : forall buf_lst str_lst<br/>
+&nbsp;&nbsp;(Hbuf: (0 &lt; length buf_lst)%nat)<br/>
+&nbsp;&nbsp;(Hbuf2: (length str_lst &lt;= length buf_lst)%nat)<br/>
+&nbsp;&nbsp;(Hstr: string str_lst),<br/>
+&nbsp;&nbsp;{{ (var_e buf |---&gt; buf_lst) ** (var_e str |---&gt; str_lst) }}<br/>
+&nbsp;&nbsp;StringCopy c1 c2 buf str str_tmp <br/>
+&nbsp;&nbsp;{{ (var_e buf |---&gt; str_lst) ** TT ** (var_e str |---&gt; str_lst) }}.<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+&nbsp;&nbsp;Eval_b_hyp H1.<br/>
+&nbsp;&nbsp;Eval_b_hyp H1.<br/>
+
+<br/>
+&nbsp;&nbsp;Opaque nth.<br/>
+&nbsp;&nbsp;Transparent nth.<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+&nbsp;&nbsp;Opaque nth.<br/>
+&nbsp;&nbsp;Transparent nth.<br/>
+&nbsp;&nbsp;Opaque nth.<br/>
+&nbsp;&nbsp;Transparent nth.<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+&nbsp;&nbsp;Eval_b_hyp_clean.<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+&nbsp;&nbsp;Opaque nth.<br/>
+&nbsp;&nbsp;Transparent nth.<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+<span class="keyword">End</span> StringCopy.<br/>
+</code>
+</div>
+
+<div id="footer">
+<hr/><a href="index.html">Index</a><hr/><font size="-1">This page has been generated by <a href="http://coq.inria.fr">coqdoc</a></font>
+</div>
+
+</div>
+
+</body>
+</html>

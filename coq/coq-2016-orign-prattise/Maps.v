@@ -113,7 +113,19 @@ Proof.
     _total maps_ that return a default value when we look up a key
     that is not present in the map. *)
 
-Definition total_map (A:Type) := id -> A.
+Definition total_map (A:Type):Type := id -> A.
+
+Definition total_map'' (A:Type):Type := forall n:id, A.
+
+(* Definition total_map' (A:Type) : id -> A := fun (x:id) => A. *)
+
+(* Check ( (total_map' bool) (Id 4) ). *)
+
+(* Check ( (total_map'' bool) (Id 4) ). *)
+
+Definition test_zbh := total_map'' bool.
+
+Definition test_zbh2 := fun (x:test_zbh) => x (Id 3).
 
 (* Definition total_map1(A:Type) :id->A := fun (x:id) => A. *)
 

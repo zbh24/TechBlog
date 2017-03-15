@@ -1,0 +1,205 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"/>
+<link href="coqdoc.css" rel="stylesheet" type="text/css"/>
+<title>hl_abstraction</title>
+</head>
+
+<body>
+
+<div id="page">
+
+<div id="header">
+</div>
+
+<div id="main">
+
+<h1 class="libtitle">Library hl_abstraction</h1>
+
+<code>
+<span class="keyword">Load</span> seplog_header.<br/>
+
+<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> <a class="modref" href="topsy_hm.html">topsy_hm</a>.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="eval_store_update"></a>eval_store_update: forall e x v s,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;eval e (store.update x v s) = eval (expr_rewrite e (var_e x) (int_e v)) s.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="eval_b_store_update"></a>eval_b_store_update: forall b x v s,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;eval_b b (store.update x v s) = eval_b (expr_b_rewrite b (var_e x) (int_e v)) s.<br/>
+
+<br/>
+<span class="keyword">Inductive</span> <a name="abstract_hl"></a>abstract_hl: list (loc * expr) -&gt; loc -&gt; nat -&gt; store.s -&gt; heap.h -&gt; <span class="keyword">Prop</span> :=<br/>
+&nbsp;&nbsp;abstract_hl_last: forall l start size s h,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;size = 0 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;l = nil -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sep.emp s h -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;abstract_hl l start size s h<br/>
+&nbsp;&nbsp;| abstract_hl_free: forall l l' adr start size s h h1 h2,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;start = adr -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;size &gt; 0 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;l = (adr, Free)::l' -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;h1 # h2 -&gt; h = (h1 +++ h2) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;((nat_e start) |-&gt; Free) s h1 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;abstract_hl l' (start + 1) (size - 1) s h2 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;abstract_hl l start size s h<br/>
+&nbsp;&nbsp;| abstract_hl_alloc: forall l l' adr start size s h h1 h2,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;start = adr -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;size &gt; 0 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;l = (adr, Allocated)::l' -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;h1 # h2 -&gt; h = (h1 +++ h2) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;((nat_e start) |-&gt; Allocated) s h1 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;abstract_hl l' (start + 1) (size - 1) s h2 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;abstract_hl l start size s h.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="abstract_hl_inde_store"></a>abstract_hl_inde_store: forall l start size s s' h,<br/>
+&nbsp;&nbsp;&nbsp;abstract_hl l start size s h -&gt; abstract_hl l start size s' h.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="abstract_hl_start"></a>abstract_hl_start: forall l a b start size s h,<br/>
+&nbsp;&nbsp;&nbsp;abstract_hl ((a,b)::l) start size s h -&gt; a = start.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="abstract_hl_size"></a>abstract_hl_size: forall l start size s h,<br/>
+&nbsp;&nbsp;&nbsp;abstract_hl l start size s h -&gt; size = length l.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="abstract_hl_free_alloc"></a>abstract_hl_free_alloc: forall l a b start size s h,<br/>
+&nbsp;&nbsp;&nbsp;abstract_hl l start size s h -&gt; In (a,b) l -&gt;<br/>
+&nbsp;&nbsp;&nbsp;b = Free \/ b =Allocated.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="abstract_hl_app"></a>abstract_hl_app: forall l1 l2 start size s h,<br/>
+&nbsp;&nbsp;&nbsp;abstract_hl (l1 ++ l2) start size s h -&gt;<br/>
+&nbsp;&nbsp;&nbsp;(abstract_hl l1 start (size - length l2) ** abstract_hl l2 (start + length l1) (size - length l1)) s h.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="abstract_hl_app'"></a>abstract_hl_app': forall l1 l2 start size s h,<br/>
+&nbsp;&nbsp;&nbsp;(abstract_hl l1 start (size - length l2) ** abstract_hl l2 (start + length l1) (size - length l1)) s h -&gt;<br/>
+&nbsp;&nbsp;&nbsp;abstract_hl (l1 ++ l2) start size s h.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="abstract_hl_cons"></a>abstract_hl_cons: forall l a b start size s h,<br/>
+&nbsp;&nbsp;&nbsp;abstract_hl ((a,b)::l) start size s h -&gt;<br/>
+&nbsp;&nbsp;&nbsp;((nat_e a |-&gt; b) ** abstract_hl l (start + 1) (size - 1)) s h.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="abstract_hl_cons'"></a>abstract_hl_cons': forall l a b start size s h,<br/>
+&nbsp;&nbsp;&nbsp;b = Free \/ b =Allocated -&gt;   <br/>
+&nbsp;&nbsp;&nbsp;a = start -&gt;<br/>
+&nbsp;&nbsp;&nbsp;size &gt; 0 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;((nat_e a |-&gt; b) ** abstract_hl l (start + 1) (size - 1)) s h -&gt;<br/>
+&nbsp;&nbsp;&nbsp;abstract_hl ((a,b)::l) start size s h.<br/>
+
+<br/>
+<span class="keyword">Axiom</span> <a name="coucou"></a>coucou: False.<br/>
+<span class="keyword">Ltac</span> Coucou := generalize coucou; contradiction.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="abstract_hl_cell_gt"></a>abstract_hl_cell_gt: forall l a b x y start size s h,<br/>
+&nbsp;&nbsp;&nbsp;abstract_hl ((x, y) :: l) start size s h -&gt;<br/>
+&nbsp;&nbsp;&nbsp;In (a, b) l -&gt;<br/>
+&nbsp;&nbsp;&nbsp;a &gt; x.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="abstract_hl_notin_list"></a>abstract_hl_notin_list: forall (l: list (nat * expr)) a b x y start size s h,<br/>
+&nbsp;&nbsp;abstract_hl l start size s h -&gt;<br/>
+&nbsp;&nbsp;In (a,b) l -&gt;<br/>
+&nbsp;&nbsp;In (x,y) l -&gt;<br/>
+&nbsp;&nbsp;b &lt;&gt; y -&gt;<br/>
+&nbsp;&nbsp;a &lt;&gt; x.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="abstract_hmAlloc"></a>abstract_hmAlloc (start: loc) (size: nat) (result i j: var.v) : cmd :=<br/>
+&nbsp;&nbsp;&nbsp;i &lt;- (nat_e 0);<br/>
+&nbsp;&nbsp;&nbsp;j &lt;-* ((nat_e start) +e (var_e i));<br/>
+&nbsp;&nbsp;&nbsp;while (((nat_e size) &gt;&gt; (var_e i)) &amp;&amp;&amp; ((var_e j) =/= (Free))) (<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;i &lt;- ((var_e i) +e (nat_e 1));<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ifte ((nat_e size) &gt;&gt; (var_e i)) thendo <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;j &lt;-* ((nat_e start) +e (var_e i))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;elsedo<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;skip<br/>
+&nbsp;&nbsp;&nbsp;);<br/>
+&nbsp;&nbsp;&nbsp;(ifte ((nat_e size) &gt;&gt; (var_e i)) thendo (((nat_e start) +e (var_e i)) *&lt;- Allocated; result &lt;- ((nat_e start) +e (var_e i))) elsedo (result &lt;- (int_e (-1)%Z))).<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="abstract_hmAlloc_specif1"></a>abstract_hmAlloc_specif1 := forall start size result i j x, <br/>
+&nbsp;&nbsp;(var.set (result::i::j::nil)) -&gt; <br/>
+&nbsp;&nbsp;size &gt; 0 -&gt;<br/>
+<br/>
+&nbsp;&nbsp;{{<span class="keyword">fun</span> s h =&gt; exists l,  <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;abstract_hl l start size s h /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;In (x,Allocated) l}}<br/>
+&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;abstract_hmAlloc start size result i j<br/>
+&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;{{ <span class="keyword">fun</span> s h =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(exists l, exists y, <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;eval (var_e result) s = Z_of_nat (y) /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;abstract_hl l start size s h /\ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;In (x,Allocated) l /\ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;In (y,Allocated) l /\ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;x &lt;&gt; y)<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;\/<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(exists l, <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;eval (var_e result) s = (-1)%Z /\ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;abstract_hl l start size s h /\ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;In (x,Allocated) l) }}.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="abstract_hmAlloc_verif1"></a>abstract_hmAlloc_verif1: abstract_hmAlloc_specif1.<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+</code>
+</div>
+
+<div id="footer">
+<hr/><a href="index.html">Index</a><hr/><font size="-1">This page has been generated by <a href="http://coq.inria.fr">coqdoc</a></font>
+</div>
+
+</div>
+
+</body>
+</html>

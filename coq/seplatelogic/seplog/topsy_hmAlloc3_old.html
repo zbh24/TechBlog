@@ -1,0 +1,275 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"/>
+<link href="coqdoc.css" rel="stylesheet" type="text/css"/>
+<title>topsy_hmAlloc3_old</title>
+</head>
+
+<body>
+
+<div id="page">
+
+<div id="header">
+</div>
+
+<div id="main">
+
+<h1 class="libtitle">Library topsy_hmAlloc3_old</h1>
+
+<code>
+<span class="keyword">Load</span> seplog_header.<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> <a class="modref" href="topsy_hm_old.html">topsy_hm_old</a>.<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> <a class="modref" href="topsy_hmAlloc_old.html">topsy_hmAlloc_old</a>.<br/>
+
+<br/>
+<span class="keyword">Print</span> Free.<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="compact'"></a>compact' (l:list (loc * nat *  expr)) (len:nat) {struct len} : list (loc * nat *  expr) :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> len <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a name="O"></a>O =&gt; nil<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| S len' =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> l <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a name="nil"></a>nil =&gt; nil<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| (adr, sz, st)::tl =&gt; <span class="keyword">match</span> (expr_eq Allocated st) <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a name="true"></a>true =&gt; (adr, sz, Allocated)::(compact' tl len')<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| false =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> tl <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a name="nil"></a>nil =&gt; (adr, sz, Free)::nil<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| (adr',sz',st')::tl' =&gt; <span class="keyword">match</span> (expr_eq Allocated st) <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a name="true"></a>true =&gt; (adr, sz, Allocated)::(compact' tl len')<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| false =&gt; compact' ((adr, sz+sz'+2, Free)::tl) len'<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Definition</span>  <a name="compact_coq_fct"></a>compact_coq_fct (l:list (loc * nat *  expr)): list (loc * nat *  expr) := compact' l (length l).<br/>
+
+<br/>
+<span class="keyword">Inductive</span> <a name="compact_coq_ind"></a>compact_coq_ind: (list (nat * loc * expr)) -&gt; (list (nat * loc * expr)) -&gt; <span class="keyword">Prop</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a name="compact_coq_ind_nil"></a>compact_coq_ind_nil: compact_coq_ind nil nil<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <a name="compact_coq_ind_Alloc"></a>compact_coq_ind_Alloc: forall adr size l l',<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;compact_coq_ind l l' -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;compact_coq_ind ((adr, size, Allocated)::l) ((adr, size, Allocated)::l')                         <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <a name="compact_coq_ind_last_Free"></a>compact_coq_ind_last_Free: forall adr size,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;compact_coq_ind ((adr, size, Free)::nil) ((adr, size, Free)::nil)                         <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <a name="compact_coq_ind_Free_Free"></a>compact_coq_ind_Free_Free: forall adr size adr' size' l l',<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;compact_coq_ind ((adr,size + 2 + size', Free)::l) l' -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;compact_coq_ind ((adr,size, Free)::(adr',size', Free)::l) l'<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <a name="compact_coq_ind_Free_Alloc"></a>compact_coq_ind_Free_Alloc: forall adr size adr' size' l l',<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;compact_coq_ind l l' -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;compact_coq_ind ((adr,size, Free)::(adr',size', Allocated)::l) ((adr,size, Free)::(adr',size', Allocated)::l').<br/>
+
+<br/>
+<span class="keyword">Axiom</span> <a name="compact_coq_ind2fct"></a>compact_coq_ind2fct: forall l s h startl,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Heap_List l startl 0 s h -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(forall l', compact_coq_fct l = l' &lt;-&gt; compact_coq_ind l l').<br/>
+
+<br/>
+<span class="keyword">Inductive</span> <a name="split_coq_ind"></a>split_coq_ind: (list (nat * loc * expr)) -&gt; nat -&gt; loc -&gt; (list (nat * loc * expr)) -&gt; <span class="keyword">Prop</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a name="split_coq_ind_nil"></a>split_coq_ind_nil: forall n sz, split_coq_ind nil sz n nil<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <a name="split_coq_ind_Alloc"></a>split_coq_ind_Alloc: forall adr sz n size l l',<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;split_coq_ind l size n l' -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;split_coq_ind ((adr,sz,Allocated)::l) size n ((adr,sz,Allocated)::l')<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <a name="split_coq_ind_Free"></a>split_coq_ind_Free: forall adr sz l l' n size,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;adr &lt;&gt; n -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;split_coq_ind l size n l' -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;split_coq_ind ((adr,sz,Allocated)::l) size n ((adr,sz,Allocated)::l')<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <a name="split_coq_ind_Free_split"></a>split_coq_ind_Free_split: forall adr sz l n size,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;adr = n -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sz &gt;= size + LEFTOVER + 2 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;split_coq_ind ((adr,sz,Free)::l) size n ((adr,size,Free)::(adr+2+size,sz-2-size,Free)::l)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <a name="split_coq_ind_Free_split'"></a>split_coq_ind_Free_split': forall adr sz l n size,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;adr = n -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sz &lt; size + LEFTOVER + 2 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;split_coq_ind ((adr,sz,Free)::l) size n ((adr,sz,Free)::l).<br/>
+
+<br/>
+<span class="keyword">Inductive</span> <a name="freeblocks'"></a>freeblocks': list (nat * loc * expr) -&gt; Z -&gt; <span class="keyword">Prop</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a name="freeblocks'_nil"></a>freeblocks'_nil: freeblocks' nil 0%Z<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <a name="freeblocks'_Allocated"></a>freeblocks'_Allocated: forall adr sz l l' n,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;freeblocks' l n -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;freeblocks' (l' ++ (adr,sz,Allocated)::l) n<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <a name="freeblocks'_Free_end"></a>freeblocks'_Free_end: forall adr sz l,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;freeblocks' ((adr,sz,Allocated)::l) 0%Z<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <a name="freeblocks'_Free_suiv"></a>freeblocks'_Free_suiv: forall adr sz l n,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;freeblocks' l (n - (Z_of_nat sz) - 2)%Z -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;freeblocks' ((adr,sz,Free)::l) n.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="freeblocks"></a>freeblocks (l: list (nat * loc * expr)) (n: nat) :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;freeblocks' l (Z_of_nat (n + 2)).<br/>
+
+<br/>
+<span class="keyword">Inductive</span> <a name="freeblock'"></a>freeblock': list (loc * nat * expr) -&gt; nat -&gt; <span class="keyword">Prop</span> :=<br/>
+&nbsp;&nbsp;<a name="freeblock'_nil"></a>freeblock'_nil: freeblock' nil 0<br/>
+&nbsp;&nbsp;| <a name="freeblock'_free"></a>freeblock'_free : forall adr sz l n, <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;freeblock' l n -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;freeblock' ((adr,sz,Free)::l) (n+sz).<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="freeblock"></a>freeblock (l: list (loc * nat * expr)) (n: nat):= <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;exists l1, exists l2, exists l', l = (l1 ++ l' ++ l2) /\ freeblock' l' n.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="hmAlloc_specif3"></a>hmAlloc_specif3 := forall l result adr size entry cptr fnd stts nptr sz, <br/>
+&nbsp;&nbsp;(var.set (hmStart::result::entry::cptr::fnd::stts::nptr::sz::nil)) -&gt; <br/>
+&nbsp;&nbsp;adr &gt; 0 -&gt; size &gt; 0 -&gt;<br/>
+<br/>
+&nbsp;&nbsp;{{<span class="keyword">fun</span> s h =&gt;  Heap_List l adr 0 s h /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;eval (var_e hmStart) s = eval (nat_e adr) s /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;exists free_size, freeblocks l free_size /\ free_size &gt;= size<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}}<br/>
+&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;hmAlloc result size entry cptr fnd stts nptr sz<br/>
+&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;{{ <span class="keyword">fun</span> s =&gt; <span class="keyword">fun</span> h =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;exists l', <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;exists y, y &gt; 0 /\ eval (var_e result) s = Z_of_nat (y+2) /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;exists size'', size'' &gt;= size /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Heap_List l adr 0 ** Array (y + 2) size'') s h /\ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;In (y,size'',Allocated) l /\ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(exists l'', compact_coq_ind l l'' /\ split_coq_ind l'' size y l')<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\/<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(split_coq_ind l size y l')<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+}}.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="findFree_specif"></a>findFree_specif := forall adr entry fnd sz stts size sizex x result l,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;size &gt; 0 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;sizex &gt; 0 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;adr &gt; 0 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;var.set (hmStart::entry::fnd::sz::stts::result::nil) -&gt;<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{<span class="keyword">fun</span> s =&gt; <span class="keyword">fun</span> h =&gt; Heap_List l adr 0 s h /\ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;In (x,sizex,Allocated) l /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;eval (var_e hmStart) s = eval (nat_e adr) s /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;eval (var_e result) s = eval null s }}<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;findFree size entry fnd sz stts<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{<span class="keyword">fun</span> s =&gt; <span class="keyword">fun</span> h =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Heap_List l adr 0 s h /\ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;In (x,sizex,Allocated) l /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;eval (var_e hmStart) s = eval (nat_e adr) s /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;eval (var_e result) s = eval null s /\    <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(exists finded_free_block, exists size'', size'' &gt;= size /\ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;In (finded_free_block,size'',Free) l /\ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;eval (var_e entry) s = (Z_of_nat finded_free_block) /\ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;finded_free_block &gt; 0)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;\/<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(eval (var_e entry) s = eval null s)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;)}}.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="findFree_verif"></a>findFree_verif : findFree_specif.<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+Eval_b_hyp_clean.<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+</code>
+</div>
+
+<div id="footer">
+<hr/><a href="index.html">Index</a><hr/><font size="-1">This page has been generated by <a href="http://coq.inria.fr">coqdoc</a></font>
+</div>
+
+</div>
+
+</body>
+</html>

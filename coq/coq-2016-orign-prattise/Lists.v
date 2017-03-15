@@ -1409,7 +1409,6 @@ Definition update (d : partial_map)
     the key was associated with [val]. If the same key is mapped to
     multiple values, [find] will return the first one it
     encounters. *)
-
 Fixpoint find (key : id) (d : partial_map) : natoption :=
   match d with
   | empty         => None

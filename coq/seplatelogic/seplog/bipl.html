@@ -1,0 +1,709 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"/>
+<link href="coqdoc.css" rel="stylesheet" type="text/css"/>
+<title>bipl</title>
+</head>
+
+<body>
+
+<div id="page">
+
+<div id="header">
+</div>
+
+<div id="main">
+
+<h1 class="libtitle">Library bipl</h1>
+
+<code>
+<span class="keyword">Require</span> <span class="keyword">Import</span> List.<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> ZArith.<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> List.<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> EqNat.<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> Classical.<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> Bool.<br/>
+
+<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> <a class="modref" href="util.html">util</a>.<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> <a class="modref" href="heap.html">heap</a>.<br/>
+
+<br/>
+<span class="keyword">Module</span> <span class="keyword">Type</span> <a name="VAR"></a>VAR.<br/>
+&nbsp;&nbsp;<span class="keyword">Parameter</span> <a name="v"></a>v : <span class="keyword">Set</span>.<br/>
+&nbsp;&nbsp;<span class="keyword">Parameter</span> <a name="eqdec"></a>eqdec : forall (x y : v), {x=y} + {x &lt;&gt; y}.<br/>
+&nbsp;&nbsp;<span class="keyword">Parameter</span> <a name="fresh"></a>fresh : v -&gt; list v -&gt; <span class="keyword">Prop</span>.<br/>
+&nbsp;&nbsp;<span class="keyword">Parameter</span> <a name="set"></a>set : list v -&gt; <span class="keyword">Prop</span>.<br/>
+<span class="keyword">End</span> VAR.<br/>
+
+<br/>
+<span class="keyword">Module</span> <a name="var"></a>var &lt;: VAR <span class="keyword">with</span> <span class="keyword">Definition</span> <a name="var.v"></a>v := nat.<br/>
+&nbsp;&nbsp;<span class="keyword">Definition</span> <a name="var.v"></a>v := nat.<br/>
+&nbsp;&nbsp;<span class="keyword">Definition</span> <a name="var.eqdec"></a>eqdec := eq_nat_dec.<br/>
+&nbsp;&nbsp;<span class="keyword">Fixpoint</span> <a name="var.fresh"></a>fresh (x:v) (he:list v) {struct he} : <span class="keyword">Prop</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> he <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| nil =&gt; True<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| hd::tl =&gt; x &lt;&gt; hd /\ fresh x tl<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Fixpoint</span> <a name="var.set"></a>set (he:list v) : <span class="keyword">Prop</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> he <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a name="var.nil"></a>nil =&gt; True<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| hd::tl =&gt; fresh hd tl /\ set tl<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+<span class="keyword">End</span> var.<br/>
+
+<br/>
+<span class="keyword">Ltac</span> Var_uneq :=<br/>
+&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> goal <span class="keyword">with</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| id: ?v &lt;&gt; ?v' |- ?v &lt;&gt; ?v' =&gt; auto<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| id: ?v' &lt;&gt; ?v |- ?v &lt;&gt; ?v' =&gt; auto<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| id: var.fresh ?v ?l |- ?v &lt;&gt; ?v' =&gt;  <span class="keyword">let</span> x := fresh <span class="keyword">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(inversion_clear id <span class="keyword">as</span> [x X]; decompose [and] X; clear X); Var_uneq<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| id: var.fresh ?v' ?l |- ?v &lt;&gt; ?v' =&gt; <span class="keyword">let</span> x := fresh <span class="keyword">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(inversion_clear id <span class="keyword">as</span> [x X]; decompose [and] X; clear X); Var_uneq<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| id: var.set ?l |- ?v &lt;&gt; ?v' =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> x := fresh <span class="keyword">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(inversion_clear id <span class="keyword">as</span> [x X]; decompose [and] X; clear X); Var_uneq<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; fail<br/>
+&nbsp;&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Module</span> <span class="keyword">Type</span> <a name="STORE"></a>STORE.<br/>
+&nbsp;&nbsp;<span class="keyword">Parameter</span> <a name="s"></a>s : <span class="keyword">Set</span>.<br/>
+&nbsp;&nbsp;<span class="keyword">Parameter</span> <a name="emp"></a>emp : s.<br/>
+&nbsp;&nbsp;<span class="keyword">Parameter</span> <a name="lookup"></a>lookup : var.v -&gt; s -&gt; val.<br/>
+&nbsp;&nbsp;<span class="keyword">Parameter</span> <a name="update"></a>update : var.v -&gt; val -&gt; s -&gt; s.<br/>
+&nbsp;&nbsp;<span class="keyword">Parameter</span> <a name="lookup_emp"></a>lookup_emp : forall x,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;lookup x emp = 0%Z.<br/>
+&nbsp;&nbsp;<span class="keyword">Parameter</span> <a name="lookup_update"></a>lookup_update : forall x y z st,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;x &lt;&gt; y -&gt; lookup x st = lookup x (update y z st).<br/>
+&nbsp;&nbsp;<span class="keyword">Parameter</span> <a name="lookup_update'"></a>lookup_update' : forall x z st,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;lookup x (update x z st) = z.<br/>
+&nbsp;&nbsp;<span class="keyword">Parameter</span> <a name="extensionality"></a>extensionality: forall st1 st2, (forall x, lookup x st1 = lookup x st2) -&gt; st1 = st2.<br/>
+&nbsp;&nbsp;<span class="keyword">Parameter</span> <a name="update_update"></a>update_update: forall s x x' v v',<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;x &lt;&gt; x' -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;update x v (update x' v' s) = update x' v' (update x v s).<br/>
+&nbsp;&nbsp;<span class="keyword">Parameter</span> <a name="update_update'"></a>update_update': forall s x v v',<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;update x v (update x v' s) = update x v s.<br/>
+&nbsp;&nbsp;<span class="keyword">Parameter</span> <a name="update_lookup"></a>update_lookup : forall s x, <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;update x (lookup x s) s = s.<br/>
+&nbsp;&nbsp;<span class="keyword">Parameter</span> <a name="update_lookup_update"></a>update_lookup_update: forall x v s, <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;update x (lookup x s) (update x v s) = s.<br/>
+<span class="keyword">End</span> STORE.<br/>
+
+<br/>
+<span class="keyword">Module</span> <a name="non_null_integer"></a>non_null_integer.<br/>
+&nbsp;&nbsp;<span class="keyword">Inductive</span> <a name="non_null_integer.negpos"></a>negpos : <span class="keyword">Set</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a name="non_null_integer.neg"></a>neg : positive -&gt; negpos<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <a name="non_null_integer.pos"></a>pos : positive -&gt; negpos.<br/>
+&nbsp;&nbsp;<span class="keyword">Definition</span> <a name="non_null_integer.elem"></a>elem := negpos.<br/>
+<span class="keyword">End</span> non_null_integer.<br/>
+
+<br/>
+<span class="keyword">Module</span> store_heap := map Loc non_null_integer.<br/>
+
+<br/>
+<span class="keyword">Module</span> <a name="store"></a>store : STORE.<br/>
+&nbsp;&nbsp;<span class="keyword">Definition</span> <a name="store.s"></a>s := store_heap.h.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Definition</span> <a name="store.emp"></a>emp : s := store_heap.emp.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Import</span> non_null_integer.<br/>
+
+<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Definition</span> <a name="store.lookup"></a>lookup (w:var.v) (st:s) : Z := <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> store_heap.lookup w st <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Some (pos x) =&gt; Zpos x<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Some (neg x) =&gt; Zneg x<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| None =&gt; Z0<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Definition</span> <a name="store.update"></a>update (i:var.v) (w:Z) (st:s) : s :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> w <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Z0 =&gt; store_heap.dif st i<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Zneg p =&gt; store_heap.union (store_heap.singleton i (neg p)) st<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Zpos p =&gt; store_heap.union (store_heap.singleton i (pos p)) st<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="store.lookup_emp"></a>lookup_emp : forall x,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;lookup x emp = 0%Z.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="store.lookup_update"></a>lookup_update : forall x y z st,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;x &lt;&gt; y -&gt; lookup x st = lookup x (update y z st).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="store.lookup_update'"></a>lookup_update' : forall w z st,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;lookup w (update w z st) = z.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="store.extensionality"></a>extensionality: forall st1 st2, <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(forall x, lookup x st1= lookup x st2) -&gt; st1 = st2.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="store.update_update"></a>update_update: forall s x x' v v', x &lt;&gt; x' -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;update x v (update x' v' s) = update x' v' (update x v s).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="store.update_update'"></a>update_update': forall s x v v',<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;update x v (update x v' s) = update x v s.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="store.update_lookup"></a>update_lookup : forall s x, <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;update x (lookup x s) s = s.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="store.update_lookup_update"></a>update_lookup_update: forall x v s, <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;update x (lookup x s) (update x v s) = s.<br/>
+
+<br/>
+<span class="keyword">End</span> store.<br/>
+
+<br/>
+<span class="keyword">Inductive</span> <a name="expr"></a>expr : <span class="keyword">Set</span> :=<br/>
+&nbsp;&nbsp;<a name="var_e"></a>var_e : var.v -&gt; expr<br/>
+| int_e : val -&gt; expr<br/>
+| add_e : expr -&gt; expr -&gt; expr<br/>
+| min_e : expr -&gt; expr -&gt; expr<br/>
+| mul_e : expr -&gt; expr -&gt; expr<br/>
+| div_e : expr -&gt; expr -&gt; expr<br/>
+| mod_e : expr -&gt; expr -&gt; expr.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="nat_e"></a>nat_e x := int_e (Z_of_nat x).<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="null"></a>null := int_e 0%Z.<br/>
+
+<br/>
+<span class="keyword">Notation</span> "e1 '+e' e2" := (add_e e1 e2) (at level 79) : sep_scope.<br/>
+<span class="keyword">Notation</span> "e1 '-e' e2" := (min_e e1 e2) (at level 79) : sep_scope.<br/>
+<span class="keyword">Notation</span> "e1 '*e' e2" := (mul_e e1 e2) (at level 79) : sep_scope.<br/>
+<span class="keyword">Notation</span> "e1 '/e' e2" := (div_e e1 e2) (at level 79) : sep_scope.<br/>
+<span class="keyword">Notation</span> "e1 'mode' e2" := (mod_e e1 e2) (at level 79) : sep_scope.<br/>
+
+<br/>
+Open <span class="keyword">Local</span> Scope sep_scope.<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="expr_var"></a>expr_var (e:expr) {struct e} : list var.v :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> e <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;var_e x =&gt; x::nil<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| int_e z =&gt; nil<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| add_e e1 e2 =&gt; expr_var e1 ++ expr_var e2<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| min_e e1 e2 =&gt; expr_var e1 ++ expr_var e2<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| mul_e e1 e2 =&gt; expr_var e1 ++ expr_var e2<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| div_e e1 e2 =&gt; expr_var e1 ++ expr_var e2<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| mod_e e1 e2 =&gt; expr_var e1 ++ expr_var e2<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="expr_eq"></a>expr_eq (e1:expr) (e2:expr) {struct e1} : bool :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> e1 <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a name="var_e"></a>var_e w1 =&gt; <span class="keyword">match</span> e2 <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a name="var_e"></a>var_e w2 =&gt; beq_nat w1 w2<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; false<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| int_e i1 =&gt; <span class="keyword">match</span> e2 <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a name="int_e"></a>int_e i2 =&gt; Zeq_bool i1 i2<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; false<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| add_e e11 e12 =&gt; <span class="keyword">match</span> e2 <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a name="add_e"></a>add_e e21 e22 =&gt;  andb (expr_eq e11 e21) (expr_eq e12 e22)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; false<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| min_e e11 e12 =&gt; <span class="keyword">match</span> e2 <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a name="min_e"></a>min_e e21 e22 =&gt; andb (expr_eq e11 e21) (expr_eq e12 e22)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; false<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| mul_e e11 e12 =&gt; <span class="keyword">match</span> e2 <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a name="mul_e"></a>mul_e e21 e22 =&gt; andb (expr_eq e11 e21) (expr_eq e12 e22)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; false<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| div_e e11 e12 =&gt; <span class="keyword">match</span> e2 <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a name="div_e"></a>div_e e21 e22 =&gt; andb (expr_eq e11 e21) (expr_eq e12 e22)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; false<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| mod_e e11 e12 =&gt; <span class="keyword">match</span> e2 <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a name="mod_e"></a>mod_e e21 e22 =&gt; andb (expr_eq e11 e21) (expr_eq e12 e22)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; false<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="expr_rewrite"></a>expr_rewrite (e:expr) (patern:expr) (rep:expr) {struct e} : expr :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> e <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a name="var_e"></a>var_e w =&gt; <span class="keyword">match</span> expr_eq e patern <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a name="true"></a>true =&gt; rep<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| false =&gt; e<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| int_e i =&gt; <span class="keyword">match</span> expr_eq e patern <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a name="true"></a>true =&gt; rep<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| false =&gt; e<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| add_e e1 e2 =&gt; <span class="keyword">match</span> expr_eq e patern <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a name="true"></a>true =&gt; rep<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| false =&gt; add_e (expr_rewrite e1 patern rep) (expr_rewrite e2 patern rep)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| min_e e1 e2 =&gt; <span class="keyword">match</span> expr_eq e patern <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a name="true"></a>true =&gt; rep<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| false =&gt; min_e (expr_rewrite e1 patern rep) (expr_rewrite e2 patern rep)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| mul_e e1 e2 =&gt; <span class="keyword">match</span> expr_eq e patern <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a name="true"></a>true =&gt; rep<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| false =&gt; mul_e (expr_rewrite e1 patern rep) (expr_rewrite e2 patern rep)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| div_e e1 e2 =&gt; <span class="keyword">match</span> expr_eq e patern <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a name="true"></a>true =&gt; rep<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| false =&gt; div_e (expr_rewrite e1 patern rep) (expr_rewrite e2 patern rep)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| mod_e e1 e2 =&gt; <span class="keyword">match</span> expr_eq e patern <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a name="true"></a>true =&gt; rep<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| false =&gt; mod_e (expr_rewrite e1 patern rep) (expr_rewrite e2 patern rep)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+<span class="keyword">end</span>.<br/>
+<span class="keyword">Fixpoint</span> <a name="eval"></a>eval (e:expr) (s:store.s) {struct e} : Z :=<br/>
+<span class="keyword">match</span> e <span class="keyword">with</span><br/>
+&nbsp;&nbsp;var_e w =&gt; store.lookup w s<br/>
+&nbsp;&nbsp;| int_e i =&gt; i<br/>
+&nbsp;&nbsp;| add_e e1 e2 =&gt; Zplus (eval e1 s) (eval e2 s)<br/>
+&nbsp;&nbsp;| min_e e1 e2 =&gt; Zminus (eval e1 s) (eval e2 s)<br/>
+&nbsp;&nbsp;| mul_e e1 e2 =&gt; Zmult (eval e1 s) (eval e2 s)<br/>
+&nbsp;&nbsp;| div_e e1 e2 =&gt; Zdiv (eval e1 s) (eval e2 s)<br/>
+&nbsp;&nbsp;| mod_e e1 e2 =&gt; Zmod (eval e1 s) (eval e2 s)<br/>
+<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="eval_store_update"></a>eval_store_update: forall e x v s,<br/>
+&nbsp;&nbsp;eval e (store.update x (eval v s) s) = eval (expr_rewrite e (var_e x) v) s.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="inde_expr"></a>inde_expr : forall e l,<br/>
+&nbsp;&nbsp;inter (expr_var e) l nil -&gt;<br/>
+&nbsp;&nbsp;forall x, In x l -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;forall s z,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;eval e s = eval e (store.update x z s).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="expr_inde_var"></a>expr_inde_var: forall e s v x,<br/>
+&nbsp;&nbsp;~In x (expr_var e) -&gt;<br/>
+&nbsp;&nbsp;eval e s = eval e (store.update x v s).<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="field"></a>field x f := var_e x +e int_e f.<br/>
+<span class="keyword">Notation</span> "x '-.&gt;' f " := (field x f) (at level 79) : sep_scope.<br/>
+
+<br/>
+<span class="keyword">Inductive</span> <a name="expr_b"></a>expr_b : <span class="keyword">Set</span> :=<br/>
+&nbsp;&nbsp;<a name="true_b"></a>true_b: expr_b<br/>
+| <a name="eq_b"></a>eq_b : expr -&gt; expr -&gt; expr_b<br/>
+| <a name="neq_b"></a>neq_b : expr -&gt; expr -&gt; expr_b<br/>
+| <a name="ge_b"></a>ge_b : expr -&gt; expr -&gt; expr_b<br/>
+| <a name="gt_b"></a>gt_b : expr -&gt; expr -&gt; expr_b<br/>
+| <a name="neg_b"></a>neg_b : expr_b -&gt; expr_b<br/>
+| <a name="and_b"></a>and_b : expr_b -&gt; expr_b -&gt; expr_b<br/>
+| <a name="or_b"></a>or_b : expr_b -&gt; expr_b -&gt; expr_b.<br/>
+
+<br/>
+<span class="keyword">Notation</span> "e == e'" := (eq_b e e') (at level 78) : sep_scope.<br/>
+<span class="keyword">Notation</span> "e =/= e'" := (neq_b e e') (at level 78) : sep_scope.<br/>
+<span class="keyword">Notation</span> "e &amp;&amp;&amp; e'" := (and_b e e') (at level 78) : sep_scope.<br/>
+<span class="keyword">Notation</span> "e ||| e'" := (or_b e e') (at level 78) : sep_scope.<br/>
+<span class="keyword">Notation</span> "e &gt;&gt;= e'" := (ge_b e e') (at level 78) : sep_scope.<br/>
+<span class="keyword">Notation</span> "e &gt;&gt; e'" := (gt_b e e') (at level 78) : sep_scope.<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="expr_b_var"></a>expr_b_var (e:expr_b) : list var.v :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> e <span class="keyword">with</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;true_b =&gt; nil<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| eq_b e1 e2 =&gt; expr_var e1 ++ expr_var e2<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| neq_b e1 e2 =&gt; expr_var e1 ++ expr_var e2<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| ge_b e1 e2 =&gt; expr_var e1 ++ expr_var e2<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| gt_b e1 e2 =&gt; expr_var e1 ++ expr_var e2<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| and_b e1 e2 =&gt; expr_b_var e1 ++ expr_b_var e2<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| or_b e1 e2 =&gt; expr_b_var e1 ++ expr_b_var e2<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| neg_b e =&gt; expr_b_var e<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="expr_b_eq"></a>expr_b_eq (e1: expr_b) (e2: expr_b) {struct e1} : bool :=<br/>
+<span class="keyword">match</span> e1 <span class="keyword">with</span><br/>
+&nbsp;&nbsp;<a name="true_b"></a>true_b =&gt; <span class="keyword">match</span> e2 <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a name="true_b"></a>true_b =&gt; true<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; false<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;| f == g =&gt; <span class="keyword">match</span> e2 <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a name="f'"></a>f' == g' =&gt; andb (expr_eq f f') (expr_eq g g')<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; false<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span>   <br/>
+&nbsp;&nbsp;| f =/= g =&gt; <span class="keyword">match</span> e2 <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a name="f'"></a>f' =/= g' =&gt; andb (expr_eq f f') (expr_eq g g')<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; false<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span>   <br/>
+&nbsp;&nbsp;| f &gt;&gt;= g =&gt; <span class="keyword">match</span> e2 <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a name="f'"></a>f' &gt;&gt;= g' =&gt; andb (expr_eq f f') (expr_eq g g')<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; false<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span>   <br/>
+&nbsp;&nbsp;| f &gt;&gt; g =&gt; <span class="keyword">match</span> e2 <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a name="f'"></a>f' &gt;&gt; g' =&gt; andb (expr_eq f f') (expr_eq g g')<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; false<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span>   <br/>
+&nbsp;&nbsp;| f &amp;&amp;&amp; g =&gt; <span class="keyword">match</span> e2 <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a name="f'"></a>f' &amp;&amp;&amp; g' =&gt; andb (expr_b_eq f f') (expr_b_eq g g')<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; false<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span>   <br/>
+&nbsp;&nbsp;| f ||| g =&gt; <span class="keyword">match</span> e2 <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a name="f'"></a>f' ||| g' =&gt; andb (expr_b_eq f f') (expr_b_eq g g')<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; false<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span>   <br/>
+&nbsp;&nbsp;| neg_b e =&gt;  <span class="keyword">match</span> e2 <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a name="neg_b"></a>neg_b e' =&gt; (expr_b_eq e e')<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; false<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span>   <br/>
+<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="expr_b_rewrite"></a>expr_b_rewrite (e: expr_b) (patern: expr) (rep: expr) {struct e}: expr_b :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> e <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a name="true_b"></a>true_b =&gt; true_b<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| f == g =&gt; expr_rewrite f patern rep == expr_rewrite g patern rep<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| f =/= g =&gt; expr_rewrite f patern rep =/= expr_rewrite g patern rep<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| f &gt;&gt;= g =&gt; expr_rewrite f patern rep &gt;&gt;= expr_rewrite g patern rep<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| f &gt;&gt; g =&gt; expr_rewrite f patern rep &gt;&gt; expr_rewrite g patern rep<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| f &amp;&amp;&amp; g =&gt; expr_b_rewrite f patern rep &amp;&amp;&amp; expr_b_rewrite g patern rep<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| f ||| g =&gt; expr_b_rewrite f patern rep ||| expr_b_rewrite g patern rep<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| neg_b e =&gt; neg_b (expr_b_rewrite e patern rep)<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="eval_b"></a>eval_b (e:expr_b) (s:store.s) {struct e} : bool :=<br/>
+<span class="keyword">match</span> e <span class="keyword">with</span><br/>
+&nbsp;&nbsp;true_b =&gt; true<br/>
+&nbsp;&nbsp;| f == g =&gt; Zeq_bool (eval f s) (eval g s)<br/>
+&nbsp;&nbsp;| f =/= g =&gt; negb (Zeq_bool (eval f s) (eval g s))<br/>
+&nbsp;&nbsp;| f &gt;&gt;= g =&gt; Zge_bool (eval f s) (eval g s)<br/>
+&nbsp;&nbsp;| f &gt;&gt; g =&gt; Zgt_bool (eval f s) (eval g s)<br/>
+&nbsp;&nbsp;| f &amp;&amp;&amp; g =&gt; andb (eval_b f s) (eval_b g s)<br/>
+&nbsp;&nbsp;| f ||| g =&gt; orb (eval_b f s) (eval_b g s)<br/>
+&nbsp;&nbsp;| neg_b e =&gt; negb (eval_b e s)<br/>
+<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="eval_b_store_update"></a>eval_b_store_update: forall b x v s,<br/>
+&nbsp;&nbsp;eval_b b (store.update x (eval v s) s) = eval_b (expr_b_rewrite b (var_e x) v) s.<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="expr_b_sem"></a>expr_b_sem (e: expr_b) (s: store.s) {struct e} : <span class="keyword">Prop</span> :=<br/>
+<span class="keyword">match</span> e <span class="keyword">with</span><br/>
+&nbsp;&nbsp;true_b =&gt; True<br/>
+&nbsp;&nbsp;| f == g =&gt; eval f s = eval g s<br/>
+&nbsp;&nbsp;| f =/= g =&gt; (eval f s &lt;&gt; eval g s)<br/>
+&nbsp;&nbsp;| f &gt;&gt;= g =&gt; (eval f s &gt;= eval g s)%Z<br/>
+&nbsp;&nbsp;| f &gt;&gt; g =&gt; (eval f s &gt; eval g s)%Z<br/>
+&nbsp;&nbsp;| f &amp;&amp;&amp; g =&gt; expr_b_sem f s /\ expr_b_sem g s<br/>
+&nbsp;&nbsp;| f ||| g =&gt; expr_b_sem f s \/ expr_b_sem g s<br/>
+&nbsp;&nbsp;| neg_b e =&gt; ~ expr_b_sem e s<br/>
+<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="expr_b_inde_var"></a>expr_b_inde_var: forall b s v x,<br/>
+&nbsp;&nbsp;&nbsp;~In x (expr_b_var b) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;eval_b b s = eval_b b (store.update x v s).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="expr_b_semantic_good"></a>expr_b_semantic_good : forall e s,<br/>
+&nbsp;&nbsp;eval_b e s = true &lt;-&gt; expr_b_sem e s.<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="expr_b_false_negb_true"></a>expr_b_false_negb_true: forall b s,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;eval_b b s = false -&gt; eval_b (neg_b b) s = true.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="expr_b_true_negb_false"></a>expr_b_true_negb_false: forall b s,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;eval_b (neg_b b) s = true -&gt; eval_b b s = false.<br/>
+
+<br/>
+Open <span class="keyword">Local</span> Scope heap_scope.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="assert"></a>assert := store.s -&gt; heap.h -&gt; <span class="keyword">Prop</span>.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="TT"></a>TT : assert := <span class="keyword">fun</span> s h =&gt; True.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="FF"></a>FF : assert := <span class="keyword">fun</span> s h =&gt; False.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="And"></a>And (P Q:assert) : assert := <span class="keyword">fun</span> s h =&gt; P s h /\ Q s h.<br/>
+
+<br/>
+<span class="keyword">Module</span> <a name="sep"></a>sep.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="sep.con"></a>con (P Q:assert) : assert := <span class="keyword">fun</span> s h =&gt;<br/>
+&nbsp;&nbsp;exists h1, exists h2, h1 # h2 /\ h = h1 +++ h2 /\ P s h1 /\ Q s h2.<br/>
+
+<br/>
+<span class="keyword">Notation</span> "P ** Q" := (con P Q) (at level 80).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="sep.con_inde_store"></a>con_inde_store: forall P Q s s' h,<br/>
+&nbsp;&nbsp;((P ** Q) s h) -&gt; <br/>
+&nbsp;&nbsp;(forall s s' h, P s h -&gt; P s' h) -&gt; <br/>
+&nbsp;&nbsp;(forall s s' h, Q s h -&gt; Q s' h) -&gt;<br/>
+&nbsp;&nbsp;((P ** Q) s' h).<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="sep.imp"></a>imp (P Q:assert) : assert := <span class="keyword">fun</span> s h =&gt;<br/>
+&nbsp;&nbsp;forall h', h # h' /\ P s h' -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;forall h'', h'' = h +++ h' -&gt; Q s h''.<br/>
+
+<br/>
+<span class="keyword">Notation</span> "P -* Q" := (imp P Q) (at level 80).<br/>
+
+<br/>
+</code>
+
+<div class="doc">
+Assertions lemma 
+</div>
+<code>
+
+<br/>
+<span class="keyword">Definition</span> <a name="sep.entails"></a>entails (P Q:assert) : <span class="keyword">Prop</span> :=<br/>
+&nbsp;&nbsp;forall s h, P s h -&gt; Q s h.<br/>
+
+<br/>
+<span class="keyword">Notation</span> "P ==&gt; Q" := (entails P Q) (at level 90, no associativity).<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="sep.equiv"></a>equiv (P Q:assert) : <span class="keyword">Prop</span> :=<br/>
+&nbsp;&nbsp;forall s h, P s h &lt;-&gt; Q s h.<br/>
+
+<br/>
+<span class="keyword">Notation</span> "P &lt;==&gt; Q" := (equiv P Q) (at level 90, no associativity).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="sep.con_TT"></a>con_TT : forall P, P ==&gt; (P ** TT).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="sep.con_com"></a>con_com : forall P Q, P ** Q ==&gt; Q ** P.<br/>
+
+<br/>
+<span class="keyword">Axiom</span> <a name="assert_ext"></a>assert_ext: forall P Q, (P &lt;==&gt; Q) -&gt; P = Q.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="sep.con_com_equiv"></a>con_com_equiv : forall P Q, (P ** Q) = (Q ** P).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="sep.con_assoc"></a>con_assoc: forall P Q R, (P ** Q) ** R ==&gt; P ** (Q ** R).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="sep.con_assoc_equiv"></a>con_assoc_equiv : forall P Q R, ((Q ** P) ** R) = (Q ** (P ** R)).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="sep.mp"></a>mp : forall P Q, Q ** (Q -* P) ==&gt; P.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="sep.monotony"></a>monotony : forall (P1 P2 Q1 Q2:assert),<br/>
+&nbsp;&nbsp;forall s h,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;((forall h', P1 s h' -&gt; P2 s h') /\ (forall h'', Q1 s h'' -&gt; Q2 s h'')) -&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;((P1 ** Q1) s h -&gt; (P2 ** Q2) s h).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="sep.monotony'"></a>monotony': forall P1 P2 P3 P4,<br/>
+&nbsp;(P1 ==&gt; P2) -&gt;<br/>
+&nbsp;(P3 ==&gt; P4) -&gt;<br/>
+&nbsp;(P1 ** P3 ==&gt; P2 ** P4).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="sep.monotony''"></a>monotony'': forall P1 P2 P3 P4,<br/>
+&nbsp;(P2 ==&gt; P1) -&gt;<br/>
+&nbsp;(P3 ==&gt; P4) -&gt;<br/>
+&nbsp;(P1 -* P3 ==&gt; P2 -* P4).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="sep.adjunction"></a>adjunction : forall (P1 P2 P3:assert),<br/>
+&nbsp;&nbsp;forall s,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(forall h, (P1 ** P2) s h -&gt; P3 s h) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(forall h, P1 s h -&gt; (P2 -* P3) s h).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="sep.adjunction'"></a>adjunction' : forall (P1 P2 P3:assert),<br/>
+&nbsp;&nbsp;forall s,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(forall h, P1 s h -&gt; (P2 -* P3) s h) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(forall h, (P1 ** P2) s h -&gt; P3 s h).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="sep.imp_reg"></a>imp_reg : forall P Q, P ==&gt; Q -* (P ** Q).<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="sep.emp"></a>emp : assert := <span class="keyword">fun</span> s h =&gt; h = heap.emp.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="sep.con_emp"></a>con_emp: forall P, (P ** sep.emp) ==&gt; P .<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="sep.con_emp'"></a>con_emp': forall P, P  ==&gt; (P ** sep.emp).<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="sep.mapsto"></a>mapsto e e' s h := exists p, <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;val2loc (eval e s) = p /\ h = heap.singleton p (eval e' s).<br/>
+
+<br/>
+<span class="keyword">Notation</span> "e1 '|-&gt;' e2" := (mapsto e1 e2) (at level 79, no associativity).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="sep.mapsto_con_inversion"></a>mapsto_con_inversion : forall l e P s h,<br/>
+&nbsp;&nbsp;((l |-&gt; e) ** P) s h -&gt;<br/>
+&nbsp;&nbsp;exists n,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;val2loc (eval l s) = n /\ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;exists h',<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;h = (heap.singleton n (eval e s)) +++ h' /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;P s h'.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="sep.cell_exists"></a>cell_exists (e1: expr) : assert :=<br/>
+&nbsp;<span class="keyword">fun</span> s h =&gt; exists y, (e1 |-&gt; int_e y) s h.<br/>
+
+<br/>
+<span class="keyword">Notation</span> " e '|-&gt;_' " := (cell_exists e) (right associativity, at level 80).<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="sep.mapstos"></a>mapstos (e:expr) (l:list expr) {struct l} : assert :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> l <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a name="sep.nil"></a>nil =&gt; sep.emp<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| e1::tl =&gt; e |-&gt; e1 ** mapstos (e +e int_e 1%Z) tl<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Notation</span> "x '|--&gt;' l" := (mapstos x l) (at level 80).<br/>
+
+<br/>
+<span class="keyword">End</span> sep.<br/>
+
+<br/>
+<span class="keyword">Notation</span> "P ** Q" := (sep.con P Q) (at level 80) : sep_scope.<br/>
+<span class="keyword">Notation</span> "P -* Q" := (sep.imp P Q) (at level 80) : sep_scope.<br/>
+<span class="keyword">Notation</span> "P ==&gt; Q" := (sep.entails P Q) (at level 90, no associativity) : sep_scope.<br/>
+<span class="keyword">Notation</span> "P &lt;==&gt; Q" := (sep.equiv P Q) (at level 90, no associativity) : sep_scope.<br/>
+<span class="keyword">Notation</span> "e1 '|-&gt;' e2" := (sep.mapsto e1 e2) (at level 79, no associativity) : sep_scope.<br/>
+<span class="keyword">Notation</span> "x '|--&gt;' l" := (sep.mapstos x l) (at level 80) : sep_scope.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="mapsto_equiv'"></a>mapsto_equiv' : forall s s' h e1 e2 e3 e4,<br/>
+&nbsp;&nbsp;(e1|-&gt;e2) s' h -&gt;<br/>
+&nbsp;&nbsp;eval e1 s' = eval e3 s -&gt;<br/>
+&nbsp;&nbsp;eval e2 s' = eval e4 s -&gt;<br/>
+&nbsp;&nbsp;(e3|-&gt;e4) s h.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="mapsto_equiv"></a>mapsto_equiv : forall s h e1 e2 e3 e4,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(e1|-&gt;e2) s h -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;eval e1 s = eval e3 s -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;eval e2 s = eval e4 s -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(e3|-&gt;e4) s h.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="inde"></a>inde (l:list var.v) (P:assert) :=<br/>
+&nbsp;&nbsp;forall s h,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(forall x v, In x l -&gt; (P s h &lt;-&gt; P (store.update x v s) h)).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="inde_update_store"></a>inde_update_store : forall (P:assert) x z s h,<br/>
+&nbsp;&nbsp;inde (x::nil) P -&gt;<br/>
+&nbsp;&nbsp;P s h -&gt;<br/>
+&nbsp;&nbsp;P (store.update x z s) h.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="inde_update_store'"></a>inde_update_store' : forall (P:assert) x z s h,<br/>
+&nbsp;&nbsp;inde (x::nil) P -&gt;<br/>
+&nbsp;&nbsp;P (store.update x z s) h -&gt;<br/>
+&nbsp;&nbsp;P s h.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="inde_TT"></a>inde_TT : forall l, inde l TT.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="inde_sep_con"></a>inde_sep_con : forall l (P Q:assert),<br/>
+&nbsp;&nbsp;inde l P -&gt; inde l Q -&gt;<br/>
+&nbsp;&nbsp;inde l (P ** Q).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="inde_sep_imp"></a>inde_sep_imp : forall l (P Q:assert),<br/>
+&nbsp;&nbsp;inde l P -&gt; inde l Q -&gt;<br/>
+&nbsp;&nbsp;inde l (P -* Q).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="inde_mapsto"></a>inde_mapsto : forall lst e e',<br/>
+&nbsp;&nbsp;inter (expr_var e) lst nil -&gt;<br/>
+&nbsp;&nbsp;inter (expr_var e') lst nil -&gt;<br/>
+&nbsp;&nbsp;inde lst (e |-&gt; e').<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="inde_mapsto'"></a>inde_mapsto' : forall e x,<br/>
+&nbsp;&nbsp;inde x (<span class="keyword">fun</span> s h =&gt; exists z, (int_e e |-&gt; int_e z) s h).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="inde_mapsto''"></a>inde_mapsto'' : forall e1 e2 x,<br/>
+&nbsp;&nbsp;inde x (int_e e1 |-&gt; int_e e2).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="inde_mapstos"></a>inde_mapstos : forall lst l e,<br/>
+&nbsp;&nbsp;inter (fold_right (@app var.v) nil (map expr_var lst)) l nil -&gt;<br/>
+&nbsp;&nbsp;inter (expr_var e) l nil -&gt;<br/>
+&nbsp;&nbsp;inde l (e |--&gt; lst).<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+</code>
+</div>
+
+<div id="footer">
+<hr/><a href="index.html">Index</a><hr/><font size="-1">This page has been generated by <a href="http://coq.inria.fr">coqdoc</a></font>
+</div>
+
+</div>
+
+</body>
+</html>

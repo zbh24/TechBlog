@@ -1,0 +1,361 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"/>
+<link href="coqdoc.css" rel="stylesheet" type="text/css"/>
+<title>contrib</title>
+</head>
+
+<body>
+
+<div id="page">
+
+<div id="header">
+</div>
+
+<div id="main">
+
+<h1 class="libtitle">Library contrib</h1>
+
+<code>
+<span class="keyword">Require</span> <span class="keyword">Import</span> List.<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> ZArith.<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> List.<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> EqNat.<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> Classical.<br/>
+
+<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> <a class="modref" href="util.html">util</a>.<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> <a class="modref" href="util_tactic.html">util_tactic</a>.<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> <a class="modref" href="heap.html">heap</a>.<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> <a class="modref" href="heap_tactic.html">heap_tactic</a>.<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> <a class="modref" href="bipl.html">bipl</a>.<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> <a class="modref" href="axiomatic.html">axiomatic</a>.<br/>
+
+<br/>
+Open <span class="keyword">Local</span> Scope heap_scope.<br/>
+Open <span class="keyword">Local</span> Scope sep_scope.<br/>
+
+<br/>
+<span class="keyword">Load</span> contrib_tactics.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="singleton_equal"></a>singleton_equal: forall s h1 h2 e1 e2 e3 e4,<br/>
+&nbsp;&nbsp;(e1 |-&gt; e2) s h1 -&gt;<br/>
+&nbsp;&nbsp;(e3 |-&gt; e4) s h2 -&gt;<br/>
+&nbsp;&nbsp;eval e1 s = eval e3 s -&gt;<br/>
+&nbsp;&nbsp;eval e2 s = eval e4 s -&gt;<br/>
+&nbsp;&nbsp;h1 = h2.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="semax_lookup_simple"></a>semax_lookup_simple: forall R e e' x s h,<br/>
+&nbsp;&nbsp;((e |-&gt; e') ** TT) s h -&gt;<br/>
+&nbsp;&nbsp;(update_store2 x e' R) s h -&gt;<br/>
+&nbsp;&nbsp;exists e0, ((e |-&gt; e0) ** ((e |-&gt; e0) -* (update_store2 x e0 R))) s h.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="update_heap2_sep_con"></a>update_heap2_sep_con: forall x v P Q,<br/>
+&nbsp;&nbsp;(update_heap2 x v P) ** Q ==&gt; update_heap2 x v (P**Q).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="update_heap2_sep_con'"></a>update_heap2_sep_con': forall P Q x1 x2 v1 v2,<br/>
+&nbsp;&nbsp;(update_heap2 x1 v1 P) ** (update_heap2 x2 v2 Q) ==&gt;<br/>
+&nbsp;&nbsp;update_heap2 x1 v1 (update_heap2 x2 v2 (P**Q)).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="semax_assign'"></a>semax_assign' :forall Q P x e,<br/>
+&nbsp;&nbsp;&nbsp;(P ==&gt; update_store2 x e Q) -&gt; <br/>
+&nbsp;&nbsp;&nbsp;{{ P }} x &lt;- e {{ Q }}.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="semax_assign''"></a>semax_assign'' : forall R P Q x e c,<br/>
+&nbsp;&nbsp;(P ==&gt; update_store2 x e R) -&gt;<br/>
+&nbsp;&nbsp;{{ R }} c {{ Q }} -&gt;<br/>
+&nbsp;&nbsp;{{ P }} x &lt;- e ; c {{ Q }}.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="semax_lookup'"></a>semax_lookup' : forall Q P x e,<br/>
+&nbsp;&nbsp;(P ==&gt; lookup2 x e Q) -&gt; <br/>
+&nbsp;&nbsp;{{ P }} x &lt;-* e {{ Q }}.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="semax_lookup''"></a>semax_lookup'' : forall R P Q x e c,<br/>
+&nbsp;&nbsp;(P ==&gt; lookup2 x e R) -&gt;<br/>
+&nbsp;&nbsp;{{ R }} c {{ Q }} -&gt;<br/>
+&nbsp;&nbsp;{{ P }} x &lt;-* e ; c {{ Q }}.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="semax_lookup_backwards'"></a>semax_lookup_backwards' : forall P Q x e,<br/>
+&nbsp;&nbsp;(P ==&gt; (<span class="keyword">fun</span> s h =&gt; exists e0, ((e |-&gt; e0) ** ((e |-&gt; e0) -* (update_store2 x e0 Q))) s h)) -&gt; <br/>
+&nbsp;&nbsp;{{ P }} x &lt;-* e {{ Q }}.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="semax_lookup_backwards''"></a>semax_lookup_backwards'' : forall P Q R x e c,<br/>
+&nbsp;&nbsp;(P ==&gt; (<span class="keyword">fun</span> s h =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;exists e0, ((e |-&gt; e0) ** ((e |-&gt; e0) -* (update_store2 x e0 R))) s h)) -&gt; <br/>
+&nbsp;&nbsp;{{ R }} c {{ Q }} -&gt;<br/>
+&nbsp;&nbsp;{{ P }} x &lt;-* e; c {{ Q }}.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="cell_read"></a>cell_read: forall e v Q s h,<br/>
+&nbsp;((e |-&gt; v) ** TT) s h /\ Q s h -&gt;<br/>
+&nbsp;((e |-&gt; v) ** ((e |-&gt; v) -* Q)) s h.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="semax_lookup_backwards''2"></a>semax_lookup_backwards''2 : forall P Q R x e c,<br/>
+&nbsp;&nbsp;(P ==&gt; (<span class="keyword">fun</span> s h =&gt; exists e0, ((e |-&gt; e0) ** TT) s h /\ (update_store2 x e0 R) s h)) -&gt; <br/>
+&nbsp;&nbsp;{{ R }} c {{ Q }} -&gt;<br/>
+&nbsp;&nbsp;{{ P }} x &lt;-* e; c {{ Q }}.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="semax_mutation'"></a>semax_mutation' : forall Q P e1 e2,<br/>
+&nbsp;&nbsp;(P ==&gt; update_heap2 e1 e2 Q) -&gt; <br/>
+&nbsp;&nbsp;{{ P }} e1 *&lt;- e2 {{ Q }}.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="semax_mutation''"></a>semax_mutation'' : forall R P Q c e1 e2,<br/>
+&nbsp;&nbsp;(P ==&gt; update_heap2 e1 e2 R) -&gt;<br/>
+&nbsp;&nbsp;{{ R }} c {{ Q }} -&gt;<br/>
+&nbsp;&nbsp;{{ P }} e1 *&lt;- e2 ; c {{ Q }}.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="semax_mutation_backwards'"></a>semax_mutation_backwards' : forall Q P e1 e2,<br/>
+&nbsp;&nbsp;(P ==&gt; (<span class="keyword">fun</span> s h =&gt; exists e'', ((e1 |-&gt; e'') ** ((e1 |-&gt; e2) -* Q)) s h)) -&gt; <br/>
+&nbsp;&nbsp;{{ P }} e1 *&lt;- e2 {{ Q }}.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="semax_mutation_backwards''"></a>semax_mutation_backwards'' : forall Q P R e1 e2 c,<br/>
+&nbsp;&nbsp;(P ==&gt; (<span class="keyword">fun</span> s h =&gt; exists e'', ((e1 |-&gt; e'') ** ((e1 |-&gt; e2) -* R)) s h)) -&gt; <br/>
+&nbsp;&nbsp;{{ R }} c {{ Q }} -&gt; <br/>
+&nbsp;&nbsp;{{ P }} e1 *&lt;- e2 ; c {{ Q }}.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="semax_while'"></a>semax_while' : forall b c I P Q,<br/>
+&nbsp;&nbsp;(P ==&gt; I) -&gt;<br/>
+&nbsp;&nbsp;{{ <span class="keyword">fun</span> s h =&gt; I s h /\ eval_b b s = true }} c {{ I }} -&gt;<br/>
+&nbsp;&nbsp;((<span class="keyword">fun</span> s h =&gt; I s h /\ eval_b b s = false) ==&gt; Q) -&gt;<br/>
+&nbsp;&nbsp;{{ P }} while b c {{ Q }}.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="semax_while''"></a>semax_while'': forall b c I P Q c1,<br/>
+&nbsp;&nbsp;(P ==&gt; I) -&gt;<br/>
+&nbsp;&nbsp;{{ <span class="keyword">fun</span> s h =&gt; I s h /\ eval_b b s = true }} c {{ I }} -&gt;<br/>
+&nbsp;&nbsp;{{ <span class="keyword">fun</span> s h =&gt; I s h /\ eval_b b s = false }} c1 {{ Q }} -&gt;<br/>
+&nbsp;&nbsp;{{ P }} while b c; c1 {{ Q }}.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="semax_skip'"></a>semax_skip': forall P Q,<br/>
+&nbsp;&nbsp;(P ==&gt; Q) -&gt; <br/>
+&nbsp;&nbsp;{{ P }} skip {{ Q }}.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="apply_triple"></a>apply_triple: forall (P P' Q Q': assert) c,<br/>
+&nbsp;&nbsp;&nbsp;{{P'}} c {{Q'}} -&gt;<br/>
+&nbsp;&nbsp;&nbsp;(P ==&gt; P') -&gt;<br/>
+&nbsp;&nbsp;&nbsp;(Q' ==&gt; Q) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;{{P}} c {{Q}}.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="apply_triple'"></a>apply_triple': forall (P P' Q Q': assert) c c',<br/>
+&nbsp;&nbsp;&nbsp;{{P'}} c {{Q'}} -&gt;<br/>
+&nbsp;&nbsp;&nbsp;(P ==&gt; P') -&gt;<br/>
+&nbsp;&nbsp;&nbsp;{{Q'}} c' {{Q}} -&gt;<br/>
+&nbsp;&nbsp;&nbsp;{{P}} c; c' {{Q}}.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="semax_and'"></a>semax_and' : forall c P Q, {{ P }} c {{ Q }} -&gt; <br/>
+&nbsp;&nbsp;forall P' Q' d, {{ P' }} d {{ Q' }} -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;c = d -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{ And P P' }} c {{ And Q Q' }}.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="semax_and"></a>semax_and : forall c P Q P' Q', <br/>
+&nbsp;&nbsp;{{ P }} c {{ Q }} -&gt; <br/>
+&nbsp;&nbsp;{{ P' }} c {{ Q' }} -&gt;<br/>
+&nbsp;&nbsp;{{ And P P' }} c {{ And Q Q' }}.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="forward_reasoning"></a>forward_reasoning : forall x e P,<br/>
+&nbsp;&nbsp;inde (x::nil) P -&gt;<br/>
+&nbsp;&nbsp;~ In x (expr_var e) -&gt;<br/>
+&nbsp;&nbsp;{{ P }} x &lt;- e {{ <span class="keyword">fun</span> s h =&gt; P s h /\ eval (var_e x) s = eval e s }}.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="frame_rule'"></a>frame_rule': forall P c Q,<br/>
+&nbsp;&nbsp;{{ P }} c {{ Q }} -&gt;<br/>
+&nbsp;&nbsp;forall R1 R2,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;inde (modified_cmd_var c) R1 -&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(R1 ==&gt; R2) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{ P ** R1 }} c {{ Q ** R2 }}.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="frame_rule''"></a>frame_rule'': forall c1 c2 P1 P2 Q1 Q2,<br/>
+&nbsp;&nbsp;{{ P1 }} c1 {{ Q1 }} -&gt;<br/>
+&nbsp;&nbsp;{{ P2 }} c2 {{ Q2 }} -&gt;    <br/>
+&nbsp;&nbsp;inde (modified_cmd_var c1) P2 -&gt;<br/>
+&nbsp;&nbsp;inde (modified_cmd_var c2) Q1 -&gt;<br/>
+&nbsp;&nbsp;{{ P1 ** P2 }} c1 ; c2 {{ Q1 ** Q2 }}.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="semax_mutation_frame_rule"></a>semax_mutation_frame_rule : forall  x v c P Q v',<br/>
+&nbsp;&nbsp;{{ P }} c {{ Q }} -&gt; <br/>
+&nbsp;&nbsp;inde (modified_cmd_var c) (x |-&gt; v) -&gt;<br/>
+&nbsp;&nbsp;{{ (x |-&gt; v') ** P }} x *&lt;- v ; c {{ (x |-&gt; v) ** Q }}.<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="Array"></a>Array (p:loc) (size:nat) {struct size} : assert :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> size <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a name="O"></a>O =&gt; sep.emp<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| S n =&gt; (<span class="keyword">fun</span> s h =&gt; exists y, (nat_e p |-&gt; int_e y) s h) ** <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Array (p + 1) n<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Array_inde_store"></a>Array_inde_store : forall m n s h,<br/>
+&nbsp;&nbsp;Array n m s h -&gt; forall s', Array n m s' h.<br/>
+
+<br/>
+<span class="keyword">Ltac</span> Array_equiv := <br/>
+&nbsp;&nbsp;<span class="keyword">match</span> goal <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| id: Array ?adr1 ?size1 ?s1 ?h |-  Array ?adr2 ?size2 ?s2 ?h =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;assert (Array_equivA1: adr2 = adr1); [omega |<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;assert (Array_equivA2: size2 = size1); [omega |
+          ((rewrite Array_equivA1) || idtac); ((rewrite  Array_equivA2) || idtac);
+          eapply (Array_inde_store); apply id
+        ]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Array_inde"></a>Array_inde: forall l adr size,<br/>
+&nbsp;&nbsp;inde l (Array adr size).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Array_inde_list"></a>Array_inde_list: forall l st sz,<br/>
+&nbsp;&nbsp;inde l (Array st sz).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Array_concat_split"></a>Array_concat_split: forall size1 size2 adr,<br/>
+&nbsp;&nbsp;Array adr (size1+size2) &lt;==&gt; (Array adr size1 ** Array (adr+size1) size2).<br/>
+
+<br/>
+<span class="keyword">Ltac</span> TArray_concat_split_r size1 size2:=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> goal <span class="keyword">with</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- Array ?adr ?size ?s ?h =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;generalize (Array_concat_split size1 size2 adr s h); intro TArray_concat_split_rH1; inversion_clear TArray_concat_split_rH1 <span class="keyword">as</span> [TArray_concat_split_rH11 TArray_concat_split_rH12];<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;assert (TArray_concat_split_rA1: size1 + size2 = size); [omega | (rewrite &lt;- TArray_concat_split_rA1 || idtac); clear TArray_concat_split_rA1; apply TArray_concat_split_rH12; clear TArray_concat_split_rH11 TArray_concat_split_rH12]<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Ltac</span> TArray_concat_split_l_l sz id:=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> goal <span class="keyword">with</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| id: Array ?adr ?size ?s ?h |- _ =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;assert (TArray_concat_split_l_lA1: size = sz + (size - sz)); <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[omega | <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;rewrite TArray_concat_split_l_lA1 <span class="keyword">in</span> id; clear TArray_concat_split_l_lA1;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;generalize (Array_concat_split sz (size - sz) adr s h); intro TArray_concat_split_l_lH1;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;inversion_clear TArray_concat_split_l_lH1 <span class="keyword">as</span> [TArray_concat_split_l_lH2 TArray_concat_split_l_lH3]; generalize (TArray_concat_split_l_lH2 id); clear TArray_concat_split_l_lH3; clear TArray_concat_split_l_lH2; intro<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Ltac</span> TArray_concat_split_l_r sz id:=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> goal <span class="keyword">with</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| id: Array ?adr ?size ?s ?h |- _ =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;assert (TArray_concat_split_l_lA1: size = (size - sz) + sz); <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[omega | <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;rewrite TArray_concat_split_l_lA1 <span class="keyword">in</span> id; clear TArray_concat_split_l_lA1;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;generalize (Array_concat_split (size - sz) sz adr s h); intro TArray_concat_split_l_lH1;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;inversion_clear TArray_concat_split_l_lH1 <span class="keyword">as</span> [TArray_concat_split_l_lH2 TArray_concat_split_l_lH3]; generalize (TArray_concat_split_l_lH2 id); clear TArray_concat_split_l_lH3; clear TArray_concat_split_l_lH2; intro<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Array_split"></a>Array_split : forall size' size,<br/>
+&nbsp;&nbsp;size' &lt;= size -&gt; <br/>
+&nbsp;&nbsp;forall adr s h, adr &gt; 0 -&gt; Array adr size s h -&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(Array adr size' ** Array (adr+size') (size - size')) s h.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Array_disjoint"></a>Array_disjoint : forall size adr s h, adr &gt; 0 -&gt;<br/>
+&nbsp;&nbsp;Array adr size s h -&gt;<br/>
+&nbsp;&nbsp;forall adr', <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;adr' &gt;= adr+size -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;forall z,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;h # (heap.singleton adr' z).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Array_concat"></a>Array_concat : forall size adr s h, adr &gt; 0 -&gt;<br/>
+&nbsp;&nbsp;Array adr size s h -&gt;<br/>
+&nbsp;&nbsp;forall z, <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Array adr (size + 1) s (h +++ (heap.singleton (adr+size) z)).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="mapstos_to_array"></a>mapstos_to_array: forall l x x' sz s h,<br/>
+&nbsp;&nbsp;&nbsp;(x |--&gt; l) s h -&gt;<br/>
+&nbsp;&nbsp;&nbsp;eval x s = Z_of_nat x' -&gt;<br/>
+&nbsp;&nbsp;&nbsp;sz = length l -&gt;<br/>
+&nbsp;&nbsp;&nbsp;Array x' sz s h.<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="ArrayI"></a>ArrayI (x:loc) (l:list Z) {struct l} : assert :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> l <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a name="nil"></a>nil =&gt; sep.emp<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| hd::tl =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="keyword">fun</span> s h =&gt; (nat_e x |-&gt; int_e hd) s h) ** <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ArrayI (x + 1) tl<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="ArrayI_inde_store"></a>ArrayI_inde_store: forall l n s h,<br/>
+&nbsp;&nbsp;ArrayI n l s h -&gt; forall s', ArrayI n l s' h.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="ArrayI_disjoint_heap"></a>ArrayI_disjoint_heap: forall lst a h' e e' s h,<br/>
+&nbsp;&nbsp;ArrayI a lst s h -&gt;<br/>
+&nbsp;&nbsp;(nat_e e |-&gt; e') s h' -&gt;<br/>
+&nbsp;&nbsp;(e &lt; a \/ e &gt;= a + length lst) -&gt;<br/>
+&nbsp;&nbsp;h # h'.<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Data_destructive_update_inv2"></a>Data_destructive_update_inv2: forall lx x h1 h2 e1 x1 s h,<br/>
+&nbsp;&nbsp;(ArrayI x lx ** TT) s h -&gt;<br/>
+&nbsp;&nbsp;h1 # h2 -&gt;<br/>
+&nbsp;&nbsp;h = h1 +++ h2 -&gt;<br/>
+&nbsp;&nbsp;(nat_e e1 |-&gt; x1) s h1 -&gt;<br/>
+&nbsp;&nbsp;(e1 &lt; x \/ e1 &gt;= x + length lx) -&gt;<br/>
+&nbsp;&nbsp;(ArrayI x lx ** TT) s h2.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Data_destructive_update_inv"></a>Data_destructive_update_inv: forall lx x h1 h2 e1 x1 x2 h'1 h' s h,<br/>
+&nbsp;&nbsp;(ArrayI x lx ** TT) s h -&gt;<br/>
+&nbsp;&nbsp;h1 # h2 -&gt;<br/>
+&nbsp;&nbsp;h = h1 +++ h2 -&gt;<br/>
+&nbsp;&nbsp;(nat_e e1 |-&gt; x1) s h1 -&gt;<br/>
+&nbsp;&nbsp;(nat_e e1 |-&gt; x2) s h'1 -&gt;<br/>
+&nbsp;&nbsp;h'1 # h2 -&gt;<br/>
+&nbsp;&nbsp;h' = h'1 +++ h2 -&gt;<br/>
+&nbsp;&nbsp;(e1 &lt; x \/ e1 &gt;= x + length lx) -&gt;<br/>
+&nbsp;&nbsp;(ArrayI x lx ** TT) s h'.<br/>
+
+<br/>
+</code>
+</div>
+
+<div id="footer">
+<hr/><a href="index.html">Index</a><hr/><font size="-1">This page has been generated by <a href="http://coq.inria.fr">coqdoc</a></font>
+</div>
+
+</div>
+
+</body>
+</html>

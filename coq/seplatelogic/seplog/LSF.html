@@ -1,0 +1,152 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"/>
+<link href="coqdoc.css" rel="stylesheet" type="text/css"/>
+<title>LSF</title>
+</head>
+
+<body>
+
+<div id="page">
+
+<div id="header">
+</div>
+
+<div id="main">
+
+<h1 class="libtitle">Library LSF</h1>
+
+<code>
+<span class="keyword">Load</span> seplog_header.<br/>
+
+<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> Omega.<br/>
+
+<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> <a class="modref" href="frag_list_triple.html">frag_list_triple</a>.<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> <a class="modref" href="frag_list_entail.html">frag_list_entail</a>.<br/>
+
+<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> <a class="modref" href="expr_b_dp.html">expr_b_dp</a>.<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> Max.<br/>
+
+<br/>
+<span class="keyword">Import</span> Fresh.<br/>
+
+<br/>
+<span class="keyword">Inductive</span> <a name="LSF"></a>LSF : assrt -&gt; cmd -&gt; assrt -&gt; <span class="keyword">Prop</span> :=<br/>
+<br/>
+&nbsp;&nbsp;| <a name="LSF_precond_stre"></a>LSF_precond_stre: forall L1 L1' L2 c,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(assrt_interp L1) ==&gt; (assrt_interp L1') -&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;LSF L1' c L2 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;LSF L1 c L2<br/>
+<br/>
+&nbsp;&nbsp;| <a name="LSF_seq_assoc"></a>LSF_seq_assoc: forall P Q c1 c2 c3,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;LSF P (c1; (c2; c3)) Q -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;LSF P ((c1; c2); c3) Q<br/>
+<br/>
+&nbsp;&nbsp;| <a name="LSF_add_empty"></a>LSF_add_empty: forall P Q c,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;LSF P (c; skip) Q -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;LSF P c Q<br/>
+<br/>
+&nbsp;&nbsp;| <a name="LSF_empty"></a>LSF_empty: forall P Q,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;((assrt_interp P) ==&gt; (assrt_interp Q)) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;LSF P skip Q<br/>
+<br/>
+&nbsp;&nbsp;| <a name="LSF_assign"></a>LSF_assign: forall pi sig Q c x e x',<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;fresh_assrt x' (pi, sig) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;fresh_assrt x' Q -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;fresh_cmd x' c -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;fresh_e x' e -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;fresh_e x' (var_e x) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;LSF (((expr_b_rewrite pi (var_e x) (var_e x')) &amp;&amp;&amp; ((var_e x) == (expr_rewrite e (var_e x) (var_e x')))), subst_Sigma sig x (var_e x')) c Q -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;LSF (pi, sig) (x &lt;- e ; c) Q<br/>
+<br/>
+&nbsp;&nbsp;| <a name="LSF_lookup"></a>LSF_lookup: forall pi sig e1 e2 e x Q c x', <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(forall s, eval_b pi s = true -&gt; eval_b (e1 == e) s = true) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;fresh_assrt x' (pi, star sig (singl e1 e2)) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;fresh_assrt x' Q -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;fresh_cmd x' c -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;fresh_e x' e -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;fresh_e x' (var_e x) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;LSF (((expr_b_rewrite pi (var_e x) (var_e x')) &amp;&amp;&amp; ((var_e x) == (expr_rewrite e2 (var_e x) (var_e x')))), subst_Sigma (star sig (singl e1 e2)) x (var_e x')) c Q -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;LSF (pi,star sig (singl e1 e2)) (x &lt;-* e; c) Q<br/>
+<br/>
+&nbsp;&nbsp;| <a name="LSF_mutation"></a>LSF_mutation: forall pi1 sig1 e1 e2 e3 e4 Q c, <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(forall s, eval_b pi1 s = true -&gt; eval_b (e1 == e3) s = true) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;LSF (pi1,star sig1 (singl e1 e4)) c Q -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;LSF (pi1,star sig1 (singl e1 e2)) (e3 *&lt;- e4 ; c) Q<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;| <a name="LSF_mutation'"></a>LSF_mutation': forall pi1 sig1 e1 e3 e4 Q c, <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(forall s, eval_b pi1 s = true -&gt; eval_b (e1 == e3) s = true) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;LSF (pi1,star sig1 (singl e1 e4)) c Q -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;LSF (pi1,star sig1 (cell e1)) (e3 *&lt;- e4 ; c) Q<br/>
+<br/>
+&nbsp;&nbsp;| <a name="LSF_cond"></a>LSF_cond: forall b c1 c2 c Q pi sig,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;LSF (pi &amp;&amp;&amp; b, sig) (c1;c) Q -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;LSF (pi &amp;&amp;&amp; (! b), sig) (c2;c) Q -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;LSF (pi, sig) (ifte b thendo c1 elsedo c2; c) Q<br/>
+<br/>
+&nbsp;&nbsp;| <a name="LSF_unroll_lst_lookup"></a>LSF_unroll_lst_lookup: forall pi sig e1 e2 e x Q c x', <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(forall s, eval_b pi s = true -&gt; eval_b (e1 == e) s = true) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;fresh_assrt x' (pi, star sig (lst e1 e2)) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;fresh_assrt x' Q -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;fresh_cmd x' c -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;fresh_e x' e -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;fresh_e x' (var_e x) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(forall s, s |<a name="b"></a>b= (pi =b&gt; (e1 =/= e2))) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;LSF ((pi &amp;&amp;&amp; ((var_e x') == e2) ,star sig (star (star (singl e1 (var_e x')) (cell (e1 +e (nat_e 1)))) (lst (var_e x') e2)))) (x &lt;-* e; c) Q -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;LSF ((pi &amp;&amp;&amp; ((var_e x') =/= e2) ,star sig (star (star (singl e1 (var_e x')) (cell (e1 +e (nat_e 1)))) (lst (var_e x') e2)))) (x &lt;-* e; c) Q -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;LSF (pi,star sig (lst e1 e2)) (x &lt;-* e; c) Q.<br/>
+
+<br/>
+<span class="keyword">Axiom</span> <a name="LSF_sound"></a>LSF_sound: forall P c Q,<br/>
+&nbsp;&nbsp;LSF P c Q -&gt;<br/>
+&nbsp;&nbsp;{{assrt_interp P}} c {{assrt_interp Q}}.<br/>
+
+<br/>
+<span class="keyword">Axiom</span> <a name="LSF_lookup'"></a>LSF_lookup': forall pi sig e1 e2 e x Q c x', <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(forall s, eval_b pi s = true -&gt; eval_b (e1 == e) s = true) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;x' = (max (var_max_cmd c) (max (var_max_assrt (pi,star sig (singl e1 e2))) (max (var_max_assrt Q) (max x (var_max_expr e))))) + 1 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;LSF (((expr_b_rewrite pi (var_e x) (var_e x')) &amp;&amp;&amp; ((var_e x) == (expr_rewrite e2 (var_e x) (var_e x')))), subst_Sigma (star sig (singl e1 e2)) x (var_e x')) c Q -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;LSF (pi,star sig (singl e1 e2)) (x &lt;-* e; c) Q.<br/>
+
+<br/>
+<span class="keyword">Axiom</span> <a name="LSF_assign'"></a>LSF_assign': forall pi sig Q c x e x',<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;x' = (max (var_max_cmd c) (max (var_max_assrt (pi,sig)) (max (var_max_assrt Q) (max x (var_max_expr e))))) + 1 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;LSF (((expr_b_rewrite pi (var_e x) (var_e x')) &amp;&amp;&amp; ((var_e x) == (expr_rewrite e (var_e x) (var_e x')))), subst_Sigma sig x (var_e x')) c Q -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;LSF (pi, sig) (x &lt;- e ; c) Q.<br/>
+
+<br/>
+<span class="keyword">Axiom</span> <a name="LSF_unroll_lst_lookup'"></a>LSF_unroll_lst_lookup': forall pi sig e1 e2 e x Q c x', <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(forall s, eval_b pi s = true -&gt; eval_b (e1 == e) s = true) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;x' = (max (var_max_cmd c) (max (var_max_assrt (pi,star sig (lst e1 e2))) (max (var_max_assrt Q) (max x (var_max_expr e))))) + 1 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(forall s, s |b= (pi =b&gt; (e1 =/= e2))) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;LSF ((pi &amp;&amp;&amp; ((var_e x') == e2), star sig (star (star (singl e1 (var_e x')) (cell (e1 +e (nat_e 1)))) (lst (var_e x') e2)))) (x &lt;-* e; c) Q -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;LSF ((pi &amp;&amp;&amp; ((var_e x') =/= e2), star sig (star (star (singl e1 (var_e x')) (cell (e1 +e (nat_e 1)))) (lst (var_e x') e2)))) (x &lt;-* e; c) Q -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;LSF (pi,star sig (lst e1 e2)) (x &lt;-* e; c) Q.<br/>
+
+<br/>
+<span class="keyword">Notation</span> "[[ P ]] c [[ Q ]]" := ({{ assrt_interp P }} c {{ Assrt_interp (Q::nil)}}) (at level 80).<br/>
+
+<br/>
+<span class="keyword">Ltac</span> Rotate_LSF_sig_lhs :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> goal <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- LSF (?pi,?sig) ?c ?Q =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;eapply LSF_precond_stre <span class="keyword">with</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(pi, remove_empty_heap pi (star_assoc_left (star_com sig) emp) )<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;); [apply entail_soundness; simpl; Entail| simpl]<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+</code>
+</div>
+
+<div id="footer">
+<hr/><a href="index.html">Index</a><hr/><font size="-1">This page has been generated by <a href="http://coq.inria.fr">coqdoc</a></font>
+</div>
+
+</div>
+
+</body>
+</html>

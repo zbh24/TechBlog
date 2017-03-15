@@ -1,0 +1,550 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"/>
+<link href="coqdoc.css" rel="stylesheet" type="text/css"/>
+<title>topsy_hmAlloc2</title>
+</head>
+
+<body>
+
+<div id="page">
+
+<div id="header">
+</div>
+
+<div id="main">
+
+<h1 class="libtitle">Library topsy_hmAlloc2</h1>
+
+<code>
+<span class="keyword">Load</span> seplog_header.<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> <a class="modref" href="topsy_hm.html">topsy_hm</a>.<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> <a class="modref" href="topsy_hmAlloc.html">topsy_hmAlloc</a>.<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> Bool.<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="Free_block_list"></a>Free_block_list (l:list nat) {struct l} : list (nat * bool) :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> l <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a name="nil"></a>nil =&gt; nil<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| hd::tl =&gt; (hd,true) :: Free_block_list tl<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="nat_list_sum"></a>nat_list_sum (l:list nat) {struct l}: nat :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> l <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a name="nil"></a>nil =&gt; 0<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| hd::tl =&gt; hd + (nat_list_sum tl)<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="Free_block_compact_size"></a>Free_block_compact_size (l:list nat) :=<br/>
+&nbsp;&nbsp;nat_list_sum l + 2 * length l - 2.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Free_block_list_nempty"></a>Free_block_list_nempty: forall l,<br/>
+&nbsp;&nbsp;(Free_block_compact_size l &gt; 0) -&gt;<br/>
+&nbsp;&nbsp;l &lt;&gt; nil.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="findFree_specif2"></a>findFree_specif2 := forall adr size ,<br/>
+&nbsp;&nbsp;size &gt; 0 -&gt;<br/>
+&nbsp;&nbsp;adr &gt; 0 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{<span class="keyword">fun</span> s =&gt; <span class="keyword">fun</span> h =&gt; exists l1, exists l2, exists l,  <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(Heap_List (l1 ++ (Free_block_list l) ++ l2) adr) s h /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(Free_block_compact_size l) &gt;= size /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;eval (var_e hmStart) s = eval (nat_e adr) s /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;eval (var_e result) s = eval null s }}<br/>
+<br/>
+&nbsp;&nbsp;findFree size entry fnd sz stts<br/>
+<br/>
+&nbsp;&nbsp;{{<span class="keyword">fun</span> s =&gt; <span class="keyword">fun</span> h =&gt;  exists l1, exists l2, exists l,  <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(Heap_List (l1 ++ (Free_block_list l) ++ l2) adr) s h /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(Free_block_compact_size l) &gt;= size /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;eval (var_e hmStart) s = eval (nat_e adr) s /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;eval (var_e result) s = eval null s /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(exists finded_free_block, exists size'', size'' &gt;= size /\ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;In_hl (l1 ++ (Free_block_list l) ++ l2) (finded_free_block,size'',free) adr /\ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;eval (var_e entry) s = (Z_of_nat finded_free_block) /\ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;finded_free_block &gt; 0)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\/<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(eval (var_e entry) s = eval null s)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;)}}.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="findFree_verif2"></a>findFree_verif2: findFree_specif2.<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+&nbsp;&nbsp;Eval_b_hyp_clean.<br/>
+&nbsp;&nbsp;Eval_b_goal.<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="compact_specif2"></a>compact_specif2:= forall adr size,<br/>
+&nbsp;&nbsp;size &gt; 0 -&gt;<br/>
+&nbsp;&nbsp;adr &gt; 0 -&gt;<br/>
+<br/>
+&nbsp;&nbsp;{{<span class="keyword">fun</span> s =&gt; <span class="keyword">fun</span> h =&gt; exists l1, exists l2, exists l,  <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(Heap_List (l1 ++ (Free_block_list l) ++ l2) adr) s h /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(Free_block_compact_size l) &gt;= size /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;eval (var_e hmStart) s = eval (nat_e adr) s /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;eval (var_e result) s = eval null s /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;eval (var_e cptr) s = eval (nat_e adr) s<br/>
+&nbsp;&nbsp;}}<br/>
+&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;compact cptr nptr stts<br/>
+&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;{{<span class="keyword">fun</span> s =&gt; <span class="keyword">fun</span> h =&gt; exists l,  <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(Heap_List l adr) s h /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;eval (var_e hmStart) s = eval (nat_e adr) s /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;eval (var_e result) s = eval null s /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(exists free_adr, exists free_size, free_size &gt;= size /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;In_hl l (free_adr, free_size, free) adr<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;}}.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="compact_verif2"></a>compact_verif2: compact_specif2.<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+&nbsp;&nbsp;Eval_b_hyp H9.<br/>
+
+<br/>
+
+<br/>
+&nbsp;&nbsp;Eval_b_hyp H12.<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+Eval_b_hyp H11.<br/>
+
+<br/>
+Eval_b_hyp H11.<br/>
+Eval_b_goal.<br/>
+
+<br/>
+Eval_b_hyp H11.<br/>
+Eval_b_hyp H11.<br/>
+Eval_b_goal.<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+Eval_b_hyp H12.<br/>
+Eval_b_hyp H12.<br/>
+Eval_b_goal.<br/>
+
+<br/>
+Eval_b_hyp H12; OmegaZ.<br/>
+Eval_b_hyp H12.<br/>
+Eval_b_goal.<br/>
+
+<br/>
+Eval_b_hyp H12.<br/>
+Eval_b_hyp H12.<br/>
+Eval_b_goal.<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="findFree_specif2'"></a>findFree_specif2' := forall adr size,<br/>
+&nbsp;&nbsp;size &gt; 0 -&gt;<br/>
+&nbsp;&nbsp;adr &gt; 0 -&gt;<br/>
+&nbsp;&nbsp;{{<span class="keyword">fun</span> (s : store.s) (h : heap.h) =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;exists l,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Heap_List l adr s h /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;eval (var_e hmStart) s = eval (nat_e adr) s /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;eval (var_e result) s = eval null s /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(exists free_adr : loc,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(exists free_size : nat,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;free_size &gt;= size /\ In_hl l (free_adr, free_size, free) adr))}}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;findFree size entry fnd sz stts<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{<span class="keyword">fun</span> (s : store.s) (h : heap.h) =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;exists l,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Heap_List l adr s h /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;eval (var_e hmStart) s = eval (nat_e adr) s /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;eval (var_e result) s = eval null s /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(exists finded_free_block : loc,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(exists size'' : nat,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;size'' &gt;= size /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;In_hl l (finded_free_block, size'', free) adr /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;eval (var_e entry) s = Z_of_nat finded_free_block /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;finded_free_block &gt; 0))}}.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="findFree_verif2'"></a>findFree_verif2': findFree_specif2'.<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="split_specif2"></a>split_specif2 := forall adr size, <br/>
+&nbsp;&nbsp;size &gt; 0 -&gt;<br/>
+&nbsp;&nbsp;adr &gt; 0 -&gt;<br/>
+&nbsp;&nbsp;{{<span class="keyword">fun</span> s =&gt; <span class="keyword">fun</span> h =&gt;  exists l,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Heap_List l adr s h /\ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;eval (var_e hmStart) s = eval (nat_e adr) s /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;eval (var_e result) s = eval null s /\    <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(exists finded_free_block, exists size'', size'' &gt;= size /\ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;In_hl l (finded_free_block,size'',free) adr /\ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;eval (var_e entry) s = (Z_of_nat finded_free_block) /\ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;finded_free_block &gt; 0) }}<br/>
+&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;split entry size cptr sz<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{<span class="keyword">fun</span> s =&gt; <span class="keyword">fun</span> h =&gt; exists l,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(exists y, y &gt; 0 /\ eval (var_e entry) s = Z_of_nat (y) /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(exists size'', size'' &gt;= size /\      <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Heap_List l adr ** Array (y+2) size'') s h /\ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;In_hl l (y,size'', alloc) adr))}}.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="split_verif2"></a>split_verif2: split_specif2.<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="hmAlloc_specif2"></a>hmAlloc_specif2 := forall adr size,<br/>
+&nbsp;&nbsp;adr &gt; 0 -&gt; size &gt; 0 -&gt;<br/>
+&nbsp;&nbsp;{{ <span class="keyword">fun</span> s h =&gt; exists l1, exists l2, exists l,  <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(Heap_List (l1 ++ (Free_block_list l) ++ l2) adr) s h /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Free_block_compact_size l &gt;= size /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(s |b= var_e hmStart == nat_e adr) }}<br/>
+&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;hmAlloc result size entry cptr fnd stts nptr sz<br/>
+&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;{{ <span class="keyword">fun</span> s h =&gt; exists l, exists y, <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;y &gt; 0 /\ (s |b= var_e result == nat_e (y+2)) /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;exists size'', size'' &gt;= size /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Heap_List l adr ** Array (y + 2) size'') s h /\ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;In_hl l (y,size'',alloc) adr<br/>
+&nbsp;&nbsp;}}.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="hmAlloc_verif2"></a>hmAlloc_verif2: hmAlloc_specif2.<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+</code>
+</div>
+
+<div id="footer">
+<hr/><a href="index.html">Index</a><hr/><font size="-1">This page has been generated by <a href="http://coq.inria.fr">coqdoc</a></font>
+</div>
+
+</div>
+
+</body>
+</html>

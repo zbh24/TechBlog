@@ -1,0 +1,1584 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"/>
+<link href="coqdoc.css" rel="stylesheet" type="text/css"/>
+<title>frag_list_triple</title>
+</head>
+
+<body>
+
+<div id="page">
+
+<div id="header">
+</div>
+
+<div id="main">
+
+<h1 class="libtitle">Library frag_list_triple</h1>
+
+<code>
+<span class="keyword">Load</span> seplog_header.<br/>
+
+<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> Omega.<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> Bool.<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> <a class="modref" href="frag_list_entail.html">frag_list_entail</a>.<br/>
+
+<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> Max.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="max_lemma3'"></a>max_lemma3': forall x1 x2 x3,<br/>
+&nbsp;&nbsp;x1 &gt;= x2 /\ x1 &gt;= x3 -&gt;<br/>
+&nbsp;&nbsp;x1 &gt;= max x2 x3.<br/>
+
+<br/>
+<span class="keyword">Ltac</span> Resolve_ge_max :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> goal <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- ?x &gt;= max ?y ?z =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;eapply max_lemma3'; split; [Resolve_ge_max | Resolve_ge_max]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- max ?x ?y &gt;= ?z =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;eapply max_lemma5; Resolve_ge_max<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- max ?x ?y &gt;= ?z =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;eapply max_lemma6; Resolve_ge_max<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- ?x + 1 &gt; ?z =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;cut (x &gt;= z); [Resolve_ge_max | auto]      <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; omega<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Inductive</span> <a name="wpAssrt"></a>wpAssrt : <span class="keyword">Set</span> :=<br/>
+| <a name="wpElt"></a>wpElt : Assrt -&gt; wpAssrt<br/>
+| <a name="wpSubst"></a>wpSubst : list (var.v * expr) -&gt; wpAssrt -&gt; wpAssrt<br/>
+| wpLookup : var.v -&gt; expr -&gt; wpAssrt -&gt; wpAssrt<br/>
+| wpMutation : expr -&gt; expr -&gt; wpAssrt -&gt; wpAssrt<br/>
+| wpIf : expr_b -&gt; wpAssrt -&gt; wpAssrt -&gt; wpAssrt.<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="subst_lst2update_store"></a>subst_lst2update_store (l:list (var.v * expr)) (P:assert) {struct l} : assert :=<br/>
+&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> l <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;nil =&gt; P<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| (x,e)::tl =&gt; subst_lst2update_store tl (update_store2 x e P)<br/>
+&nbsp;&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="subst_lst2update_store_app"></a>subst_lst2update_store_app : forall l2 l1 P s h,<br/>
+&nbsp;&nbsp;&nbsp;subst_lst2update_store (l2 ++ l1) P s h -&gt;<br/>
+&nbsp;&nbsp;&nbsp;subst_lst2update_store l1 (subst_lst2update_store l2 P) s h.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="subst_lst2update_store'"></a>subst_lst2update_store' : forall l x v s h P,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;subst_lst2update_store (l ++ (x,v)::nil) P s h -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;update_store2 x v (subst_lst2update_store l P) s h.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="entails_subst_lst2update_store"></a>entails_subst_lst2update_store: forall l P1 P2 s h,<br/>
+&nbsp;&nbsp;&nbsp;(P1 ==&gt; P2) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;subst_lst2update_store l P1 s h -&gt;<br/>
+&nbsp;&nbsp;&nbsp;subst_lst2update_store l P2 s h.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="subst_lst2update_store_and"></a>subst_lst2update_store_and: forall l P1 P2 s h,<br/>
+&nbsp;&nbsp;subst_lst2update_store l (<span class="keyword">fun</span> s h =&gt; P1 s h /\ P2 s h) s h -&gt;<br/>
+&nbsp;&nbsp;subst_lst2update_store l P1 s h /\ subst_lst2update_store l P2 s h.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="subst_lst2update_store_and'"></a>subst_lst2update_store_and': forall l P1 P2 s h,<br/>
+&nbsp;&nbsp;subst_lst2update_store l P1 s h /\ subst_lst2update_store l P2 s h -&gt;<br/>
+&nbsp;&nbsp;subst_lst2update_store l (<span class="keyword">fun</span> s h =&gt; P1 s h /\ P2 s h) s h.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="subst_lst2update_store_imply"></a>subst_lst2update_store_imply: forall l P1 P2 s h,<br/>
+&nbsp;&nbsp;(subst_lst2update_store l P1 s h -&gt; subst_lst2update_store l P2 s h) -&gt;<br/>
+&nbsp;&nbsp;subst_lst2update_store l (<span class="keyword">fun</span> s h =&gt; P1 s h -&gt; P2 s h) s h.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="subst_lst2update_store_exists"></a>subst_lst2update_store_exists: forall l (P: expr -&gt; assert) s h,<br/>
+&nbsp;&nbsp;(exists x0, (subst_lst2update_store l (P x0)) s h) -&gt;<br/>
+&nbsp;&nbsp;subst_lst2update_store l (<span class="keyword">fun</span> s h =&gt; exists e0, P e0 s h) s h.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="subst_lst2update_store_sep_con"></a>subst_lst2update_store_sep_con: forall l P1 P2 s h,<br/>
+&nbsp;&nbsp;&nbsp;((<span class="keyword">fun</span> s h =&gt; subst_lst2update_store l P1 s h) ** (<span class="keyword">fun</span> s h =&gt; subst_lst2update_store l P2 s h)) s h -&gt;<br/>
+&nbsp;&nbsp;&nbsp;subst_lst2update_store l (P1 ** P2) s h.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="subst_lst2update_store_sepimp"></a>subst_lst2update_store_sepimp: forall l P1 P2 s h,<br/>
+&nbsp;&nbsp;((<span class="keyword">fun</span> s h =&gt; subst_lst2update_store l P1 s h) -* (<span class="keyword">fun</span> s h =&gt; subst_lst2update_store l P2 s h)) s h -&gt;<br/>
+&nbsp;&nbsp;subst_lst2update_store l (P1 -* P2) s h.<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="wpAssrt_interp"></a>wpAssrt_interp (a: wpAssrt) : assert :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> a <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a name="wpElt"></a>wpElt a1 =&gt; Assrt_interp a1<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| wpSubst l L =&gt; subst_lst2update_store l (wpAssrt_interp L)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| wpLookup x e L =&gt; (<span class="keyword">fun</span> s h =&gt; exists e0, (e |-&gt; e0 ** (e |-&gt; e0 -* (update_store2 x e0 (wpAssrt_interp L)))) s h)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| wpMutation e1 e2 L =&gt; (<span class="keyword">fun</span> s h =&gt; exists e0, (e1 |-&gt; e0 ** (e1 |-&gt; e2 -* (wpAssrt_interp L))) s h)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| wpIf b L1 L2 =&gt; (<span class="keyword">fun</span> s h =&gt; (eval_pi b s = true -&gt; wpAssrt_interp L1 s h) /\ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(eval_b b s = false -&gt; wpAssrt_interp L2 s h))<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="subst_e"></a>subst_e (e patt repl: expr) {struct e} : expr :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> e <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a name="var_e"></a>var_e w =&gt; <span class="keyword">match</span> expr_eq e patt <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a name="true"></a>true =&gt; repl<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| false =&gt; e<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| int_e i =&gt; <span class="keyword">match</span> expr_eq e patt <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a name="true"></a>true =&gt; repl<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| false =&gt; e<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| add_e e1 e2 =&gt; <span class="keyword">match</span> expr_eq e patt <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a name="true"></a>true =&gt; repl<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| false =&gt; add_e (subst_e e1 patt repl) (subst_e e2 patt repl)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| min_e e1 e2 =&gt; <span class="keyword">match</span> expr_eq e patt <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a name="true"></a>true =&gt; repl<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| false =&gt; min_e (subst_e e1 patt repl) (subst_e e2 patt repl)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| mul_e e1 e2 =&gt; <span class="keyword">match</span> expr_eq e patt <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a name="true"></a>true =&gt; repl<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| false =&gt; mul_e (subst_e e1 patt repl) (subst_e e2 patt repl)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| div_e e1 e2 =&gt; <span class="keyword">match</span> expr_eq e patt <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a name="true"></a>true =&gt; repl<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| false =&gt; div_e (subst_e e1 patt repl) (subst_e e2 patt repl)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| mod_e e1 e2 =&gt; <span class="keyword">match</span> expr_eq e patt <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a name="true"></a>true =&gt; repl<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| false =&gt; mod_e (subst_e e1 patt repl) (subst_e e2 patt repl)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="subst_b"></a>subst_b (e: expr_b) (patt repl: expr) {struct e} : expr_b :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> e <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a name="true_b"></a>true_b =&gt; true_b<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| f == g =&gt; subst_e f patt repl == subst_e g patt repl<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| f =/= g =&gt; subst_e f patt repl =/= subst_e g patt repl<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| f &gt;&gt;= g =&gt; subst_e f patt repl &gt;&gt;= subst_e g patt repl<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| f &gt;&gt; g =&gt; subst_e f patt repl &gt;&gt; subst_e g patt repl<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| f &amp;&amp;&amp; g =&gt; (subst_b f patt repl) &amp;&amp;&amp; (subst_b g patt repl)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| f ||| g =&gt; (subst_b f patt repl) ||| (subst_b g patt repl)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| neg_b e =&gt; neg_b (subst_b e patt repl)<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="subst_Sigma"></a>subst_Sigma (a: Sigma) (x: var.v) (e: expr) {struct a} : Sigma :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> a <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;singl e1 e2 =&gt; singl (subst_e e1 (var_e x) e) (subst_e e2 (var_e x) e)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| emp =&gt; emp<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| star s1 s2 =&gt; star (subst_Sigma s1 x e) (subst_Sigma s2 x e)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| cell e1 =&gt; cell (subst_e e1 (var_e x) e)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| lst e1 e2 =&gt; lst (subst_e e1 (var_e x) e) (subst_e e2 (var_e x) e)<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="subst_assrt"></a>subst_assrt (a: assrt) (x: var.v) (e: expr): assrt :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> a <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(pi, sigm) =&gt; (subst_b pi (var_e x) e, subst_Sigma sigm x e)<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="subst_Assrt"></a>subst_Assrt (a: Assrt) (x: var.v) (e: expr) {struct a}: Assrt :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> a <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;nil =&gt; nil<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| hd::tl =&gt; (subst_assrt hd x e)::(subst_Assrt tl x e)<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="subst_e_lst"></a>subst_e_lst (l: list (var.v * expr)) (e: expr) {struct l}: expr :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> l <span class="keyword">with</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;nil =&gt; e<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| (x,e')::tl =&gt; subst_e_lst tl (subst_e e (var_e x) e')<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="subst_b_lst"></a>subst_b_lst (l: list (var.v * expr)) (e: expr_b) {struct l}: expr_b :=<br/>
+&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> l <span class="keyword">with</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;nil =&gt; e<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| (x,e')::tl =&gt; subst_b_lst tl (subst_b e (var_e x) e')<br/>
+&nbsp;&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="subst_assrt_lst"></a>subst_assrt_lst (l:list (var.v * expr)) (a:assrt) {struct l} : assrt :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> l <span class="keyword">with</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;nil =&gt; a<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| (x,e)::tl =&gt; subst_assrt_lst tl (subst_assrt a x e)<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="subst_Assrt_lst"></a>subst_Assrt_lst (l:list (var.v * expr)) (a:Assrt) {struct l} : Assrt :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> l <span class="keyword">with</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;nil =&gt; a<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| (x,e)::tl =&gt; subst_Assrt_lst tl (subst_Assrt a x e)<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="subst_e2store_update"></a>subst_e2store_update: forall e s x v,<br/>
+&nbsp;&nbsp;&nbsp;eval (subst_e e (var_e x) v) s = eval e (store.update x (eval v s) s).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="subst_b2store_update"></a>subst_b2store_update: forall b s x v,<br/>
+&nbsp;&nbsp;eval_b (subst_b b (var_e x) v) s = eval_b b (store.update x (eval v s) s).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="subst_e_lst_int_e"></a>subst_e_lst_int_e: forall l v s,<br/>
+&nbsp;&nbsp;eval (subst_e_lst l (int_e v)) s =  v.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="subst_Sigma2store_update"></a>subst_Sigma2store_update: forall sigm s h x v,<br/>
+&nbsp;&nbsp;Sigma_interp (subst_Sigma sigm x v) s h -&gt; <br/>
+&nbsp;&nbsp;Sigma_interp sigm (store.update x (eval v s) s) h.<br/>
+
+<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="subst_Sigma2store_update'"></a>subst_Sigma2store_update': forall sigm s h x v,<br/>
+&nbsp;&nbsp;Sigma_interp sigm (store.update x (eval v s) s) h -&gt; <br/>
+&nbsp;&nbsp;Sigma_interp (subst_Sigma sigm x v) s h.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="subst_Assert2store_update"></a>subst_Assert2store_update: forall A s h x v,<br/>
+&nbsp;&nbsp;Assrt_interp (subst_Assrt A x v) s h -&gt; <br/>
+&nbsp;&nbsp;Assrt_interp A (store.update x (eval v s) s) h.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="subst_lst2update_store_assrt_interp"></a>subst_lst2update_store_assrt_interp: forall l s h pi sigm,<br/>
+&nbsp;&nbsp;assrt_interp (subst_assrt_lst l (pi, sigm)) s h -&gt;<br/>
+&nbsp;&nbsp;subst_lst2update_store l (assrt_interp (pi, sigm)) s h.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="subst_lst2update_store_Assrt_interp"></a>subst_lst2update_store_Assrt_interp: forall l A s h,<br/>
+&nbsp;&nbsp;Assrt_interp (subst_Assrt_lst l A) s h -&gt;<br/>
+&nbsp;&nbsp;subst_lst2update_store l (Assrt_interp A) s h.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="subst_lst2update_store_subst_b_lst"></a>subst_lst2update_store_subst_b_lst: forall (b':bool) l b s h,<br/>
+&nbsp;&nbsp;subst_lst2update_store l (<span class="keyword">fun</span> s h =&gt; eval_pi b s = b') s h -&gt;<br/>
+&nbsp;&nbsp;eval_b (subst_b_lst l b) s = b'.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="subst_lst2update_store_mapsto"></a>subst_lst2update_store_mapsto: forall l e1 e2 s h,<br/>
+&nbsp;&nbsp;(subst_e_lst l e1 |-&gt; subst_e_lst l e2) s h -&gt;<br/>
+&nbsp;&nbsp;subst_lst2update_store l (e1 |-&gt; e2) s h.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="subst_lst2update_store_mapsto'"></a>subst_lst2update_store_mapsto': forall l e1 e2 s h,<br/>
+&nbsp;&nbsp;&nbsp;subst_lst2update_store l (e1 |-&gt; e2) s h -&gt;<br/>
+&nbsp;&nbsp;&nbsp;(subst_e_lst l e1 |-&gt; subst_e_lst l e2) s h.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="subst_lst2update_store_lookup'"></a>subst_lst2update_store_lookup' : forall e x v s,<br/>
+&nbsp;&nbsp;exists e', eval e s = eval (subst_e e' (var_e x) v) s.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="subst_lst2update_store_lookup"></a>subst_lst2update_store_lookup: forall l e1 e2 s h P,<br/>
+&nbsp;&nbsp;(exists e0, <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;((subst_e_lst l e1 |-&gt; e0) ** <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(subst_e_lst l e1 |-&gt; subst_e_lst l e2 -* subst_lst2update_store l P)) s h) -&gt;<br/>
+&nbsp;&nbsp;subst_lst2update_store l (<span class="keyword">fun</span> s' h' =&gt; exists e0, (e1 |-&gt; e0 ** (e1 |-&gt; e2 -* P)) s' h') s h.<br/>
+
+<br/>
+<span class="keyword">Module</span> <span class="keyword">Type</span> <a name="FRESH"></a>FRESH.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Parameter</span> <a name="fresh_e"></a>fresh_e : var.v -&gt; expr -&gt; <span class="keyword">Prop</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Parameter</span> <a name="fresh_b"></a>fresh_b : var.v -&gt; expr_b -&gt; <span class="keyword">Prop</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Parameter</span> <a name="fresh_Sigma"></a>fresh_Sigma : var.v -&gt; Sigma -&gt; <span class="keyword">Prop</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Parameter</span> <a name="fresh_assrt"></a>fresh_assrt : var.v -&gt; assrt -&gt; <span class="keyword">Prop</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Parameter</span> <a name="fresh_lst"></a>fresh_lst : var.v -&gt; (list (var.v * expr)) -&gt; <span class="keyword">Prop</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Parameter</span> <a name="fresh_wpAssrt"></a>fresh_wpAssrt : var.v -&gt; wpAssrt -&gt; <span class="keyword">Prop</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Parameter</span> <a name="fresh_cmd"></a>fresh_cmd : var.v -&gt; cmd -&gt; <span class="keyword">Prop</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Parameter</span> <a name="fresh_lst_decompose"></a>fresh_lst_decompose : forall x hd0 hd1 tl, fresh_lst x ((hd0,hd1)::tl) -&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;fresh_e x hd1 /\ x &lt;&gt; hd0 /\ fresh_lst x tl.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Parameter</span> <a name="fresh_e_var_e_neq"></a>fresh_e_var_e_neq : forall x y, fresh_e x (var_e y) -&gt; x &lt;&gt; y.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Parameter</span> <a name="fresh_e_eval"></a>fresh_e_eval: forall e x v s, fresh_e x e -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;eval e (store.update x v s) = eval e s.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Parameter</span> <a name="fresh_wpAssrt_inde"></a>fresh_wpAssrt_inde: forall L x , fresh_wpAssrt x L -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;inde (x::nil) (wpAssrt_interp L).<br/>
+
+<br/>
+<span class="keyword">End</span> FRESH.<br/>
+
+<br/>
+<span class="keyword">Module</span> <a name="Fresh"></a>Fresh &lt;: FRESH.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Fixpoint</span> <a name="Fresh.var_max_expr"></a>var_max_expr (e: expr) : var.v :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> e <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;var_e w =&gt; w<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| int_e i =&gt; 0<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| add_e e1 e2 =&gt; max (var_max_expr e1) (var_max_expr e2)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| min_e e1 e2 =&gt; max (var_max_expr e1) (var_max_expr e2)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| mul_e e1 e2 =&gt; max (var_max_expr e1) (var_max_expr e2)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| div_e e1 e2 =&gt; max (var_max_expr e1) (var_max_expr e2)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| mod_e e1 e2 =&gt; max (var_max_expr e1) (var_max_expr e2)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Fixpoint</span> <a name="Fresh.var_max_expr_b"></a>var_max_expr_b (e: expr_b) : var.v :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> e <span class="keyword">with</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;true_b =&gt; 0<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| eq_b e1 e2 =&gt; max (var_max_expr e1) (var_max_expr e2)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| neq_b e1 e2 =&gt; max (var_max_expr e1) (var_max_expr e2)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| ge_b e1 e2 =&gt; max (var_max_expr e1) (var_max_expr e2)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| gt_b e1 e2 =&gt; max (var_max_expr e1) (var_max_expr e2)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| and_b e1 e2 =&gt; max (var_max_expr_b e1) (var_max_expr_b e2)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| or_b e1 e2 =&gt; max (var_max_expr_b e1) (var_max_expr_b e2)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| neg_b e =&gt; (var_max_expr_b e)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Fixpoint</span> <a name="Fresh.var_max_Sigma"></a>var_max_Sigma (s: Sigma) : var.v :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> s <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;singl e1 e2 =&gt; max (var_max_expr e1) (var_max_expr e2)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| emp =&gt; 0<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| star s1 s2 =&gt; max (var_max_Sigma s1) (var_max_Sigma s2)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| cell e1 =&gt; var_max_expr e1<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| lst e1 e2 =&gt; max (var_max_expr e1) (var_max_expr e2)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Definition</span> <a name="Fresh.var_max_assrt"></a>var_max_assrt (a: assrt) : var.v :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> a <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(pi, sigm) =&gt; max (var_max_expr_b pi) (var_max_Sigma sigm)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Fixpoint</span> <a name="Fresh.var_max_Assrt"></a>var_max_Assrt (a: Assrt) : var.v :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> a <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| nil =&gt; 0<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| hd::tl =&gt; max (var_max_assrt hd) (var_max_Assrt tl)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Fixpoint</span> <a name="Fresh.var_max_lst"></a>var_max_lst (l: list (var.v * expr)) : var.v :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> l <span class="keyword">with</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;nil =&gt; 0<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| (v,e)::tl =&gt; max (max v (var_max_expr e)) (var_max_lst tl)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Fixpoint</span> <a name="Fresh.var_max_wpAssrt"></a>var_max_wpAssrt (a: wpAssrt) : var.v :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> a <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;wpElt a1 =&gt; var_max_Assrt a1<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| wpSubst l L =&gt; max (var_max_lst l) (var_max_wpAssrt L)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| wpLookup x e L=&gt; max (max x (var_max_expr e)) (var_max_wpAssrt L)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| wpMutation e1 e2 L =&gt; max (max (var_max_expr e1) (var_max_expr e2)) (var_max_wpAssrt L)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| wpIf b L1 L2 =&gt; max (max (var_max_wpAssrt L1) (var_max_wpAssrt L2)) (var_max_expr_b b)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Fixpoint</span> <a name="Fresh.var_max_cmd"></a>var_max_cmd (c: cmd) : var.v :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> c <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;skip =&gt; 0<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| assign x e =&gt; max (var_max_expr e) x<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| lookup x e =&gt; max (var_max_expr e) x<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| mutation e1 e2 =&gt; max (var_max_expr e1) (var_max_expr e2)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| malloc x e =&gt; max (var_max_expr e) x<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| free e =&gt; (var_max_expr e)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| while b c' =&gt; max (var_max_expr_b b) (var_max_cmd c')<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| seq c1 c2 =&gt; max (var_max_cmd c1) (var_max_cmd c2)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| ifte b thendo c1 elsedo c2 =&gt; max (max (var_max_cmd c1) (var_max_cmd c2)) (var_max_expr_b b)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Definition</span> <a name="Fresh.fresh_e"></a>fresh_e x e := (x &gt; var_max_expr e).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Definition</span> <a name="Fresh.fresh_b"></a>fresh_b x b := (x &gt; var_max_expr_b b).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Definition</span> <a name="Fresh.fresh_Sigma"></a>fresh_Sigma x s := (x &gt; var_max_Sigma s).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Definition</span> <a name="Fresh.fresh_assrt"></a>fresh_assrt x a := (x &gt; var_max_assrt a).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Definition</span> <a name="Fresh.fresh_Assrt"></a>fresh_Assrt x a := (x &gt; var_max_Assrt a).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Definition</span> <a name="Fresh.fresh_lst"></a>fresh_lst x l := (x &gt; var_max_lst l).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Definition</span> <a name="Fresh.fresh_wpAssrt"></a>fresh_wpAssrt x L := (x &gt; var_max_wpAssrt L).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Definition</span> <a name="Fresh.fresh_cmd"></a>fresh_cmd x c := (x &gt; var_max_cmd c).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="Fresh.fresh_lst_decompose"></a>fresh_lst_decompose : forall x hd0 hd1 tl, fresh_lst x ((hd0,hd1)::tl) -&gt; fresh_e x hd1 /\ x &lt;&gt; hd0 /\ fresh_lst x tl.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="Fresh.fresh_e_var_e_neq"></a>fresh_e_var_e_neq : forall x y, fresh_e x (var_e y) -&gt; x &lt;&gt; y.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Ltac</span> Max_inf_resolve :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Max_inf_clean_hyp; Max_inf_resolve_goal<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">with</span>          <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Max_inf_clean_hyp :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> goal <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| id: fresh_e _ _  |- _ =&gt;  red <span class="keyword">in</span> id; simpl <span class="keyword">in</span> id; Max_inf_clean_hyp<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| id: fresh_b _ _ |- _ =&gt; red <span class="keyword">in</span> id; simpl <span class="keyword">in</span> id; Max_inf_clean_hyp<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| id: fresh_Sigma _ _ |- _ =&gt; red <span class="keyword">in</span> id; simpl <span class="keyword">in</span> id; Max_inf_clean_hyp<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| id: fresh_assrt _ _ |- _ =&gt; red <span class="keyword">in</span> id; simpl <span class="keyword">in</span> id; Max_inf_clean_hyp<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| id: fresh_Assrt _ _ |- _ =&gt; red <span class="keyword">in</span> id; simpl <span class="keyword">in</span> id; Max_inf_clean_hyp<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| id: fresh_lst _ _ |- _ =&gt; red <span class="keyword">in</span> id; simpl <span class="keyword">in</span> id; Max_inf_clean_hyp<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| id: fresh_wpAssrt _ _ |- _ =&gt; red <span class="keyword">in</span> id; simpl <span class="keyword">in</span> id; Max_inf_clean_hyp<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| id: ?x &gt; max ?y ?z |- _ =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;generalize (max_lemma2 _ _ _ id); intro X; inversion_clear X; clear id; Max_inf_clean_hyp<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| |- _ =&gt;  idtac<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Max_inf_resolve_goal := <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> goal <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| |- fresh_e _ _ =&gt; red; simpl; Max_inf_resolve_goal<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| |- fresh_b _ _ =&gt; red; simpl; Max_inf_resolve_goal<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| |- fresh_Sigma _ _ =&gt; red; simpl; Max_inf_resolve_goal<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| |- fresh_assrt _ _ =&gt; red; simpl; Max_inf_resolve_goal<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| |- fresh_Assrt _ _ =&gt; red; simpl; Max_inf_resolve_goal<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| |- fresh_lst _ _ =&gt; red; simpl; Max_inf_resolve_goal<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| |- fresh_wpAssrt _ _ =&gt; red; simpl; Max_inf_resolve_goal<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| |- ?x &gt; max ?y ?z =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;eapply max_lemma3; split; [Max_inf_resolve_goal | Max_inf_resolve_goal]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| |- _ =&gt; omega || tauto || idtac<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="Fresh.fresh_e_eval"></a>fresh_e_eval: forall e x v s,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;fresh_e x e -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;eval e (store.update x v s) = eval e s.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Fresh.subst_e_lst_eval_sub1"></a>subst_e_lst_eval_sub1: forall e x v0 e0,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;fresh_e x e -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;x &lt;&gt; v0 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;fresh_e x e0 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;fresh_e x (subst_e e (var_e v0) e0).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Fresh.subst_e_lst_eval"></a>subst_e_lst_eval: forall l e x v s,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;fresh_e x e -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;fresh_lst x l -&gt;   <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;eval (subst_e_lst l e) (store.update x v s) = eval (subst_e_lst l e) s.<br/>
+
+<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="Fresh.fresh_b_inde"></a>fresh_b_inde: forall b x v,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;fresh_b x b -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;inde (x::nil) (<span class="keyword">fun</span> s h =&gt; eval_b b s = v).<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="Fresh.var_max_Sigma_inde"></a>var_max_Sigma_inde: forall sigm x ,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;fresh_Sigma x sigm -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;inde (x::nil) (Sigma_interp sigm).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="Fresh.fresh_assrt_inde"></a>fresh_assrt_inde: forall a x ,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;fresh_assrt x a -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;inde (x::nil) (assrt_interp a).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="Fresh.fresh_Assrt_inde"></a>fresh_Assrt_inde: forall a x ,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;fresh_Assrt x a -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;inde (x::nil) (Assrt_interp a).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="Fresh.fresh_lst_inde"></a>fresh_lst_inde: forall l P x,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;inde (x::nil) P -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;fresh_lst x l -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;inde (x::nil) (subst_lst2update_store l P).<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="Fresh.fresh_wpAssrt_inde"></a>fresh_wpAssrt_inde: forall L x ,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;fresh_wpAssrt x L -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;inde (x::nil) (wpAssrt_interp L).<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+<span class="keyword">End</span> Fresh.<br/>
+
+<br/>
+<span class="keyword">Import</span> Fresh.<br/>
+
+<br/>
+<span class="keyword">Ltac</span> apply_entails_subst_lst2update_store id :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> goal <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;| id: subst_lst2update_store ?l ?P' ?s ?h |- subst_lst2update_store ?l ?P ?s ?h =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;eapply entails_subst_lst2update_store <span class="keyword">with</span> P'; [red; simpl; intros; idtac | auto]<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Ltac</span> cut_replace_list P :=<br/>
+&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> goal <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| |- subst_lst2update_store ?l ?P' ?s ?h =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;cut (subst_lst2update_store l P s h); <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[intro cut_replace_listA1; apply_entails_subst_lst2update_store cut_replace_listA1 | idtac]<br/>
+&nbsp;&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="subst_lst2update_store_fresh"></a>subst_lst2update_store_fresh: forall l x' e s h P,<br/>
+&nbsp;&nbsp;&nbsp;fresh_lst x' l -&gt;<br/>
+&nbsp;&nbsp;&nbsp;subst_lst2update_store l P (store.update x' (eval e s) s) h -&gt;<br/>
+&nbsp;&nbsp;&nbsp;subst_lst2update_store l (<span class="keyword">fun</span> s' h' =&gt; P (store.update x' (eval e s) s') h') s h.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="subst_lst2update_store_fresh'"></a>subst_lst2update_store_fresh': forall l x' e s h P,<br/>
+&nbsp;&nbsp;fresh_lst x' l -&gt;<br/>
+&nbsp;&nbsp;subst_lst2update_store l (<span class="keyword">fun</span> s' h' =&gt; P (store.update x' (eval e s) s') h') s h -&gt;<br/>
+&nbsp;&nbsp;subst_lst2update_store l P (store.update x' (eval e s) s) h.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="intro_fresh_var'"></a>intro_fresh_var' : forall l x x' e s h P,<br/>
+&nbsp;&nbsp;fresh_lst x' l -&gt;<br/>
+&nbsp;&nbsp;fresh_e x' (var_e x) -&gt;<br/>
+&nbsp;&nbsp;inde (x'::nil) P -&gt; <br/>
+&nbsp;&nbsp;subst_lst2update_store l (<span class="keyword">fun</span> s' h' =&gt; P (store.update x (eval (var_e x') s') s') h') (store.update x' (eval e s) s) h -&gt;<br/>
+&nbsp;&nbsp;subst_lst2update_store l (<span class="keyword">fun</span> s' h' =&gt; P (store.update x (eval e s) s') h') s h.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="intro_fresh_var"></a>intro_fresh_var : forall l x x' e s h L,<br/>
+&nbsp;&nbsp;&nbsp;fresh_lst x' l -&gt; fresh_wpAssrt x' L -&gt; fresh_e x' (var_e x) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;subst_lst2update_store <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;l (<span class="keyword">fun</span> s' h' =&gt; wpAssrt_interp L (store.update x (eval (var_e x') s') s') h') (store.update x' (eval e s) s) h -&gt;<br/>
+&nbsp;&nbsp;&nbsp;subst_lst2update_store <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;l (<span class="keyword">fun</span> s' h' =&gt; wpAssrt_interp L (store.update x (eval e s) s') h') s h.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="triple_fresh"></a>triple_fresh (P: assrt) (L: wpAssrt) (x: var.v) : <span class="keyword">Prop</span> := fresh_assrt x P /\ fresh_wpAssrt x L.<br/>
+
+<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> <a class="modref" href="expr_b_dp.html">expr_b_dp</a>.<br/>
+
+<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="wp_frag"></a>wp_frag (Q: option wpAssrt) (c: cmd) {struct c}: option wpAssrt :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> c <span class="keyword">with</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a name="skip"></a>skip =&gt; <span class="keyword">match</span> Q <span class="keyword">with</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a name="None"></a>None =&gt; None<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Some Q' =&gt; Some Q'<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| assign v e =&gt; <span class="keyword">match</span> Q <span class="keyword">with</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a name="None"></a>None =&gt; None<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Some Q' =&gt; Some (wpSubst ((v,e)::nil) Q')<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| lookup v e =&gt; <span class="keyword">match</span> Q <span class="keyword">with</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a name="None"></a>None =&gt; None<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Some Q' =&gt; Some (wpLookup v e Q')<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| mutation e1 e2 =&gt; <span class="keyword">match</span> Q <span class="keyword">with</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a name="None"></a>None =&gt; None<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Some Q' =&gt; Some (wpMutation e1 e2 Q')<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| seq c1 c2 =&gt; wp_frag (wp_frag Q c2) c1 <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| ifte b thendo c1 elsedo c2 =&gt; <span class="keyword">match</span> (wp_frag Q c1) <span class="keyword">with</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a name="None"></a>None =&gt; None<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Some Q1 =&gt; <span class="keyword">match</span> (wp_frag Q c2) <span class="keyword">with</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a name="None"></a>None =&gt; None<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Some Q2 =&gt; Some (wpIf b (Q1) (Q2))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| while a c =&gt; None<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| malloc v e =&gt; None<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| free e =&gt; None<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="wp_frag_None_is_None"></a>wp_frag_None_is_None: forall c, wp_frag None c = None.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="wp_frag_soudness"></a>wp_frag_soudness: forall c Q Q', <br/>
+&nbsp;&nbsp;wp_frag (Some Q) c = Some Q' -&gt; {{ wpAssrt_interp Q' }} c {{ wpAssrt_interp Q }}.<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+Open <span class="keyword">Local</span> Scope tmp_scope.<br/>
+
+<br/>
+<span class="keyword">Inductive</span> <a name="tritra"></a>tritra : assrt -&gt; wpAssrt -&gt; <span class="keyword">Prop</span> :=<br/>
+<br/>
+&nbsp;&nbsp;| <a name="tritra_incons"></a>tritra_incons : forall pi sig Q, <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(forall s h, (assrt_interp (pi, sig) s h) -&gt; False) -&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;tritra (pi, sig) Q<br/>
+<br/>
+&nbsp;&nbsp;| <a name="tritra_entail"></a>tritra_entail : forall P Q, <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;assrt_interp P ==&gt; Assrt_interp Q -&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;tritra P (wpElt Q)<br/>
+<br/>
+&nbsp;&nbsp;| <a name="tritra_precond_stre"></a>tritra_precond_stre : forall L1 L1' L2,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;assrt_interp L1 ==&gt; assrt_interp L1' -&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;tritra L1' L2 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;tritra L1 L2<br/>
+<br/>
+&nbsp;&nbsp;| <a name="tritra_if"></a>tritra_if : forall pi1 sig1 L1 L2 b,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;tritra (pi1 &amp;&amp;&amp; b, sig1)  L1 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;tritra (pi1 &amp;&amp;&amp; (neg_b b), sig1) L2 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;tritra (pi1, sig1) (wpIf b L1 L2)<br/>
+<br/>
+&nbsp;&nbsp;| <a name="tritra_mutation"></a>tritra_mutation : forall pi1 sig1 e1 e2 e3 e4 L, <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(forall s, eval_pi pi1 s = true -&gt; eval_pi (e1 == e3) s = true) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;tritra (pi1, sig1 ** (singl e1 e4)) L -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;tritra (pi1, sig1 ** (singl e1 e2)) (wpMutation e3 e4 L)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;| <a name="tritra_mutation'"></a>tritra_mutation' : forall pi1 sig1 e1 e3 e4 L, <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(forall s, eval_pi pi1 s = true -&gt; eval_pi (e1 == e3) s = true) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;tritra (pi1, sig1 ** (singl e1 e4)) L -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;tritra (pi1, sig1 ** (cell e1)) (wpMutation e3 e4 L)<br/>
+<br/>
+&nbsp;&nbsp;| <a name="tritra_lookup"></a>tritra_lookup : forall pi1 sig1 e1 e2 e x L, <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(forall s, eval_pi pi1 s = true -&gt; eval_pi (e1 == e) s = true) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;tritra (pi1, sig1 ** (singl e1 e2)) (wpSubst ((x,e2)::nil) L) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;tritra (pi1, sig1 ** (singl e1 e2)) (wpLookup x e L)<br/>
+<br/>
+&nbsp;&nbsp;| <a name="tritra_lookup'"></a>tritra_lookup' : forall pi1 sig1 e1 e x L x', <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(forall s, eval_pi pi1 s = true -&gt; eval_pi (e1 == e) s = true) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;fresh_assrt x' (pi1, sig1 ** cell e1) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;fresh_wpAssrt x' (wpLookup x e L) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;tritra (pi1, sig1 ** (singl e1 (var_e x'))) (wpSubst ((x,var_e x')::nil) L) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;tritra (pi1, sig1 ** (cell e1)) (wpLookup x e L)<br/>
+<br/>
+&nbsp;&nbsp;| <a name="tritra_subst_elt"></a>tritra_subst_elt : forall pi1 sig1 l L, <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;tritra (pi1, sig1) (wpElt (subst_Assrt_lst l L)) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;tritra (pi1, sig1) (wpSubst l (wpElt L))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;| <a name="tritra_subst_subst"></a>tritra_subst_subst : forall pi1 sig1 l1 l2 L, <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;tritra (pi1, sig1) (wpSubst (l2 ++ l1) L) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;tritra (pi1, sig1) (wpSubst l1 (wpSubst l2 L))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;| <a name="tritra_subst_lookup"></a>tritra_subst_lookup : forall pi1 sig1 e1 e2 e x x' l L,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(forall s, eval_pi pi1 s = true -&gt; eval_pi (e1 == (subst_e_lst l e)) s = true) -&gt;                     <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;fresh_lst x' l -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;fresh_wpAssrt x' L -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;fresh_e x' (var_e x) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;tritra (pi1, sig1 ** (singl e1 e2)) (wpSubst ((x, var_e x')::l ++ ((x', e2)::nil)) L) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;tritra (pi1, sig1 ** (singl e1 e2)) (wpSubst l (wpLookup x e L))<br/>
+<br/>
+&nbsp;&nbsp;| <a name="tritra_subst_lookup2"></a>tritra_subst_lookup2 : forall pi1 sig1 e1 e x x' l L x'',<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(forall s, eval_pi pi1 s = true -&gt; eval_pi (e1 == subst_e_lst l e) s = true) -&gt;                     <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;fresh_lst x' l -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;fresh_wpAssrt x' L -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;fresh_e x' (var_e x) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;fresh_wpAssrt x'' (wpSubst l (wpLookup x e L)) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;fresh_assrt x'' (pi1, sig1 ** cell e1) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;tritra (pi1, sig1 ** (singl e1 (var_e x''))) (wpSubst ((x, var_e x')::l ++ ((x',var_e x'')::nil)) L) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;tritra (pi1, sig1 ** cell e1) (wpSubst l (wpLookup x e L))<br/>
+&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;| <a name="tritra_subst_mutation"></a>tritra_subst_mutation : forall pi1 sig1 e1 e2 l L, <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;tritra (pi1, sig1) (wpMutation (subst_e_lst l e1) (subst_e_lst l e2) (wpSubst l L)) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;tritra (pi1, sig1) (wpSubst l (wpMutation e1 e2 L))<br/>
+<br/>
+&nbsp;&nbsp;| <a name="tritra_subst_if"></a>tritra_subst_if : forall pi1 sig1 l b L1 L2,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;tritra (pi1, sig1)  (wpIf (subst_b_lst l b) (wpSubst l L1) (wpSubst l L2)) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;tritra (pi1, sig1) (wpSubst l (wpIf b L1 L2))<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <a name="tritra_destruct_lst"></a>tritra_destruct_lst: forall pi1 sig1 e1 e2 L x', <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(forall s, eval_pi pi1 s = true -&gt; eval_pi (e1 =/= e2) s = true) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;fresh_assrt x' (pi1, sig1 ** lst e1 e2) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;fresh_wpAssrt x' L -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;tritra (pi1 &amp;&amp;&amp; (e1 =/= var_e x') &amp;&amp;&amp; (var_e x' == nat_e 0), <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sig1 ** (((singl e1 (var_e x')) ** (cell (e1 +e nat_e 1))) ** (lst (var_e x') e2))) L -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;tritra (pi1 &amp;&amp;&amp; (e1 =/= var_e x') &amp;&amp;&amp; (var_e x' =/= nat_e 0), <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sig1 ** (((singl e1 (var_e x')) ** (cell (e1 +e nat_e 1))) ** (lst (var_e x') e2))) L -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;tritra (pi1,star sig1 (lst e1 e2)) L<br/>
+<br/>
+&nbsp;&nbsp;(**)<br/>
+<br/>
+.<br/>
+
+<br/>
+Close <span class="keyword">Local</span> Scope tmp_scope.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="tritra_soundness"></a>tritra_soundness : forall P Q, tritra P Q -&gt; <br/>
+&nbsp;&nbsp;assrt_interp P ==&gt; wpAssrt_interp Q.<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="triple_vfresh"></a>triple_vfresh (a: assrt) (L: wpAssrt) := (max (var_max_assrt a) (var_max_wpAssrt L)) + 1.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="tritra_lookup_lst"></a>tritra_lookup_lst: forall pi1 sig1 e1 e2 e x L x', <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(forall s, eval_pi pi1 s = true -&gt; (eval_pi (e1 == e) s = true /\ eval_pi (e1 =/= e2) s = true)) -&gt;<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;x' = triple_vfresh  (pi1, star sig1 (lst e1 e2)) (wpLookup x e L) -&gt;<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;tritra (pi1 &amp;&amp;&amp; (e1 =/= var_e x') &amp;&amp;&amp; (var_e x' == nat_e 0), <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;star (star sig1 (star (lst (var_e x') e2) (cell (e1 +e nat_e 1)))) (singl e1 (var_e x'))) (wpLookup x e L) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;tritra (pi1 &amp;&amp;&amp; (e1 =/= var_e x') &amp;&amp;&amp; (var_e x' =/= nat_e 0), <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;star (star sig1 (star (lst (var_e x') e2) (cell (e1 +e nat_e 1)))) (singl e1 (var_e x'))) (wpLookup x e L) -&gt;<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;tritra (pi1, star sig1 (lst e1 e2)) (wpLookup x e L).<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="tritra_lookup_lst'"></a>tritra_lookup_lst': forall pi1 sig1 e1 e2 e x L x', <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(forall s, eval_pi pi1 s = true -&gt; (eval_pi ((e1 +e nat_e 1) == e) s = true /\ eval_pi (e1 =/= e2) s = true)) -&gt;<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;x' = triple_vfresh  (pi1, star sig1 (lst e1 e2)) (wpLookup x e L) -&gt;<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;tritra (pi1 &amp;&amp;&amp; (e1 =/= var_e x') &amp;&amp;&amp; (var_e x' == nat_e 0), <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;star (star sig1 (star (lst (var_e x') e2) (cell (e1 +e nat_e 1)))) (singl e1 (var_e x'))) (wpLookup x e L) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;tritra (pi1 &amp;&amp;&amp; (e1 =/= var_e x') &amp;&amp;&amp; (var_e x' =/= nat_e 0), <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;star (star sig1 (star (lst (var_e x') e2) (cell (e1 +e nat_e 1)))) (singl e1 (var_e x'))) (wpLookup x e L) -&gt;<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;tritra (pi1, star sig1 (lst e1 e2)) (wpLookup x e L).<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="tritra_subst_lookup_lst"></a>tritra_subst_lookup_lst: forall pi1 sig1 e1 e2 e x L l x', <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(forall s, eval_pi pi1 s = true -&gt; (eval_pi (e1 == (subst_e_lst l e)) s = true /\ eval_pi (e1 =/= e2) s = true)) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;x' = triple_vfresh  (pi1, star sig1 (lst e1 e2)) (wpSubst l (wpLookup x e L)) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;tritra (pi1 &amp;&amp;&amp; (e1 =/= var_e x') &amp;&amp;&amp; (var_e x' == nat_e 0),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;star (star sig1 (star (lst (var_e x') e2) (cell (e1 +e nat_e 1)))) (singl e1 (var_e x'))) (wpSubst l (wpLookup x e L)) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;tritra (pi1 &amp;&amp;&amp; (e1 =/= var_e x') &amp;&amp;&amp; (var_e x' =/= nat_e 0),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;star (star sig1 (star (lst (var_e x') e2) (cell (e1 +e nat_e 1)))) (singl e1 (var_e x'))) (wpSubst l (wpLookup x e L)) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;tritra (pi1, star sig1 (lst e1 e2)) (wpSubst l (wpLookup x e L)).<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="tritra_subst_lookup_lst'"></a>tritra_subst_lookup_lst': forall pi1 sig1 e1 e2 e x L l x', <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(forall s, eval_pi pi1 s = true -&gt; (eval_pi ((e1 +e nat_e 1) == (subst_e_lst l e)) s = true /\ eval_pi (e1 =/= e2) s = true)) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;x' = triple_vfresh  (pi1,star sig1 (lst e1 e2)) (wpSubst l (wpLookup x e L)) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;tritra (pi1 &amp;&amp;&amp; (e1 =/= var_e x')  &amp;&amp;&amp; (var_e x' == nat_e 0),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;star (star sig1 (star (lst (var_e x') e2) (singl e1 (var_e x')))) (cell (e1 +e nat_e 1))) (wpSubst l (wpLookup x e L)) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;tritra (pi1 &amp;&amp;&amp; (e1 =/= var_e x')  &amp;&amp;&amp; (var_e x' =/= nat_e 0),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;star (star sig1 (star (lst (var_e x') e2) (singl e1 (var_e x')))) (cell (e1 +e nat_e 1))) (wpSubst l (wpLookup x e L)) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;tritra (pi1,star sig1 (lst e1 e2)) (wpSubst l (wpLookup x e L)).<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="tritra_mutation_lst"></a>tritra_mutation_lst : forall pi1 sig1 e1 e2 e3 e4 L x', <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(forall s, eval_pi pi1 s = true -&gt; (eval_pi (e1 == e3) s = true /\ eval_pi (e1 =/= e2) s = true)) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;x' = triple_vfresh (pi1,star sig1 (lst e1 e2)) (wpMutation e3 e4 L) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;tritra (pi1 &amp;&amp;&amp; (e1 =/= var_e x') &amp;&amp;&amp; (var_e x' == nat_e 0), <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;star (star sig1 (star (lst (var_e x') e2) (cell (e1 +e nat_e 1)))) (singl e1 (var_e x'))) (wpMutation e3 e4 L) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;tritra (pi1 &amp;&amp;&amp; (e1 =/= var_e x') &amp;&amp;&amp; (var_e x' =/= nat_e 0), <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;star (star sig1 (star (lst (var_e x') e2) (cell (e1 +e nat_e 1)))) (singl e1 (var_e x'))) (wpMutation e3 e4 L) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;tritra (pi1,star sig1 (lst e1 e2)) (wpMutation e3 e4 L).<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="tritra_mutation_lst'"></a>tritra_mutation_lst': forall pi1 sig1 e1 e2 e3 e4 L x', <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(forall s, eval_pi pi1 s = true -&gt; (eval_pi ((e1 +e (nat_e 1)) == e3) s = true /\ eval_pi (e1 =/= e2) s = true)) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;x' = triple_vfresh (pi1, star sig1 (lst e1 e2)) (wpMutation e3 e4 L) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;tritra (pi1 &amp;&amp;&amp; (e1 =/= var_e x')  &amp;&amp;&amp; (var_e x' == nat_e 0), <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;star (star sig1 (star (lst (var_e x') e2) (singl e1 (var_e x')))) (cell (e1 +e nat_e 1))) (wpMutation e3 e4 L) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;tritra (pi1 &amp;&amp;&amp; (e1 =/= var_e x')  &amp;&amp;&amp; (var_e x' =/= nat_e 0), <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;star (star sig1 (star (lst (var_e x') e2) (singl e1 (var_e x')))) (cell (e1 +e nat_e 1))) (wpMutation e3 e4 L) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;tritra (pi1, star sig1 (lst e1 e2)) (wpMutation e3 e4 L).<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="tritra_subst_mutation_lst"></a>tritra_subst_mutation_lst: forall pi1 sig1 e1 e2 e3 e4 L l x', <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(forall s, eval_pi pi1 s = true -&gt; (eval_pi (e1 == (subst_e_lst l e3)) s = true /\ eval_pi (e1 =/= e2) s = true)) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;x' = triple_vfresh (pi1,star sig1 (lst e1 e2)) (wpSubst l (wpMutation e3 e4 L))-&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;tritra (pi1 &amp;&amp;&amp; (e1 =/= var_e x') &amp;&amp;&amp; (var_e x' == nat_e 0), <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;star (star sig1 (star (lst (var_e x') e2) (cell (e1 +e nat_e 1)))) (singl e1 (var_e x'))) (wpSubst l (wpMutation e3 e4 L)) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;tritra (pi1 &amp;&amp;&amp; (e1 =/= var_e x') &amp;&amp;&amp; (var_e x' =/= nat_e 0), <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;star (star sig1 (star (lst (var_e x') e2) (cell (e1 +e nat_e 1)))) (singl e1 (var_e x'))) (wpSubst l (wpMutation e3 e4 L)) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;tritra (pi1,star sig1 (lst e1 e2)) (wpSubst l (wpMutation e3 e4 L)).<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="tritra_subst_mutation_lst'"></a>tritra_subst_mutation_lst': forall pi1 sig1 e1 e2 e3 e4 L l x', <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(forall s, eval_pi pi1 s = true -&gt; (eval_pi ((e1 +e nat_e 1) == (subst_e_lst l e3)) s = true /\ eval_pi (e1 =/= e2) s = true)) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;x' = triple_vfresh (pi1,star sig1 (lst e1 e2)) (wpSubst l (wpMutation e3 e4 L)) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;tritra (pi1 &amp;&amp;&amp; (e1 =/= var_e x')  &amp;&amp;&amp; (var_e x' == nat_e 0),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;star (star sig1 (star (lst (var_e x') e2) (singl e1 (var_e x')))) (cell (e1 +e nat_e 1))) (wpSubst l (wpMutation e3 e4 L)) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;tritra (pi1 &amp;&amp;&amp; (e1 =/= var_e x')  &amp;&amp;&amp; (var_e x' =/= nat_e 0),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;star (star sig1 (star (lst (var_e x') e2) (singl e1 (var_e x')))) (cell (e1 +e nat_e 1))) (wpSubst l (wpMutation e3 e4 L)) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;tritra (pi1,star sig1 (lst e1 e2)) (wpSubst l (wpMutation e3 e4 L)).<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="tritra_use"></a>tritra_use: forall c P Q R, <br/>
+&nbsp;&nbsp;wp_frag (Some (wpElt Q)) c = Some R -&gt; <br/>
+&nbsp;&nbsp;tritra P R -&gt; <br/>
+&nbsp;&nbsp;{{ assrt_interp P }} c {{ Assrt_interp Q }}.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="tritra_subst_lookup'"></a>tritra_subst_lookup' : forall pi1 sig1 e1 e2 e x x' l L,<br/>
+&nbsp;&nbsp;(forall s,eval_pi pi1 s = true -&gt; (eval_pi (e1 == (subst_e_lst l e))) s = true) -&gt;                     <br/>
+&nbsp;&nbsp;x' = triple_vfresh (pi1,star sig1 (singl e1 e2)) (wpSubst l (wpLookup x e L)) -&gt;<br/>
+&nbsp;&nbsp;tritra (pi1,star sig1 (singl e1 e2)) (wpSubst ((x,(var_e x'))::l ++ ((x',e2)::nil)) L) -&gt;<br/>
+&nbsp;&nbsp;tritra (pi1,star sig1 (singl e1 e2)) (wpSubst l (wpLookup x e L)).<br/>
+
+<br/>
+<span class="keyword">Ltac</span> Rotate_tritra_sig_lhs :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> goal <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- tritra (?pi,?sig) ?L' =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;eapply tritra_precond_stre <span class="keyword">with</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(pi, remove_empty_heap pi (star_assoc_left (star_com sig) emp))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;); [apply entail_soundness; simpl; Entail| simpl]<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Decompose_Assrt_interp"></a>Decompose_Assrt_interp: forall a hd tl,<br/>
+&nbsp;&nbsp;(assrt_interp a ==&gt; assrt_interp hd) \/ (assrt_interp a ==&gt; Assrt_interp tl) -&gt;<br/>
+&nbsp;&nbsp;(assrt_interp a ==&gt; (Assrt_interp (hd::tl))).<br/>
+
+<br/>
+<span class="keyword">Ltac</span> Resolve_entails :=<br/>
+&nbsp;&nbsp;eapply Decompose_Assrt_interp; ((left; apply entail_soundness; Entail) || (right; Resolve_entails)).<br/>
+
+<br/>
+<span class="keyword">Ltac</span> tritra_resolve := <br/>
+&nbsp;&nbsp;<span class="keyword">match</span> goal <span class="keyword">with</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- tritra (?pi1, ?sig1) ?L =&gt; eapply tritra_entail; Resolve_entails<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- tritra (?pi1, star ?sig1 (singl ?e1 ?e2)) (wpMutation ?e3 ?e4 ?L') =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(eapply tritra_mutation; [unfold eval_pi; Omega_exprb | tritra_resolve] || Rotate_tritra_sig_lhs; idtac)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- tritra (?pi1, star ?sig1 (cell ?e1)) (wpMutation ?e3 ?e4 ?L') =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(eapply tritra_mutation'; [unfold eval_pi; Omega_exprb | tritra_resolve] || Rotate_tritra_sig_lhs; idtac)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- tritra (?pi1, star ?sig1 (singl ?e1 ?e2)) (wpLookup ?x ?e ?L') =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(eapply tritra_lookup; [unfold eval_pi; Omega_exprb | tritra_resolve] || Rotate_tritra_sig_lhs; idtac)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- tritra ?L (wpSubst ?l (wpElt ?L')) =&gt; eapply tritra_subst_elt; simpl; idtac<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- tritra ?L (wpSubst ?l (wpSubst ?l' ?L')) =&gt; eapply tritra_subst_subst; simpl; idtac<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- tritra ?L (wpSubst ?l (wpLookup ?x ?e ?L')) =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(eapply tritra_subst_lookup'; [unfold eval_pi; Omega_exprb | simpl; intuition | tritra_resolve] || Rotate_tritra_sig_lhs; idtac)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- tritra ?L (wpSubst ?l (wpMutation ?e1 ?e2 ?L')) =&gt; eapply tritra_subst_mutation; simpl; idtac<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- tritra ?L (wpSubst ?l (wpIf ?b ?L1 ?L2)) =&gt; eapply tritra_subst_if; simpl; idtac<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- tritra ?L (wpIf ?b ?L1 ?L2) =&gt; eapply tritra_if; simpl; idtac<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Ltac</span> Tritra := Rotate_tritra_sig_lhs; repeat tritra_resolve.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="tritra_step'"></a>tritra_step' (pi : Pi) (sig : Sigma) (A : wpAssrt) : option (list ((Pi * Sigma) * wpAssrt)) :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> A <span class="keyword">with</span><br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| wpElt L =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span> entail_fct (pi, sig) L nil <span class="keyword">then</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Some nil <span class="keyword">else</span> None<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| wpSubst l L =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> L <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| wpElt L' =&gt; Some (((pi,sig), wpElt (subst_Assrt_lst l L'))::nil) <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| wpSubst l' L' =&gt; Some (((pi,sig), wpSubst (l'++ l) L')::nil)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| wpLookup x e L' =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> sig <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| star s1 (singl e1 e2) =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span> expr_b_dp (pi =b&gt; (e1 == subst_e_lst l e)) <span class="keyword">then</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> x' := (max (max (var_max_lst l) (var_max_wpAssrt L')) x) + 1 <span class="keyword">in</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Some (((pi,sig), wpSubst ((x, var_e x')::l ++ ((x',e2)::nil)) L')::nil)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">else</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Some (((pi, remove_empty_heap pi (star_assoc_left (star_com sig) emp)), A)::nil)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| star s1 (cell e1) =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span> expr_b_dp (pi =b&gt; (e1 == subst_e_lst l e)) <span class="keyword">then</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> x' := (max (max (var_max_lst l) (var_max_wpAssrt L')) x) + 1 <span class="keyword">in</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> x'' := (max (var_max_assrt (pi,sig)) (var_max_wpAssrt A)) + 1 <span class="keyword">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Some (((pi, star s1 (singl e1 (var_e x''))), wpSubst ((x, var_e x')::l ++ ((x', var_e x'')::nil)) L')::nil)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">else</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Some (((pi, remove_empty_heap pi (star_assoc_left (star_com sig) emp)),A)::nil)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| star s1 (lst e1 e2) =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span> expr_b_dp (pi =b&gt; ((e1 =/= e2) &amp;&amp;&amp; (e1 == subst_e_lst l e))) <span class="keyword">then</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> x' := triple_vfresh (pi,sig) A <span class="keyword">in</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Some ((pi &amp;&amp;&amp; (e1 =/= var_e x') &amp;&amp;&amp; (var_e x' == nat_e 0), <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;star (star s1 (star (lst (var_e x') e2) (cell (e1 +e nat_e 1)))) (singl e1 (var_e x')), A)::<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(pi &amp;&amp;&amp; (e1 =/= var_e x') &amp;&amp;&amp; (var_e x' =/= nat_e 0), <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;star (star s1 (star (lst (var_e x') e2) (cell (e1 +e nat_e 1)))) (singl e1 (var_e x')), A)::<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;nil)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">else</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span> expr_b_dp (pi =b&gt; ((e1 =/= e2) &amp;&amp;&amp; ((e1 +e nat_e 1) == subst_e_lst l e))) <span class="keyword">then</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> x' := triple_vfresh (pi,sig) A <span class="keyword">in</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Some (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(((pi &amp;&amp;&amp; (e1 =/= var_e x')) &amp;&amp;&amp; (var_e x' == nat_e 0),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;star (star s1 (star (lst (var_e x') e2) (singl e1 (var_e x'))))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cell (e1 +e nat_e 1))), A)::<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(((pi &amp;&amp;&amp; (e1 =/= var_e x')) &amp;&amp;&amp; (var_e x' =/= nat_e 0),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;star (star s1 (star (lst (var_e x') e2) (singl e1 (var_e x'))))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cell (e1 +e nat_e 1))), A)::<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;nil)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">else</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Some (((pi, remove_empty_heap pi (star_assoc_left (star_com sig) emp)), A)::nil)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| (singl e1 e2) =&gt; Some ((pi, star emp sig, A)::nil)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| (cell e1) =&gt; Some ((pi, star emp sig, A)::nil)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| (lst e1 e2) =&gt; Some ((pi, star emp sig, A)::nil)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; Some (((pi, remove_empty_heap pi (star_assoc_left (star_com sig) emp)), A)::nil)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| wpMutation e1 e2 L' =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Some (((pi,sig), wpMutation (subst_e_lst l e1) (subst_e_lst l e2) (wpSubst l L'))::nil)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| wpIf b L1 L2 =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Some (((pi,sig), wpIf (subst_b_lst l b) (wpSubst l L1) (wpSubst l L2))::nil)                  <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(**)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| wpIf b L1 L2 =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Some (((pi &amp;&amp;&amp; b,sig),L1)::((pi &amp;&amp;&amp; (! b),sig),L2)::nil)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(**)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| wpLookup x e L =&gt;       <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> sig <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| star s1 (singl e1 e2) =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span> expr_b_dp (pi =b&gt; (e1 == e)) <span class="keyword">then</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Some (((pi,sig), wpSubst ((x,e2)::nil) L)::nil)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">else</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Some (((pi, remove_empty_heap pi (star_assoc_left (star_com sig) emp)), A)::nil)<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| star s1 (cell e1) =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span> expr_b_dp (pi =b&gt; (e1 == e)) <span class="keyword">then</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> x' := (max (var_max_assrt (pi, sig)) (var_max_wpAssrt A)) + 1 <span class="keyword">in</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Some (((pi, star s1 (singl e1 (var_e x'))), wpSubst ((x, var_e x')::nil) L)::nil)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">else</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Some (((pi, remove_empty_heap pi (star_assoc_left (star_com sig) emp)), A)::nil)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| star s1 (lst e1 e2) =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span> expr_b_dp (pi =b&gt; ((e1 =/= e2) &amp;&amp;&amp; (e1 == e))) <span class="keyword">then</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> x' := triple_vfresh (pi,sig) A <span class="keyword">in</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Some (((pi &amp;&amp;&amp; (e1 =/= var_e x') &amp;&amp;&amp; (var_e x' == nat_e 0),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;star (star s1 (star (lst (var_e x') e2) (cell (e1 +e nat_e 1)))) (singl e1 (var_e x'))), A)::<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;((pi &amp;&amp;&amp; (e1 =/= var_e x') &amp;&amp;&amp; (var_e x' =/= nat_e 0),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;star (star s1 (star (lst (var_e x') e2) (cell (e1 +e nat_e 1)))) (singl e1 (var_e x'))), A)::<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;nil)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">else</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span> expr_b_dp (pi =b&gt; ((e1 =/= e2) &amp;&amp;&amp; ((e1 +e nat_e 1) == e))) <span class="keyword">then</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> x' := triple_vfresh (pi,sig) A <span class="keyword">in</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Some (((pi &amp;&amp;&amp; (e1 =/= var_e x') &amp;&amp;&amp; (var_e x' == nat_e 0),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;star (star s1 (star (lst (var_e x') e2) (cell (e1 +e nat_e 1)))) (singl e1 (var_e x'))), A)::<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;((pi &amp;&amp;&amp; (e1 =/= var_e x') &amp;&amp;&amp; (var_e x' =/= nat_e 0),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;star (star s1 (star (lst (var_e x') e2) (cell (e1 +e nat_e 1)))) (singl e1 (var_e x'))), A)::<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;nil)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">else</span> Some (((pi, remove_empty_heap pi (star_assoc_left (star_com sig) emp)),A)::nil)  <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| (singl e1 e2) =&gt; Some ((pi, star emp sig, A)::nil)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| (cell e1) =&gt; Some ((pi, star emp sig, A)::nil)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| (lst e1 e2) =&gt; Some ((pi, star emp sig, A)::nil)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; Some (((pi, remove_empty_heap pi (star_assoc_left (star_com sig) emp)), A)::nil)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(**)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| wpMutation e1 e2 L =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> sig <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| star s1 (cell e3) =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span> expr_b_dp (pi =b&gt; (e1 == e3)) <span class="keyword">then</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Some (((pi, star s1 (singl e3 e2)),L)::nil)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">else</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Some (((pi, remove_empty_heap pi (star_assoc_left (star_com sig) emp)), A)::nil)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| star s1 (singl e3 e4) =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span> expr_b_dp (pi =b&gt; (e1 == e3)) <span class="keyword">then</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Some (((pi, star s1 (singl e3 e2)), L)::nil)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">else</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Some (((pi, remove_empty_heap pi (star_assoc_left (star_com sig) emp)), A)::nil)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| star s1 (lst e3 e4) =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span> expr_b_dp (pi =b&gt; ((e1 == e3) &amp;&amp;&amp; (e3 =/= e4))) <span class="keyword">then</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> x' := triple_vfresh (pi,sig) A <span class="keyword">in</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Some (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(((pi &amp;&amp;&amp; (e3 =/= var_e x')) &amp;&amp;&amp; (var_e x' == nat_e 0),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;star (star s1 (star (lst (var_e x') e4) (cell (e3 +e nat_e 1))))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(singl e3 (var_e x'))), A)::<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(((pi &amp;&amp;&amp; (e3 =/= var_e x')) &amp;&amp;&amp; (var_e x' =/= nat_e 0),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;star (star s1 (star (lst (var_e x') e4) (cell (e3 +e nat_e 1))))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(singl e3 (var_e x'))),A)::<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;nil)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">else</span> <span class="keyword">if</span> expr_b_dp (pi =b&gt; (((e3 +e (nat_e 1)) == e1) &amp;&amp;&amp; (e3 =/= e4))) <span class="keyword">then</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> x' := triple_vfresh (pi,sig) A <span class="keyword">in</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Some (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(((pi &amp;&amp;&amp; (e3 =/= var_e x')) &amp;&amp;&amp; (var_e x' == nat_e 0),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;star (star s1 (star (lst (var_e x') e4) (singl e3 (var_e x'))))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cell (e3 +e nat_e 1))), A)::<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(((pi &amp;&amp;&amp; (e3 =/= var_e x')) &amp;&amp;&amp; (var_e x' =/= nat_e 0),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;star (star s1 (star (lst (var_e x') e4) (singl e3 (var_e x'))))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cell (e3 +e nat_e 1))), A)::<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;nil)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">else</span> Some (((pi, remove_empty_heap pi (star_assoc_left (star_com sig) emp)), A)::nil)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| (singl e1 e2) =&gt; Some ((pi, star emp sig, A)::nil)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| (cell e1) =&gt; Some ((pi, star emp sig, A)::nil)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| (lst e1 e2) =&gt; Some ((pi, star emp sig, A)::nil)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; Some (((pi, remove_empty_heap pi (star_assoc_left (star_com sig) emp)), A)::nil)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+Opaque entail_fct.<br/>
+Opaque remove_empty_heap.<br/>
+Opaque star_assoc_left.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="tritra_step'_correct"></a>tritra_step'_correct: forall A pi sig l,<br/>
+&nbsp;&nbsp;tritra_step' pi sig A = Some l -&gt;<br/>
+&nbsp;&nbsp;(forall pi' sig' A', <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;In ((pi',sig'),A') l -&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;tritra (pi',sig') A'    <br/>
+&nbsp;&nbsp;) -&gt;<br/>
+&nbsp;&nbsp;tritra (pi,sig) A.<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="tritra_step"></a>tritra_step (pi: Pi) (sig: Sigma) (A: wpAssrt) : option (list ((Pi * Sigma) * wpAssrt)) :=<br/>
+&nbsp;&nbsp;<span class="keyword">if</span> expr_b_dp (!pi) <span class="keyword">then</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Some nil <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">else</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tritra_step' pi sig A.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="tritra_step_correct"></a>tritra_step_correct: forall A pi sig l,<br/>
+&nbsp;&nbsp;tritra_step pi sig A = Some l -&gt;<br/>
+&nbsp;&nbsp;(forall pi' sig' A', In ((pi', sig'),A') l -&gt; tritra (pi', sig') A') -&gt;<br/>
+&nbsp;&nbsp;tritra (pi, sig) A.<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="tritra_list"></a>tritra_list (l: list ((Pi * Sigma) * wpAssrt)) : option (list ((Pi * Sigma) * wpAssrt)) :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> l <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| nil =&gt; Some nil<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| ((pi,sg), A)::tl =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> tritra_step pi sg A <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| None =&gt; None<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Some l' =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> tritra_list tl <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| None =&gt; None<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Some l'' =&gt; Some (l' ++ l'')<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="tritra_list_correct"></a>tritra_list_correct: forall l l',<br/>
+&nbsp;&nbsp;tritra_list l = Some l' -&gt;<br/>
+&nbsp;&nbsp;(forall pi sig A, In ((pi, sig), A) l' -&gt; tritra (pi, sig) A) -&gt;    <br/>
+&nbsp;&nbsp;(forall pi sig A, In ((pi, sig), A) l -&gt; tritra (pi, sig) A).<br/>
+
+<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="tritra_list_rec"></a>tritra_list_rec (l: list ((Pi * Sigma) * wpAssrt)) (size:nat) {struct size} : option (list ((Pi * Sigma) * wpAssrt)) :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> size <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| 0 =&gt; Some l<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| S size' =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> tritra_list l <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| None =&gt; None<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Some l' =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> l' <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| nil =&gt; Some nil<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt;  tritra_list_rec l' size'<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="tritra_list_rec_correct"></a>tritra_list_rec_correct : forall n l l',<br/>
+&nbsp;&nbsp;tritra_list_rec l n = Some l' -&gt;<br/>
+&nbsp;&nbsp;(forall pi sig A, In ((pi,sig),A) l' -&gt; tritra (pi,sig) A) -&gt;    <br/>
+&nbsp;&nbsp;(forall pi sig A, In ((pi,sig),A) l -&gt; tritra (pi,sig) A).<br/>
+
+<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="tritra_list_rec_correct'"></a>tritra_list_rec_correct': forall n l,<br/>
+&nbsp;&nbsp;tritra_list_rec l n = Some nil -&gt;<br/>
+&nbsp;&nbsp;(forall pi sig A, In ((pi,sig),A) l -&gt; assrt_interp (pi,sig) ==&gt; wpAssrt_interp A).<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="wpAssrt_size"></a>wpAssrt_size (A:wpAssrt) : nat :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> A <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a name="wpElt"></a>wpElt P =&gt; 2<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| wpSubst l P =&gt; 2 + wpAssrt_size P<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| wpLookup x e P =&gt; 2 + wpAssrt_size P<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| wpMutation e1 e2 P  =&gt; 2 + wpAssrt_size P<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| wpIf b L1 L2 =&gt; 2 + wpAssrt_size L1 + wpAssrt_size L2<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="triple_transformation_complexity"></a>triple_transformation_complexity (pi: expr_b) (sig: Sigma) (L: wpAssrt) : nat :=<br/>
+&nbsp;&nbsp;(Expr_B_size pi) * (sigma_size sig) * (wpAssrt_size L).<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="triple_transformation"></a>triple_transformation (P: Assrt) (Q: wpAssrt) {struct P} : option (list ((Pi * Sigma) * wpAssrt)) :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> P <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| nil =&gt; Some nil<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| (pi, sig) :: tl =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> tritra_list_rec <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(((compute_constraints (cell_loc_not_null pi sig) sig, sig), Q)::nil) <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(triple_transformation_complexity pi sig Q) <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Some l =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> triple_transformation tl Q <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Some l' =&gt; Some (l ++ l')<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| None =&gt; None<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| None =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> triple_transformation tl Q <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Some l' =&gt; Some (((pi,sig),Q)::l')<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| None =&gt; None<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="triple_transformation_correct"></a>triple_transformation_correct: forall P Q,<br/>
+&nbsp;&nbsp;triple_transformation P Q = Some nil  -&gt;<br/>
+&nbsp;&nbsp;Assrt_interp P ==&gt; wpAssrt_interp Q.<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="triple_transformation2"></a>triple_transformation2 (P: Assrt) (Q: wpAssrt) {struct P} : bool :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> P <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| nil =&gt; true<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| (pi,sig)::tl =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> tritra_list_rec (((pi,sig),Q)::nil) (triple_transformation_complexity pi sig Q) <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Some nil =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;triple_transformation2 tl Q <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; false<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="triple_transformation2_correct"></a>triple_transformation2_correct: forall P Q,<br/>
+&nbsp;&nbsp;triple_transformation2 P Q = true  -&gt;<br/>
+&nbsp;&nbsp;Assrt_interp P ==&gt; wpAssrt_interp Q.<br/>
+
+<br/>
+
+<br/>
+</code>
+</div>
+
+<div id="footer">
+<hr/><a href="index.html">Index</a><hr/><font size="-1">This page has been generated by <a href="http://coq.inria.fr">coqdoc</a></font>
+</div>
+
+</div>
+
+</body>
+</html>

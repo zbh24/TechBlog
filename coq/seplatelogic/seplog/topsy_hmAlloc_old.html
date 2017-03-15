@@ -1,0 +1,544 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"/>
+<link href="coqdoc.css" rel="stylesheet" type="text/css"/>
+<title>topsy_hmAlloc_old</title>
+</head>
+
+<body>
+
+<div id="page">
+
+<div id="header">
+</div>
+
+<div id="main">
+
+<h1 class="libtitle">Library topsy_hmAlloc_old</h1>
+
+<code>
+<span class="keyword">Load</span> seplog_header.<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> <a class="modref" href="topsy_hm_old.html">topsy_hm_old</a>.<br/>
+
+<br/>
+Open <span class="keyword">Local</span> Scope Z_scope.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="ENTRYSIZE"></a>ENTRYSIZE (x:var.v) (tmp:var.v) := <br/>
+&nbsp;&nbsp;tmp &lt;-* (x -.&gt; next);<br/>
+&nbsp;&nbsp;tmp &lt;- (var_e tmp -e var_e x -e int_e 2%Z);<br/>
+&nbsp;&nbsp;ifte (nat_e 0 &gt;&gt; var_e tmp) thendo (tmp &lt;- nat_e 0) elsedo skip.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="findFree"></a>findFree (size: nat) (entry fnd sz stts:var.v) :=<br/>
+<br/>
+entry &lt;- var_e hmStart;<br/>
+stts &lt;-* (entry -.&gt; status);<br/>
+fnd &lt;- int_e 0;<br/>
+<br/>
+(while ((var_e entry =/= null) &amp;&amp;&amp; (var_e fnd =/= int_e 1)) (<br/>
+&nbsp;&nbsp;stts &lt;-* (entry -.&gt; status);<br/>
+&nbsp;&nbsp;(ENTRYSIZE entry sz);<br/>
+&nbsp;&nbsp;(ifte ((var_e stts == Free) &amp;&amp;&amp; (var_e sz &gt;&gt;= nat_e size)) thendo <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(fnd &lt;- int_e 1)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;elsedo <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(entry &lt;-* (entry -.&gt; next)))<br/>
+)).<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="LEFTOVER"></a>LEFTOVER : nat := 8%nat.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="compact"></a>compact (cptr nptr stts : var.v) :=<br/>
+<br/>
+while (var_e cptr =/= null) (<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;stts &lt;-* (cptr -.&gt; status);<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;ifte (var_e stts ==  Free) thendo (<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;nptr &lt;-* (cptr -.&gt; next); <br/>
+&nbsp;&nbsp;&nbsp;stts &lt;-* (nptr -.&gt; status);<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;(while (var_e stts == Free) (<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;stts &lt;-* (nptr -.&gt; next);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cptr -.&gt; next) *&lt;- var_e stts;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;nptr &lt;- var_e stts;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;stts &lt;-* (nptr -.&gt; status)<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;) elsedo skip;<br/>
+&nbsp;<br/>
+&nbsp;&nbsp;&nbsp;cptr &lt;-* (cptr -.&gt; next)<br/>
+).<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="split"></a>split (entry:var.v) (size:nat) (cptr sz:var.v) :=<br/>
+ENTRYSIZE entry sz;<br/>
+ifte (var_e sz &gt;&gt;= (nat_e size +e nat_e LEFTOVER +e nat_e 2%nat)) thendo (<br/>
+&nbsp;&nbsp;cptr &lt;- var_e entry +e nat_e 2%nat +e nat_e size;<br/>
+&nbsp;&nbsp;sz &lt;-* (entry -.&gt; next);<br/>
+&nbsp;&nbsp;(cptr -.&gt; next) *&lt;- var_e sz;<br/>
+&nbsp;&nbsp;(cptr -.&gt; status) *&lt;- Free;<br/>
+&nbsp;&nbsp;(entry -.&gt; next) *&lt;- var_e cptr<br/>
+) elsedo (<br/>
+&nbsp;&nbsp;skip<br/>
+);<br/>
+(entry -.&gt; status) *&lt;- Allocated.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="HM_ALLOCFAILED"></a>HM_ALLOCFAILED := int_e 0%Z.<br/>
+<span class="keyword">Definition</span> <a name="HM_ALLOCOK"></a>HM_ALLOCOK := int_e 1%Z.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="hmAlloc"></a>hmAlloc (result:var.v) (size: nat) (entry:var.v) (*(adr: loc)*) (cptr fnd stts nptr sz:var.v) :=<br/>
+result &lt;- null;<br/>
+findFree size entry fnd sz stts;<br/>
+(ifte (var_e entry == null) thendo (<br/>
+&nbsp;&nbsp;cptr &lt;- var_e hmStart;<br/>
+&nbsp;&nbsp;compact cptr nptr stts;<br/>
+&nbsp;&nbsp;findFree size entry fnd sz stts<br/>
+) elsedo (<br/>
+&nbsp;&nbsp;skip<br/>
+));<br/>
+(ifte (var_e entry == null) thendo (<br/>
+&nbsp;&nbsp;result &lt;- HM_ALLOCFAILED<br/>
+) elsedo (<br/>
+&nbsp;&nbsp;split entry size cptr sz;<br/>
+&nbsp;&nbsp;result &lt;- var_e entry +e nat_e 2%nat<br/>
+)).<br/>
+
+<br/>
+Close <span class="keyword">Local</span> Scope Z_scope.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="hmAlloc_specif1"></a>hmAlloc_specif1 := forall result adr sizex x size entry cptr fnd stts nptr sz, <br/>
+&nbsp;&nbsp;(var.set (hmStart::result::entry::cptr::fnd::stts::nptr::sz::nil)) -&gt; <br/>
+&nbsp;&nbsp;adr &gt; 0 -&gt; sizex &gt; 0 -&gt; size &gt; 0 -&gt;<br/>
+<br/>
+&nbsp;&nbsp;{{<span class="keyword">fun</span> s h =&gt; exists l,  <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Heap_List l adr 0 s h /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;In (x,sizex,Allocated) l /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;eval (var_e hmStart) s = eval (nat_e adr) s }}<br/>
+&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;hmAlloc result size entry cptr fnd stts nptr sz<br/>
+&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;{{ <span class="keyword">fun</span> s h =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(exists l, exists y, y &gt; 0 /\ eval (var_e result) s = Z_of_nat (y+2) /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(exists size'', size'' &gt;= size /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Heap_List l adr 0 ** Array (y + 2) size'') s h /\ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;In (x,sizex,Allocated) l /\ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;In (y,size'',Allocated) l /\ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;x &lt;&gt; y))<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;\/<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(exists l, eval (var_e result) s = 0%Z /\ Heap_List l adr 0 s h /\ In (x,sizex,Allocated) l) }}.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="findFree_specif1"></a>findFree_specif1 := forall adr entry fnd sz stts size sizex x result,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;size &gt; 0 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;sizex &gt; 0 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;adr &gt; 0 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;var.set (hmStart::entry::fnd::sz::stts::result::nil) -&gt;<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{<span class="keyword">fun</span> s h =&gt;exists l,  Heap_List l adr 0 s h /\ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;In (x,sizex,Allocated) l /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;eval (var_e hmStart) s = eval (nat_e adr) s /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;eval (var_e result) s = eval null s }}<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;findFree size entry fnd sz stts<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{<span class="keyword">fun</span> s h =&gt;  exists l,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Heap_List l adr 0 s h /\ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;In (x,sizex,Allocated) l /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;eval (var_e hmStart) s = eval (nat_e adr) s /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;eval (var_e result) s = eval null s /\    <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(exists finded_free_block, exists size'', size'' &gt;= size /\ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;In (finded_free_block,size'',Free) l /\ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;eval (var_e entry) s = (Z_of_nat finded_free_block) /\ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;finded_free_block &gt; 0)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;\/<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(eval (var_e entry) s = eval null s)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;)}}.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="compact_specif1"></a>compact_specif1:= forall adr cptr nptr stts size sizex x result entry,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;size &gt; 0 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;sizex &gt; 0 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;adr &gt; 0 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;var.set (hmStart::entry::cptr::nptr::stts::result::nil) -&gt;<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{<span class="keyword">fun</span> s h =&gt;exists l, Heap_List l adr 0 s h /\ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;In (x,sizex,Allocated) l /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;eval (var_e hmStart) s = eval (nat_e adr) s /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;eval (var_e result) s = eval null s /\    <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;eval (var_e cptr) s = eval (nat_e adr) s<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;}}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;compact cptr nptr stts<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{{<span class="keyword">fun</span> s h =&gt; exists l, Heap_List l adr 0 s h /\ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;In (x,sizex,Allocated) l /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;eval (var_e hmStart) s = eval (nat_e adr) s /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;eval (var_e result) s = eval null s <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;}}.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="split_specif1"></a>split_specif1 := forall adr cptr sz size sizex x result entry, <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;size &gt; 0 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;sizex &gt; 0 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;adr &gt; 0 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;var.set (hmStart::entry::cptr::sz::result::nil) -&gt;<br/>
+<br/>
+{{<span class="keyword">fun</span> s h =&gt;  exists l,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Heap_List l adr 0 s h /\ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;In (x,sizex,Allocated) l /\ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;eval (var_e hmStart) s = eval (nat_e adr) s /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;eval (var_e result) s = eval null s /\    <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(exists finded_free_block, exists size'', size'' &gt;= size /\ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;In (finded_free_block,size'',Free) l /\ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;eval (var_e entry) s = (Z_of_nat finded_free_block) /\ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;finded_free_block &gt; 0 /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;finded_free_block &lt;&gt; x) }}<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;split entry size cptr sz<br/>
+<br/>
+{{<span class="keyword">fun</span> s h =&gt; exists l,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;In (x,sizex,Allocated) l /\ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(exists y, y &gt; 0 /\ eval (var_e entry) s = Z_of_nat (y) /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(exists size'', size'' &gt;= size /\      <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Heap_List l adr 0 ** Array (y+2) size'') s h /\ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;In (y,size'',Allocated) l /\ y &lt;&gt; x))}}.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="findFree_verif1"></a>findFree_verif1 : findFree_specif1.<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+Eval_b_hyp_clean.<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="compact_verif1"></a>compact_verif1 : compact_specif1.<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="split_verif1"></a>split_verif1 : split_specif1.<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="hmAlloc_verif1"></a>hmAlloc_verif1: hmAlloc_specif1.<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+</code>
+</div>
+
+<div id="footer">
+<hr/><a href="index.html">Index</a><hr/><font size="-1">This page has been generated by <a href="http://coq.inria.fr">coqdoc</a></font>
+</div>
+
+</div>
+
+</body>
+</html>

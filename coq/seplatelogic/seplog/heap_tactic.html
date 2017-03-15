@@ -1,0 +1,229 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"/>
+<link href="coqdoc.css" rel="stylesheet" type="text/css"/>
+<title>heap_tactic</title>
+</head>
+
+<body>
+
+<div id="page">
+
+<div id="header">
+</div>
+
+<div id="main">
+
+<h1 class="libtitle">Library heap_tactic</h1>
+
+<code>
+<span class="keyword">Require</span> <span class="keyword">Import</span> List.<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> ZArith.<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> List.<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> EqNat.<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> Classical.<br/>
+
+<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> <a class="modref" href="util.html">util</a>.<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> <a class="modref" href="heap.html">heap</a>.<br/>
+
+<br/>
+Open <span class="keyword">Local</span> Scope heap_scope.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="disjoint_up"></a>disjoint_up: forall x x1 x2 x3,<br/>
+&nbsp;&nbsp;x = x1 +++ x3 -&gt; x1 # x3 -&gt; x # x2 -&gt; x1 # x2.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="disjoint_up'"></a>disjoint_up': forall x x1 x2 x3,<br/>
+&nbsp;&nbsp;x = heap.union x1 x3 -&gt; heap.disjoint x1 x3 -&gt; heap.disjoint x x2 -&gt; heap.disjoint x3 x2.<br/>
+
+<br/>
+<span class="keyword">Ltac</span> Disjoint_heap :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> goal <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| id: (?x1 +++ ?x2) # ?x |- _ =&gt; generalize (heap.disjoint_union' x1 x2 x (heap.disjoint_com (x1 +++ x2) x id)); intro Disjoint_heapA; inversion_clear Disjoint_heapA; clear id; Disjoint_heap<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| id: ?x # (?x1 +++ ?x2) |- _ =&gt; generalize (heap.disjoint_union' x1 x2 x id); intro Disjoint_heapA; inversion_clear Disjoint_heapA; clear id; Disjoint_heap<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;|  |- (?x1 +++ ?x2) # ?x3 =&gt; eapply heap.disjoint_com; eapply heap.disjoint_union; split; [ (Disjoint_simpl || Disjoint_heap) | (Disjoint_simpl || Disjoint_heap)]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;|  |- ?x3 # (?x1 +++ ?x2) =&gt; eapply heap.disjoint_union; split; [ (Disjoint_simpl || Disjoint_heap) | (Disjoint_simpl || Disjoint_heap)]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;|  |- ?x1 # ?x2 =&gt; Disjoint_up<br/>
+&nbsp;&nbsp;<span class="keyword">end</span><br/>
+<span class="keyword">with</span><br/>
+&nbsp;&nbsp;Disjoint_up :=<br/>
+&nbsp;&nbsp;(<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Disjoint_simpl ||  (Disjoint_up_left) || (Disjoint_up_right)<br/>
+&nbsp;&nbsp;)<br/>
+<span class="keyword">with</span><br/>
+&nbsp;&nbsp;Disjoint_up_left :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> goal <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| id1:  ?X1 = (?x1 +++ ?x1')  |- ?x1 # ?x2 =&gt; apply (disjoint_up X1 x1 x2 x1' id1); [(Disjoint_simpl || Disjoint_heap)|(Disjoint_simpl || Disjoint_heap)]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| id1:  ?X1 = (?x1 +++ ?x1')  |- ?x1' # ?x2 =&gt; apply (disjoint_up' X1 x1 x2 x1' id1) ; [(Disjoint_simpl || Disjoint_heap)|(Disjoint_simpl || Disjoint_heap)]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;|  |- ?x1 # ?x2 =&gt; (Disjoint_simpl)<br/>
+&nbsp;&nbsp;<span class="keyword">end</span><br/>
+<span class="keyword">with</span><br/>
+&nbsp;&nbsp;Disjoint_up_right :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> goal <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| id1: ?X1 = (?x2 +++ ?x2')  |- ?x1 # ?x2 =&gt; apply heap.disjoint_com; apply (disjoint_up X1 x2 x1 x2' id1); [(Disjoint_simpl || Disjoint_heap)|(Disjoint_simpl || Disjoint_heap)]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| id1: ?X1 = (?x2 +++ ?x2')  |- ?x1 # ?x2' =&gt; apply heap.disjoint_com; apply (disjoint_up' X1 x2 x1 x2' id1) ; [(Disjoint_simpl || Disjoint_heap)|(Disjoint_simpl || Disjoint_heap)]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;|  |- ?x1 # ?x2 =&gt; (Disjoint_simpl)<br/>
+&nbsp;&nbsp;<span class="keyword">end</span><br/>
+<span class="keyword">with</span><br/>
+&nbsp;&nbsp;Disjoint_simpl :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> goal <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| id : ?x1 # ?x2 |- ?x1 # ?x2 =&gt; auto<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| id : ?x2 # ?x1 |- ?x1 # ?x2 =&gt; apply heap.disjoint_com; auto<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- ?x1 # heap.emp =&gt; apply (heap.disjoint_emp x1)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- heap.emp # ?x1 =&gt; apply heap.disjoint_com; apply (heap.disjoint_emp x1)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- heap.singleton ?l1 ?v1 # heap.singleton ?l2 ?v2 =&gt; eapply heap.disjoint_singleton; omega<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="tactic_test_disjoint"></a>tactic_test_disjoint: forall h h1 h2 h11 h12 h21 h22 h111 h112 h121 h122 h211 h212 h221 h222,<br/>
+&nbsp;&nbsp;h1 # h2 -&gt;<br/>
+&nbsp;&nbsp;h11 # h12 -&gt;<br/>
+&nbsp;&nbsp;h21 # h22 -&gt;<br/>
+&nbsp;&nbsp;h111 # h112 -&gt;<br/>
+&nbsp;&nbsp;h121 # h122 -&gt;<br/>
+&nbsp;&nbsp;h211 # h212 -&gt;<br/>
+&nbsp;&nbsp;h221 # h222 -&gt;<br/>
+&nbsp;&nbsp;h = (heap.union h1 h2) -&gt;<br/>
+&nbsp;&nbsp;h1 = (heap.union h11 h12) -&gt;<br/>
+&nbsp;&nbsp;h2 = (heap.union h21 h22) -&gt;<br/>
+&nbsp;&nbsp;h11 = (heap.union h111 h112) -&gt;<br/>
+&nbsp;&nbsp;h12 = (heap.union h121 h122) -&gt;<br/>
+&nbsp;&nbsp;h21 = (heap.union h211 h212) -&gt;<br/>
+&nbsp;&nbsp;h22 = (heap.union h221 h222) -&gt;<br/>
+&nbsp;&nbsp;(h112 +++ h221) # h222.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="tactic_test_disjoint2"></a>tactic_test_disjoint2: forall h h1 h2,<br/>
+&nbsp;&nbsp;heap.disjoint h (heap.union h1 h2) -&gt;<br/>
+&nbsp;&nbsp;heap.disjoint h h2 .<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="equal_tactic_l1"></a>equal_tactic_l1: forall h1 h2 h3 h4,<br/>
+&nbsp;&nbsp;heap.disjoint h1 h2 -&gt;<br/>
+&nbsp;&nbsp;(heap.union h2 h1) = (heap.union h3 h4) -&gt;<br/>
+&nbsp;&nbsp;(heap.union h1 h2) = (heap.union h3 h4).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="equal_tactic_l1'"></a>equal_tactic_l1': forall h1 h2 h3 h4,<br/>
+&nbsp;&nbsp;heap.disjoint h3 h4 -&gt;<br/>
+&nbsp;&nbsp;(heap.union h1 h2) = (heap.union h4 h3) -&gt;<br/>
+&nbsp;&nbsp;(heap.union h1 h2) = (heap.union h3 h4).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="equal_tactic_l2"></a>equal_tactic_l2: forall h1 h2 h3 H,<br/>
+&nbsp;&nbsp;H = heap.union (heap.union h1 h2) h3 -&gt;<br/>
+&nbsp;&nbsp;H = heap.union h1 (heap.union h2 h3).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="equal_tactic_l2'"></a>equal_tactic_l2': forall h1 h2 h3,<br/>
+&nbsp;&nbsp;heap.union (heap.union h1 h2) h3 = heap.union h1 (heap.union h2 h3).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="equal_tactic_l3"></a>equal_tactic_l3: forall h1 h2 h3 H,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(heap.union (heap.union h1 h2) h3) = H  -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(heap.union h1 (heap.union h2 h3)) = H.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="equal_tactic_l4"></a>equal_tactic_l4: forall x1 x2 h1 h2 H,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;H = (heap.union x1 x2) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(heap.union x1 x2) = (heap.union h1 h2) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(heap.union h1 h2) = H.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="equal_tactic_l4'"></a>equal_tactic_l4': forall x1 h1 h2 H,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;H = x1 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;x1 = (heap.union h1 h2) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(heap.union h1 h2) = H.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="equal_tactic_l5"></a>equal_tactic_l5: forall x1 x2 h1 h2 H,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;H = (heap.union x1 x2) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(heap.union x1 x2) = (heap.union h1 h2) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;H = (heap.union h1 h2).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="equal_tactic_l5'"></a>equal_tactic_l5': forall x1 h1 h2 H,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;H = x1 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;x1 = (heap.union h1 h2) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;H = (heap.union h1 h2).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="equal_tactic_l6"></a>equal_tactic_l6: forall X Y,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;X = Y -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(heap.union X heap.emp) = Y.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="equal_tactic_l7"></a>equal_tactic_l7: forall X Y,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Y = X -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(heap.union heap.emp X ) = Y.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="equal_tactic_l8"></a>equal_tactic_l8: forall x1 x2 h1 X Y,<br/>
+&nbsp;&nbsp;X = x1 +++ x2 -&gt;<br/>
+&nbsp;&nbsp;h1 # X -&gt;<br/>
+&nbsp;&nbsp;x1 # x2 -&gt;<br/>
+&nbsp;&nbsp;h1 +++ (x1 +++ x2) =  Y -&gt;<br/>
+&nbsp;&nbsp;h1 +++ X = Y.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="equal_tactic_l8'"></a>equal_tactic_l8': forall x1 h1 X Y,<br/>
+&nbsp;&nbsp;X = x1 -&gt;<br/>
+&nbsp;&nbsp;heap.disjoint h1 X -&gt;<br/>
+&nbsp;&nbsp;(heap.union h1 x1) = Y -&gt;<br/>
+&nbsp;&nbsp;(heap.union h1 X) = Y.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="equal_tactic_l9"></a>equal_tactic_l9: forall X Y h1,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;h1 = X -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;X = Y -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(heap.union X h1) = (heap.union Y h1).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="equal_tactic_l9'"></a>equal_tactic_l9': forall X Y x1 x2,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;x1 = x2 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;heap.disjoint x1 X -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;heap.disjoint x2 X -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;X = Y -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(heap.union X x1) = (heap.union Y x2).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="equal_tactic_l10"></a>equal_tactic_l10: forall X h1 h2,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;h1 = h2 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(heap.union X h1) = (heap.union X h2).<br/>
+
+<br/>
+<span class="keyword">Ltac</span> Equal_heap :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> goal <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| |-  (?h1 +++ ?h2) = (?h1 +++ ?h3) =&gt; apply (equal_tactic_l10 h1 h2 h3); Equal_heap<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| |- ?h1 = ?h1 =&gt; auto<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| |- (heap.emp +++ ?h1) = ?h2 =&gt; apply (equal_tactic_l7 h1 h2); [Equal_heap]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| |- (?h1 +++ heap.emp) = ?h2 =&gt; apply (equal_tactic_l6 h1 h2); [Equal_heap]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| |- ?h2 = (heap.emp +++ ?h1)  =&gt; symmetry; apply (equal_tactic_l7 h1 h2); [Equal_heap]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| |- ?h2 = (?h1 +++ heap.emp) =&gt; symmetry;apply (equal_tactic_l6 h1 h2); [Equal_heap]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|  id: ?X = (?x1 +++ ?x2) |- (?X +++ ?x1') = (?Y +++ ?x2') =&gt; rewrite id ;  Equal_heap<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|  id: ?Y = (?y1 +++ ?y2) |- (?X +++ ?x1') = (?Y +++ ?x2') =&gt; rewrite id ;  Equal_heap<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|  id: ?X = (?x1 +++ ?x2) |- ?X = (?Y +++ ?x2') =&gt; rewrite id ;  Equal_heap<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|  id: ?Y = (?y1 +++ ?y2) |- (?X +++ ?x1') = ?Y =&gt; rewrite id ;  Equal_heap<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| |- ((?h1 +++ ?h2) +++ ?h3) = ?X =&gt; rewrite (equal_tactic_l2' h1 h2 h3); [Equal_heap]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| |- ?X = ((?h1 +++ ?h2) +++ ?h3)  =&gt; rewrite (equal_tactic_l2' h1 h2 h3); [Equal_heap]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| |- (?h1 +++ ?h2) = (?h3 +++ ?h4) =&gt; apply  (equal_tactic_l1 h1 h2 h3 h4); [Disjoint_heap | Equal_heap]  <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| id1: ?h1 = ?h2 |- ?h1 = ?h3 =&gt; rewrite id1; Equal_heap<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| id1: ?h1 = ?h2 |- ?h3 = ?h1 =&gt; rewrite id1; Equal_heap<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+</code>
+</div>
+
+<div id="footer">
+<hr/><a href="index.html">Index</a><hr/><font size="-1">This page has been generated by <a href="http://coq.inria.fr">coqdoc</a></font>
+</div>
+
+</div>
+
+</body>
+</html>

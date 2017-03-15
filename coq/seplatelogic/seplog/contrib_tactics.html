@@ -1,0 +1,224 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"/>
+<link href="coqdoc.css" rel="stylesheet" type="text/css"/>
+<title>contrib_tactics</title>
+</head>
+
+<body>
+
+<div id="page">
+
+<div id="header">
+</div>
+
+<div id="main">
+
+<h1 class="libtitle">Library contrib_tactics</h1>
+
+<code>
+<span class="keyword">Require</span> <span class="keyword">Import</span> List.<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> ZArith.<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> List.<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> EqNat.<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> Classical.<br/>
+
+<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> <a class="modref" href="util.html">util</a>.<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> <a class="modref" href="heap.html">heap</a>.<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> <a class="modref" href="heap_tactic.html">heap_tactic</a>.<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> <a class="modref" href="bipl.html">bipl</a>.<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> <a class="modref" href="axiomatic.html">axiomatic</a>.<br/>
+
+<br/>
+Open <span class="keyword">Local</span> Scope heap_scope.<br/>
+Open <span class="keyword">Local</span> Scope sep_scope.<br/>
+
+<br/>
+<span class="keyword">Ltac</span> Simpl_eval := <br/>
+&nbsp;&nbsp;<span class="keyword">match</span> goal <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| id: eval ?e ?s = ?P |- _ =&gt; simpl <span class="keyword">in</span> id; generalize id; clear id; Simpl_eval<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| id: ?P = eval ?e ?s |- _ =&gt; simpl <span class="keyword">in</span> id; generalize id; clear id; Simpl_eval<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- _ =&gt; (intros || idtac); simpl<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Ltac</span><br/>
+&nbsp;Eval_b_hyp h :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> goal <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| h: eval_b ?e ?s = true |- _ =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;generalize (expr_b_semantic_good e s); intro eval_b_HypX; inversion_clear eval_b_HypX <span class="keyword">as</span> [eval_b_HypX1 eval_b_HypX2]; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;generalize (eval_b_HypX1 h); clear eval_b_HypX1 eval_b_HypX2;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;intro eval_b_HypX; simpl <span class="keyword">in</span> eval_b_HypX; generalize eval_b_HypX; <span class="keyword">let</span> x := fresh <span class="keyword">in</span> intro x; clear eval_b_HypX; clear h<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+<span class="keyword">with</span><br/>
+&nbsp;Eval_b_goal :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> goal <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|  |-  eval_b ?e ?s = true =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;generalize (expr_b_semantic_good e s); intro eval_b_HypX; inversion_clear eval_b_HypX <span class="keyword">as</span> [eval_b_HypX1 eval_b_HypX2]; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;apply (eval_b_HypX2); clear eval_b_HypX1 eval_b_HypX2; simpl<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|  |-  eval_b ?e ?s = false =&gt; apply (expr_b_true_negb_false e s); Eval_b_goal<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| |- _ =&gt; idtac<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+<span class="keyword">with</span><br/>
+&nbsp;Eval_b_hyp_clean :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> goal <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| id: eval_b ?e ?s = true |- _ =&gt; Eval_b_hyp id;  Eval_b_hyp_clean<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| id: eval_b ?e ?s = false |- _ =&gt; generalize (expr_b_false_negb_true e s id); clear id; intro; Eval_b_hyp_clean<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| |- _ =&gt; idtac<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+<span class="keyword">with</span><br/>
+&nbsp;Omega_exprb :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(intros || idtac); Eval_b_hyp_clean; Eval_b_goal; (tauto || omega || Simpl_eval; OmegaZ).<br/>
+
+<br/>
+<span class="keyword">Ltac</span> Frame_rule_pre A :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> goal <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| |- {{?a1 **  A }} ?c {{?Q}} =&gt; idtac<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| |- {{ A ** ?a1}} ?c {{?Q}} =&gt; rewrite (sep.con_com_equiv A a1)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| |- {{ (?a1 ** ?a2) ** ?a3}} ?c {{?Q}} =&gt; rewrite (sep.con_assoc_equiv a2 a1 a3); Frame_rule_pre A<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| |- {{ ?a1 ** ?a2}} ?c {{?Q}} =&gt; rewrite (sep.con_com_equiv a1 a2); Frame_rule_pre A<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Ltac</span> Frame_rule_post A :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> goal <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| |- {{?P}} ?c {{?a1 **  A }} =&gt; idtac<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| |- {{?P}} ?c {{ A ** ?a1}} =&gt; rewrite (sep.con_com_equiv A a1)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| |- {{?P}} ?c {{ (?a1 ** ?a2) ** ?a3}} =&gt; rewrite (sep.con_assoc_equiv a2 a1 a3); Frame_rule_post A<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| |- {{?P}} ?c {{ ?a1 ** ?a2}} =&gt; rewrite (sep.con_com_equiv a1 a2); Frame_rule_post A<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Ltac</span> Frame_rule A := <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> goal <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| |- {{?P}} ?c {{?Q}} =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Frame_rule_pre  A); (Frame_rule_post A); <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;eapply frame_rule<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Ltac</span> emp_red := <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> goal <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| id: sep.emp ?s ?h |- _ =&gt; red <span class="keyword">in</span> id; emp_red<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| |-_ =&gt; idtac<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Ltac</span> Heap_emp_clean :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> goal <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| id: ?h = heap.emp |- _ =&gt; subst h; Heap_emp_clean<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| id: sep.emp ?s ?h |- _ =&gt; red <span class="keyword">in</span> id; Heap_emp_clean<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| id: heap.emp = ?h |- _ =&gt; subst h; Heap_emp_clean<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; idtac<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Ltac</span> Decompose_sepcon id h1 h2:=<br/>
+&nbsp;&nbsp;inversion_clear id <span class="keyword">as</span> [h1 X]; inversion_clear X <span class="keyword">as</span> [h2 Y]; decompose [and] Y; clear Y.<br/>
+
+<br/>
+<span class="keyword">Ltac</span> Compose_sepcon id1 id2:=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;exists id1; exists id2; split; [Heap_emp_clean; Disjoint_heap | (split;[Heap_emp_clean; (Equal_heap) | split; idtac])].<br/>
+
+<br/>
+<span class="keyword">Ltac</span> Intro_sepimp id1 id2 := red; intro id1; intro X; inversion_clear X; intro id2; intro.<br/>
+
+<br/>
+<span class="keyword">Ltac</span> Store_update:= simpl;<br/>
+&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> goal <span class="keyword">with</span><br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| |- TT ?s ?h =&gt; red; simpl; auto<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| id: store.lookup ?v ?s = ?p |- store.lookup ?v (store.update ?v' ?p' ?s) = ?p =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;rewrite &lt;- store.lookup_update; [simpl; (Omega_exprb || Store_update || auto) |  Var_uneq || (unfold v; unfold v'; Omega_exprb)]<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| |- store.lookup ?v1 (store.update ?v2 ?p ?s) = ?p1 =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;assert (A1: v1 = v2); [
+			Omega_exprb |
+			subst v1; rewrite store.lookup_update'; auto 
+		]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| |- _ =&gt; rewrite &lt;- store.lookup_update; [simpl; (Omega_exprb || Store_update || auto || idtac ) |  Var_uneq]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| |- _ =&gt; rewrite store.lookup_update'; [simpl; (Omega_exprb || Store_update || auto || idtac )]<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Ltac</span> Decompose_hyp := Eval_b_hyp_clean;<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> goal <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| id: ex ?P |- _ =&gt; inversion_clear id; Decompose_hyp<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| id: ?P1 /\ ?P2 |- _ =&gt; decompose [and] id; clear id; Decompose_hyp<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| id: eval ?e ?s = ?v |- _ =&gt; simpl <span class="keyword">in</span> id<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| id: (?P1 ** ?P2) ?s ?h |- _ =&gt; <span class="keyword">let</span> h := fresh <span class="keyword">in</span> (inversion_clear id <span class="keyword">as</span> [h X]); <span class="keyword">let</span> h := fresh <span class="keyword">in</span> (inversion_clear X <span class="keyword">as</span> [h Y]; decompose [and] Y; clear Y); Decompose_hyp<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- _ =&gt; idtac<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Ltac</span> Resolve_not_in_var_list_rec :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> goal <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| id: ?v1 = ?v2 \/ ?P |- _ =&gt; inversion_clear id;[assert (v1 &lt;&gt; v2); [Var_uneq | contradiction] | Resolve_not_in_var_list_rec]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| id: False |- _ =&gt; contradiction<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Ltac</span> Resolve_not_in_var_list := simpl; red; intros; Resolve_not_in_var_list_rec.<br/>
+
+<br/>
+<span class="keyword">Ltac</span> Mapsto :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> goal <span class="keyword">with</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| id: (?e1 |-&gt; ?e2) ?s1 ?h |- (?e3 |-&gt; ?e4) ?s2 ?h =&gt; apply (mapsto_equiv' s2 s1 h e1 e2 e3 e4 id); [simpl; (Omega_exprb || Store_update || auto)| simpl; (Omega_exprb || Store_update || auto)]<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Ltac</span> assocs_sepcon :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> goal <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- ?P -&gt; _  =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;repeat rewrite sep.con_assoc_equiv<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Ltac</span> rotate_sepcon :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> goal <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- ?P -&gt; _ =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;rewrite sep.con_com_equiv;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;assocs_sepcon<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Ltac</span> try_monotony :=<br/>
+<span class="keyword">match</span> goal <span class="keyword">with</span><br/>
+&nbsp;&nbsp;| |- (?P ** ?PP) ?S ?SS ?M ?H -&gt; (?P ** ?QQ) ?S ?H =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;apply sep.monotony; split; [intros; auto | intros; idtac]<br/>
+&nbsp;&nbsp;| |- ((?L |-&gt; ?V) ** ?PP) ?S ?H -&gt; ((?K |-&gt; ?W) ** ?QQ) ?S ?H =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;apply sep.monotony; split; [intros; Mapsto | intros; idtac]<br/>
+&nbsp;&nbsp;| |- (?P -* ?PP) ?S ?H -&gt; (?Q -* ?QQ) ?S ?H =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;apply sep.monotony''; [red; intros; Mapsto | red; intros; idtac]<br/>
+&nbsp;&nbsp;| |- (?P ** ?PP) ?S ?H -&gt; (?Q ** ?QQ) ?S ?H =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;rotate_sepcon; try_monotony<br/>
+<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Ltac</span> Monotony Hyp :=<br/>
+&nbsp;&nbsp;generalize Hyp; clear Hyp; try_monotony.<br/>
+
+<br/>
+<span class="keyword">Ltac</span> Adjunction Hyp :=<br/>
+&nbsp;&nbsp;generalize Hyp; clear Hyp; apply sep.adjunction; intros.<br/>
+
+<br/>
+</code>
+</div>
+
+<div id="footer">
+<hr/><a href="index.html">Index</a><hr/><font size="-1">This page has been generated by <a href="http://coq.inria.fr">coqdoc</a></font>
+</div>
+
+</div>
+
+</body>
+</html>

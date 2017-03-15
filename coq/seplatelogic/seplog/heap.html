@@ -1,0 +1,803 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"/>
+<link href="coqdoc.css" rel="stylesheet" type="text/css"/>
+<title>heap</title>
+</head>
+
+<body>
+
+<div id="page">
+
+<div id="header">
+</div>
+
+<div id="main">
+
+<h1 class="libtitle">Library heap</h1>
+
+<code>
+<span class="keyword">Require</span> <span class="keyword">Import</span> ZArith.<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> EqNat.<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> Bool.<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> ZArith.<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> List.<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> Classical.<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> <a class="modref" href="util.html">util</a>.<br/>
+
+<br/>
+<span class="keyword">Module</span> <span class="keyword">Type</span> <a name="MAP"></a>MAP.<br/>
+&nbsp;&nbsp;<span class="keyword">Parameter</span> <a name="l"></a>l : <span class="keyword">Set</span>.<br/>
+&nbsp;&nbsp;<span class="keyword">Parameter</span> <a name="v"></a>v : <span class="keyword">Set</span>.<br/>
+&nbsp;&nbsp;<span class="keyword">Parameter</span> <a name="h"></a>h : <span class="keyword">Set</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Parameter</span> <a name="emp"></a>emp : h. <br/>
+&nbsp;&nbsp;<span class="keyword">Parameter</span> <a name="singleton"></a>singleton : l -&gt; v -&gt; h. <br/>
+&nbsp;&nbsp;<span class="keyword">Parameter</span> <a name="lookup"></a>lookup : l -&gt; h -&gt; option v.<br/>
+&nbsp;&nbsp;<span class="keyword">Parameter</span> <a name="lookup_emp"></a>lookup_emp : forall x, lookup x emp = None.<br/>
+&nbsp;&nbsp;<span class="keyword">Parameter</span> <a name="lookup_singleton"></a>lookup_singleton : forall n w, lookup n (singleton n w) = Some w.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Parameter</span> <a name="extensionality"></a>extensionality: forall h1 h2, (forall x, lookup x h1 = lookup x h2) -&gt; h1 = h2.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Parameter</span> <a name="update"></a>update : l -&gt; v -&gt; h -&gt; h.<br/>
+&nbsp;&nbsp;<span class="keyword">Parameter</span> <a name="update_singleton"></a>update_singleton : forall n w w', update n w' (singleton n w) = singleton n w'.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Parameter</span> <a name="union"></a>union : h -&gt; h -&gt; h.<br/>
+&nbsp;&nbsp;<span class="keyword">Notation</span> "k '+++' m" := (union k m) (at level 69) : heap_scope.<br/>
+&nbsp;&nbsp;Open <span class="keyword">Local</span> Scope heap_scope.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Parameter</span> <a name="equal_union_emp"></a>equal_union_emp : forall h1, h1 +++ emp = h1.<br/>
+&nbsp;&nbsp;<span class="keyword">Parameter</span> <a name="union_assoc"></a>union_assoc : forall h1 h2 h3, h1 +++ (h2 +++ h3) = (h1 +++ h2) +++ h3.<br/>
+&nbsp;&nbsp;<span class="keyword">Parameter</span> <a name="lookup_union_or"></a>lookup_union_or: forall h1 h2 n z,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;lookup n (h1 +++ h2) = Some z -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;lookup n h1 = Some z \/ lookup n h2 = Some z.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Parameter</span> <a name="lookup_update"></a>lookup_update : forall x y z st, x &lt;&gt; y -&gt; lookup x st = lookup x (singleton y  z +++ st).<br/>
+&nbsp;&nbsp;<span class="keyword">Parameter</span> <a name="lookup_update'"></a>lookup_update' : forall x z st, lookup x (singleton x z +++ st) = Some z.<br/>
+&nbsp;&nbsp;<span class="keyword">Parameter</span> <a name="lookup_update''"></a>lookup_update'' : forall x y z st,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;x &lt;&gt; y -&gt; lookup x st = lookup x (update y z st).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Parameter</span> <a name="disjoint"></a>disjoint : h -&gt; h -&gt; <span class="keyword">Prop</span>.<br/>
+&nbsp;&nbsp;<span class="keyword">Notation</span> "k '#' m" := (disjoint k m) (at level 79) : heap_scope.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Parameter</span> <a name="disjoint_emp"></a>disjoint_emp : forall h, h # emp.<br/>
+&nbsp;&nbsp;<span class="keyword">Parameter</span> <a name="disjoint_singleton"></a>disjoint_singleton : forall x y z z', x &lt;&gt; y -&gt; (singleton x z) # (singleton y z').<br/>
+&nbsp;&nbsp;<span class="keyword">Parameter</span> <a name="disjoint_singleton'"></a>disjoint_singleton' : forall x y z z', (singleton x z) # (singleton y z') -&gt; x &lt;&gt; y.<br/>
+&nbsp;&nbsp;<span class="keyword">Parameter</span> <a name="disjoint_com"></a>disjoint_com : forall h0 h1,  h0 # h1 -&gt; h1 # h0.<br/>
+&nbsp;&nbsp;<span class="keyword">Parameter</span> <a name="disjoint_update"></a>disjoint_update : forall n z h1 h2,  h1 # h2 -&gt; (update n z h1) # h2.<br/>
+&nbsp;&nbsp;<span class="keyword">Parameter</span> <a name="disjoint_union"></a>disjoint_union : forall h1 h2 h0,  h0 # h1 /\ h0 # h2  -&gt;  h0 # (h1 +++ h2).<br/>
+&nbsp;&nbsp;<span class="keyword">Parameter</span> <a name="disjoint_union'"></a>disjoint_union' : forall h1 h2 h0,  h0 # (h1 +++ h2) -&gt; h0 # h1 /\ h0 # h2.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Parameter</span> <a name="equal_union_disjoint"></a>equal_union_disjoint : forall x1 x2 x0, (x1 +++ x2) # x0  -&gt;  x1 # x0.<br/>
+&nbsp;&nbsp;<span class="keyword">Parameter</span> <a name="union_com"></a>union_com : forall h1 h2,  h1 # h2 -&gt; h1 +++ h2 = h2 +++ h1.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Parameter</span> <a name="lookup_union"></a>lookup_union : forall h1 h2, h1 # h2 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;forall n z, lookup n h1 = Some z -&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lookup n (h1 +++ h2) = Some z.<br/>
+&nbsp;&nbsp;<span class="keyword">Parameter</span> <a name="lookup_union_R"></a>lookup_union_R : forall h1 h2, h1 # h2 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;forall n z, lookup n h2 = Some z -&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lookup n (h1 +++ h2) = Some z.<br/>
+&nbsp;&nbsp;<span class="keyword">Parameter</span> <a name="equal_update_L"></a>equal_update_L : forall h1 h2, h1 # h2 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;forall n z z1, lookup n h1 = Some z1 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;update n z (h1 +++ h2) = (update n z h1) +++ h2.<br/>
+&nbsp;&nbsp;<span class="keyword">Parameter</span> <a name="equal_update_R"></a>equal_update_R : forall (h1 h2:h), h1 # h2 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;forall (n:l) (z z2:v), lookup n h2 = Some z2 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;update n z (h1 +++ h2) = h1 +++ (update n z h2).<br/>
+&nbsp;&nbsp;<span class="keyword">Parameter</span> <a name="lookup_exists_partition"></a>lookup_exists_partition: forall h a b,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;lookup a h = Some b -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;exists h'' , h = (singleton a b) +++ h'' /\ (singleton a b) # h''.<br/>
+&nbsp;&nbsp;<span class="keyword">Parameter</span> <a name="disjoint_comp"></a>disjoint_comp : forall h'1 h1 h2 h'2,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;h1 # h'1 -&gt; h1 # h2 -&gt; h'1 # h'2 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;h'1 +++ h'2 = h1 +++ h2 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;exists h', h'1 # h' /\ h2 = (h' +++ h'1).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Parameter</span> <a name="dif"></a>dif : h -&gt; l -&gt; h.<br/>
+&nbsp;&nbsp;<span class="keyword">Notation</span> "k '---' l" := (dif k l) (at level 69) : heap_scope.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Parameter</span> <a name="dif_singleton_emp"></a>dif_singleton_emp: forall a b, (singleton a b) --- a = emp.<br/>
+&nbsp;&nbsp;<span class="keyword">Parameter</span> <a name="dif_union"></a>dif_union: forall h1 h2 a, (h1 +++ h2) --- a = (h1 --- a) +++ (h2 --- a).<br/>
+&nbsp;&nbsp;<span class="keyword">Parameter</span> <a name="dif_disjoint"></a>dif_disjoint: forall h a b, h # (singleton a b) -&gt; (h --- a) = h.<br/>
+&nbsp;&nbsp;<span class="keyword">Parameter</span> <a name="dif_disjoint'"></a>dif_disjoint': forall h1 h2 l, h1 # h2 -&gt; (h1 --- l) # (h2 --- l).<br/>
+&nbsp;&nbsp;<span class="keyword">Parameter</span> <a name="lookup_dif"></a>lookup_dif : forall w st, lookup w (st --- w) = None.<br/>
+&nbsp;&nbsp;<span class="keyword">Parameter</span> <a name="lookup_dif'"></a>lookup_dif' : forall st x y, x &lt;&gt; y -&gt; lookup x (st --- y) = lookup x st.<br/>
+
+<br/>
+<span class="keyword">End</span> MAP.<br/>
+
+<br/>
+<span class="keyword">Module</span> <span class="keyword">Type</span> <a name="ELEM"></a>ELEM.<br/>
+&nbsp;&nbsp;<span class="keyword">Parameter</span> <a name="elem"></a>elem : <span class="keyword">Set</span>.<br/>
+<span class="keyword">End</span> ELEM.<br/>
+
+<br/>
+<span class="keyword">Require</span> OrderedType.<br/>
+
+<br/>
+<span class="keyword">Module</span> <span class="keyword">Type</span> <a name="OrderedTypeExt"></a>OrderedTypeExt.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Parameter</span> <a name="t"></a>t : <span class="keyword">Set</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Parameter</span> <a name="eq"></a>eq : t -&gt; t -&gt; <span class="keyword">Prop</span>.<br/>
+&nbsp;&nbsp;<span class="keyword">Parameter</span> <a name="lt"></a>lt : t -&gt; t -&gt; <span class="keyword">Prop</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Axiom</span> <a name="eq_refl"></a>eq_refl : forall x : t, eq x x.<br/>
+&nbsp;&nbsp;<span class="keyword">Axiom</span> <a name="eq_sym"></a>eq_sym : forall x y : t, eq x y -&gt; eq y x.<br/>
+&nbsp;&nbsp;<span class="keyword">Axiom</span> <a name="eq_trans"></a>eq_trans : forall x y z : t, eq x y -&gt; eq y z -&gt; eq x z.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Axiom</span> <a name="lt_trans"></a>lt_trans : forall x y z : t, lt x y -&gt; lt y z -&gt; lt x z.<br/>
+&nbsp;&nbsp;<span class="keyword">Axiom</span> <a name="lt_not_eq"></a>lt_not_eq : forall x y : t, lt x y -&gt; ~ eq x y.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Parameter</span> <a name="compare"></a>compare : forall x y : t, OrderedType.Compare lt eq x y.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Hint</span> <span class="keyword">Immediate</span> eq_sym.<br/>
+&nbsp;&nbsp;<span class="keyword">Hint</span> Resolve eq_refl eq_trans lt_not_eq lt_trans.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Axiom</span> <a name="eq_ext"></a>eq_ext : forall x y : t, eq x y -&gt; x = y.<br/>
+
+<br/>
+<span class="keyword">End</span> OrderedTypeExt.<br/>
+
+<br/>
+<span class="keyword">Module</span> <a name="map"></a>map (A: OrderedTypeExt) (E : ELEM) : MAP <br/>
+&nbsp;&nbsp;<span class="keyword">with</span> <span class="keyword">Definition</span> <a name="map.l"></a>l := A.t<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">with</span> <span class="keyword">Definition</span> <a name="map.v"></a>v := E.elem.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Definition</span> <a name="map.l"></a>l := A.t.<br/>
+&nbsp;&nbsp;<span class="keyword">Definition</span> <a name="map.v"></a>v := E.elem.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Notation</span> "a &lt; b" := (A.lt a b) : addr_scope.<br/>
+
+<br/>
+&nbsp;&nbsp;Open <span class="keyword">Local</span> Scope addr_scope.<br/>
+&nbsp;&nbsp;Delimit Scope addr_scope <span class="keyword">with</span> addr_scope.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Module</span> otf := OrderedType.OrderedTypeFacts A.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Definition</span> <a name="map.mygt"></a>mygt a b := (b &lt; a)%addr_scope.<br/>
+&nbsp;&nbsp;<span class="keyword">Notation</span> "a &gt; b" := (mygt a b) : addr_scope.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Definition</span> <a name="map.myle"></a>myle x y := x &lt; y \/ A.eq x y.<br/>
+&nbsp;&nbsp;<span class="keyword">Notation</span> "a &lt;= b" := (myle a b) : addr_scope.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Definition</span> <a name="map.myge"></a>myge a b := (b &lt;= a)%addr_scope.<br/>
+&nbsp;&nbsp;<span class="keyword">Notation</span> "a &gt;= b" := (myge a b) : addr_scope.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.mytrichotomy"></a>mytrichotomy : forall x y : l, (x &lt; y \/ x = y \/ x &gt; y)%addr_scope.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.gt_neq"></a>gt_neq : forall a b : l, (a &lt; b -&gt; a &lt;&gt; b)%addr_scope.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.mylt_neq"></a>mylt_neq : forall a b : l, (b &lt; a -&gt; a &lt;&gt; b)%addr_scope.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.myleq_neq_lt"></a>myleq_neq_lt : forall a b : l, (a &lt;= b -&gt; a &lt;&gt; b -&gt; a &lt; b)%addr_scope.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.myle_ge_eq"></a>myle_ge_eq : forall a b:l, (a &lt;= b -&gt; b &lt;= a -&gt; a = b)%addr_scope.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.mylt_trans2"></a>mylt_trans2 : forall n m p : l, (n &lt;= m -&gt; m &lt; p -&gt; n &lt; p)%addr_scope.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.myle_eq_lt"></a>myle_eq_lt : forall a b, (a &lt;= b -&gt; a = b \/ a &lt; b)%addr_scope.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Definition</span> <a name="map.addr_lt"></a>addr_lt (x y:l) := <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> A.compare x y <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| OrderedType.LT _ =&gt; true<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; false<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.addr_lt_false'"></a>addr_lt_false' : forall n m : l, (n &gt;= m -&gt; addr_lt n m = false)%addr_scope.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.addr_lt_classic"></a>addr_lt_classic : forall n m : l, addr_lt n m = true \/ addr_lt n m = false.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.addr_lt_false"></a>addr_lt_false : forall n m : l, addr_lt n m = false -&gt; (n &gt;= m)%addr_scope.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.addr_lt_true"></a>addr_lt_true : forall n m : l, addr_lt n m = true -&gt; (n &lt; m)%addr_scope.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.addr_lt_true'"></a>addr_lt_true' : forall n m : l, (n &lt; m)%addr_scope -&gt; addr_lt n m = true.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.addr_lt_irrefl"></a>addr_lt_irrefl : forall n : l, addr_lt n n = false.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.addr_lt_assym"></a>addr_lt_assym : forall n m : l, addr_lt n m = true -&gt; addr_lt m n = false.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Definition</span> <a name="map.beq_addr"></a>beq_addr (x y:l) := <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> (A.compare x y) <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| OrderedType.EQ _ =&gt; true<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; false<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.beq_dif_false_addr"></a>beq_dif_false_addr : forall n m : l, n &lt;&gt; m -&gt; beq_addr n m = false.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.beq_addr_refl"></a>beq_addr_refl : forall n : l, true = beq_addr n n.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.beq_addr_classic"></a>beq_addr_classic : forall a b : l, beq_addr a b = true \/ beq_addr a b = false.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.beq_addr_true"></a>beq_addr_true : forall x y : l, beq_addr x y = true -&gt; x = y.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.beq_addr_false"></a>beq_addr_false : forall a b : l, beq_addr a b = false -&gt; a &lt;&gt; b.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.beq_addr_com"></a>beq_addr_com : forall n m : l, beq_addr n m = beq_addr m n.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Fixpoint</span> <a name="map.lb"></a>lb (loc:l) (he:list l) {struct he} : <span class="keyword">Prop</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> he <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| nil =&gt; True<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| hd::tl =&gt; loc &lt; hd /\ lb loc tl<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.lb_notin"></a>lb_notin : forall k a, lb a k -&gt; ~ In a k.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.lb_notin'"></a>lb_notin' : forall k a, In a k -&gt; ~ lb a k.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.lb_In_uneq"></a>lb_In_uneq: forall k a c, In a k -&gt; lb c k -&gt; beq_addr a c = false.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.lb_trans"></a>lb_trans: forall k n m , lb m k -&gt; n &lt; m -&gt; lb n k.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Fixpoint</span> <a name="map.set"></a>set (locs:list l) : <span class="keyword">Prop</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> locs <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a name="map.nil"></a>nil =&gt; True<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| hd::tl =&gt; lb hd tl /\ set tl<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Definition</span> <a name="map.dom"></a>dom (k:list (l*v)) := map (<span class="keyword">fun</span> x =&gt; fst x) k.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Inductive</span> <a name="map.h'"></a>h' : <span class="keyword">Set</span> := <a name="map.mk_h"></a>mk_h : forall lst, set (dom lst) -&gt; h'.<br/>
+&nbsp;&nbsp;<span class="keyword">Definition</span> <a name="map.h"></a>h := h'.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Definition</span> <a name="map.lst"></a>lst := <span class="keyword">fun</span> k:h =&gt; <span class="keyword">let</span> (lst, _) := k <span class="keyword">in</span> lst.<br/>
+&nbsp;&nbsp;<span class="keyword">Definition</span> <a name="map.prf"></a>prf := <span class="keyword">fun</span> k:h =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> (lst, va) <span class="keyword">as</span> h <span class="keyword">return</span> (set (dom (lst h))) := k <span class="keyword">in</span> va.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Definition</span> <a name="map.set_nil"></a>set_nil : set nil.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Definition</span> <a name="map.emp"></a>emp := mk_h nil set_nil.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Definition</span> <a name="map.set_singleton"></a>set_singleton : forall n v, set (dom ((n,v)::nil)).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Definition</span> <a name="map.singleton"></a>singleton := <span class="keyword">fun</span> (n:l) (w:v) =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;mk_h ((n, w)::nil) (set_singleton n w).<br/>
+
+<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Fixpoint</span> <a name="map.lookup'"></a>lookup' (n:l) (k:list (l*v)) {struct k} : option v :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> k <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a name="map.nil"></a>nil =&gt; None<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| hd::tl =&gt; <span class="keyword">match</span> beq_addr n (fst hd) <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a name="map.true"></a>true =&gt; Some (snd hd)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| false =&gt; lookup' n tl<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Definition</span> <a name="map.lookup"></a>lookup n k := lookup' n (lst k).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.lookup_emp"></a>lookup_emp : forall x, lookup x emp = None.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.lookup_singleton"></a>lookup_singleton : forall n w, lookup n (singleton n w) = Some w.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.lookup'_In"></a>lookup'_In : forall (k:list (l*v)) (n:l) (z:v), <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;lookup' n k = Some z -&gt; In n (dom k).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.lookup_not_In"></a>lookup_not_In: forall h x, ~ In x (dom (lst h)) -&gt; lookup x h = None.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Definition</span> <a name="map.equal"></a>equal (h1: h) (h2: h) := (lst h1) = (lst h2).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Notation</span> "k '===' m" := (equal k m) (at level 79) : heap_scope.<br/>
+
+<br/>
+&nbsp;&nbsp;Open <span class="keyword">Local</span> Scope heap_scope.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.equal_ext"></a>equal_ext: forall h1 h2, h1 === h2 -&gt; h1 = h2.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.equal_ext'"></a>equal_ext': forall h1 h2, h1 = h2 -&gt; h1 === h2.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.extensionality"></a>extensionality: forall h1 h2, <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(forall x, lookup x h1 = lookup x h2) -&gt; h1 = h2.<br/>
+
+<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Fixpoint</span> <a name="map.update'"></a>update' (n:l) (w:v) (k:list (l*v)) {struct k} : list (l*v) :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> k <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a name="map.nil"></a>nil =&gt; k<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| hd::tl =&gt; <span class="keyword">match</span> beq_addr n (fst hd) <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a name="map.true"></a>true =&gt; (fst hd, w)::tl <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| false =&gt; hd::(update' n w tl)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.lb_update"></a>lb_update : forall (n:l) (k:list (l*v)), lb n (dom k) -&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;forall (m:l) (w:v), lb n (dom (update' m w k)).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.set_update"></a>set_update: forall (k:list (l*v)), set (dom k) -&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;forall (n:l) (w:v), set (dom (update' n w k)).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Definition</span> <a name="map.update"></a>update (n:l) (w:v) (k:h) := mk_h (update' n w (lst k)) (set_update (lst k) (prf k) n w).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.lookup'_update'"></a>lookup'_update' : forall (k:list (l*v)) (x y:l) (z:v), x &lt;&gt; y -&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;lookup' x k = lookup' x (update' y z k).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.lookup_update''"></a>lookup_update'' : forall x y z st,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;x &lt;&gt; y -&gt; lookup x st = lookup x (update y z st).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.update_dom"></a>update_dom : forall (k:h) (n:l) (z:v),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;dom (lst (update n z k)) = dom (lst k).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.update_singleton"></a>update_singleton : forall (n:l) (w w':v),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;update n w' (singleton n w) = singleton n w'.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Fixpoint</span> <a name="map.add_lst"></a>add_lst (n:l) (w:v) (lst:list (l*v)) {struct lst}: list (l*v) :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> lst <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a name="map.nil"></a>nil =&gt; (n,w)::nil<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| (n',w')::tl =&gt; <span class="keyword">match</span> addr_lt n' n <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a name="map.true"></a>true =&gt; (n',w') :: (add_lst n w tl)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| false =&gt; <span class="keyword">match</span> beq_addr n' n <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a name="map.true"></a>true =&gt; (n',w) :: tl<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| false =&gt; (n,w) :: (n',w')::tl<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.lb_add_lst"></a>lb_add_lst : forall (k:list (l*v)) (n:l), lb n (dom k) -&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;forall m, n &lt; m -&gt; forall w, lb n (dom (add_lst m w k)).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.add_lst_lb"></a>add_lst_lb: forall k a b, lb a (dom k) -&gt; add_lst a b k = (a, b)::k.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.set_add"></a>set_add : forall lst, set (dom lst) -&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;forall n w, set (dom (add_lst n w lst)).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.In_dom_add_lst"></a>In_dom_add_lst: forall k a b, In a (dom (add_lst a b k)).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.In_dom_add_lst'"></a>In_dom_add_lst': forall k x a b, In x (dom k) -&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;In x (dom (add_lst a b k)).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.add_lst'_In_dom"></a>add_lst'_In_dom: forall k x a b, In x (dom (add_lst a b k)) -&gt; x = a \/ In x (dom k).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.In_dom_add_lst2"></a>In_dom_add_lst2: forall k n w n', n &lt;&gt; n' -&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;In n' (dom (add_lst n w k)) -&gt; In n' (dom k).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.add_lst_add_lst'"></a>add_lst_add_lst': forall k n w' w, add_lst n w (add_lst n w' k) = add_lst n w k.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.add_lst_add_lst"></a>add_lst_add_lst: forall k n' w' n w, n' &lt;&gt; n -&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;add_lst n w (add_lst n' w' k) = add_lst n' w' (add_lst n w k).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.update_add_lst"></a>update_add_lst: forall k n w w', update' n w (add_lst n w' k) = add_lst n w k.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.update_add_lst'"></a>update_add_lst': forall k n n' w w', n' &lt;&gt; n -&gt; update' n w (add_lst n' w' k) = add_lst n' w' (update' n w k).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.lookup'_add_lst"></a>lookup'_add_lst : forall k n w, lookup' n (add_lst n w k) = Some w.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.lookup'_add_lst'"></a>lookup'_add_lst' : forall k n w n' , n &lt;&gt; n' -&gt; lookup' n' (add_lst n w k) = lookup' n' k.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Fixpoint</span> <a name="map.app'"></a>app' (h1 h2:list (l*v)) {struct h1} : list (l*v) :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> h1 <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a name="map.nil"></a>nil =&gt; h2<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| hd::tl =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;add_lst (fst hd) (snd hd) (app' tl h2)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.set_app'"></a>set_app' : forall h1 h2, set (dom h1) -&gt; set (dom h2) -&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;set (dom (app' h1 h2)).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Definition</span> <a name="map.union"></a>union h1 h2 := <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;mk_h (app' (lst h1) (lst h2)) (set_app' _ _ (prf h1) (prf h2)).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Notation</span> "k '+++' m" := (union k m) (at level 69) : heap_scope.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.app'_nil"></a>app'_nil : forall k, set (dom k) -&gt; app' k nil = k.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.add_lst_app'"></a>add_lst_app': forall lst1 lst2 n w, <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;add_lst n w (app' lst1 lst2) = app' (add_lst n w lst1) lst2.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.app'_com"></a>app'_com : forall l1 l2, set (dom l1) -&gt; set (dom l2) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;inter (dom l1) (dom l2) nil -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;app' l1 l2 = app' l2 l1.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.update'_app'"></a>update'_app' : forall (l1 l2:list (l*v)) (n:l) (z:v),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;In n (dom l1) /\ ~ In n (dom l2) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;app' (update' n z l1) l2 = update' n z (app' l1 l2).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.lookup'_app'_L"></a>lookup'_app'_L : forall l1 l2 n z,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;lookup' n l1 = Some z -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;lookup' n (app' l1 l2) = Some z.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.lookup'_app'_R"></a>lookup'_app'_R : forall l1 l2 n z,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;inter (dom l1) (dom l2) nil -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;lookup' n l2 = Some z -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;lookup' n (app' l1 l2) = Some z.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.In_dom_union"></a>In_dom_union : forall k x, In x (dom (lst k)) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;forall m, In x (dom (lst (k +++ m))).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.equal_union_emp"></a>equal_union_emp : forall h1, h1 +++ emp = h1.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.In_dom_union'"></a>In_dom_union' : forall m k x, In x (dom (lst k)) -&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;In x (dom (lst (m +++ k))).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.union_assoc"></a>union_assoc : forall h1 h2 h3, h1 +++ (h2 +++ h3) = (h1 +++ h2) +++ h3.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.In_union_dom"></a>In_union_dom : forall k m x, In x (dom (lst (k +++ m))) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;In x (dom (lst k)) \/ In x (dom (lst m)).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.lookup_union_or"></a>lookup_union_or: forall h1 h2 n z,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;lookup n (h1 +++ h2) = Some z -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;lookup n h1 = Some z \/ lookup n h2 = Some z.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.lookup_update"></a>lookup_update : forall x y z st, x &lt;&gt; y -&gt; lookup x st = lookup x (singleton y z +++ st).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.lookup_update'"></a>lookup_update' : forall x z st, lookup x (singleton x z +++ st) = Some z.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Definition</span> <a name="map.disjoint"></a>disjoint h1 h2 := inter (dom (lst h1)) (dom (lst h2)) nil.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Notation</span> "k '#' m" := (disjoint k m) (at level 79) : heap_scope.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.disjoint_emp"></a>disjoint_emp : forall h, h # emp.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.disjoint_singleton"></a>disjoint_singleton : forall x y z z',<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;x &lt;&gt; y -&gt; singleton x z # singleton y z'.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.disjoint_singleton'"></a>disjoint_singleton' : forall x y z z',<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;singleton x z # singleton y z' -&gt; x &lt;&gt; y.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.disjoint_com"></a>disjoint_com: forall h1 h2, h1 # h2 -&gt; h2 # h1.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.disjoint_update"></a>disjoint_update : forall n z h1 h2,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;h1 # h2 -&gt; (update n z h1) # h2.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.distributivity"></a>distributivity : forall h1 h2 h0,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;h0 # (h1 +++ h2) &lt;-&gt; h0 # h1 /\ h0 # h2.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.disjoint_union"></a>disjoint_union : forall h1 h2 h0,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;h0 # h1 /\ h0 # h2 -&gt; h0 # (h1 +++ h2).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.disjoint_union'"></a>disjoint_union' : forall h1 h2 h0,  h0 # (h1 +++ h2) -&gt; h0 # h1 /\ h0 # h2.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.equal_union_disjoint"></a>equal_union_disjoint : forall x1 x2 x0, (x1 +++ x2) # x0 -&gt; x1 # x0.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.union_com"></a>union_com : forall h1 h2, h1 # h2 -&gt; h1 +++ h2 = h2 +++ h1.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.lookup_union"></a>lookup_union : forall h1 h2, h1 # h2 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;forall n z, lookup n h1 = Some z -&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lookup n (h1 +++ h2) = Some z.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.lookup_union_R"></a>lookup_union_R : forall h1 h2, h1 # h2 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;forall n z, lookup n h2 = Some z -&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lookup n (h1 +++ h2) = Some z.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.equal_update_L"></a>equal_update_L : forall (h1 h2:h), h1 # h2 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;forall (n:l) (z z1:v), lookup n h1 = Some z1 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;update n z (h1 +++ h2) = (update n z h1) +++ h2.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.equal_update_R"></a>equal_update_R : forall (h1 h2:h), h1 # h2 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;forall (n:l) (z z2:v), lookup n h2 = Some z2 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;update n z (h1 +++ h2) = h1 +++ (update n z h2).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.lookup_exists_partition"></a>lookup_exists_partition : forall h a b,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;lookup a h = Some b -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;exists h'' ,     <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;h = (singleton a b) +++ h'' /\ (singleton a b) # h''.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Fixpoint</span> <a name="map.del'"></a>del' (n:l) (k:list (l*v)) {struct k} : list (l*v) :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> k <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a name="map.nil"></a>nil =&gt; nil<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| hd::tl =&gt; <span class="keyword">match</span> beq_addr n (fst hd) <span class="keyword">with</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a name="map.true"></a>true =&gt; del' n tl<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| false =&gt; hd :: del' n tl<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.lb_del'"></a>lb_del' : forall k n, lb n (dom k) -&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;forall m, lb n (dom (del' m k)).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.lb_del''"></a>lb_del'' : forall k n, lb n (dom k) -&gt; del' n k = k.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.set_del'"></a>set_del' : forall k, set (dom k) -&gt; forall n, set (dom (del' n k)).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Definition</span> <a name="map.dif"></a>dif h l := mk_h (del' l (lst h) ) (set_del' (lst h) (prf h) l).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Notation</span> "k '---' m" := (dif k m) (at level 69) : heap_scope.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.dif_singleton_emp"></a>dif_singleton_emp: forall a b, (singleton a b) --- a = emp.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.add_lst_del'"></a>add_lst_del': forall lst n w n', set (dom lst) -&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;n' &lt;&gt; n -&gt; add_lst n w (del' n' lst) = del' n' (add_lst n w lst).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.add_lst_del''"></a>add_lst_del'': forall lst n w, del' n (add_lst n w lst) = del' n lst.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.lookup'_del'"></a>lookup'_del' : forall w st, lookup' w (del' w st) = None.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.lookup'_del''"></a>lookup'_del'' : forall st x y, x &lt;&gt; y -&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;lookup' x (del' y st) = lookup' x st.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.del'_app'"></a>del'_app' : forall k m n, set (dom m) -&gt; set (dom k) -&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;del' n (app' k m) = app' (del' n k) (del' n m).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.dif_not_in_dom"></a>dif_not_in_dom: forall h l,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;~(In l (dom (lst h))) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(h --- l) = h.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.dif_union"></a>dif_union: forall h1 h2 a,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(h1 +++ h2) --- a = (h1 --- a) +++ (h2 --- a).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.dif_disjoint"></a>dif_disjoint: forall h a b, h # (singleton a b) -&gt; h --- a = h.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.In_dom_del'"></a>In_dom_del' : forall k x y, x &lt;&gt; y -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;In x (dom (del' y k)) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;In x (dom k).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.dif_disjoint'"></a>dif_disjoint': forall h1 h2 l, h1 # h2 -&gt; h1 --- l # h2 --- l.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.compose_union_equiv"></a>compose_union_equiv: forall h a b (s: set (dom ((a,b)::h))) <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(s': set (dom h)) , <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;mk_h ((a,b) :: h) s === (singleton a b) +++ (mk_h h s').<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.lookup_disjoint_None"></a>lookup_disjoint_None: forall h a b,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;h # singleton a b -&gt; lookup a h = None.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.disjoint_comp"></a>disjoint_comp : forall h'1 h1 h2 h'2,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;h1 # h'1 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;h1 # h2 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;h'1 # h'2 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;h'1 +++ h'2 = h1 +++ h2 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;exists h', h'1 # h' /\ h2 = (h' +++ h'1).<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.lookup_dif"></a>lookup_dif : forall w st, lookup w (st --- w) = None.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="map.lookup_dif'"></a>lookup_dif' : forall st x y, x &lt;&gt; y -&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;lookup x (st --- y) = lookup x st.<br/>
+
+<br/>
+<span class="keyword">End</span> map.<br/>
+
+<br/>
+<span class="keyword">Module</span> <a name="Loc"></a>Loc &lt;: OrderedTypeExt.<br/>
+&nbsp;&nbsp;<span class="keyword">Definition</span> <a name="Loc.t"></a>t := nat.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Definition</span> <a name="Loc.eq"></a>eq := @eq nat.<br/>
+&nbsp;&nbsp;<span class="keyword">Definition</span> <a name="Loc.eq_refl"></a>eq_refl := @refl_equal t.<br/>
+&nbsp;&nbsp;<span class="keyword">Definition</span> <a name="Loc.eq_sym"></a>eq_sym := @sym_eq t.<br/>
+&nbsp;&nbsp;<span class="keyword">Definition</span> <a name="Loc.eq_trans"></a>eq_trans := @trans_eq t.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Definition</span> <a name="Loc.lt"></a>lt := lt.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="Loc.lt_trans"></a>lt_trans : forall x y z : t, lt x y -&gt; lt y z -&gt; lt x z.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="Loc.lt_not_eq"></a>lt_not_eq : forall x y : t, lt x y -&gt; ~ eq x y.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Definition</span> <a name="Loc.compare"></a>compare : forall x y : t, OrderedType.Compare lt eq x y.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="Loc.eq_ext"></a>eq_ext : forall x y : t, eq x y -&gt; x = y.<br/>
+
+<br/>
+<span class="keyword">End</span> Loc.<br/>
+
+<br/>
+<span class="keyword">Module</span> <a name="integer"></a>integer.<br/>
+&nbsp;&nbsp;<span class="keyword">Definition</span> <a name="integer.elem"></a>elem := Z.<br/>
+<span class="keyword">End</span> integer.<br/>
+
+<br/>
+<span class="keyword">Module</span> heap := map Loc integer.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="loc"></a>loc := Loc.t.<br/>
+<span class="keyword">Definition</span> <a name="val"></a>val := Z.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="val2loc"></a>val2loc (z:Z) : loc :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> z <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Z0 =&gt; O<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| Zpos p =&gt; nat_of_P p<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| Zneg p =&gt; nat_of_P p<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="loc2val"></a>loc2val (p:loc) : val := Z_of_nat p.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Z_of_nat2loc"></a>Z_of_nat2loc : forall n, val2loc (loc2val n) = n.<br/>
+
+<br/>
+<span class="keyword">Notation</span> "k '---' l" := (heap.dif k l) (at level 69) : heap_scope.<br/>
+<span class="keyword">Notation</span> "k '+++' m" := (heap.union k m) (at level 69) : heap_scope.<br/>
+<span class="keyword">Notation</span> "k '#' m" := (heap.disjoint k m) (at level 79) : heap_scope.<br/>
+
+<br/>
+</code>
+</div>
+
+<div id="footer">
+<hr/><a href="index.html">Index</a><hr/><font size="-1">This page has been generated by <a href="http://coq.inria.fr">coqdoc</a></font>
+</div>
+
+</div>
+
+</body>
+</html>

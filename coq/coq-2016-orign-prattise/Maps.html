@@ -69,9 +69,9 @@
 <div class="code">
 
 <br/>
-<span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <span class="id" type="var">Coq.Arith.Arith</span>.<br/>
-<span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <span class="id" type="var">Coq.Bool.Bool</span>.<br/>
-<span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <span class="id" type="var">Coq.Logic.FunctionalExtensionality</span>.<br/>
+<span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl3/stdlib/Coq.Arith.Arith.html#"><span class="id" type="library">Coq.Arith.Arith</span></a>.<br/>
+<span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl3/stdlib/Coq.Bool.Bool.html#"><span class="id" type="library">Coq.Bool.Bool</span></a>.<br/>
+<span class="id" type="keyword">Require</span> <span class="id" type="keyword">Import</span> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl3/stdlib/Coq.Logic.FunctionalExtensionality.html#"><span class="id" type="library">Coq.Logic.FunctionalExtensionality</span></a>.<br/>
 
 <br/>
 </div>
@@ -104,19 +104,19 @@ Documentation for the standard library can be found at
 <div class="code">
 
 <br/>
-<span class="id" type="keyword">Inductive</span> <span class="id" type="var">id</span> : <span class="id" type="keyword">Type</span> :=<br/>
-&nbsp;&nbsp;| <span class="id" type="var">Id</span> : <span class="id" type="var">nat</span> -&gt; <span class="id" type="var">id</span>.<br/>
+<span class="id" type="keyword">Inductive</span> <a name="id"><span class="id" type="inductive">id</span></a> : <span class="id" type="keyword">Type</span> :=<br/>
+&nbsp;&nbsp;| <a name="Id"><span class="id" type="constructor">Id</span></a> : <a class="idref" href="http://coq.inria.fr/distrib/8.4pl3/stdlib/Coq.Init.Datatypes.html#nat"><span class="id" type="inductive">nat</span></a> -&gt; <a class="idref" href="Maps.html#id"><span class="id" type="inductive">id</span></a>.<br/>
 
 <br/>
-<span class="id" type="keyword">Definition</span> <span class="id" type="var">beq_id</span> <span class="id" type="var">id1</span> <span class="id" type="var">id2</span> :=<br/>
-&nbsp;&nbsp;<span class="id" type="keyword">match</span> <span class="id" type="var">id1</span>,<span class="id" type="var">id2</span> <span class="id" type="keyword">with</span><br/>
-&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" type="var">Id</span> <span class="id" type="var">n1</span>, <span class="id" type="var">Id</span> <span class="id" type="var">n2</span> =&gt; <span class="id" type="var">beq_nat</span> <span class="id" type="var">n1</span> <span class="id" type="var">n2</span><br/>
+<span class="id" type="keyword">Definition</span> <a name="beq_id"><span class="id" type="definition">beq_id</span></a> <span class="id" type="var">id1</span> <span class="id" type="var">id2</span> :=<br/>
+&nbsp;&nbsp;<span class="id" type="keyword">match</span> <a class="idref" href="Maps.html#id1"><span class="id" type="variable">id1</span></a>,<a class="idref" href="Maps.html#id2"><span class="id" type="variable">id2</span></a> <span class="id" type="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <a class="idref" href="Maps.html#Id"><span class="id" type="constructor">Id</span></a> <span class="id" type="var">n1</span>, <a class="idref" href="Maps.html#Id"><span class="id" type="constructor">Id</span></a> <span class="id" type="var">n2</span> =&gt; <a class="idref" href="http://coq.inria.fr/distrib/8.4pl3/stdlib/Coq.Arith.EqNat.html#beq_nat"><span class="id" type="definition">beq_nat</span></a> <span class="id" type="var">n1</span> <span class="id" type="var">n2</span><br/>
 &nbsp;&nbsp;<span class="id" type="keyword">end</span>.<br/>
 
 <br/>
-<span class="id" type="keyword">Theorem</span> <span class="id" type="var">beq_id_refl</span> : <span class="id" type="keyword">forall</span> <span class="id" type="var">id</span>, <span class="id" type="var">true</span> = <span class="id" type="var">beq_id</span> <span class="id" type="var">id</span> <span class="id" type="var">id</span>.<br/>
+<span class="id" type="keyword">Theorem</span> <a name="beq_id_refl"><span class="id" type="lemma">beq_id_refl</span></a> : <span class="id" type="keyword">forall</span> <span class="id" type="var">id</span>, <a class="idref" href="http://coq.inria.fr/distrib/8.4pl3/stdlib/Coq.Init.Datatypes.html#true"><span class="id" type="constructor">true</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl3/stdlib/Coq.Init.Logic.html#:type_scope:x_'='_x"><span class="id" type="notation">=</span></a> <a class="idref" href="Maps.html#beq_id"><span class="id" type="definition">beq_id</span></a> <a class="idref" href="Maps.html#id"><span class="id" type="variable">id</span></a> <a class="idref" href="Maps.html#id"><span class="id" type="variable">id</span></a>.<br/>
 <span class="id" type="keyword">Proof</span>.<br/>
-&nbsp;&nbsp;<span class="id" type="tactic">intros</span> [<span class="id" type="var">n</span>]. <span class="id" type="tactic">simpl</span>. <span class="id" type="tactic">rewrite</span> &lt;- <span class="id" type="var">beq_nat_refl</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> [<span class="id" type="var">n</span>]. <span class="id" type="tactic">simpl</span>. <span class="id" type="tactic">rewrite</span> &lt;- <a class="idref" href="http://coq.inria.fr/distrib/8.4pl3/stdlib/Coq.Arith.EqNat.html#beq_nat_refl"><span class="id" type="lemma">beq_nat_refl</span></a>.<br/>
 &nbsp;&nbsp;<span class="id" type="tactic">reflexivity</span>. <span class="id" type="keyword">Qed</span>.<br/>
 
 <br/>
@@ -129,12 +129,12 @@ The following useful property of <span class="inlinecode"><span class="id" type=
 <div class="code">
 
 <br/>
-<span class="id" type="keyword">Theorem</span> <span class="id" type="var">beq_id_true_iff</span> : <span class="id" type="keyword">forall</span> <span class="id" type="var">id1</span> <span class="id" type="var">id2</span> : <span class="id" type="var">id</span>,<br/>
-&nbsp;&nbsp;<span class="id" type="var">beq_id</span> <span class="id" type="var">id1</span> <span class="id" type="var">id2</span> = <span class="id" type="var">true</span> &lt;-&gt; <span class="id" type="var">id1</span> = <span class="id" type="var">id2</span>.<br/>
+<span class="id" type="keyword">Theorem</span> <a name="beq_id_true_iff"><span class="id" type="lemma">beq_id_true_iff</span></a> : <span class="id" type="keyword">forall</span> <span class="id" type="var">id1</span> <span class="id" type="var">id2</span> : <a class="idref" href="Maps.html#id"><span class="id" type="inductive">id</span></a>,<br/>
+&nbsp;&nbsp;<a class="idref" href="Maps.html#beq_id"><span class="id" type="definition">beq_id</span></a> <a class="idref" href="Maps.html#id1"><span class="id" type="variable">id1</span></a> <a class="idref" href="Maps.html#id2"><span class="id" type="variable">id2</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl3/stdlib/Coq.Init.Logic.html#:type_scope:x_'='_x"><span class="id" type="notation">=</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl3/stdlib/Coq.Init.Datatypes.html#true"><span class="id" type="constructor">true</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl3/stdlib/Coq.Init.Logic.html#:type_scope:x_'<->'_x"><span class="id" type="notation">&lt;-&gt;</span></a> <a class="idref" href="Maps.html#id1"><span class="id" type="variable">id1</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl3/stdlib/Coq.Init.Logic.html#:type_scope:x_'='_x"><span class="id" type="notation">=</span></a> <a class="idref" href="Maps.html#id2"><span class="id" type="variable">id2</span></a>.<br/>
 <span class="id" type="keyword">Proof</span>.<br/>
 &nbsp;&nbsp;&nbsp;<span class="id" type="tactic">intros</span> [<span class="id" type="var">n1</span>] [<span class="id" type="var">n2</span>].<br/>
-&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">unfold</span> <span class="id" type="var">beq_id</span>.<br/>
-&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">rewrite</span> <span class="id" type="var">beq_nat_true_iff</span>.<br/>
+&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">unfold</span> <a class="idref" href="Maps.html#beq_id"><span class="id" type="definition">beq_id</span></a>.<br/>
+&nbsp;&nbsp;&nbsp;<span class="id" type="tactic">rewrite</span> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl3/stdlib/Coq.Arith.EqNat.html#beq_nat_true_iff"><span class="id" type="lemma">beq_nat_true_iff</span></a>.<br/>
 &nbsp;&nbsp;&nbsp;<span class="id" type="tactic">split</span>.<br/>
 &nbsp;&nbsp;&nbsp;-  <span class="id" type="tactic">intros</span> <span class="id" type="var">H</span>. <span class="id" type="tactic">rewrite</span> <span class="id" type="var">H</span>. <span class="id" type="tactic">reflexivity</span>.<br/>
 &nbsp;&nbsp;&nbsp;-  <span class="id" type="tactic">intros</span> <span class="id" type="var">H</span>. <span class="id" type="tactic">inversion</span> <span class="id" type="var">H</span>. <span class="id" type="tactic">reflexivity</span>.<br/>
@@ -149,12 +149,12 @@ Similarly:
 <div class="code">
 
 <br/>
-<span class="id" type="keyword">Theorem</span> <span class="id" type="var">beq_id_false_iff</span> : <span class="id" type="keyword">forall</span> <span class="id" type="var">x</span> <span class="id" type="var">y</span> : <span class="id" type="var">id</span>,<br/>
-&nbsp;&nbsp;<span class="id" type="var">beq_id</span> <span class="id" type="var">x</span> <span class="id" type="var">y</span> = <span class="id" type="var">false</span><br/>
-&nbsp;&nbsp;&lt;-&gt; <span class="id" type="var">x</span> &lt;&gt; <span class="id" type="var">y</span>.<br/>
+<span class="id" type="keyword">Theorem</span> <a name="beq_id_false_iff"><span class="id" type="lemma">beq_id_false_iff</span></a> : <span class="id" type="keyword">forall</span> <span class="id" type="var">x</span> <span class="id" type="var">y</span> : <a class="idref" href="Maps.html#id"><span class="id" type="inductive">id</span></a>,<br/>
+&nbsp;&nbsp;<a class="idref" href="Maps.html#beq_id"><span class="id" type="definition">beq_id</span></a> <a class="idref" href="Maps.html#x"><span class="id" type="variable">x</span></a> <a class="idref" href="Maps.html#y"><span class="id" type="variable">y</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl3/stdlib/Coq.Init.Logic.html#:type_scope:x_'='_x"><span class="id" type="notation">=</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl3/stdlib/Coq.Init.Datatypes.html#false"><span class="id" type="constructor">false</span></a><br/>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.4pl3/stdlib/Coq.Init.Logic.html#:type_scope:x_'<->'_x"><span class="id" type="notation">&lt;-&gt;</span></a> <a class="idref" href="Maps.html#x"><span class="id" type="variable">x</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl3/stdlib/Coq.Init.Logic.html#:type_scope:x_'<>'_x"><span class="id" type="notation">&lt;&gt;</span></a> <a class="idref" href="Maps.html#y"><span class="id" type="variable">y</span></a>.<br/>
 <span class="id" type="keyword">Proof</span>.<br/>
-&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">x</span> <span class="id" type="var">y</span>. <span class="id" type="tactic">rewrite</span> &lt;- <span class="id" type="var">beq_id_true_iff</span>.<br/>
-&nbsp;&nbsp;<span class="id" type="tactic">rewrite</span> <span class="id" type="var">not_true_iff_false</span>. <span class="id" type="tactic">reflexivity</span>. <span class="id" type="keyword">Qed</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">x</span> <span class="id" type="var">y</span>. <span class="id" type="tactic">rewrite</span> &lt;- <a class="idref" href="Maps.html#beq_id_true_iff"><span class="id" type="lemma">beq_id_true_iff</span></a>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">rewrite</span> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl3/stdlib/Coq.Bool.Bool.html#not_true_iff_false"><span class="id" type="lemma">not_true_iff_false</span></a>. <span class="id" type="tactic">reflexivity</span>. <span class="id" type="keyword">Qed</span>.<br/>
 
 <br/>
 </div>
@@ -165,11 +165,11 @@ This useful variant follows just by rewriting:
 <div class="code">
 
 <br/>
-<span class="id" type="keyword">Theorem</span> <span class="id" type="var">false_beq_id</span> : <span class="id" type="keyword">forall</span> <span class="id" type="var">x</span> <span class="id" type="var">y</span> : <span class="id" type="var">id</span>,<br/>
-&nbsp;&nbsp;&nbsp;<span class="id" type="var">x</span> &lt;&gt; <span class="id" type="var">y</span><br/>
-&nbsp;&nbsp;&nbsp;-&gt; <span class="id" type="var">beq_id</span> <span class="id" type="var">x</span> <span class="id" type="var">y</span> = <span class="id" type="var">false</span>.<br/>
+<span class="id" type="keyword">Theorem</span> <a name="false_beq_id"><span class="id" type="lemma">false_beq_id</span></a> : <span class="id" type="keyword">forall</span> <span class="id" type="var">x</span> <span class="id" type="var">y</span> : <a class="idref" href="Maps.html#id"><span class="id" type="inductive">id</span></a>,<br/>
+&nbsp;&nbsp;&nbsp;<a class="idref" href="Maps.html#x"><span class="id" type="variable">x</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl3/stdlib/Coq.Init.Logic.html#:type_scope:x_'<>'_x"><span class="id" type="notation">&lt;&gt;</span></a> <a class="idref" href="Maps.html#y"><span class="id" type="variable">y</span></a><br/>
+&nbsp;&nbsp;&nbsp;-&gt; <a class="idref" href="Maps.html#beq_id"><span class="id" type="definition">beq_id</span></a> <a class="idref" href="Maps.html#x"><span class="id" type="variable">x</span></a> <a class="idref" href="Maps.html#y"><span class="id" type="variable">y</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl3/stdlib/Coq.Init.Logic.html#:type_scope:x_'='_x"><span class="id" type="notation">=</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl3/stdlib/Coq.Init.Datatypes.html#false"><span class="id" type="constructor">false</span></a>.<br/>
 <span class="id" type="keyword">Proof</span>.<br/>
-&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">x</span> <span class="id" type="var">y</span>. <span class="id" type="tactic">rewrite</span> <span class="id" type="var">beq_id_false_iff</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">x</span> <span class="id" type="var">y</span>. <span class="id" type="tactic">rewrite</span> <a class="idref" href="Maps.html#beq_id_false_iff"><span class="id" type="lemma">beq_id_false_iff</span></a>.<br/>
 &nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">H</span>. <span class="id" type="tactic">apply</span> <span class="id" type="var">H</span>. <span class="id" type="keyword">Qed</span>.<br/>
 
 <br/>
@@ -203,7 +203,24 @@ This useful variant follows just by rewriting:
 <div class="code">
 
 <br/>
-<span class="id" type="keyword">Definition</span> <span class="id" type="var">total_map</span> (<span class="id" type="var">A</span>:<span class="id" type="keyword">Type</span>) := <span class="id" type="var">id</span> -&gt; <span class="id" type="var">A</span>.<br/>
+<span class="id" type="keyword">Definition</span> <a name="total_map"><span class="id" type="definition">total_map</span></a> (<span class="id" type="var">A</span>:<span class="id" type="keyword">Type</span>):<span class="id" type="keyword">Type</span> := <a class="idref" href="Maps.html#id"><span class="id" type="inductive">id</span></a> -&gt; <a class="idref" href="Maps.html#A"><span class="id" type="variable">A</span></a>.<br/>
+
+<br/>
+<span class="id" type="keyword">Definition</span> <a name="total_map''"><span class="id" type="definition">total_map''</span></a> (<span class="id" type="var">A</span>:<span class="id" type="keyword">Type</span>) := <span class="id" type="keyword">forall</span> <span class="id" type="var">n</span>:<a class="idref" href="Maps.html#id"><span class="id" type="inductive">id</span></a>, <a class="idref" href="Maps.html#A"><span class="id" type="variable">A</span></a>.<br/>
+
+<br/>
+<span class="id" type="keyword">Definition</span> <a name="total_map'"><span class="id" type="definition">total_map'</span></a>(<span class="id" type="var">A</span>:<span class="id" type="keyword">Type</span>) := <span class="id" type="keyword">fun</span> (<span class="id" type="var">x</span>:<a class="idref" href="Maps.html#id"><span class="id" type="inductive">id</span></a>) =&gt; <a class="idref" href="Maps.html#A"><span class="id" type="variable">A</span></a>.<br/>
+
+<br/>
+<span class="id" type="keyword">Check</span> ( (<a class="idref" href="Maps.html#total_map'"><span class="id" type="definition">total_map'</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl3/stdlib/Coq.Init.Datatypes.html#bool"><span class="id" type="inductive">bool</span></a>) (<a class="idref" href="Maps.html#Id"><span class="id" type="constructor">Id</span></a> 4) ).<br/>
+
+<br/>
+
+<br/>
+<span class="id" type="keyword">Definition</span> <a name="test_zbh"><span class="id" type="definition">test_zbh</span></a> := <a class="idref" href="Maps.html#total_map''"><span class="id" type="definition">total_map''</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl3/stdlib/Coq.Init.Datatypes.html#bool"><span class="id" type="inductive">bool</span></a>.<br/>
+
+<br/>
+<span class="id" type="keyword">Definition</span> <a name="test_zbh2"><span class="id" type="definition">test_zbh2</span></a> := <span class="id" type="keyword">fun</span> (<span class="id" type="var">x</span>:<a class="idref" href="Maps.html#test_zbh"><span class="id" type="definition">test_zbh</span></a>) =&gt; <a class="idref" href="Maps.html#x"><span class="id" type="variable">x</span></a> (<a class="idref" href="Maps.html#Id"><span class="id" type="constructor">Id</span></a> 3).<br/>
 
 <br/>
 
@@ -223,8 +240,8 @@ Intuitively, a total map over an element type <span class="inlinecode"><span cla
 <div class="code">
 
 <br/>
-<span class="id" type="keyword">Definition</span> <span class="id" type="var">t_empty</span> {<span class="id" type="var">A</span>:<span class="id" type="keyword">Type</span>} (<span class="id" type="var">v</span> : <span class="id" type="var">A</span>) : <span class="id" type="var">total_map</span> <span class="id" type="var">A</span> :=<br/>
-&nbsp;&nbsp;(<span class="id" type="keyword">fun</span> <span class="id" type="var">_</span> =&gt; <span class="id" type="var">v</span>).<br/>
+<span class="id" type="keyword">Definition</span> <a name="t_empty"><span class="id" type="definition">t_empty</span></a> {<span class="id" type="var">A</span>:<span class="id" type="keyword">Type</span>} (<span class="id" type="var">v</span> : <a class="idref" href="Maps.html#A"><span class="id" type="variable">A</span></a>) : <a class="idref" href="Maps.html#total_map"><span class="id" type="definition">total_map</span></a> <a class="idref" href="Maps.html#A"><span class="id" type="variable">A</span></a> :=<br/>
+&nbsp;&nbsp;(<span class="id" type="keyword">fun</span> <span class="id" type="var">_</span> =&gt; <a class="idref" href="Maps.html#v"><span class="id" type="variable">v</span></a>).<br/>
 
 <br/>
 </div>
@@ -237,9 +254,9 @@ More interesting is the <span class="inlinecode"><span class="id" type="var">upd
 <div class="code">
 
 <br/>
-<span class="id" type="keyword">Definition</span> <span class="id" type="var">t_update</span> {<span class="id" type="var">A</span>:<span class="id" type="keyword">Type</span>} (<span class="id" type="var">m</span> : <span class="id" type="var">total_map</span> <span class="id" type="var">A</span>)<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" type="var">x</span> : <span class="id" type="var">id</span>) (<span class="id" type="var">v</span> : <span class="id" type="var">A</span>) : <span class="id" type="var">total_map</span> <span class="id" type="var">A</span> :=<br/>
-&nbsp;&nbsp;<span class="id" type="keyword">fun</span> <span class="id" type="var">x'</span> =&gt; <span class="id" type="keyword">if</span> <span class="id" type="var">beq_id</span> <span class="id" type="var">x</span> <span class="id" type="var">x'</span> <span class="id" type="keyword">then</span> <span class="id" type="var">v</span> <span class="id" type="keyword">else</span> <span class="id" type="var">m</span> <span class="id" type="var">x'</span>.<br/>
+<span class="id" type="keyword">Definition</span> <a name="t_update"><span class="id" type="definition">t_update</span></a> {<span class="id" type="var">A</span>:<span class="id" type="keyword">Type</span>} (<span class="id" type="var">m</span> : <a class="idref" href="Maps.html#total_map"><span class="id" type="definition">total_map</span></a> <a class="idref" href="Maps.html#A"><span class="id" type="variable">A</span></a>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" type="var">x</span> : <a class="idref" href="Maps.html#id"><span class="id" type="inductive">id</span></a>) (<span class="id" type="var">v</span> : <a class="idref" href="Maps.html#A"><span class="id" type="variable">A</span></a>) : <a class="idref" href="Maps.html#total_map"><span class="id" type="definition">total_map</span></a> <a class="idref" href="Maps.html#A"><span class="id" type="variable">A</span></a> :=<br/>
+&nbsp;&nbsp;<span class="id" type="keyword">fun</span> <span class="id" type="var">x'</span> =&gt; <span class="id" type="keyword">if</span> <a class="idref" href="Maps.html#beq_id"><span class="id" type="definition">beq_id</span></a> <a class="idref" href="Maps.html#x"><span class="id" type="variable">x</span></a> <a class="idref" href="Maps.html#x'"><span class="id" type="variable">x'</span></a> <span class="id" type="keyword">then</span> <a class="idref" href="Maps.html#v"><span class="id" type="variable">v</span></a> <span class="id" type="keyword">else</span> <a class="idref" href="Maps.html#m"><span class="id" type="variable">m</span></a> <a class="idref" href="Maps.html#x'"><span class="id" type="variable">x'</span></a>.<br/>
 
 <br/>
 </div>
@@ -258,9 +275,9 @@ This definition is a nice example of higher-order programming.
 <div class="code">
 
 <br/>
-<span class="id" type="keyword">Definition</span> <span class="id" type="var">examplemap</span> :=<br/>
-&nbsp;&nbsp;<span class="id" type="var">t_update</span> (<span class="id" type="var">t_update</span> (<span class="id" type="var">t_empty</span> <span class="id" type="var">false</span>) (<span class="id" type="var">Id</span> 1) <span class="id" type="var">false</span>)<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" type="var">Id</span> 3) <span class="id" type="var">true</span>.<br/>
+<span class="id" type="keyword">Definition</span> <a name="examplemap"><span class="id" type="definition">examplemap</span></a> :=<br/>
+&nbsp;&nbsp;<a class="idref" href="Maps.html#t_update"><span class="id" type="definition">t_update</span></a> (<a class="idref" href="Maps.html#t_update"><span class="id" type="definition">t_update</span></a> (<a class="idref" href="Maps.html#t_empty"><span class="id" type="definition">t_empty</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl3/stdlib/Coq.Init.Datatypes.html#false"><span class="id" type="constructor">false</span></a>) (<a class="idref" href="Maps.html#Id"><span class="id" type="constructor">Id</span></a> 1) <a class="idref" href="http://coq.inria.fr/distrib/8.4pl3/stdlib/Coq.Init.Datatypes.html#false"><span class="id" type="constructor">false</span></a>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="Maps.html#Id"><span class="id" type="constructor">Id</span></a> 3) <a class="idref" href="http://coq.inria.fr/distrib/8.4pl3/stdlib/Coq.Init.Datatypes.html#true"><span class="id" type="constructor">true</span></a>.<br/>
 
 <br/>
 </div>
@@ -273,19 +290,19 @@ This completes the definition of total maps.  Note that we don't
 <div class="code">
 
 <br/>
-<span class="id" type="keyword">Example</span> <span class="id" type="var">update_example1</span> : <span class="id" type="var">examplemap</span> (<span class="id" type="var">Id</span> 0) = <span class="id" type="var">false</span>.<br/>
+<span class="id" type="keyword">Example</span> <a name="update_example1"><span class="id" type="definition">update_example1</span></a> : <a class="idref" href="Maps.html#examplemap"><span class="id" type="definition">examplemap</span></a> (<a class="idref" href="Maps.html#Id"><span class="id" type="constructor">Id</span></a> 0) <a class="idref" href="http://coq.inria.fr/distrib/8.4pl3/stdlib/Coq.Init.Logic.html#:type_scope:x_'='_x"><span class="id" type="notation">=</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl3/stdlib/Coq.Init.Datatypes.html#false"><span class="id" type="constructor">false</span></a>.<br/>
 <span class="id" type="keyword">Proof</span>. <span class="id" type="tactic">reflexivity</span>. <span class="id" type="keyword">Qed</span>.<br/>
 
 <br/>
-<span class="id" type="keyword">Example</span> <span class="id" type="var">update_example2</span> : <span class="id" type="var">examplemap</span> (<span class="id" type="var">Id</span> 1) = <span class="id" type="var">false</span>.<br/>
+<span class="id" type="keyword">Example</span> <a name="update_example2"><span class="id" type="definition">update_example2</span></a> : <a class="idref" href="Maps.html#examplemap"><span class="id" type="definition">examplemap</span></a> (<a class="idref" href="Maps.html#Id"><span class="id" type="constructor">Id</span></a> 1) <a class="idref" href="http://coq.inria.fr/distrib/8.4pl3/stdlib/Coq.Init.Logic.html#:type_scope:x_'='_x"><span class="id" type="notation">=</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl3/stdlib/Coq.Init.Datatypes.html#false"><span class="id" type="constructor">false</span></a>.<br/>
 <span class="id" type="keyword">Proof</span>. <span class="id" type="tactic">reflexivity</span>. <span class="id" type="keyword">Qed</span>.<br/>
 
 <br/>
-<span class="id" type="keyword">Example</span> <span class="id" type="var">update_example3</span> : <span class="id" type="var">examplemap</span> (<span class="id" type="var">Id</span> 2) = <span class="id" type="var">false</span>.<br/>
+<span class="id" type="keyword">Example</span> <a name="update_example3"><span class="id" type="definition">update_example3</span></a> : <a class="idref" href="Maps.html#examplemap"><span class="id" type="definition">examplemap</span></a> (<a class="idref" href="Maps.html#Id"><span class="id" type="constructor">Id</span></a> 2) <a class="idref" href="http://coq.inria.fr/distrib/8.4pl3/stdlib/Coq.Init.Logic.html#:type_scope:x_'='_x"><span class="id" type="notation">=</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl3/stdlib/Coq.Init.Datatypes.html#false"><span class="id" type="constructor">false</span></a>.<br/>
 <span class="id" type="keyword">Proof</span>. <span class="id" type="tactic">reflexivity</span>. <span class="id" type="keyword">Qed</span>.<br/>
 
 <br/>
-<span class="id" type="keyword">Example</span> <span class="id" type="var">update_example4</span> : <span class="id" type="var">examplemap</span> (<span class="id" type="var">Id</span> 3) = <span class="id" type="var">true</span>.<br/>
+<span class="id" type="keyword">Example</span> <a name="update_example4"><span class="id" type="definition">update_example4</span></a> : <a class="idref" href="Maps.html#examplemap"><span class="id" type="definition">examplemap</span></a> (<a class="idref" href="Maps.html#Id"><span class="id" type="constructor">Id</span></a> 3) <a class="idref" href="http://coq.inria.fr/distrib/8.4pl3/stdlib/Coq.Init.Logic.html#:type_scope:x_'='_x"><span class="id" type="notation">=</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl3/stdlib/Coq.Init.Datatypes.html#true"><span class="id" type="constructor">true</span></a>.<br/>
 <span class="id" type="keyword">Proof</span>. <span class="id" type="tactic">reflexivity</span>. <span class="id" type="keyword">Qed</span>.<br/>
 
 <br/>
@@ -308,16 +325,16 @@ To use maps in later chapters, we'll need several fundamental
 <div class="code">
 
 <br/>
-<span class="id" type="keyword">Lemma</span> <span class="id" type="var">t_update_eq</span> : <span class="id" type="keyword">forall</span> <span class="id" type="var">A</span> (<span class="id" type="var">m</span>: <span class="id" type="var">total_map</span> <span class="id" type="var">A</span>) <span class="id" type="var">x</span> <span class="id" type="var">v</span>,<br/>
-&nbsp;&nbsp;(<span class="id" type="var">t_update</span> <span class="id" type="var">m</span> <span class="id" type="var">x</span> <span class="id" type="var">v</span>) <span class="id" type="var">x</span> = <span class="id" type="var">v</span>.<br/>
+<span class="id" type="keyword">Lemma</span> <a name="t_update_eq"><span class="id" type="lemma">t_update_eq</span></a> : <span class="id" type="keyword">forall</span> <span class="id" type="var">A</span> (<span class="id" type="var">m</span>: <a class="idref" href="Maps.html#total_map"><span class="id" type="definition">total_map</span></a> <a class="idref" href="Maps.html#A"><span class="id" type="variable">A</span></a>) <span class="id" type="var">x</span> <span class="id" type="var">v</span>,<br/>
+&nbsp;&nbsp;(<a class="idref" href="Maps.html#t_update"><span class="id" type="definition">t_update</span></a> <a class="idref" href="Maps.html#m"><span class="id" type="variable">m</span></a> <a class="idref" href="Maps.html#x"><span class="id" type="variable">x</span></a> <a class="idref" href="Maps.html#v"><span class="id" type="variable">v</span></a>) <a class="idref" href="Maps.html#x"><span class="id" type="variable">x</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl3/stdlib/Coq.Init.Logic.html#:type_scope:x_'='_x"><span class="id" type="notation">=</span></a> <a class="idref" href="Maps.html#v"><span class="id" type="variable">v</span></a>.<br/>
 <span class="id" type="keyword">Proof</span>.<br/>
 <span class="id" type="tactic">intros</span>.<br/>
 <span class="id" type="tactic">destruct</span> <span class="id" type="var">x</span>.<br/>
 <span class="id" type="tactic">simpl</span>.<br/>
-<span class="id" type="tactic">unfold</span> <span class="id" type="var">t_update</span>.<br/>
+<span class="id" type="tactic">unfold</span> <a class="idref" href="Maps.html#t_update"><span class="id" type="definition">t_update</span></a>.<br/>
 <span class="id" type="tactic">simpl</span>.<br/>
-<span class="id" type="keyword">SearchAbout</span> <span class="id" type="var">beq_nat</span>.<br/>
-<span class="id" type="tactic">rewrite</span> &lt;- <span class="id" type="var">beq_nat_refl</span>.<br/>
+<span class="id" type="keyword">SearchAbout</span> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl3/stdlib/Coq.Arith.EqNat.html#beq_nat"><span class="id" type="definition">beq_nat</span></a>.<br/>
+<span class="id" type="tactic">rewrite</span> &lt;- <a class="idref" href="http://coq.inria.fr/distrib/8.4pl3/stdlib/Coq.Arith.EqNat.html#beq_nat_refl"><span class="id" type="lemma">beq_nat_refl</span></a>.<br/>
 <span class="id" type="tactic">reflexivity</span>.<br/>
 <span class="id" type="keyword">Qed</span>.<br/>
 </div>
@@ -334,16 +351,16 @@ To use maps in later chapters, we'll need several fundamental
 <div class="code">
 
 <br/>
-<span class="id" type="keyword">Theorem</span> <span class="id" type="var">t_update_neq</span> : <span class="id" type="keyword">forall</span> (<span class="id" type="var">X</span>:<span class="id" type="keyword">Type</span>) <span class="id" type="var">v</span> <span class="id" type="var">x1</span> <span class="id" type="var">x2</span><br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" type="var">m</span> : <span class="id" type="var">total_map</span> <span class="id" type="var">X</span>),<br/>
-&nbsp;&nbsp;<span class="id" type="var">x1</span> &lt;&gt; <span class="id" type="var">x2</span> -&gt;<br/>
-&nbsp;&nbsp;(<span class="id" type="var">t_update</span> <span class="id" type="var">m</span> <span class="id" type="var">x1</span> <span class="id" type="var">v</span>) <span class="id" type="var">x2</span> = <span class="id" type="var">m</span> <span class="id" type="var">x2</span>.<br/>
+<span class="id" type="keyword">Theorem</span> <a name="t_update_neq"><span class="id" type="lemma">t_update_neq</span></a> : <span class="id" type="keyword">forall</span> (<span class="id" type="var">X</span>:<span class="id" type="keyword">Type</span>) <span class="id" type="var">v</span> <span class="id" type="var">x1</span> <span class="id" type="var">x2</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" type="var">m</span> : <a class="idref" href="Maps.html#total_map"><span class="id" type="definition">total_map</span></a> <a class="idref" href="Maps.html#X"><span class="id" type="variable">X</span></a>),<br/>
+&nbsp;&nbsp;<a class="idref" href="Maps.html#x1"><span class="id" type="variable">x1</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl3/stdlib/Coq.Init.Logic.html#:type_scope:x_'<>'_x"><span class="id" type="notation">&lt;&gt;</span></a> <a class="idref" href="Maps.html#x2"><span class="id" type="variable">x2</span></a> -&gt;<br/>
+&nbsp;&nbsp;(<a class="idref" href="Maps.html#t_update"><span class="id" type="definition">t_update</span></a> <a class="idref" href="Maps.html#m"><span class="id" type="variable">m</span></a> <a class="idref" href="Maps.html#x1"><span class="id" type="variable">x1</span></a> <a class="idref" href="Maps.html#v"><span class="id" type="variable">v</span></a>) <a class="idref" href="Maps.html#x2"><span class="id" type="variable">x2</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl3/stdlib/Coq.Init.Logic.html#:type_scope:x_'='_x"><span class="id" type="notation">=</span></a> <a class="idref" href="Maps.html#m"><span class="id" type="variable">m</span></a> <a class="idref" href="Maps.html#x2"><span class="id" type="variable">x2</span></a>.<br/>
 <span class="id" type="keyword">Proof</span>.<br/>
 <span class="id" type="tactic">intros</span>.<br/>
-<span class="id" type="tactic">unfold</span> <span class="id" type="var">t_update</span>.<br/>
-<span class="id" type="keyword">SearchAbout</span> <span class="id" type="var">beq_id</span>.<br/>
-<span class="id" type="tactic">assert</span>(<span class="id" type="var">HX</span>:<span class="id" type="var">beq_id</span> <span class="id" type="var">x1</span> <span class="id" type="var">x2</span> =<span class="id" type="var">false</span>).<br/>
-<span class="id" type="tactic">apply</span> <span class="id" type="var">false_beq_id</span>.<br/>
+<span class="id" type="tactic">unfold</span> <a class="idref" href="Maps.html#t_update"><span class="id" type="definition">t_update</span></a>.<br/>
+<span class="id" type="keyword">SearchAbout</span> <a class="idref" href="Maps.html#beq_id"><span class="id" type="definition">beq_id</span></a>.<br/>
+<span class="id" type="tactic">assert</span>(<span class="id" type="var">HX</span>:<a class="idref" href="Maps.html#beq_id"><span class="id" type="definition">beq_id</span></a> <span class="id" type="var">x1</span> <span class="id" type="var">x2</span> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl3/stdlib/Coq.Init.Logic.html#:type_scope:x_'='_x"><span class="id" type="notation">=</span></a><a class="idref" href="http://coq.inria.fr/distrib/8.4pl3/stdlib/Coq.Init.Datatypes.html#false"><span class="id" type="constructor">false</span></a>).<br/>
+<span class="id" type="tactic">apply</span> <a class="idref" href="Maps.html#false_beq_id"><span class="id" type="lemma">false_beq_id</span></a>.<br/>
 <span class="id" type="tactic">apply</span> <span class="id" type="var">H</span>.<br/>
 <span class="id" type="tactic">rewrite</span> <span class="id" type="var">HX</span>.<br/>
 <span class="id" type="tactic">reflexivity</span>.<br/>
@@ -364,16 +381,16 @@ To use maps in later chapters, we'll need several fundamental
 <div class="code">
 
 <br/>
-<span class="id" type="keyword">Lemma</span> <span class="id" type="var">t_update_shadow</span> : <span class="id" type="keyword">forall</span> <span class="id" type="var">A</span> (<span class="id" type="var">m</span>: <span class="id" type="var">total_map</span> <span class="id" type="var">A</span>) <span class="id" type="var">v1</span> <span class="id" type="var">v2</span> <span class="id" type="var">x</span>,<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" type="var">t_update</span> (<span class="id" type="var">t_update</span> <span class="id" type="var">m</span> <span class="id" type="var">x</span> <span class="id" type="var">v1</span>) <span class="id" type="var">x</span> <span class="id" type="var">v2</span><br/>
-&nbsp;&nbsp;= <span class="id" type="var">t_update</span> <span class="id" type="var">m</span> <span class="id" type="var">x</span> <span class="id" type="var">v2</span>.<br/>
+<span class="id" type="keyword">Lemma</span> <a name="t_update_shadow"><span class="id" type="lemma">t_update_shadow</span></a> : <span class="id" type="keyword">forall</span> <span class="id" type="var">A</span> (<span class="id" type="var">m</span>: <a class="idref" href="Maps.html#total_map"><span class="id" type="definition">total_map</span></a> <a class="idref" href="Maps.html#A"><span class="id" type="variable">A</span></a>) <span class="id" type="var">v1</span> <span class="id" type="var">v2</span> <span class="id" type="var">x</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="Maps.html#t_update"><span class="id" type="definition">t_update</span></a> (<a class="idref" href="Maps.html#t_update"><span class="id" type="definition">t_update</span></a> <a class="idref" href="Maps.html#m"><span class="id" type="variable">m</span></a> <a class="idref" href="Maps.html#x"><span class="id" type="variable">x</span></a> <a class="idref" href="Maps.html#v1"><span class="id" type="variable">v1</span></a>) <a class="idref" href="Maps.html#x"><span class="id" type="variable">x</span></a> <a class="idref" href="Maps.html#v2"><span class="id" type="variable">v2</span></a><br/>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.4pl3/stdlib/Coq.Init.Logic.html#:type_scope:x_'='_x"><span class="id" type="notation">=</span></a> <a class="idref" href="Maps.html#t_update"><span class="id" type="definition">t_update</span></a> <a class="idref" href="Maps.html#m"><span class="id" type="variable">m</span></a> <a class="idref" href="Maps.html#x"><span class="id" type="variable">x</span></a> <a class="idref" href="Maps.html#v2"><span class="id" type="variable">v2</span></a>.<br/>
 <span class="id" type="keyword">Proof</span>.<br/>
 <span class="id" type="tactic">intros</span>.<br/>
-<span class="id" type="tactic">unfold</span> <span class="id" type="var">t_update</span>.<br/>
+<span class="id" type="tactic">unfold</span> <a class="idref" href="Maps.html#t_update"><span class="id" type="definition">t_update</span></a>.<br/>
 <span class="id" type="tactic">simpl</span>.<br/>
-<span class="id" type="tactic">apply</span> <span class="id" type="var">functional_extensionality</span>.<br/>
+<span class="id" type="tactic">apply</span> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl3/stdlib/Coq.Logic.FunctionalExtensionality.html#functional_extensionality"><span class="id" type="lemma">functional_extensionality</span></a>.<br/>
 <span class="id" type="tactic">intros</span>.<br/>
-<span class="id" type="tactic">destruct</span> (<span class="id" type="var">beq_id</span> <span class="id" type="var">x</span> <span class="id" type="var">x0</span>) <span class="id" type="var">eqn</span>:<span class="id" type="var">HX</span>.<br/>
+<span class="id" type="tactic">destruct</span> (<a class="idref" href="Maps.html#beq_id"><span class="id" type="definition">beq_id</span></a> <span class="id" type="var">x</span> <span class="id" type="var">x0</span>) <span class="id" type="var">eqn</span>:<span class="id" type="var">HX</span>.<br/>
 <span class="id" type="tactic">reflexivity</span>.<br/>
 <span class="id" type="tactic">reflexivity</span>.<br/>
 <span class="id" type="keyword">Qed</span>.<br/>
@@ -396,12 +413,12 @@ To use maps in later chapters, we'll need several fundamental
 <div class="code">
 
 <br/>
-<span class="id" type="keyword">Lemma</span> <span class="id" type="var">beq_idP</span> : <span class="id" type="keyword">forall</span> <span class="id" type="var">x</span> <span class="id" type="var">y</span>, <span class="id" type="var">reflect</span> (<span class="id" type="var">x</span> = <span class="id" type="var">y</span>) (<span class="id" type="var">beq_id</span> <span class="id" type="var">x</span> <span class="id" type="var">y</span>).<br/>
+<span class="id" type="keyword">Lemma</span> <a name="beq_idP"><span class="id" type="lemma">beq_idP</span></a> : <span class="id" type="keyword">forall</span> <span class="id" type="var">x</span> <span class="id" type="var">y</span>, <a class="idref" href="http://coq.inria.fr/distrib/8.4pl3/stdlib/Coq.Bool.Bool.html#reflect"><span class="id" type="inductive">reflect</span></a> (<a class="idref" href="Maps.html#x"><span class="id" type="variable">x</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl3/stdlib/Coq.Init.Logic.html#:type_scope:x_'='_x"><span class="id" type="notation">=</span></a> <a class="idref" href="Maps.html#y"><span class="id" type="variable">y</span></a>) (<a class="idref" href="Maps.html#beq_id"><span class="id" type="definition">beq_id</span></a> <a class="idref" href="Maps.html#x"><span class="id" type="variable">x</span></a> <a class="idref" href="Maps.html#y"><span class="id" type="variable">y</span></a>).<br/>
 <span class="id" type="keyword">Proof</span>.<br/>
 <span class="id" type="tactic">intros</span>.<br/>
-<span class="id" type="tactic">apply</span> <span class="id" type="var">iff_reflect</span>.<br/>
-<span class="id" type="keyword">SearchAbout</span> <span class="id" type="var">beq_id</span>.<br/>
-<span class="id" type="tactic">rewrite</span> <span class="id" type="var">beq_id_true_iff</span>.<br/>
+<span class="id" type="tactic">apply</span> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl3/stdlib/Coq.Bool.Bool.html#iff_reflect"><span class="id" type="lemma">iff_reflect</span></a>.<br/>
+<span class="id" type="keyword">SearchAbout</span> <a class="idref" href="Maps.html#beq_id"><span class="id" type="definition">beq_id</span></a>.<br/>
+<span class="id" type="tactic">rewrite</span> <a class="idref" href="Maps.html#beq_id_true_iff"><span class="id" type="lemma">beq_id_true_iff</span></a>.<br/>
 <span class="id" type="tactic">reflexivity</span>.<br/>
 <span class="id" type="keyword">Qed</span>.<br/>
 </div>
@@ -425,13 +442,13 @@ To use maps in later chapters, we'll need several fundamental
 <div class="code">
 
 <br/>
-<span class="id" type="keyword">Theorem</span> <span class="id" type="var">t_update_same</span> : <span class="id" type="keyword">forall</span> <span class="id" type="var">X</span> <span class="id" type="var">x</span> (<span class="id" type="var">m</span> : <span class="id" type="var">total_map</span> <span class="id" type="var">X</span>),<br/>
-&nbsp;&nbsp;<span class="id" type="var">t_update</span> <span class="id" type="var">m</span> <span class="id" type="var">x</span> (<span class="id" type="var">m</span> <span class="id" type="var">x</span>) = <span class="id" type="var">m</span>.<br/>
+<span class="id" type="keyword">Theorem</span> <a name="t_update_same"><span class="id" type="lemma">t_update_same</span></a> : <span class="id" type="keyword">forall</span> <span class="id" type="var">X</span> <span class="id" type="var">x</span> (<span class="id" type="var">m</span> : <a class="idref" href="Maps.html#total_map"><span class="id" type="definition">total_map</span></a> <a class="idref" href="Maps.html#X"><span class="id" type="variable">X</span></a>),<br/>
+&nbsp;&nbsp;<a class="idref" href="Maps.html#t_update"><span class="id" type="definition">t_update</span></a> <a class="idref" href="Maps.html#m"><span class="id" type="variable">m</span></a> <a class="idref" href="Maps.html#x"><span class="id" type="variable">x</span></a> (<a class="idref" href="Maps.html#m"><span class="id" type="variable">m</span></a> <a class="idref" href="Maps.html#x"><span class="id" type="variable">x</span></a>) <a class="idref" href="http://coq.inria.fr/distrib/8.4pl3/stdlib/Coq.Init.Logic.html#:type_scope:x_'='_x"><span class="id" type="notation">=</span></a> <a class="idref" href="Maps.html#m"><span class="id" type="variable">m</span></a>.<br/>
 <span class="id" type="keyword">Proof</span>.<br/>
 <span class="id" type="tactic">intros</span>.<br/>
-<span class="id" type="tactic">unfold</span> <span class="id" type="var">t_update</span>.<br/>
+<span class="id" type="tactic">unfold</span> <a class="idref" href="Maps.html#t_update"><span class="id" type="definition">t_update</span></a>.<br/>
 <span class="id" type="tactic">extensionality</span> <span class="id" type="var">x0</span>.<br/>
-<span class="id" type="tactic">destruct</span> (<span class="id" type="var">beq_idP</span> <span class="id" type="var">x</span> <span class="id" type="var">x0</span>) <span class="id" type="keyword">as</span> [<span class="id" type="var">HX</span> | <span class="id" type="var">HX</span>].<br/>
+<span class="id" type="tactic">destruct</span> (<a class="idref" href="Maps.html#beq_idP"><span class="id" type="lemma">beq_idP</span></a> <span class="id" type="var">x</span> <span class="id" type="var">x0</span>) <span class="id" type="keyword">as</span> [<span class="id" type="var">HX</span> | <span class="id" type="var">HX</span>].<br/>
 <span class="id" type="tactic">rewrite</span> <span class="id" type="var">HX</span>.<br/>
 <span class="id" type="tactic">reflexivity</span>.<br/>
 <span class="id" type="tactic">reflexivity</span>.<br/>
@@ -450,24 +467,24 @@ To use maps in later chapters, we'll need several fundamental
 <div class="code">
 
 <br/>
-<span class="id" type="keyword">Theorem</span> <span class="id" type="var">t_update_permute</span> : <span class="id" type="keyword">forall</span> (<span class="id" type="var">X</span>:<span class="id" type="keyword">Type</span>) <span class="id" type="var">v1</span> <span class="id" type="var">v2</span> <span class="id" type="var">x1</span> <span class="id" type="var">x2</span><br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" type="var">m</span> : <span class="id" type="var">total_map</span> <span class="id" type="var">X</span>),<br/>
-&nbsp;&nbsp;<span class="id" type="var">x2</span> &lt;&gt; <span class="id" type="var">x1</span> -&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" type="var">t_update</span> (<span class="id" type="var">t_update</span> <span class="id" type="var">m</span> <span class="id" type="var">x2</span> <span class="id" type="var">v2</span>) <span class="id" type="var">x1</span> <span class="id" type="var">v1</span>)<br/>
-&nbsp;&nbsp;= (<span class="id" type="var">t_update</span> (<span class="id" type="var">t_update</span> <span class="id" type="var">m</span> <span class="id" type="var">x1</span> <span class="id" type="var">v1</span>) <span class="id" type="var">x2</span> <span class="id" type="var">v2</span>).<br/>
+<span class="id" type="keyword">Theorem</span> <a name="t_update_permute"><span class="id" type="lemma">t_update_permute</span></a> : <span class="id" type="keyword">forall</span> (<span class="id" type="var">X</span>:<span class="id" type="keyword">Type</span>) <span class="id" type="var">v1</span> <span class="id" type="var">v2</span> <span class="id" type="var">x1</span> <span class="id" type="var">x2</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" type="var">m</span> : <a class="idref" href="Maps.html#total_map"><span class="id" type="definition">total_map</span></a> <a class="idref" href="Maps.html#X"><span class="id" type="variable">X</span></a>),<br/>
+&nbsp;&nbsp;<a class="idref" href="Maps.html#x2"><span class="id" type="variable">x2</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl3/stdlib/Coq.Init.Logic.html#:type_scope:x_'<>'_x"><span class="id" type="notation">&lt;&gt;</span></a> <a class="idref" href="Maps.html#x1"><span class="id" type="variable">x1</span></a> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.4pl3/stdlib/Coq.Init.Logic.html#:type_scope:x_'='_x"><span class="id" type="notation">(</span></a><a class="idref" href="Maps.html#t_update"><span class="id" type="definition">t_update</span></a> (<a class="idref" href="Maps.html#t_update"><span class="id" type="definition">t_update</span></a> <a class="idref" href="Maps.html#m"><span class="id" type="variable">m</span></a> <a class="idref" href="Maps.html#x2"><span class="id" type="variable">x2</span></a> <a class="idref" href="Maps.html#v2"><span class="id" type="variable">v2</span></a>) <a class="idref" href="Maps.html#x1"><span class="id" type="variable">x1</span></a> <a class="idref" href="Maps.html#v1"><span class="id" type="variable">v1</span></a><a class="idref" href="http://coq.inria.fr/distrib/8.4pl3/stdlib/Coq.Init.Logic.html#:type_scope:x_'='_x"><span class="id" type="notation">)</span></a><br/>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.4pl3/stdlib/Coq.Init.Logic.html#:type_scope:x_'='_x"><span class="id" type="notation">=</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl3/stdlib/Coq.Init.Logic.html#:type_scope:x_'='_x"><span class="id" type="notation">(</span></a><a class="idref" href="Maps.html#t_update"><span class="id" type="definition">t_update</span></a> (<a class="idref" href="Maps.html#t_update"><span class="id" type="definition">t_update</span></a> <a class="idref" href="Maps.html#m"><span class="id" type="variable">m</span></a> <a class="idref" href="Maps.html#x1"><span class="id" type="variable">x1</span></a> <a class="idref" href="Maps.html#v1"><span class="id" type="variable">v1</span></a>) <a class="idref" href="Maps.html#x2"><span class="id" type="variable">x2</span></a> <a class="idref" href="Maps.html#v2"><span class="id" type="variable">v2</span></a><a class="idref" href="http://coq.inria.fr/distrib/8.4pl3/stdlib/Coq.Init.Logic.html#:type_scope:x_'='_x"><span class="id" type="notation">)</span></a>.<br/>
 <span class="id" type="keyword">Proof</span>.<br/>
 <span class="id" type="tactic">intros</span>.<br/>
-<span class="id" type="tactic">unfold</span> <span class="id" type="var">t_update</span>.<br/>
-<span class="id" type="tactic">apply</span> <span class="id" type="var">functional_extensionality</span>.<br/>
+<span class="id" type="tactic">unfold</span> <a class="idref" href="Maps.html#t_update"><span class="id" type="definition">t_update</span></a>.<br/>
+<span class="id" type="tactic">apply</span> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl3/stdlib/Coq.Logic.FunctionalExtensionality.html#functional_extensionality"><span class="id" type="lemma">functional_extensionality</span></a>.<br/>
 <span class="id" type="tactic">intros</span>.<br/>
-<span class="id" type="tactic">destruct</span> (<span class="id" type="var">beq_idP</span>  <span class="id" type="var">x1</span> <span class="id" type="var">x</span>) <span class="id" type="keyword">as</span> [<span class="id" type="var">HX</span> | <span class="id" type="var">HX</span>].<br/>
-<span class="id" type="tactic">destruct</span> (<span class="id" type="var">beq_idP</span>  <span class="id" type="var">x2</span> <span class="id" type="var">x</span>) <span class="id" type="keyword">as</span> [<span class="id" type="var">HX1</span> | <span class="id" type="var">HX1</span>].<br/>
+<span class="id" type="tactic">destruct</span> (<a class="idref" href="Maps.html#beq_idP"><span class="id" type="lemma">beq_idP</span></a>  <span class="id" type="var">x1</span> <span class="id" type="var">x</span>) <span class="id" type="keyword">as</span> [<span class="id" type="var">HX</span> | <span class="id" type="var">HX</span>].<br/>
+<span class="id" type="tactic">destruct</span> (<a class="idref" href="Maps.html#beq_idP"><span class="id" type="lemma">beq_idP</span></a>  <span class="id" type="var">x2</span> <span class="id" type="var">x</span>) <span class="id" type="keyword">as</span> [<span class="id" type="var">HX1</span> | <span class="id" type="var">HX1</span>].<br/>
 <span class="id" type="tactic">rewrite</span> &lt;- <span class="id" type="var">HX</span> <span class="id" type="keyword">in</span> <span class="id" type="var">HX1</span>.<br/>
-<span class="id" type="tactic">unfold</span> <span class="id" type="var">not</span> <span class="id" type="keyword">in</span> <span class="id" type="var">H</span>.<br/>
+<span class="id" type="tactic">unfold</span> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl3/stdlib/Coq.Init.Logic.html#not"><span class="id" type="definition">not</span></a> <span class="id" type="keyword">in</span> <span class="id" type="var">H</span>.<br/>
 <span class="id" type="tactic">apply</span> <span class="id" type="var">H</span> <span class="id" type="keyword">in</span> <span class="id" type="var">HX1</span>.<br/>
 <span class="id" type="tactic">inversion</span> <span class="id" type="var">HX1</span>.<br/>
 <span class="id" type="tactic">reflexivity</span>.<br/>
-<span class="id" type="tactic">destruct</span> (<span class="id" type="var">beq_idP</span>  <span class="id" type="var">x2</span> <span class="id" type="var">x</span>) <span class="id" type="keyword">as</span> [<span class="id" type="var">HX1</span> | <span class="id" type="var">HX1</span>]<br/>
+<span class="id" type="tactic">destruct</span> (<a class="idref" href="Maps.html#beq_idP"><span class="id" type="lemma">beq_idP</span></a>  <span class="id" type="var">x2</span> <span class="id" type="var">x</span>) <span class="id" type="keyword">as</span> [<span class="id" type="var">HX1</span> | <span class="id" type="var">HX1</span>]<br/>
 ;<span class="id" type="tactic">reflexivity</span>.<br/>
 <span class="id" type="keyword">Qed</span>.<br/>
 
@@ -494,16 +511,16 @@ To use maps in later chapters, we'll need several fundamental
 <div class="code">
 
 <br/>
-<span class="id" type="keyword">Definition</span> <span class="id" type="var">partial_map</span> (<span class="id" type="var">A</span>:<span class="id" type="keyword">Type</span>) := <span class="id" type="var">total_map</span> (<span class="id" type="var">option</span> <span class="id" type="var">A</span>).<br/>
+<span class="id" type="keyword">Definition</span> <a name="partial_map"><span class="id" type="definition">partial_map</span></a> (<span class="id" type="var">A</span>:<span class="id" type="keyword">Type</span>) := <a class="idref" href="Maps.html#total_map"><span class="id" type="definition">total_map</span></a> (<a class="idref" href="http://coq.inria.fr/distrib/8.4pl3/stdlib/Coq.Init.Datatypes.html#option"><span class="id" type="inductive">option</span></a> <a class="idref" href="Maps.html#A"><span class="id" type="variable">A</span></a>).<br/>
 
 <br/>
-<span class="id" type="keyword">Definition</span> <span class="id" type="var">empty</span> {<span class="id" type="var">A</span>:<span class="id" type="keyword">Type</span>} : <span class="id" type="var">partial_map</span> <span class="id" type="var">A</span> :=<br/>
-&nbsp;&nbsp;<span class="id" type="var">t_empty</span> <span class="id" type="var">None</span>.<br/>
+<span class="id" type="keyword">Definition</span> <a name="empty"><span class="id" type="definition">empty</span></a> {<span class="id" type="var">A</span>:<span class="id" type="keyword">Type</span>} : <a class="idref" href="Maps.html#partial_map"><span class="id" type="definition">partial_map</span></a> <a class="idref" href="Maps.html#A"><span class="id" type="variable">A</span></a> :=<br/>
+&nbsp;&nbsp;<a class="idref" href="Maps.html#t_empty"><span class="id" type="definition">t_empty</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl3/stdlib/Coq.Init.Datatypes.html#None"><span class="id" type="constructor">None</span></a>.<br/>
 
 <br/>
-<span class="id" type="keyword">Definition</span> <span class="id" type="var">update</span> {<span class="id" type="var">A</span>:<span class="id" type="keyword">Type</span>} (<span class="id" type="var">m</span> : <span class="id" type="var">partial_map</span> <span class="id" type="var">A</span>)<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" type="var">x</span> : <span class="id" type="var">id</span>) (<span class="id" type="var">v</span> : <span class="id" type="var">A</span>) :=<br/>
-&nbsp;&nbsp;<span class="id" type="var">t_update</span> <span class="id" type="var">m</span> <span class="id" type="var">x</span> (<span class="id" type="var">Some</span> <span class="id" type="var">v</span>).<br/>
+<span class="id" type="keyword">Definition</span> <a name="update"><span class="id" type="definition">update</span></a> {<span class="id" type="var">A</span>:<span class="id" type="keyword">Type</span>} (<span class="id" type="var">m</span> : <a class="idref" href="Maps.html#partial_map"><span class="id" type="definition">partial_map</span></a> <a class="idref" href="Maps.html#A"><span class="id" type="variable">A</span></a>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" type="var">x</span> : <a class="idref" href="Maps.html#id"><span class="id" type="inductive">id</span></a>) (<span class="id" type="var">v</span> : <a class="idref" href="Maps.html#A"><span class="id" type="variable">A</span></a>) :=<br/>
+&nbsp;&nbsp;<a class="idref" href="Maps.html#t_update"><span class="id" type="definition">t_update</span></a> <a class="idref" href="Maps.html#m"><span class="id" type="variable">m</span></a> <a class="idref" href="Maps.html#x"><span class="id" type="variable">x</span></a> (<a class="idref" href="http://coq.inria.fr/distrib/8.4pl3/stdlib/Coq.Init.Datatypes.html#Some"><span class="id" type="constructor">Some</span></a> <a class="idref" href="Maps.html#v"><span class="id" type="variable">v</span></a>).<br/>
 
 <br/>
 </div>
@@ -515,49 +532,49 @@ We can now lift all of the basic lemmas about total maps to
 <div class="code">
 
 <br/>
-<span class="id" type="keyword">Lemma</span> <span class="id" type="var">update_eq</span> : <span class="id" type="keyword">forall</span> <span class="id" type="var">A</span> (<span class="id" type="var">m</span>: <span class="id" type="var">partial_map</span> <span class="id" type="var">A</span>) <span class="id" type="var">x</span> <span class="id" type="var">v</span>,<br/>
-&nbsp;&nbsp;(<span class="id" type="var">update</span> <span class="id" type="var">m</span> <span class="id" type="var">x</span> <span class="id" type="var">v</span>) <span class="id" type="var">x</span> = <span class="id" type="var">Some</span> <span class="id" type="var">v</span>.<br/>
+<span class="id" type="keyword">Lemma</span> <a name="update_eq"><span class="id" type="lemma">update_eq</span></a> : <span class="id" type="keyword">forall</span> <span class="id" type="var">A</span> (<span class="id" type="var">m</span>: <a class="idref" href="Maps.html#partial_map"><span class="id" type="definition">partial_map</span></a> <a class="idref" href="Maps.html#A"><span class="id" type="variable">A</span></a>) <span class="id" type="var">x</span> <span class="id" type="var">v</span>,<br/>
+&nbsp;&nbsp;(<a class="idref" href="Maps.html#update"><span class="id" type="definition">update</span></a> <a class="idref" href="Maps.html#m"><span class="id" type="variable">m</span></a> <a class="idref" href="Maps.html#x"><span class="id" type="variable">x</span></a> <a class="idref" href="Maps.html#v"><span class="id" type="variable">v</span></a>) <a class="idref" href="Maps.html#x"><span class="id" type="variable">x</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl3/stdlib/Coq.Init.Logic.html#:type_scope:x_'='_x"><span class="id" type="notation">=</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl3/stdlib/Coq.Init.Datatypes.html#Some"><span class="id" type="constructor">Some</span></a> <a class="idref" href="Maps.html#v"><span class="id" type="variable">v</span></a>.<br/>
 <span class="id" type="keyword">Proof</span>.<br/>
-&nbsp;&nbsp;<span class="id" type="tactic">intros</span>. <span class="id" type="tactic">unfold</span> <span class="id" type="var">update</span>. <span class="id" type="tactic">rewrite</span> <span class="id" type="var">t_update_eq</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span>. <span class="id" type="tactic">unfold</span> <a class="idref" href="Maps.html#update"><span class="id" type="definition">update</span></a>. <span class="id" type="tactic">rewrite</span> <a class="idref" href="Maps.html#t_update_eq"><span class="id" type="lemma">t_update_eq</span></a>.<br/>
 &nbsp;&nbsp;<span class="id" type="tactic">reflexivity</span>.<br/>
 <span class="id" type="keyword">Qed</span>.<br/>
 
 <br/>
-<span class="id" type="keyword">Theorem</span> <span class="id" type="var">update_neq</span> : <span class="id" type="keyword">forall</span> (<span class="id" type="var">X</span>:<span class="id" type="keyword">Type</span>) <span class="id" type="var">v</span> <span class="id" type="var">x1</span> <span class="id" type="var">x2</span><br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" type="var">m</span> : <span class="id" type="var">partial_map</span> <span class="id" type="var">X</span>),<br/>
-&nbsp;&nbsp;<span class="id" type="var">x2</span> &lt;&gt; <span class="id" type="var">x1</span> -&gt;<br/>
-&nbsp;&nbsp;(<span class="id" type="var">update</span> <span class="id" type="var">m</span> <span class="id" type="var">x2</span> <span class="id" type="var">v</span>) <span class="id" type="var">x1</span> = <span class="id" type="var">m</span> <span class="id" type="var">x1</span>.<br/>
+<span class="id" type="keyword">Theorem</span> <a name="update_neq"><span class="id" type="lemma">update_neq</span></a> : <span class="id" type="keyword">forall</span> (<span class="id" type="var">X</span>:<span class="id" type="keyword">Type</span>) <span class="id" type="var">v</span> <span class="id" type="var">x1</span> <span class="id" type="var">x2</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" type="var">m</span> : <a class="idref" href="Maps.html#partial_map"><span class="id" type="definition">partial_map</span></a> <a class="idref" href="Maps.html#X"><span class="id" type="variable">X</span></a>),<br/>
+&nbsp;&nbsp;<a class="idref" href="Maps.html#x2"><span class="id" type="variable">x2</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl3/stdlib/Coq.Init.Logic.html#:type_scope:x_'<>'_x"><span class="id" type="notation">&lt;&gt;</span></a> <a class="idref" href="Maps.html#x1"><span class="id" type="variable">x1</span></a> -&gt;<br/>
+&nbsp;&nbsp;(<a class="idref" href="Maps.html#update"><span class="id" type="definition">update</span></a> <a class="idref" href="Maps.html#m"><span class="id" type="variable">m</span></a> <a class="idref" href="Maps.html#x2"><span class="id" type="variable">x2</span></a> <a class="idref" href="Maps.html#v"><span class="id" type="variable">v</span></a>) <a class="idref" href="Maps.html#x1"><span class="id" type="variable">x1</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl3/stdlib/Coq.Init.Logic.html#:type_scope:x_'='_x"><span class="id" type="notation">=</span></a> <a class="idref" href="Maps.html#m"><span class="id" type="variable">m</span></a> <a class="idref" href="Maps.html#x1"><span class="id" type="variable">x1</span></a>.<br/>
 <span class="id" type="keyword">Proof</span>.<br/>
 &nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">X</span> <span class="id" type="var">v</span> <span class="id" type="var">x1</span> <span class="id" type="var">x2</span> <span class="id" type="var">m</span> <span class="id" type="var">H</span>.<br/>
-&nbsp;&nbsp;<span class="id" type="tactic">unfold</span> <span class="id" type="var">update</span>. <span class="id" type="tactic">rewrite</span> <span class="id" type="var">t_update_neq</span>. <span class="id" type="tactic">reflexivity</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">unfold</span> <a class="idref" href="Maps.html#update"><span class="id" type="definition">update</span></a>. <span class="id" type="tactic">rewrite</span> <a class="idref" href="Maps.html#t_update_neq"><span class="id" type="lemma">t_update_neq</span></a>. <span class="id" type="tactic">reflexivity</span>.<br/>
 &nbsp;&nbsp;<span class="id" type="tactic">apply</span> <span class="id" type="var">H</span>. <span class="id" type="keyword">Qed</span>.<br/>
 
 <br/>
-<span class="id" type="keyword">Lemma</span> <span class="id" type="var">update_shadow</span> : <span class="id" type="keyword">forall</span> <span class="id" type="var">A</span> (<span class="id" type="var">m</span>: <span class="id" type="var">partial_map</span> <span class="id" type="var">A</span>) <span class="id" type="var">v1</span> <span class="id" type="var">v2</span> <span class="id" type="var">x</span>,<br/>
-&nbsp;&nbsp;<span class="id" type="var">update</span> (<span class="id" type="var">update</span> <span class="id" type="var">m</span> <span class="id" type="var">x</span> <span class="id" type="var">v1</span>) <span class="id" type="var">x</span> <span class="id" type="var">v2</span> = <span class="id" type="var">update</span> <span class="id" type="var">m</span> <span class="id" type="var">x</span> <span class="id" type="var">v2</span>.<br/>
+<span class="id" type="keyword">Lemma</span> <a name="update_shadow"><span class="id" type="lemma">update_shadow</span></a> : <span class="id" type="keyword">forall</span> <span class="id" type="var">A</span> (<span class="id" type="var">m</span>: <a class="idref" href="Maps.html#partial_map"><span class="id" type="definition">partial_map</span></a> <a class="idref" href="Maps.html#A"><span class="id" type="variable">A</span></a>) <span class="id" type="var">v1</span> <span class="id" type="var">v2</span> <span class="id" type="var">x</span>,<br/>
+&nbsp;&nbsp;<a class="idref" href="Maps.html#update"><span class="id" type="definition">update</span></a> (<a class="idref" href="Maps.html#update"><span class="id" type="definition">update</span></a> <a class="idref" href="Maps.html#m"><span class="id" type="variable">m</span></a> <a class="idref" href="Maps.html#x"><span class="id" type="variable">x</span></a> <a class="idref" href="Maps.html#v1"><span class="id" type="variable">v1</span></a>) <a class="idref" href="Maps.html#x"><span class="id" type="variable">x</span></a> <a class="idref" href="Maps.html#v2"><span class="id" type="variable">v2</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl3/stdlib/Coq.Init.Logic.html#:type_scope:x_'='_x"><span class="id" type="notation">=</span></a> <a class="idref" href="Maps.html#update"><span class="id" type="definition">update</span></a> <a class="idref" href="Maps.html#m"><span class="id" type="variable">m</span></a> <a class="idref" href="Maps.html#x"><span class="id" type="variable">x</span></a> <a class="idref" href="Maps.html#v2"><span class="id" type="variable">v2</span></a>.<br/>
 <span class="id" type="keyword">Proof</span>.<br/>
-&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">A</span> <span class="id" type="var">m</span> <span class="id" type="var">v1</span> <span class="id" type="var">v2</span> <span class="id" type="var">x1</span>. <span class="id" type="tactic">unfold</span> <span class="id" type="var">update</span>. <span class="id" type="tactic">rewrite</span> <span class="id" type="var">t_update_shadow</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">A</span> <span class="id" type="var">m</span> <span class="id" type="var">v1</span> <span class="id" type="var">v2</span> <span class="id" type="var">x1</span>. <span class="id" type="tactic">unfold</span> <a class="idref" href="Maps.html#update"><span class="id" type="definition">update</span></a>. <span class="id" type="tactic">rewrite</span> <a class="idref" href="Maps.html#t_update_shadow"><span class="id" type="lemma">t_update_shadow</span></a>.<br/>
 &nbsp;&nbsp;<span class="id" type="tactic">reflexivity</span>.<br/>
 <span class="id" type="keyword">Qed</span>.<br/>
 
 <br/>
-<span class="id" type="keyword">Theorem</span> <span class="id" type="var">update_same</span> : <span class="id" type="keyword">forall</span> <span class="id" type="var">X</span> <span class="id" type="var">v</span> <span class="id" type="var">x</span> (<span class="id" type="var">m</span> : <span class="id" type="var">partial_map</span> <span class="id" type="var">X</span>),<br/>
-&nbsp;&nbsp;<span class="id" type="var">m</span> <span class="id" type="var">x</span> = <span class="id" type="var">Some</span> <span class="id" type="var">v</span> -&gt;<br/>
-&nbsp;&nbsp;<span class="id" type="var">update</span> <span class="id" type="var">m</span> <span class="id" type="var">x</span> <span class="id" type="var">v</span> = <span class="id" type="var">m</span>.<br/>
+<span class="id" type="keyword">Theorem</span> <a name="update_same"><span class="id" type="lemma">update_same</span></a> : <span class="id" type="keyword">forall</span> <span class="id" type="var">X</span> <span class="id" type="var">v</span> <span class="id" type="var">x</span> (<span class="id" type="var">m</span> : <a class="idref" href="Maps.html#partial_map"><span class="id" type="definition">partial_map</span></a> <a class="idref" href="Maps.html#X"><span class="id" type="variable">X</span></a>),<br/>
+&nbsp;&nbsp;<a class="idref" href="Maps.html#m"><span class="id" type="variable">m</span></a> <a class="idref" href="Maps.html#x"><span class="id" type="variable">x</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl3/stdlib/Coq.Init.Logic.html#:type_scope:x_'='_x"><span class="id" type="notation">=</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl3/stdlib/Coq.Init.Datatypes.html#Some"><span class="id" type="constructor">Some</span></a> <a class="idref" href="Maps.html#v"><span class="id" type="variable">v</span></a> -&gt;<br/>
+&nbsp;&nbsp;<a class="idref" href="Maps.html#update"><span class="id" type="definition">update</span></a> <a class="idref" href="Maps.html#m"><span class="id" type="variable">m</span></a> <a class="idref" href="Maps.html#x"><span class="id" type="variable">x</span></a> <a class="idref" href="Maps.html#v"><span class="id" type="variable">v</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl3/stdlib/Coq.Init.Logic.html#:type_scope:x_'='_x"><span class="id" type="notation">=</span></a> <a class="idref" href="Maps.html#m"><span class="id" type="variable">m</span></a>.<br/>
 <span class="id" type="keyword">Proof</span>.<br/>
-&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">X</span> <span class="id" type="var">v</span> <span class="id" type="var">x</span> <span class="id" type="var">m</span> <span class="id" type="var">H</span>. <span class="id" type="tactic">unfold</span> <span class="id" type="var">update</span>. <span class="id" type="tactic">rewrite</span> &lt;- <span class="id" type="var">H</span>.<br/>
-&nbsp;&nbsp;<span class="id" type="tactic">apply</span> <span class="id" type="var">t_update_same</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">X</span> <span class="id" type="var">v</span> <span class="id" type="var">x</span> <span class="id" type="var">m</span> <span class="id" type="var">H</span>. <span class="id" type="tactic">unfold</span> <a class="idref" href="Maps.html#update"><span class="id" type="definition">update</span></a>. <span class="id" type="tactic">rewrite</span> &lt;- <span class="id" type="var">H</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">apply</span> <a class="idref" href="Maps.html#t_update_same"><span class="id" type="lemma">t_update_same</span></a>.<br/>
 <span class="id" type="keyword">Qed</span>.<br/>
 
 <br/>
-<span class="id" type="keyword">Theorem</span> <span class="id" type="var">update_permute</span> : <span class="id" type="keyword">forall</span> (<span class="id" type="var">X</span>:<span class="id" type="keyword">Type</span>) <span class="id" type="var">v1</span> <span class="id" type="var">v2</span> <span class="id" type="var">x1</span> <span class="id" type="var">x2</span><br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" type="var">m</span> : <span class="id" type="var">partial_map</span> <span class="id" type="var">X</span>),<br/>
-&nbsp;&nbsp;<span class="id" type="var">x2</span> &lt;&gt; <span class="id" type="var">x1</span> -&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" type="var">update</span> (<span class="id" type="var">update</span> <span class="id" type="var">m</span> <span class="id" type="var">x2</span> <span class="id" type="var">v2</span>) <span class="id" type="var">x1</span> <span class="id" type="var">v1</span>)<br/>
-&nbsp;&nbsp;= (<span class="id" type="var">update</span> (<span class="id" type="var">update</span> <span class="id" type="var">m</span> <span class="id" type="var">x1</span> <span class="id" type="var">v1</span>) <span class="id" type="var">x2</span> <span class="id" type="var">v2</span>).<br/>
+<span class="id" type="keyword">Theorem</span> <a name="update_permute"><span class="id" type="lemma">update_permute</span></a> : <span class="id" type="keyword">forall</span> (<span class="id" type="var">X</span>:<span class="id" type="keyword">Type</span>) <span class="id" type="var">v1</span> <span class="id" type="var">v2</span> <span class="id" type="var">x1</span> <span class="id" type="var">x2</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" type="var">m</span> : <a class="idref" href="Maps.html#partial_map"><span class="id" type="definition">partial_map</span></a> <a class="idref" href="Maps.html#X"><span class="id" type="variable">X</span></a>),<br/>
+&nbsp;&nbsp;<a class="idref" href="Maps.html#x2"><span class="id" type="variable">x2</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl3/stdlib/Coq.Init.Logic.html#:type_scope:x_'<>'_x"><span class="id" type="notation">&lt;&gt;</span></a> <a class="idref" href="Maps.html#x1"><span class="id" type="variable">x1</span></a> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.4pl3/stdlib/Coq.Init.Logic.html#:type_scope:x_'='_x"><span class="id" type="notation">(</span></a><a class="idref" href="Maps.html#update"><span class="id" type="definition">update</span></a> (<a class="idref" href="Maps.html#update"><span class="id" type="definition">update</span></a> <a class="idref" href="Maps.html#m"><span class="id" type="variable">m</span></a> <a class="idref" href="Maps.html#x2"><span class="id" type="variable">x2</span></a> <a class="idref" href="Maps.html#v2"><span class="id" type="variable">v2</span></a>) <a class="idref" href="Maps.html#x1"><span class="id" type="variable">x1</span></a> <a class="idref" href="Maps.html#v1"><span class="id" type="variable">v1</span></a><a class="idref" href="http://coq.inria.fr/distrib/8.4pl3/stdlib/Coq.Init.Logic.html#:type_scope:x_'='_x"><span class="id" type="notation">)</span></a><br/>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.4pl3/stdlib/Coq.Init.Logic.html#:type_scope:x_'='_x"><span class="id" type="notation">=</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.4pl3/stdlib/Coq.Init.Logic.html#:type_scope:x_'='_x"><span class="id" type="notation">(</span></a><a class="idref" href="Maps.html#update"><span class="id" type="definition">update</span></a> (<a class="idref" href="Maps.html#update"><span class="id" type="definition">update</span></a> <a class="idref" href="Maps.html#m"><span class="id" type="variable">m</span></a> <a class="idref" href="Maps.html#x1"><span class="id" type="variable">x1</span></a> <a class="idref" href="Maps.html#v1"><span class="id" type="variable">v1</span></a>) <a class="idref" href="Maps.html#x2"><span class="id" type="variable">x2</span></a> <a class="idref" href="Maps.html#v2"><span class="id" type="variable">v2</span></a><a class="idref" href="http://coq.inria.fr/distrib/8.4pl3/stdlib/Coq.Init.Logic.html#:type_scope:x_'='_x"><span class="id" type="notation">)</span></a>.<br/>
 <span class="id" type="keyword">Proof</span>.<br/>
-&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">X</span> <span class="id" type="var">v1</span> <span class="id" type="var">v2</span> <span class="id" type="var">x1</span> <span class="id" type="var">x2</span> <span class="id" type="var">m</span>. <span class="id" type="tactic">unfold</span> <span class="id" type="var">update</span>.<br/>
-&nbsp;&nbsp;<span class="id" type="tactic">apply</span> <span class="id" type="var">t_update_permute</span>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">intros</span> <span class="id" type="var">X</span> <span class="id" type="var">v1</span> <span class="id" type="var">v2</span> <span class="id" type="var">x1</span> <span class="id" type="var">x2</span> <span class="id" type="var">m</span>. <span class="id" type="tactic">unfold</span> <a class="idref" href="Maps.html#update"><span class="id" type="definition">update</span></a>.<br/>
+&nbsp;&nbsp;<span class="id" type="tactic">apply</span> <a class="idref" href="Maps.html#t_update_permute"><span class="id" type="lemma">t_update_permute</span></a>.<br/>
 <span class="id" type="keyword">Qed</span>.<br/>
 
 <br/>

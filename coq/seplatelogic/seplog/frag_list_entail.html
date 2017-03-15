@@ -1,0 +1,1139 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"/>
+<link href="coqdoc.css" rel="stylesheet" type="text/css"/>
+<title>frag_list_entail</title>
+</head>
+
+<body>
+
+<div id="page">
+
+<div id="header">
+</div>
+
+<div id="main">
+
+<h1 class="libtitle">Library frag_list_entail</h1>
+
+<code>
+<span class="keyword">Load</span> seplog_header.<br/>
+
+<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> Omega.<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> Bool.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="singl_disjoint_neq"></a>singl_disjoint_neq: forall e1 e2 e3 e4 h1 h2 s,<br/>
+&nbsp;&nbsp;(e1 |-&gt; e2) s h1 -&gt;<br/>
+&nbsp;&nbsp;(e3 |-&gt; e4) s h2 -&gt;<br/>
+&nbsp;&nbsp;h1 # h2 -&gt;<br/>
+&nbsp;&nbsp;eval e1 s &lt;&gt; eval e3 s.<br/>
+
+<br/>
+<span class="keyword">Inductive</span> <a name="Lst"></a>Lst : expr -&gt; expr -&gt; store.s -&gt; heap.h -&gt; <span class="keyword">Prop</span> :=<br/>
+&nbsp;&nbsp;| Lst_end: forall e1 e2 s h,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;eval e1 s = eval e2 s -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;sep.emp s h -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Lst e1 e2 s h<br/>
+&nbsp;&nbsp;| Lst_suiv: forall e1 e2 e3 e4 s h h1 h2,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;h1 # h2 -&gt; h = h1 +++ h2 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;eval e1 s &lt;&gt; eval e3 s -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;eval e1 s &lt;&gt; 0%Z -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;eval (e1 +e nat_e 1) s &lt;&gt; 0%Z -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(e1 |-&gt; e2 ** (e1 +e nat_e 1 |-&gt; e4)) s h1 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Lst e2 e3 s h2 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Lst e1 e3 s h.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Lst_equiv'"></a>Lst_equiv': forall s  h e1 e2,<br/>
+&nbsp;&nbsp;Lst e1 e2 s h -&gt;<br/>
+&nbsp;&nbsp;forall e3 e4 s',<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;eval e1 s = eval e3 s' -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;eval e2 s = eval e4 s' -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Lst e3 e4 s' h.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Lst_equiv"></a>Lst_equiv: forall s h e1 e2,<br/>
+&nbsp;&nbsp;Lst e1 e2 s h -&gt;<br/>
+&nbsp;&nbsp;forall e3 e4,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;eval e1 s = eval e3 s -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;eval e2 s = eval e4 s -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Lst e3 e4 s h.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Lst_app"></a>Lst_app : forall e1 e2 s h1,<br/>
+&nbsp;&nbsp;Lst e1 e2 s h1 -&gt;<br/>
+&nbsp;&nbsp;forall e3 h2 h3 h,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Lst e2 e3 s h2 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(exists v, (e3 |-&gt; int_e v) s h3) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;h1 # h2 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;h1 # h3 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;h = h1 +++ h2  -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Lst e1 e3 s h.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Lst_app'"></a>Lst_app' : forall e1 e2 s h1,<br/>
+&nbsp;&nbsp;Lst e1 e2 s h1 -&gt;<br/>
+&nbsp;&nbsp;forall e3 h2 h,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Lst e2 e3 s h2 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;h1 # h2 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;h = h1 +++ h2  -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;eval e3 s = 0%Z -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Lst e1 e3 s h.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="Pi"></a>Pi := expr_b.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="eval_pi"></a>eval_pi := eval_b.<br/>
+
+<br/>
+<span class="keyword">Inductive</span> <a name="Sigma"></a>Sigma : <span class="keyword">Set</span> :=<br/>
+&nbsp;&nbsp;| <a name="singl"></a>singl : expr -&gt; expr -&gt; Sigma<br/>
+&nbsp;&nbsp;| <a name="cell"></a>cell : expr -&gt; Sigma<br/>
+&nbsp;&nbsp;| <a name="emp"></a>emp : Sigma<br/>
+&nbsp;&nbsp;| <a name="star"></a>star : Sigma -&gt; Sigma -&gt; Sigma<br/>
+&nbsp;&nbsp;| <a name="lst"></a>lst : expr -&gt; expr -&gt; Sigma.<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="Sigma_interp"></a>Sigma_interp (a : Sigma) : assert :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> a <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a name="singl"></a>singl e1 e2 =&gt; <span class="keyword">fun</span> s h =&gt; (e1 |-&gt; e2) s h /\ eval e1 s &lt;&gt; 0%Z<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| emp =&gt; sep.emp<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| star s1 s2 =&gt; Sigma_interp s1 ** Sigma_interp s2<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| cell e =&gt; <span class="keyword">fun</span> s h =&gt; (exists v, (e |-&gt; int_e v) s h) /\ eval e s &lt;&gt; 0%Z<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| lst e1 e2 =&gt; Lst e1 e2<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="assrt"></a>assrt := prod Pi Sigma.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="assrt_interp"></a>assrt_interp (a : assrt) : assert :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> a <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(pi, sigm) =&gt; <span class="keyword">fun</span> s h =&gt; eval_pi pi s = true /\ Sigma_interp sigm s h<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="Assrt"></a>Assrt := list assrt.<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="Assrt_interp"></a>Assrt_interp (l : Assrt) : assert := <br/>
+&nbsp;&nbsp;<span class="keyword">match</span> l <span class="keyword">with</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| nil =&gt; <span class="keyword">fun</span> s h =&gt; False<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| hd :: tl =&gt; <span class="keyword">fun</span> s h =&gt; assrt_interp hd s h \/ Assrt_interp tl s h<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Notation</span> "s ** t" := (star s t) (at level 80) : tmp_scope.<br/>
+
+<br/>
+Open <span class="keyword">Local</span> Scope tmp_scope.<br/>
+
+<br/>
+<span class="keyword">Inductive</span> <a name="entail"></a>entail : assrt -&gt; assrt -&gt; <span class="keyword">Prop</span> :=<br/>
+<br/>
+| <a name="entail_incons"></a>entail_incons : forall pi1 pi2 sig1 sig2, <br/>
+&nbsp;&nbsp;(forall s, eval_pi pi1 s = true -&gt; False) -&gt; <br/>
+&nbsp;&nbsp;entail (pi1, sig1) (pi2, sig2)<br/>
+<br/>
+| <a name="entail_tauto"></a>entail_tauto : forall pi1 pi2, <br/>
+&nbsp;&nbsp;(forall s, eval_pi pi1 s = true -&gt; eval_pi pi2 s = true) -&gt; <br/>
+&nbsp;&nbsp;entail (pi1, emp) (pi2, emp)<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <a name="entail_coml"></a>entail_coml : forall pi1 sig1 sig2 L,<br/>
+&nbsp;&nbsp;entail (pi1, sig2 ** sig1) L -&gt;<br/>
+&nbsp;&nbsp;entail (pi1, sig1 ** sig2) L<br/>
+<br/>
+| <a name="entail_comr"></a>entail_comr : forall pi1 sig1 sig2 L,<br/>
+&nbsp;&nbsp;entail L (pi1, sig2 ** sig1)  -&gt;<br/>
+&nbsp;&nbsp;entail L (pi1, sig1 ** sig2)<br/>
+<br/>
+| <a name="entail_assocl"></a>entail_assocl : forall pi1 sig1 sig2 sig3 L,<br/>
+&nbsp;&nbsp;entail (pi1, (sig1 ** sig2) ** sig3) L -&gt;<br/>
+&nbsp;&nbsp;entail (pi1, sig1 ** (sig2 ** sig3)) L<br/>
+<br/>
+| <a name="entail_assocr"></a>entail_assocr : forall pi1 sig1 sig2 sig3 L,<br/>
+&nbsp;&nbsp;entail L (pi1, (sig1 ** sig2) ** sig3)  -&gt;<br/>
+&nbsp;&nbsp;entail L (pi1, sig1 ** (sig2 ** sig3))<br/>
+<br/>
+| <a name="entail_epseliml"></a>entail_epseliml : forall pi1 sig1 L,<br/>
+&nbsp;&nbsp;entail (pi1, sig1) L -&gt;<br/>
+&nbsp;&nbsp;entail (pi1, sig1 ** emp) L<br/>
+<br/>
+| <a name="entail_epselimr"></a>entail_epselimr : forall pi1 sig1 L,<br/>
+&nbsp;&nbsp;entail L (pi1, sig1) -&gt;<br/>
+&nbsp;&nbsp;entail L (pi1, sig1 ** emp)<br/>
+<br/>
+| <a name="entail_empintrol"></a>entail_empintrol : forall pi1 sig1 L,<br/>
+&nbsp;&nbsp;entail (pi1, sig1 ** emp) L -&gt;<br/>
+&nbsp;&nbsp;entail (pi1, sig1) L<br/>
+<br/>
+| <a name="entail_empintror"></a>entail_empintror : forall pi1 sig1 L,<br/>
+&nbsp;&nbsp;entail L (pi1, sig1 ** emp) -&gt;<br/>
+&nbsp;&nbsp;entail L (pi1, sig1)<br/>
+&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <a name="entail_lstnilelimr"></a>entail_lstnilelimr : forall pi1 sig1 pi2 sig2 e1 e2,<br/>
+&nbsp;&nbsp;(forall s, eval_pi pi1 s = true -&gt; eval_pi (e1 == e2) s = true) -&gt; <br/>
+&nbsp;&nbsp;entail (pi1, sig1) (pi2, sig2) -&gt;<br/>
+&nbsp;&nbsp;entail (pi1, sig1) (pi2, sig2 ** (lst e1 e2))<br/>
+<br/>
+&nbsp;&nbsp;| <a name="entail_lstnileliml"></a>entail_lstnileliml : forall pi1 sig1 pi2 sig2 e1 e2,<br/>
+&nbsp;&nbsp;(forall s, eval_pi pi1 s = true -&gt; eval_pi (e1 == e2) s = true) -&gt; <br/>
+&nbsp;&nbsp;entail (pi1, sig1) (pi2, sig2) -&gt;<br/>
+&nbsp;&nbsp;entail (pi1, sig1 ** (lst e1 e2)) (pi2, sig2)<br/>
+<br/>
+| <a name="entail_lstsamelst"></a>entail_lstsamelst : forall pi1 sig1 pi2 sig2 e1 e2 e3 e4,<br/>
+&nbsp;&nbsp;(forall s, eval_pi pi1 s = true -&gt; eval_pi (e1 == e3) s = true) -&gt; <br/>
+&nbsp;&nbsp;(forall s, eval_pi pi1 s = true -&gt; eval_pi (e2 == e4) s = true) -&gt; <br/>
+&nbsp;&nbsp;entail (pi1, sig1) (pi2, sig2) -&gt;<br/>
+&nbsp;&nbsp;entail (pi1, sig1 ** (lst e1 e2)) (pi2, sig2 ** (lst e3 e4))<br/>
+<br/>
+| <a name="entail_lstelim"></a>entail_lstelim : forall pi1 sig1 pi2 sig2 e1 e2 e3 e4,<br/>
+&nbsp;&nbsp;(forall s, eval_pi pi1 s = true -&gt; eval_pi (e1 == e3) s = true) -&gt; <br/>
+&nbsp;&nbsp;entail (pi1, sig1 ** (cell e4)) (pi2, sig2 ** (lst e2 e4)) -&gt;<br/>
+&nbsp;&nbsp;entail (pi1, (sig1 ** (cell e4)) ** (lst e1 e2)) (pi2, sig2 ** (lst e3 e4))<br/>
+<br/>
+| <a name="entail_lstelim_v2"></a>entail_lstelim_v2 : forall pi1 sig1 pi2 sig2 e1 e2 e3 e4 sig1',<br/>
+&nbsp;&nbsp;(forall s, eval_pi pi1 s = true -&gt; eval_pi (e1 == e3) s = true) -&gt; <br/>
+&nbsp;&nbsp;entail (pi1, sig1) (pi1, (sig1' ** (cell e4))) -&gt;<br/>
+&nbsp;&nbsp;entail (pi1, sig1' ** (cell e4)) (pi2, sig2 ** (lst e2 e4)) -&gt;    <br/>
+&nbsp;&nbsp;entail (pi1, sig1 ** (lst e1 e2)) (pi2, sig2 ** (lst e3 e4))<br/>
+<br/>
+| <a name="entail_lstelim'"></a>entail_lstelim' : forall pi1 sig1 pi2 sig2 e1 e2 e3 e4 e5,<br/>
+&nbsp;&nbsp;(forall s, eval_pi pi1 s = true -&gt; eval_pi (e1 == e3) s = true) -&gt; <br/>
+&nbsp;&nbsp;(forall s, eval_pi pi1 s = true -&gt; eval_pi (e4 =/= e5) s = true) -&gt; <br/>
+&nbsp;&nbsp;entail (pi1, sig1 ** (lst e4 e5)) (pi2, sig2 ** (lst e2 e4)) -&gt;<br/>
+&nbsp;&nbsp;entail (pi1, (sig1 ** (lst e4 e5)) ** (lst e1 e2)) (pi2, sig2 ** (lst e3 e4))<br/>
+<br/>
+| <a name="entail_lstelim'_v2"></a>entail_lstelim'_v2 : forall pi1 sig1 pi2 sig2 e1 e2 e3 e4 e5 sig1',<br/>
+&nbsp;&nbsp;(forall s, eval_pi pi1 s = true -&gt; eval_pi (e1 == e3) s = true) -&gt; <br/>
+&nbsp;&nbsp;entail (pi1, sig1) (pi1, sig1' ** (lst e4 e5)) -&gt;<br/>
+&nbsp;&nbsp;(forall s, eval_pi pi1 s = true -&gt; eval_pi (e4 =/= e5) s = true) -&gt; <br/>
+&nbsp;&nbsp;entail (pi1, sig1' ** (lst e4 e5)) (pi2, sig2 ** (lst e2 e4)) -&gt;    <br/>
+&nbsp;&nbsp;entail (pi1, sig1 ** (lst e1 e2)) (pi2, sig2 ** (lst e3 e4))<br/>
+<br/>
+| <a name="entail_lstelim''"></a>entail_lstelim'' : forall pi1 sig1 pi2 sig2 e1 e2 e3 e4,<br/>
+&nbsp;&nbsp;(forall s, eval_pi pi1 s = true -&gt; eval_pi (e1 == e3) s = true) -&gt; <br/>
+&nbsp;&nbsp;(forall s, eval_pi pi1 s = true -&gt; eval_pi (e4 == int_e 0%Z) s = true) -&gt; <br/>
+&nbsp;&nbsp;entail (pi1, sig1) (pi2, sig2 ** (lst e2 e4)) -&gt;<br/>
+&nbsp;&nbsp;entail (pi1, sig1 ** (lst e1 e2)) (pi2, sig2 ** (lst e3 e4))<br/>
+<br/>
+| <a name="entail_lstelim'''"></a>entail_lstelim''' : forall pi1 sig1 pi2 sig2 e1 e2 e3 e4,<br/>
+&nbsp;&nbsp;(forall s, eval_pi pi1 s = true -&gt; eval_pi (e1 == e3) s = true) -&gt; <br/>
+&nbsp;&nbsp;(forall s, eval_pi pi1 s = true -&gt; eval_pi (e1 =/= e4) s = true) -&gt; <br/>
+&nbsp;&nbsp;(forall s, eval_pi pi1 s = true -&gt; eval_pi (e1 =/= int_e 0%Z) s = true) -&gt; <br/>
+&nbsp;&nbsp;entail (pi1, sig1) (pi2, sig2 ** ((cell (e1 +e nat_e 1)) ** (lst e2 e4))) -&gt;<br/>
+&nbsp;&nbsp;entail (pi1, sig1 ** (singl e1 e2)) (pi2, sig2 ** (lst e3 e4))<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <a name="entail_star_elim"></a>entail_star_elim : forall pi1 pi2 sig1 sig2 e1 e2 e3 e4,<br/>
+&nbsp;&nbsp;(forall s, eval_pi pi1 s = true -&gt; eval_pi (e1 == e3) s = true) -&gt;<br/>
+&nbsp;&nbsp;(forall s, eval_pi pi1 s = true -&gt; eval_pi (e2 == e4) s = true) -&gt;    <br/>
+&nbsp;&nbsp;entail (pi1, sig1) (pi2, sig2) -&gt;<br/>
+&nbsp;&nbsp;entail (pi1, sig1 ** (singl e1 e2)) (pi2, sig2 ** (singl e3 e4))<br/>
+<br/>
+| <a name="entail_star_elim'"></a>entail_star_elim': forall pi1 pi2 sig1 sig2 e1 e2 e3,<br/>
+&nbsp;&nbsp;(forall s, eval_pi pi1 s = true -&gt; eval_pi (e1 == e3) s = true) -&gt;<br/>
+&nbsp;&nbsp;entail (pi1, sig1) (pi2, sig2) -&gt;<br/>
+&nbsp;&nbsp;entail (pi1, sig1 ** (singl e1 e2)) (pi2, sig2 ** (cell e3))<br/>
+<br/>
+| <a name="entail_star_elim''"></a>entail_star_elim'': forall pi1 pi2 sig1 sig2 e1 e3,<br/>
+&nbsp;&nbsp;(forall s, eval_pi pi1 s = true -&gt; eval_pi (e1 == e3) s = true) -&gt;<br/>
+&nbsp;&nbsp;entail (pi1, sig1) (pi2, sig2) -&gt;<br/>
+&nbsp;&nbsp;entail (pi1, sig1 ** (cell e1)) (pi2, sig2 ** (cell e3))<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <a name="entail_sepcon_neq"></a>entail_sepcon_neq : forall pi1 sig1 pi2 sig2 e1 e2 e3 e4,<br/>
+&nbsp;&nbsp;entail (pi1 &amp;&amp;&amp; (e1 =/= e3), sig1 ** ((singl e1 e2) ** (singl e3 e4))) (pi2, sig2) -&gt;<br/>
+&nbsp;&nbsp;entail (pi1, sig1 ** ((singl e1 e2) ** (singl e3 e4))) (pi2, sig2)<br/>
+<br/>
+| <a name="entail_sepcon_neq'"></a>entail_sepcon_neq' : forall pi1 sig1 pi2 sig2 e1 e2 e3,<br/>
+&nbsp;&nbsp;entail (pi1 &amp;&amp;&amp; (e1 =/= e3), sig1 ** ((singl e1 e2) ** (cell e3))) (pi2, sig2) -&gt;<br/>
+&nbsp;&nbsp;entail (pi1, sig1 ** ((singl e1 e2) ** (cell e3))) (pi2, sig2)<br/>
+<br/>
+| <a name="entail_sepcon_neq''"></a>entail_sepcon_neq'' : forall pi1 sig1 pi2 sig2 e1 e3,<br/>
+&nbsp;&nbsp;entail (pi1 &amp;&amp;&amp; (e1 =/= e3), sig1 ** ((cell e1) ** (cell e3))) (pi2, sig2) -&gt;<br/>
+&nbsp;&nbsp;entail (pi1, sig1 ** ((cell e1) ** (cell e3))) (pi2, sig2)<br/>
+<br/>
+| <a name="entail_sepcon_neq'''"></a>entail_sepcon_neq''' : forall pi1 sig1 pi2 sig2 e1 e2 e3,<br/>
+&nbsp;&nbsp;(forall s, eval_pi pi1 s = true -&gt; eval_pi (e1 =/= e2) s = true) -&gt;<br/>
+&nbsp;&nbsp;entail (pi1 &amp;&amp;&amp; (e1 =/= e3), sig1 ** ((lst e1 e2) ** (cell e3))) (pi2, sig2) -&gt;<br/>
+&nbsp;&nbsp;entail (pi1, sig1 ** ((lst e1 e2) ** (cell e3))) (pi2, sig2)<br/>
+<br/>
+| <a name="entail_sepcon_neq''''"></a>entail_sepcon_neq'''' : forall pi1 sig1 pi2 sig2 e1 e2 e3 e4,<br/>
+&nbsp;&nbsp;(forall s, eval_pi pi1 s = true -&gt; eval_pi (e1 =/= e2) s = true) -&gt;<br/>
+&nbsp;&nbsp;entail (pi1 &amp;&amp;&amp; (e1 =/= e3), sig1 ** ((lst e1 e2) ** (singl e3 e4))) (pi2, sig2) -&gt;<br/>
+&nbsp;&nbsp;entail (pi1, sig1 ** ((lst e1 e2) ** (singl e3 e4))) (pi2, sig2)<br/>
+<br/>
+| <a name="entail_sepcon_neq'''''"></a>entail_sepcon_neq''''': forall pi1 sig1 pi2 sig2 e1 e2 e3 e4,<br/>
+&nbsp;&nbsp;(forall s, eval_pi pi1 s = true -&gt; eval_pi (e1 =/= e2) s = true) -&gt;<br/>
+&nbsp;&nbsp;(forall s, eval_pi pi1 s = true -&gt; eval_pi (e3 =/= e4) s = true) -&gt;<br/>
+&nbsp;&nbsp;entail (pi1 &amp;&amp;&amp; (e1 =/= e3), sig1 ** ((lst e1 e2) ** (lst e3 e4))) (pi2, sig2) -&gt;<br/>
+&nbsp;&nbsp;entail (pi1, sig1 ** ((lst e1 e2) ** (lst e3 e4))) (pi2, sig2)<br/>
+<br/>
+| <a name="entail_singl_not_null"></a>entail_singl_not_null : forall pi1 sig1 pi2 sig2 e1 e2,<br/>
+&nbsp;&nbsp;entail (pi1 &amp;&amp;&amp; (e1 =/= (nat_e 0)), sig1 ** (singl e1 e2)) (pi2, sig2) -&gt;<br/>
+&nbsp;&nbsp;entail (pi1, sig1 ** (singl e1 e2)) (pi2, sig2)<br/>
+<br/>
+| <a name="entail_cell_not_null"></a>entail_cell_not_null : forall pi1 sig1 pi2 sig2 e1,<br/>
+&nbsp;&nbsp;entail (pi1 &amp;&amp;&amp; (e1 =/= (nat_e 0)), sig1 ** (cell e1)) (pi2, sig2) -&gt;<br/>
+&nbsp;&nbsp;entail (pi1, sig1 ** (cell e1)) (pi2, sig2)<br/>
+<br/>
+| <a name="entail_lst_not_null"></a>entail_lst_not_null : forall pi1 sig1 pi2 sig2 e1 e2,<br/>
+&nbsp;&nbsp;(forall s, eval_pi pi1 s = true -&gt; eval_pi (e2 =/= (nat_e 0)) s = true) -&gt;<br/>
+&nbsp;&nbsp;entail (pi1 &amp;&amp;&amp; (e1 =/= (nat_e 0)), sig1 ** (lst e1 e2)) (pi2, sig2) -&gt;<br/>
+&nbsp;&nbsp;entail (pi1, sig1 ** (lst e1 e2)) (pi2, sig2)<br/>
+<br/>
+| <a name="entail_monotony"></a>entail_monotony : forall pi1 pi2 sig11 sig12 sig21 sig22,<br/>
+&nbsp;&nbsp;entail (pi1,sig11) (pi2, sig21) -&gt;<br/>
+&nbsp;&nbsp;entail (pi1,sig12) (pi2, sig22) -&gt;<br/>
+&nbsp;&nbsp;entail (pi1, sig11 ** sig12) (pi2, sig21 ** sig22)<br/>
+&nbsp;&nbsp;<br/>
+| <a name="entail_destructlist"></a>entail_destructlist: forall pi1 pi2 sig1 sig2 e1 e2,<br/>
+&nbsp;&nbsp;(entail (pi1 &amp;&amp;&amp; (e1 == e2), sig1 ** (lst e1 e2)) (pi2, sig2)) -&gt;<br/>
+&nbsp;&nbsp;(entail (pi1 &amp;&amp;&amp; (e1 =/= e2), sig1 ** (lst e1 e2)) (pi2, sig2)) -&gt;<br/>
+&nbsp;&nbsp;entail (pi1, star sig1 (lst e1 e2)) (pi2, sig2).<br/>
+
+<br/>
+<span class="keyword">Notation</span> "s '|--' t" := (entail s t) (at level 80) : tmp_scope.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="entail_id"></a>entail_id : forall sig pi,<br/>
+&nbsp;&nbsp;(pi, sig) |-- (pi, sig).<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="entail_star_elim_lst"></a>entail_star_elim_lst : forall pi1 sig1 pi2 sig2 e1 e2,<br/>
+&nbsp;&nbsp;(pi1, sig1) |-- (pi2, sig2) -&gt;<br/>
+&nbsp;&nbsp;(pi1, sig1 ** (lst e1 e2)) |-- (pi2, sig2 ** (lst e1 e2)).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="entail_star_elim_star"></a>entail_star_elim_star : forall s pi1 sig1 pi2 sig2,<br/>
+&nbsp;&nbsp;(pi1, sig1) |-- (pi2, sig2) -&gt;<br/>
+&nbsp;&nbsp;(pi1, sig1 ** s) |-- (pi2, sig2 ** s).<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+Close <span class="keyword">Local</span> Scope tmp_scope.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="entail_soundness"></a>entail_soundness : forall P Q, <br/>
+&nbsp;&nbsp;entail P Q -&gt; <br/>
+&nbsp;&nbsp;assrt_interp P ==&gt; assrt_interp Q.<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="entail_to_Sigma_impl"></a>entail_to_Sigma_impl : forall sig1 sig2,<br/>
+&nbsp;&nbsp;entail (true_b, sig1) (true_b, sig2) -&gt;<br/>
+&nbsp;&nbsp;Sigma_interp sig1 ==&gt; Sigma_interp sig2.<br/>
+
+<br/>
+<span class="keyword">Ltac</span> Entail_turnl :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> goal <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- entail (?Pi, cell ?e) ?L =&gt; eapply entail_empintrol; eapply entail_coml; repeat eapply entail_assocl<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- entail (?Pi, singl ?e1 ?e2) ?L =&gt; eapply entail_empintrol; eapply entail_coml; repeat eapply entail_assocl<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- entail (?Pi, lst ?e1 ?e2) ?L =&gt; eapply entail_empintrol; eapply entail_coml; repeat eapply entail_assocl<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- entail (?Pi, star ?e1 ?e2) ?L =&gt; eapply entail_coml; repeat eapply entail_assocl<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; eapply entail_empintrol; eapply entail_coml; repeat eapply entail_assocl<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Ltac</span> Entail_turnr :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> goal <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- entail ?L (?Pi, cell ?e) =&gt; eapply entail_empintror; eapply entail_comr; repeat eapply entail_assocr<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- entail ?L (?Pi, singl ?e1 ?e2) =&gt; eapply entail_empintror; eapply entail_comr; repeat eapply entail_assocr<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- entail ?L (?Pi, lst ?e1 ?e2) =&gt; eapply entail_empintror; eapply entail_comr; repeat eapply entail_assocr<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- entail ?L (?Pi, star ?e1 ?e2) =&gt; eapply entail_comr; repeat eapply entail_assocr<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; eapply entail_empintror; eapply entail_comr; repeat eapply entail_assocr<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Ltac</span> Elim_subheap := repeat eapply entail_assocl; repeat eapply entail_assocr;<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> goal <span class="keyword">with</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- entail (?pi1, star ?sig1 (singl ?e1 ?e2)) (?pi2, star ?sig2 (singl ?e3 ?e4)) =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(eapply entail_star_elim; [unfold eval_pi; Omega_exprb | unfold eval_pi; Omega_exprb | idtac])<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- entail (?pi1, star ?sig1 (singl ?e1 ?e2)) (?pi2, star ?sig2 (cell ?e3)) =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(eapply entail_star_elim'; [unfold eval_pi;  Omega_exprb | idtac])<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- entail (?pi1, star ?sig1 (cell ?e1)) (?pi2, star ?sig2 (cell ?e3)) =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(eapply entail_star_elim''; [unfold eval_pi;  Omega_exprb | idtac])<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- entail (?pi1, star ?sig1 (lst ?e1 ?e2)) (?pi2, star ?sig2 (lst ?e3 ?e4)) =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;((eapply entail_lstsamelst; [unfold eval_pi; Omega_exprb | unfold eval_pi; Omega_exprb | idtac]) || (eapply entail_lstelim'';[unfold eval_pi; Omega_exprb | unfold eval_pi; Omega_exprb | idtac]))<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- entail (?pi1, star ?sig1 (singl ?e1 ?e2)) (?pi2, star ?sig2 (lst ?e3 ?e4)) =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(eapply entail_lstelim'''; [unfold eval_pi; Omega_exprb | unfold eval_pi; Omega_exprb | unfold eval_pi; Omega_exprb | idtac])<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- entail (?pi1, star ?sig1 ?s) (?pi2, star ?sig2 ?s) =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;eapply entail_star_elim_star<br/>
+<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Ltac</span> Entail_arith_impl :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> goal <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- entail (?pi, ?sig) (?pi, ?sig) =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;eapply entail_id<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- entail (?pi1, emp) (?pi2, emp) =&gt; eapply entail_tauto; [unfold eval_pi; intros; Omega_exprb]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- entail (?pi1, emp) (?pi2, emp) =&gt; eapply entail_incons; [unfold eval_pi; intros; Omega_exprb]<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Ltac</span> Entail_elim_emp :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> goal <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- entail (?pi1, star ?sig1 emp) (?pi2, ?sig2) =&gt; eapply entail_epseliml; Entail_elim_emp<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- entail (?pi1, ?sig1) (?pi2, star ?sig2 emp) =&gt; eapply entail_epselimr; Entail_elim_emp<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- _ =&gt; idtac<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Ltac</span> Entail_not_nul_constraint :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> goal <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- entail (?pi1, star ?sig1 (cell ?e)) (?pi2, ?sig2) =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;eapply entail_cell_not_null; idtac<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- entail (?pi1, star ?sig1 (singl ?e1 ? e2)) (?pi2, ?sig2) =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;eapply entail_singl_not_null; idtac<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- entail (?pi1, star ?sig1 (lst ?e1 ? e2)) (?pi2, ?sig2) =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;eapply entail_lst_not_null; [unfold eval_pi; Omega_exprb | idtac]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- _ =&gt; idtac<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Ltac</span> Entail_count_subheap sig :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> sig <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| star ?sig1 ?sig2 =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> x := Entail_count_subheap sig1 <span class="keyword">in</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> y := Entail_count_subheap sig2 <span class="keyword">in</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;constr:(x + y)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;constr:(1)<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Ltac</span> Printt x := assert (x = x).<br/>
+
+<br/>
+<span class="keyword">Ltac</span> Entail_elim_right n m :=<br/>
+&nbsp;&nbsp;<span class="keyword">let</span> y := (constr:(nat_gt n m)) <span class="keyword">in</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> (eval compute <span class="keyword">in</span> y) <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| true =&gt; idtac<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| false =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Entail_turnr; (Elim_subheap || (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> x := (constr:(S n)) <span class="keyword">in</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Entail_elim_right x m<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;).<br/>
+
+<br/>
+<span class="keyword">Ltac</span> Entail_elim_left := Entail_not_nul_constraint;<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> goal <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- entail (?pi1, ?sig1) (?pi2, ?sig2) =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Entail_elim_emp; Entail_arith_impl<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- entail (?pi1, ?sig1) (?pi2, ?sig2) =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> x := Entail_count_subheap sig2 <span class="keyword">in</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> vx := eval compute <span class="keyword">in</span> x <span class="keyword">in</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Entail_elim_right 0 vx<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;); Entail_turnl<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Ltac</span> Entail := repeat Entail_elim_left.<br/>
+
+<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> <a class="modref" href="expr_b_dp.html">expr_b_dp</a>.<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="remove_empty_heap"></a>remove_empty_heap  (pi : Pi) (sig : Sigma) {struct sig} : Sigma :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> sig <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| star sig1 sig2 =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> remove_empty_heap pi sig1 <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| emp =&gt; remove_empty_heap pi sig2<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| sig1' =&gt; <span class="keyword">match</span> remove_empty_heap pi sig2 <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| emp =&gt; sig1'<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| sig2' =&gt; star sig1' sig2'<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| lst e1 e2 =&gt; <span class="keyword">if</span> expr_b_dp (pi =b&gt; (e1 == e2)) <span class="keyword">then</span> emp <span class="keyword">else</span> sig<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; sig<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="remove_empty_heap_correct"></a>remove_empty_heap_correct : forall sig pi s,<br/>
+&nbsp;&nbsp;s |b= pi -&gt;  <br/>
+&nbsp;&nbsp;forall h,<br/>
+&nbsp;&nbsp;(Sigma_interp (remove_empty_heap pi sig) s h -&gt; Sigma_interp sig s h).<br/>
+
+<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="remove_empty_heap_correct'"></a>remove_empty_heap_correct' : forall sig pi s,<br/>
+&nbsp;&nbsp;s |b= pi -&gt;  <br/>
+&nbsp;&nbsp;forall h,<br/>
+&nbsp;&nbsp;(Sigma_interp sig s h -&gt; Sigma_interp (remove_empty_heap pi sig) s h).<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="cell_in_sigma"></a>cell_in_sigma (pi : Pi) (sig : Sigma) (e : expr) {struct sig} : bool :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> sig <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| singl e1 e2 =&gt; expr_b_dp (pi =b&gt; (e1 == e))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| cell e1 =&gt; expr_b_dp (pi =b&gt; (e1 == e))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| lst e1 e2 =&gt; andb <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(expr_b_dp (pi =b&gt; (e1 == e))) <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(expr_b_dp (pi =b&gt; (e1 =/= e2)))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| star s1 s2 =&gt; orb (cell_in_sigma pi s1 e ) (cell_in_sigma pi s2 e)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; false<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="cell_in_sigma_correct"></a>cell_in_sigma_correct: forall sig e pi,<br/>
+&nbsp;&nbsp;cell_in_sigma pi sig e = true -&gt;<br/>
+&nbsp;&nbsp;forall s h,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;s |b= pi -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;Sigma_interp sig s h -&gt; ((Sigma_interp (cell e)) ** TT) s h.<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+Opaque remove_empty_heap.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="sigma_eq"></a>sigma_eq (pi : Pi) (sig1 sig2 : Sigma)  : bool :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> (sig1, sig2) <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| (emp, emp) =&gt; true<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| (singl e1 e2, singl e3 e4) =&gt; andb (expr_b_dp (pi =b&gt; (e1 == e3))) (expr_b_dp (pi =b&gt; (e2 == e4)))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| (singl e1 e2, cell e3) =&gt; expr_b_dp (pi =b&gt; (e1 == e3))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| (cell e1, cell e3) =&gt; expr_b_dp (pi =b&gt; (e1 == e3)) <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| (lst e1 e2, lst e3 e4) =&gt; andb (expr_b_dp (pi =b&gt; (e1 == e3))) (expr_b_dp (pi =b&gt; (e2 == e4)))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| (_, _) =&gt; false<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="sigma_eq_correct"></a>sigma_eq_correct: forall sig1 sig2 pi,<br/>
+&nbsp;&nbsp;sigma_eq pi sig1 sig2 = true -&gt;<br/>
+&nbsp;&nbsp;(forall s h,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;s |b= pi -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(Sigma_interp sig1 s h -&gt; Sigma_interp sig2 s h)<br/>
+&nbsp;&nbsp;).<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="elim_common_cell"></a>elim_common_cell (pi : Pi) (sig1 remainder sig2 : Sigma)  {struct sig2} : option (Sigma * Sigma) :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> sig2 <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| star sig21 sig22 =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> elim_common_cell pi sig1 remainder sig21 <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| None =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> elim_common_cell pi sig1 remainder sig22 <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| None =&gt; None<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Some (sig1', sig2') =&gt; Some (sig1', remove_empty_heap pi (star sig21 sig2'))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Some (sig1', sig2') =&gt; Some (sig1', remove_empty_heap pi (star sig2' sig22))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span> sigma_eq  pi sig1 sig2 <span class="keyword">then</span> Some (emp, emp) <span class="keyword">else</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> (sig1, sig2) <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| (lst e11 e12, lst e21 e22) =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span> andb <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(expr_b_dp (pi =b&gt; (e11 == e21))) <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(orb  <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(expr_b_dp (pi =b&gt; (e22 == nat_e 0)))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cell_in_sigma pi remainder e22) ) <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">then</span> Some (emp, lst e12 e22) &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">else</span> None<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| (singl e1 e2, lst e3 e4) =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span> andb (expr_b_dp (pi =b&gt; (e1 == e3))) <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(andb (expr_b_dp (pi =b&gt; (e1 =/= e4))) <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(expr_b_dp (pi =b&gt; (e1 =/= nat_e 0)))) <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">then</span> Some (emp, (star (cell (e1 +e nat_e 1)) (lst e2 e4))) <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">else</span> None<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| (emp, lst e3 e4) =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span> expr_b_dp (pi =b&gt; (e3 == e4)) <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">then</span> Some (emp, emp) <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">else</span> Some (emp, sig2)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| (emp, _) =&gt; Some (emp, sig2)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; None<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="elim_common_cell_mp"></a>elim_common_cell_mp : forall sig2 sig1 remainder pi sig1' sig2',<br/>
+&nbsp;&nbsp;elim_common_cell pi sig1 remainder sig2 = Some (sig1', sig2') -&gt;<br/>
+&nbsp;&nbsp;(Sigma_interp sig1 ==&gt; (Sigma_interp sig1' -* Sigma_interp sig1) ** Sigma_interp sig1').<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="elim_common_cell_correct"></a>elim_common_cell_correct : forall sig2 sig1 remainder pi sig1' sig2',<br/>
+&nbsp;&nbsp;elim_common_cell pi sig1 remainder sig2 = Some (sig1', sig2') -&gt;<br/>
+&nbsp;&nbsp;forall s,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;s |b= pi -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;forall h1 h2 h3 h,      <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Sigma_interp sig2' s h1 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Sigma_interp sig1' -* Sigma_interp sig1) s h2 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Sigma_interp remainder s h3 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;h = h1 +++ h2 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;h1 # h2 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;h2 # h3 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Sigma_interp sig2 s h.<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="elim_common_subheap"></a>elim_common_subheap (pi : Pi) (sig1 sig2 remainder : Sigma) {struct sig1} : option (Sigma * Sigma) :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> sig1 <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| star sig11 sig12 =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> elim_common_subheap pi sig11 sig2 (star sig12 remainder) <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| None =&gt; None<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Some (sig11', sig12') =&gt; Some (remove_empty_heap pi (star sig11' sig12), sig12')<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; elim_common_cell pi sig1 remainder sig2<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="elim_common_subheap_correct"></a>elim_common_subheap_correct: forall sig1 sig2 remainder pi sig1' sig2',<br/>
+&nbsp;&nbsp;elim_common_subheap pi sig1 sig2 remainder = Some (sig1', sig2') -&gt;<br/>
+&nbsp;&nbsp;forall s,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;s |b= pi -&gt;    <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(forall h, Sigma_interp (star remainder sig1') s h -&gt; Sigma_interp sig2' s h) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(forall h, Sigma_interp (star sig1 remainder) s h -&gt; Sigma_interp sig2 s h).<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="star_assoc_left"></a>star_assoc_left (sig1 sig2: Sigma) {struct sig1} : Sigma :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> sig1 <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a name="star"></a>star sig11 sig12 =&gt; star_assoc_left sig12 (star sig2 sig11)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; <span class="keyword">match</span> sig2 <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a name="emp"></a>emp =&gt; sig1<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; star sig2 sig1<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="star_assoc_left_correct"></a>star_assoc_left_correct: forall sig1 sig2,<br/>
+&nbsp;&nbsp;Sigma_interp (star_assoc_left sig1 sig2) ==&gt; Sigma_interp (star sig1 sig2).<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="star_assoc_left_correct'"></a>star_assoc_left_correct' : forall sig1 sig2,<br/>
+&nbsp;&nbsp;Sigma_interp (star sig1 sig2) ==&gt; Sigma_interp (star_assoc_left sig1 sig2).<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="star_com"></a>star_com (sig : Sigma) : Sigma :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> sig <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;star sig1 sig2 =&gt; star sig2 sig1<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; sig<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="star_com_correct"></a>star_com_correct : forall sig,<br/>
+&nbsp;&nbsp;Sigma_interp (star_com sig) ==&gt; Sigma_interp sig.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="star_com_correct'"></a>star_com_correct' : forall sig,<br/>
+&nbsp;&nbsp;Sigma_interp sig ==&gt; Sigma_interp (star_com sig).<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="rearrange_elim_common_subheap"></a>rearrange_elim_common_subheap (pi : Pi) (sig1 sig2 : Sigma) : Sigma * Sigma :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> elim_common_subheap pi sig1 sig2 emp <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| None =&gt; (remove_empty_heap pi (star_com (star_assoc_left sig1 emp)), sig2)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| Some s =&gt; s<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="rearrange_elim_common_subheap_correct"></a>rearrange_elim_common_subheap_correct : forall sig1 sig2 pi sig1' sig2',<br/>
+&nbsp;&nbsp;rearrange_elim_common_subheap pi sig1 sig2 = (sig1',sig2') -&gt;<br/>
+&nbsp;&nbsp;forall s,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;s |b= pi -&gt;    <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(forall h, Sigma_interp sig1' s h -&gt; Sigma_interp sig2' s h) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(forall h, Sigma_interp sig1 s h -&gt; Sigma_interp sig2 s h).<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="elim_common_subheap_iterate"></a>elim_common_subheap_iterate (pi:Pi) (sig1 sig2:Sigma) (step:nat) {struct step} : Sigma * Sigma :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> step <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| 0 =&gt; (sig1, sig2)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| S n =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> rearrange_elim_common_subheap pi sig1 sig2 <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| (sig1', sig2') =&gt; elim_common_subheap_iterate pi sig1' sig2' n<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="elim_common_subheap_iterate_correct"></a>elim_common_subheap_iterate_correct: forall n sig1 sig2 pi sig1' sig2',<br/>
+&nbsp;&nbsp;elim_common_subheap_iterate pi sig1 sig2 n = (sig1',sig2') -&gt;<br/>
+&nbsp;&nbsp;forall s,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;s |b= pi -&gt;    <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(forall h, Sigma_interp sig1' s h -&gt; Sigma_interp sig2' s h) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(forall h, Sigma_interp sig1 s h -&gt; Sigma_interp sig2 s h).<br/>
+
+<br/>
+Transparent remove_empty_heap.<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="sigma_size"></a>sigma_size (sig : Sigma) : nat :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> sig <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| singl e1 e2 =&gt; 1<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| cell e1 =&gt; 1<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| lst e1 e2 =&gt; 3<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| star s1 s2 =&gt; sigma_size s1 + sigma_size s2<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| emp =&gt; 1<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Inductive</span> <a name="result"></a>result (A : <span class="keyword">Set</span>) : <span class="keyword">Set</span> :=<br/>
+&nbsp;&nbsp;| <a name="Good"></a>Good : result A<br/>
+&nbsp;&nbsp;| <a name="Error"></a>Error : A -&gt; result A.<br/>
+
+<br/>
+<span class="keyword">Implicit</span> Arguments Good [A].<br/>
+<span class="keyword">Implicit</span> Arguments Error [A].<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="sigma_impl"></a>sigma_impl (pi:Pi) (sig1 sig2:Sigma)  : result (Sigma * Sigma) :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> elim_common_subheap_iterate pi sig1 sig2 ((sigma_size sig1 + sigma_size sig2) * 2) <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| (emp, emp) =&gt; Good<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| e =&gt; Error e<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="sigma_impl_correct"></a>sigma_impl_correct: forall sig1 sig2 pi,<br/>
+&nbsp;&nbsp;sigma_impl pi sig1 sig2 = Good -&gt;<br/>
+&nbsp;&nbsp;forall s,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;s |b= pi -&gt;    <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(forall h, Sigma_interp sig1 s h -&gt; Sigma_interp sig2 s h).<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="frag_entail_fct"></a>frag_entail_fct (a1 a2 : assrt) : result (assrt * assrt) :=<br/>
+&nbsp;&nbsp;<span class="keyword">let</span> (pi1, sig1) := a1 <span class="keyword">in</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> (pi2, sig2) := a2 <span class="keyword">in</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span> expr_b_dp (!pi1) <span class="keyword">then</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Good<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">else</span>      <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> sigma_impl pi1 sig1 sig2 <span class="keyword">with</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Good =&gt; <span class="keyword">if</span> expr_b_dp (pi1 =b&gt; pi2) <span class="keyword">then</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Good <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">else</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Error ((pi1, emp), (pi2, emp))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Error (s1, s2) =&gt; Error ((pi1, s1), (pi2, s2))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="frag_entail_fct_correct"></a>frag_entail_fct_correct: forall a1 a2,<br/>
+&nbsp;&nbsp;frag_entail_fct a1 a2 = Good -&gt;<br/>
+&nbsp;&nbsp;(assrt_interp a1 ==&gt; assrt_interp a2).<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="compute_constraint_cell"></a>compute_constraint_cell (pi : Pi) (sig1 sig2 : Sigma) : Pi :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> (sig1,sig2) <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| (singl e1 e2, singl e3 e4) =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span> expr_b_dp (pi =b&gt; (e1 =/= e3)) <span class="keyword">then</span> pi <span class="keyword">else</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pi &amp;&amp;&amp; (e1 =/= e3)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| (singl e1 e2, cell e3) =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span> expr_b_dp (pi =b&gt; (e1 =/= e3)) <span class="keyword">then</span> pi <span class="keyword">else</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pi &amp;&amp;&amp; (e1 =/= e3)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| (cell e1, singl e3 e4) =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span> expr_b_dp (pi =b&gt; (e1 =/= e3)) <span class="keyword">then</span> pi <span class="keyword">else</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pi &amp;&amp;&amp; (e1 =/= e3)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| (cell e1, cell e3) =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span> expr_b_dp (pi =b&gt; (e1 =/= e3)) <span class="keyword">then</span> pi <span class="keyword">else</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pi &amp;&amp;&amp; (e1 =/= e3)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| (singl e1 e2, lst e3 e4) =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span> expr_b_dp (pi =b&gt; (e3 =/= e4)) <span class="keyword">then</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span> expr_b_dp (pi =b&gt; (e1 =/= e3)) <span class="keyword">then</span> pi <span class="keyword">else</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pi &amp;&amp;&amp; (e1 =/= e3) <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">else</span> pi<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| (lst e1 e2, singl e3 e4) =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span> expr_b_dp (pi =b&gt; (e1 =/= e2)) <span class="keyword">then</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span> expr_b_dp (pi =b&gt; (e1 =/= e3)) <span class="keyword">then</span> pi <span class="keyword">else</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pi &amp;&amp;&amp; (e1 =/= e3) <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">else</span> pi<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| (cell e1, lst e3 e4) =&gt;  <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span> expr_b_dp (pi =b&gt; (e3 =/= e4)) <span class="keyword">then</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span> expr_b_dp (pi =b&gt; (e1 =/= e3)) <span class="keyword">then</span> pi <span class="keyword">else</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pi &amp;&amp;&amp; (e1 =/= e3) <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">else</span> pi<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| (lst e1 e2, cell e3) =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span> expr_b_dp (pi =b&gt; (e1 =/= e2)) <span class="keyword">then</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span> expr_b_dp (pi =b&gt; (e1 =/= e3)) <span class="keyword">then</span> pi <span class="keyword">else</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pi &amp;&amp;&amp; (e1 =/= e3) <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">else</span> pi<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| (lst e1 e2, lst e3 e4) =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span> expr_b_dp (pi =b&gt; (e1 =/= e2)) &amp;&amp; expr_b_dp (pi =b&gt; (e3 =/= e4)) <span class="keyword">then</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span> expr_b_dp (pi =b&gt; (e1 =/= e3)) <span class="keyword">then</span> pi <span class="keyword">else</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pi &amp;&amp;&amp; (e1 =/= e3) <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">else</span> pi<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| (_, _) =&gt; pi<br/>
+<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="compute_constraint_cell_correct"></a>compute_constraint_cell_correct: forall sig1 sig2 pi,<br/>
+&nbsp;&nbsp;assrt_interp (pi,star sig1 sig2) ==&gt; assrt_interp ((compute_constraint_cell pi sig1 sig2), star sig1 sig2).<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="compute_constraint_cell_sigma"></a>compute_constraint_cell_sigma (pi: Pi) (sig1 sig2:Sigma) {struct sig2} : Pi :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> sig2 <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| star sig21 sig22 =&gt; compute_constraint_cell_sigma  (compute_constraint_cell_sigma pi sig1 sig21) sig1 sig22<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; compute_constraint_cell pi sig1 sig2<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="compute_constraint_cell_sigma_correct"></a>compute_constraint_cell_sigma_correct: forall sig2 sig1 pi,<br/>
+&nbsp;&nbsp;assrt_interp (pi,star sig1 sig2) ==&gt; assrt_interp ((compute_constraint_cell_sigma pi sig1 sig2 ),star sig1 sig2).<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="compute_constraints'"></a>compute_constraints' (pi: Pi) (sig:Sigma)  {struct sig} : Pi :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> sig <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| star sig1 sig2 =&gt; compute_constraints' (compute_constraint_cell_sigma pi sig2 sig1) sig1 <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; pi<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="compute_constraints'_correct"></a>compute_constraints'_correct: forall sig pi,<br/>
+&nbsp;&nbsp;assrt_interp (pi,sig) ==&gt; assrt_interp ((compute_constraints' pi sig), sig).<br/>
+
+<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="compute_constraints"></a>compute_constraints (pi : Pi) (sig : Sigma)  : Pi :=<br/>
+&nbsp;&nbsp;compute_constraints' pi (star_assoc_left sig emp).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="compute_constraints_correct"></a>compute_constraints_correct: forall pi sig,<br/>
+&nbsp;&nbsp;(assrt_interp (pi,sig) ==&gt; assrt_interp (compute_constraints pi sig, sig)).<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="cell_loc_not_null"></a>cell_loc_not_null (pi : Pi) (sig : Sigma)  {struct sig} : Pi :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> sig <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| emp =&gt; pi<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| lst e1 e2 =&gt; pi<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| cell e1 =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span> expr_b_dp (pi =b&gt; (e1 =/= nat_e 0)) <span class="keyword">then</span> pi <span class="keyword">else</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pi &amp;&amp;&amp; (e1 =/= (nat_e 0)) <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| (singl e1 e2) =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span> expr_b_dp (pi =b&gt; (e1 =/= nat_e 0)) <span class="keyword">then</span> pi <span class="keyword">else</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pi &amp;&amp;&amp; (e1 =/= nat_e 0) <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| star s1 s2 =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;cell_loc_not_null (cell_loc_not_null pi s1) s2 <br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="cell_loc_not_null_correct"></a>cell_loc_not_null_correct: forall sig pi,<br/>
+&nbsp;&nbsp;assrt_interp (pi,sig) ==&gt; assrt_interp ((cell_loc_not_null pi sig), sig).<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="assrt_entail_fct"></a>assrt_entail_fct (a1 a2: assrt) : result (assrt * assrt) :=<br/>
+&nbsp;&nbsp;<span class="keyword">let</span> (pi1,sig1) := a1 <span class="keyword">in</span> frag_entail_fct (compute_constraints (cell_loc_not_null pi1 sig1) sig1 , sig1) a2 .<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="assrt_entail_fct_correct"></a>assrt_entail_fct_correct: forall a1 a2,<br/>
+&nbsp;&nbsp;assrt_entail_fct a1 a2 = Good -&gt;<br/>
+&nbsp;&nbsp;(assrt_interp a1 ==&gt; assrt_interp a2).<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="orassrt_impl_Assrt1"></a>orassrt_impl_Assrt1 (a:assrt) (A:Assrt) (l:list (assrt * assrt)) {struct A} : result (list (assrt * assrt)) :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> A <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| nil =&gt; Error l<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| hd::tl =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> assrt_entail_fct a hd <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Good =&gt; Good<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Error e =&gt; orassrt_impl_Assrt1 a tl (e :: l)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="orassrt_impl_Assrt1_correct"></a>orassrt_impl_Assrt1_correct: forall A a l,<br/>
+&nbsp;&nbsp;orassrt_impl_Assrt1 a A l = Good -&gt;<br/>
+&nbsp;&nbsp;(assrt_interp a ==&gt; Assrt_interp A).<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="orpi"></a>orpi (l: list assrt) : expr_b :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> l <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| nil =&gt; neg_b true_b<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| (pi, sig) :: tl =&gt; pi ||| (orpi tl)<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="orassrt_impl_Assrt2"></a>orassrt_impl_Assrt2 (a:assrt) (A:Assrt) (l:list (assrt * assrt)) {struct A} : result (list (assrt * assrt)) :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> A <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| nil =&gt; Error l<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| (pi, sig) :: tl =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> a <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| (pi', sig') =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> sigma_impl (pi' &amp;&amp;&amp; pi) sig' sig  <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Error (s1, s2) =&gt; Error (((pi', s1), (pi, s2)) :: l)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Good =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> tl <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| nil =&gt; Good<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; orassrt_impl_Assrt2 a tl l<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="orassrt_impl_Assrt2_correct"></a>orassrt_impl_Assrt2_correct: forall A pi sig l,<br/>
+&nbsp;&nbsp;orassrt_impl_Assrt2 (pi, sig) A l = Good -&gt; &nbsp;&nbsp;forall s h,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;s |b= pi =b&gt; (orpi A) -&gt;  &nbsp;&nbsp;&nbsp;&nbsp;((assrt_interp (pi,sig)) s h -&gt; (Assrt_interp A) s h). <br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="entail_fct"></a>entail_fct (a:assrt) (A:Assrt) (l:list (assrt * assrt)) : result (list (assrt * assrt)) :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> a <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| (pi, sig) =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span> expr_b_dp (pi =b&gt; (orpi A)) <span class="keyword">then</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> orassrt_impl_Assrt2 a A nil <span class="keyword">with</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Good =&gt; Good<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Error e =&gt; orassrt_impl_Assrt1 a A nil &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">else</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;orassrt_impl_Assrt1 a A nil &nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="entail_fct_correct"></a>entail_fct_correct: forall A a l,<br/>
+&nbsp;&nbsp;entail_fct a A l = Good -&gt;<br/>
+&nbsp;&nbsp;(assrt_interp a ==&gt; Assrt_interp A).<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="Assrt_entail_Assrt_dp"></a>Assrt_entail_Assrt_dp (A1 A2: Assrt) (l: list (assrt * assrt)) {struct A1} : result (list (assrt * assrt)) :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> A1 <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| nil =&gt; Good<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| hd::tl =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> entail_fct hd A2 nil <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Good =&gt; Assrt_entail_Assrt_dp tl A2 l<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Error e =&gt; Error (e ++ l)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Assrt_entail_Assrt_dp_correct"></a>Assrt_entail_Assrt_dp_correct: forall A1 A2 l,<br/>
+&nbsp;&nbsp;Assrt_entail_Assrt_dp A1 A2 l = Good -&gt;<br/>
+&nbsp;&nbsp;(Assrt_interp A1) ==&gt; (Assrt_interp A2).<br/>
+
+<br/>
+</code>
+</div>
+
+<div id="footer">
+<hr/><a href="index.html">Index</a><hr/><font size="-1">This page has been generated by <a href="http://coq.inria.fr">coqdoc</a></font>
+</div>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,233 @@
+/* General look and feel of the web pages. */
+
+/* See template.html for a bare-bones example of this style. */
+
+/*
+  site background: #F4FAD2
+  banner background: #EEEEEE
+  banner foreground: #1C140D
+  border: #C5B8D4
+  light: #C5B8D4
+  hover: 
+*/
+
+body {
+    background-color: #F9FCEB;
+  font-family: Optima, Palatino, Arial, sans-serif, Helvetica;
+}
+
+#content {
+  width: 80%;
+  margin: 15px auto;
+  padding: 5px;
+  background-color:#A19ACC;
+  border-radius: 5px;
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
+}
+
+h1 {
+    color: #FFFFFF;
+}
+
+h2 {
+   margin-left: -30px;
+   color: #000000;/* #1C140D;*/
+}
+
+
+h3 {
+  margin-left: -30px;
+}
+
+a {
+    text-decoration: none;
+}
+
+a:link {
+  color: #A6295B;
+}
+
+a:visited {
+  color: #A6295B;
+}
+
+a:hover {
+  color: #F88D42;
+}
+
+.banner {
+   -webkit-border-top-left-radius: 5px;
+   -webkit-border-top-right-radius: 5px;
+   -moz-border-radius-topleft: 5px;
+   -moz-border-radius-topright: 5px;
+   border-top-left-radius: 5px;
+   border-top-right-radius: 5px;
+   background-color: #5A5199;
+   padding: 5px 15px;
+   padding-left: 50px;
+   margin: 0px 0px;
+}
+
+/* For creating the "menu" at the top of the web pages */
+
+.link {
+  display: block;
+  border-radius: 0px;
+  -moz-border-radius: 0px;
+  -webkit-border-radius: 0px;
+  margin: 0px;
+  background-color: #EEEEEE;
+  foreground-color: #000000;
+  font-family: Optima, Palatino, Arial, sans-serif, Helvetica;
+}
+
+
+#menu {
+	background-color: #A19ACC;
+}
+
+#menu a:link, #menu a:visited {
+	display: block;
+	border-top: 0px;
+	background-color: #A19ACC;/*sidebar*/
+	padding: 2px 2px 4px 2px;
+	color: #5A5199;
+	text-decoration: none;
+}
+
+#menu a:hover{
+	border-top: 0px;
+	background-color: #CBF22E;/*highlight*/
+	color: #5A5199;
+	background-image: none;
+	padding: 2px 2px 4px 2px;
+	text-decoration: none;
+}
+
+
+/* The first section doesn't have rounded upper corners. */
+
+.section1 {
+-webkit-border-bottom-right-radius: 5px;
+-webkit-border-bottom-left-radius: 5px;
+-moz-border-radius-bottomright: 5px;
+-moz-border-radius-bottomleft: 5px;
+border-bottom-right-radius: 5px;
+border-bottom-left-radius: 5px;
+        background-color: #FFFFFF;
+	foreground-color: #1C140D;
+	padding: 5px 15px;
+	padding-left: 50px;
+	margin: 0px 0;
+}
+
+
+.section {
+	border-radius: 5px;
+	-moz-border-radius: 5px;
+	-webkit-border-radius: 5px;
+	background-color: #FFFFFF;
+	foreground-color: #1C140D;
+	padding: 5px 15px;
+	padding-left: 50px;
+	margin: 15px 0;
+}
+
+/* For adding notes to the web pages (usually in projects) */
+
+.notice {
+  color: #FF4242;
+  font-weight: bold;
+}
+
+.tipt {
+    font-weight: bold;
+}
+
+.note {
+	border-radius: 5px;
+	-moz-border-radius: 5px;
+	-webkit-border-radius: 5px;
+	background-color: #EEEEEE;
+	border: 3px solid #E4E0E0;
+	/* background-color: #FFDD8D; */
+	/* color: #A62410; */
+	/* border: 3px solid #A6780C; */
+	/* border-radius: 5px; */
+	padding: 0px 10px;
+	width: 80%;
+	margin: 15px auto;
+}
+
+dd.spaced {  
+  position: relative; 
+  margin-left: 3ex;
+  margin-bottom: 1em;
+}
+
+
+/* For formatting code examples */
+
+pre.code {
+    width: 95%;
+    max-width: 80em;
+    color: black;
+    background-color: #FEFEFB;
+    display: block;
+    margin: 15px auto;
+    padding: 10px;
+    border: 1px solid #EEEEEE;
+}
+
+pre.error {
+    color: #A40000;
+}
+
+
+/************** Lecture Table Styles *********/
+td.date {
+    color:#1C140D;;
+}
+
+tr.week1 {
+    background-color: #F9FCEB;/*week1*/
+}
+
+tr.week2 {
+    background-color: #EEEEEE;/*week2*/
+}
+
+tr.hide.week1 > td.topic {
+    color: #CCCCCC;/*week1*/
+}
+
+tr.hide.week2 > td.topic {
+    color:#CCCCCC;/*week2*/
+}
+
+tr.hide.week1 > td.slides {
+    color: #F9FCEB;/*week1*/
+}
+
+tr.hide.week2 > td.slides {
+    color:#EEEEEE;/*week2*/
+}
+
+
+tr.hide > td.slides > a {
+    display:none;
+}
+
+tr.hide > td.handout > a {
+    display:none;
+}
+
+tr.hide > td.slides > br {
+    display:none;
+}
+
+tr.hide > td.handout > br {
+    display:none;
+}
+

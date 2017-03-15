@@ -1,0 +1,208 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"/>
+<link href="coqdoc.css" rel="stylesheet" type="text/css"/>
+<title>topsy_bootloader</title>
+</head>
+
+<body>
+
+<div id="page">
+
+<div id="header">
+</div>
+
+<div id="main">
+
+<h1 class="libtitle">Library topsy_bootloader</h1>
+
+<code>
+<span class="keyword">Load</span> seplog_header.<br/>
+
+<br/>
+Open <span class="keyword">Local</span> Scope sep_scope.<br/>
+Open <span class="keyword">Local</span> Scope vc_scope.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="GDTxSIZE"></a>GDTxSIZE : nat := 8*5.<br/>
+<span class="keyword">Axiom</span> <a name="GDT00"></a>GDT00: nat.<br/>
+<span class="keyword">Definition</span> <a name="GDT_BASE"></a>GDT_BASE: var.v := 16.<br/>
+<span class="keyword">Definition</span> <a name="GDTSEG"></a>GDTSEG: nat :=0.<br/>
+<span class="keyword">Definition</span> <a name="GDTOF"></a>GDTOF: nat := 1000.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="es"></a>es:var.v := 0.<br/>
+<span class="keyword">Definition</span> <a name="ds"></a>ds:var.v := 1.<br/>
+<span class="keyword">Definition</span> <a name="di"></a>di:var.v := 2.<br/>
+<span class="keyword">Definition</span> <a name="si"></a>si:var.v := 3.<br/>
+<span class="keyword">Definition</span> <a name="ax"></a>ax:var.v := 4.<br/>
+<span class="keyword">Definition</span> <a name="cx"></a>cx:var.v := 5.<br/>
+<span class="keyword">Definition</span> <a name="df"></a>df:var.v := 6.<br/>
+
+<br/>
+<span class="keyword">Axiom</span> <a name="dec_sel"></a>dec_sel: nat.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="movsw"></a>movsw (tmp:var.v) :=<br/>
+(tmp &lt;-* ((var_e ds) *e (int_e (Z_of_nat dec_sel)) +e (var_e si)));<br/>
+(((var_e es) *e (int_e (Z_of_nat dec_sel)) +e (var_e di)) *&lt;- (var_e tmp));<br/>
+(di &lt;- (var_e di) +e (int_e 1%Z));<br/>
+(si &lt;- (var_e si) +e (int_e 1%Z));<br/>
+(tmp &lt;-* ((var_e ds) *e (int_e (Z_of_nat dec_sel)) +e (var_e si)));<br/>
+(((var_e es) *e (int_e (Z_of_nat dec_sel)) +e (var_e di)) *&lt;- (var_e tmp));<br/>
+(di &lt;- (var_e di) +e (int_e 1%Z));<br/>
+(si &lt;- (var_e si) +e (int_e 1%Z)).<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="createGDT"></a>createGDT (tmp:var.v) :=<br/>
+<br/>
+(ax &lt;- (int_e (Z_of_nat GDTSEG)));<br/>
+(es &lt;- (var_e ax));<br/>
+(ax &lt;- (int_e (Z_of_nat GDTOF)));<br/>
+(di &lt;- (var_e ax));<br/>
+(cx &lt;- (int_e (Z_of_nat GDTxSIZE)));<br/>
+(cx &lt;- (div_e (var_e cx) (int_e 2%Z)));<br/>
+(ax &lt;- (int_e (Z_of_nat GDT00)));<br/>
+(si &lt;- (var_e ax));<br/>
+(df &lt;- (int_e 0%Z));<br/>
+while' ((var_e cx) &gt;&gt; (int_e 0%Z)) (TT)<br/>
+(<br/>
+&nbsp;movsw (tmp);<br/>
+&nbsp;cx &lt;- (var_e cx) -e (nat_e 1)<br/>
+)<br/>
+.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="GDTptr"></a>GDTptr := GDTOF.<br/>
+<span class="keyword">Axiom</span> <a name="IDTptr"></a>IDTptr : nat.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="idtr"></a>idtr:var.v := 7.<br/>
+<span class="keyword">Definition</span> <a name="gdtr"></a>gdtr:var.v := 8.<br/>
+<span class="keyword">Definition</span> <a name="eax"></a>eax:var.v := 9.<br/>
+<span class="keyword">Definition</span> <a name="cr0"></a>cr0:var.v := 10.<br/>
+<span class="keyword">Definition</span> <a name="bx"></a>bx:var.v := 11.<br/>
+<span class="keyword">Definition</span> <a name="fs"></a>fs:var.v := 12.<br/>
+<span class="keyword">Definition</span> <a name="gs"></a>gs:var.v := 13.<br/>
+<span class="keyword">Definition</span> <a name="ss"></a>ss:var.v := 14.<br/>
+<span class="keyword">Definition</span> <a name="esp"></a>esp:var.v := 15.<br/>
+
+<br/>
+<span class="keyword">Axiom</span> <a name="gOSData_Sel"></a>gOSData_Sel: nat.<br/>
+<span class="keyword">Axiom</span> <a name="OSD_SIZE"></a>OSD_SIZE:nat.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="PM_Switch"></a>PM_Switch :=<br/>
+(idtr &lt;- (int_e (Z_of_nat IDTptr)));<br/>
+(gdtr &lt;- (int_e (Z_of_nat GDTptr)));<br/>
+(eax &lt;- (int_e 1%Z));<br/>
+(cr0 &lt;- (var_e eax));<br/>
+(bx &lt;- (int_e (Z_of_nat gOSData_Sel)));<br/>
+(ds &lt;- (var_e bx));<br/>
+(es &lt;- (var_e bx));<br/>
+(fs &lt;- (var_e bx));<br/>
+(gs &lt;- (var_e bx));<br/>
+(ss &lt;- (var_e bx));<br/>
+(eax &lt;- (int_e (Z_of_nat OSD_SIZE)));<br/>
+(esp &lt;- (var_e eax)).<br/>
+
+<br/>
+<span class="keyword">Import</span> valandloc.<br/>
+
+<br/>
+<span class="keyword">Axiom</span> <a name="memory_size"></a>memory_size: nat.<br/>
+
+<br/>
+Open <span class="keyword">Local</span> Scope Z_scope.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="p2_14"></a>p2_14 := Zpower 2 14.<br/>
+<span class="keyword">Definition</span> <a name="p2_24"></a>p2_24 := Zpower 2 24.<br/>
+<span class="keyword">Definition</span> <a name="p2_16"></a>p2_16 := Zpower 2 16.<br/>
+<span class="keyword">Definition</span> <a name="p2_8"></a>p2_8 := Zpower 2 8.<br/>
+
+<br/>
+<span class="keyword">Axiom</span> <a name="b_and"></a>b_and : Z -&gt; Z -&gt; Z.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="Valid_Segment_Descriptor"></a>Valid_Segment_Descriptor (x:loc) := <span class="keyword">fun</span> s =&gt; <span class="keyword">fun</span> h =&gt; <br/>
+&nbsp;&nbsp;exists y0, exists y1, exists y2, exists y3, exists y4, exists y5, exists y6, exists y7,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(((int_e (Z_of_nat x))|--&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;((int_e y0)::(int_e y1)::(int_e y2)::(int_e y3)::(int_e y4)::(int_e y5)::(int_e y6)::(int_e y7)::nil)) ** TT) s h /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;((b_and (Zdiv y5 32) 3 = 0) \/ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;((y2 + (y3 * p2_8) + (y4 * p2_16) + (y7 * p2_24)) &gt;= p2_14)).<br/>
+
+<br/>
+Close <span class="keyword">Local</span> Scope Z_scope.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Valid_Segment_descriptor_inde_store"></a>Valid_Segment_descriptor_inde_store: forall s s' h x,<br/>
+&nbsp;&nbsp;&nbsp;Valid_Segment_Descriptor x s h -&gt; Valid_Segment_Descriptor x s' h.<br/>
+
+<br/>
+<span class="keyword">Ltac</span> Resolve_simpl:=<br/>
+&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> goal <span class="keyword">with</span><br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| id: Array ?adr ?size ?s ?h |- Array ?adr ?size ?s2 ?h =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;eapply Array_inde_store; apply id<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| |- eval (var_e ?v) (store.update ?v ?p ?s) = ?p1 =&gt; simpl; rewrite store.lookup_update'; auto<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| id: eval (var_e ?v) ?s = ?p |- eval (var_e ?v) (store.update ?v' ?p' ?s) = ?p =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;simpl; rewrite &lt;- store.lookup_update; [auto | unfold v; unfold v'; omega]<br/>
+&nbsp;&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Axiom</span> <a name="coucou"></a>coucou: False.<br/>
+<span class="keyword">Ltac</span> Coucou := generalize coucou; contradiction.<br/>
+
+<br/>
+<span class="keyword">Axiom</span> <a name="Array_ouch1"></a>Array_ouch1: forall adr bloc_size bloc_num s h,<br/>
+&nbsp;&nbsp;((Array adr (bloc_num * bloc_size) ** TT) s h) -&gt;<br/>
+&nbsp;&nbsp;(forall x, x&gt;= 0 /\ x&lt; bloc_num -&gt; ((Array (adr + x * bloc_size) bloc_size ) ** TT) s h).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="bootloader_verif"></a>bootloader_verif: forall tmp,<br/>
+&nbsp;&nbsp;{{ <span class="keyword">fun</span> s =&gt; <span class="keyword">fun</span> h =&gt; ((Array GDTOF (5*8)) ** TT) s h /\ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(forall x, x &gt;= 0 /\ x &lt; 5 -&gt; Valid_Segment_Descriptor (GDT00 + x* 8) s h) }}<br/>
+<br/>
+&nbsp;&nbsp;(proj_cmd (createGDT tmp; PM_Switch))<br/>
+<br/>
+&nbsp;&nbsp;{{ <span class="keyword">fun</span> s =&gt; <span class="keyword">fun</span> h =&gt; (eval (var_e cr0) s) = 1%Z  /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;( forall p, eval (var_e gdtr) s = Z_of_nat p -&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(forall x, x &gt;= 0 /\ x &lt; 5 -&gt; Valid_Segment_Descriptor (p + x* 8) s h)) <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;}}.<br/>
+
+<br/>
+Close <span class="keyword">Local</span> Scope vc_scope.<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+</code>
+</div>
+
+<div id="footer">
+<hr/><a href="index.html">Index</a><hr/><font size="-1">This page has been generated by <a href="http://coq.inria.fr">coqdoc</a></font>
+</div>
+
+</div>
+
+</body>
+</html>

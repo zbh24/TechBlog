@@ -1,0 +1,145 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"/>
+<link href="coqdoc.css" rel="stylesheet" type="text/css"/>
+<title>vc</title>
+</head>
+
+<body>
+
+<div id="page">
+
+<div id="header">
+</div>
+
+<div id="main">
+
+<h1 class="libtitle">Library vc</h1>
+
+<code>
+<span class="keyword">Require</span> <span class="keyword">Import</span> List.<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> ZArith.<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> List.<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> EqNat.<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> Classical.<br/>
+
+<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> <a class="modref" href="util.html">util</a>.<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> <a class="modref" href="heap.html">heap</a>.<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> <a class="modref" href="bipl.html">bipl</a>.<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> <a class="modref" href="axiomatic.html">axiomatic</a>.<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> <a class="modref" href="contrib.html">contrib</a>.<br/>
+
+<br/>
+Open <span class="keyword">Local</span> Scope heap_scope.<br/>
+Open <span class="keyword">Local</span> Scope sep_scope.<br/>
+
+<br/>
+</code>
+
+<div class="doc">
+weakest precondition generator 
+</div>
+<code>
+
+<br/>
+<span class="keyword">Inductive</span> <a name="cmd'"></a>cmd' : <span class="keyword">Type</span> :=<br/>
+&nbsp;<a name="skip'"></a>skip': cmd'<br/>
+| <a name="assign_var_e'"></a>assign_var_e' : var.v -&gt; expr -&gt; cmd'<br/>
+| assign_var_deref' : var.v -&gt; expr -&gt; cmd'<br/>
+| assign_deref_expr' : expr -&gt; expr -&gt; cmd'<br/>
+| malloc' : var.v -&gt; expr -&gt; cmd'<br/>
+| free' : expr -&gt; cmd'<br/>
+| while' : expr_b -&gt; assert -&gt; cmd' -&gt; cmd'<br/>
+| seq' : cmd' -&gt; cmd' -&gt; cmd'<br/>
+| ifte' : expr_b -&gt; cmd' -&gt; cmd' -&gt; cmd'.<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="proj_cmd"></a>proj_cmd (c':cmd') : cmd :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> c' <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a name="skip'"></a>skip' =&gt; skip<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;|  assign_var_e' x e =&gt; x &lt;- e<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| assign_var_deref' x e =&gt; x &lt;-* e<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| assign_deref_expr' e f =&gt; e *&lt;- f<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| malloc' x e =&gt; x &lt;-malloc e<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| free' e =&gt; free e<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| while' b Q c''  =&gt; while b (proj_cmd c'')<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| seq' c1 c2 =&gt; (seq (proj_cmd c1) (proj_cmd c2))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| ifte' b c1 c2 =&gt; (ifte b thendo (proj_cmd c1) elsedo (proj_cmd c2))<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Notation</span> "x &lt;- e" := (assign_var_e' x e) (at level 80) : vc_scope.<br/>
+<span class="keyword">Notation</span> "x '&lt;-*' e" := (assign_var_deref' x e) (at level 80) : vc_scope.<br/>
+<span class="keyword">Notation</span> "e '*&lt;-' f" := (assign_deref_expr' e f) (at level 80) : vc_scope.<br/>
+<span class="keyword">Notation</span> "x '&lt;-malloc' e" := (malloc' x e) (at level 80) : vc_scope.<br/>
+<span class="keyword">Notation</span> "c ; d" := (seq' c d) (at level 81, right associativity) : vc_scope.<br/>
+<span class="keyword">Notation</span> "'ifte' a 'thendo' x 'elsedo' y" := (ifte' a x y)(at level 80) : vc_scope.<br/>
+
+<br/>
+Open <span class="keyword">Local</span> Scope vc_scope.<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="wp"></a>wp (c:cmd') (P:assert) {struct c} : assert :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> c <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a name="skip'"></a>skip' =&gt; P<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| assign_var_e' x e =&gt; update_store2 x e P<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| assign_var_deref' x e =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">fun</span> s h =&gt; exists e0, ((e |-&gt; e0) ** ((e |-&gt; e0) -* (update_store2 x e0 P))) s h<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| assign_deref_expr' e f =&gt;  <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">fun</span> s h =&gt; exists x, (((e |-&gt; x) ** ((e |-&gt; f) -* P)) s h)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| (malloc' x e) =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">fun</span> s h =&gt; forall n, (((nat_e n) |-&gt; e) -* (update_store2 x (nat_e n) P)) s h<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| free' e =&gt; <span class="keyword">fun</span> s h =&gt; <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;exists l, val2loc (eval e s) = l /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;exists v, heap.lookup l h = Some v /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;P s (h --- l)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| while' b Q c' =&gt; Q<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| seq' c1 c2 =&gt; wp c1 (wp c2 P)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| ifte' b c1 c2 =&gt; (<span class="keyword">fun</span> s h =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;( eval_b b s = true -&gt; (wp c1 P) s h) /\ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;( eval_b b s = false -&gt; (wp c2 P) s h))<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="vc"></a>vc (c:cmd') (P:assert) {struct c} : assert :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> c <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a name="skip'"></a>skip' =&gt; TT<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| assign_var_e' x e =&gt; TT<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| assign_var_deref' x e =&gt; TT<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| assign_deref_expr' e f =&gt; TT<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| malloc' x e =&gt; TT<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| free' e =&gt; TT<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| while' b Q c' =&gt; <span class="keyword">fun</span> s h =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Q s h /\ eval_b b s = false -&gt; P s h) /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Q s h /\ eval_b b s = true -&gt; (wp c' Q) s h) /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;((vc c' Q) s h)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| seq' c1 c2 =&gt; <span class="keyword">fun</span> s h =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;vc c1 (wp c2 P) s h /\ (vc c2 P) s h<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| ifte' b c1 c2 =&gt; <span class="keyword">fun</span> s h =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(vc c1 P) s h /\ (vc c2 P) s h<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="vc_soundness"></a>vc_soundness : forall c' P,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(forall s h, vc c' P s h) -&gt; {{wp c' P}} (proj_cmd c') {{ P }}.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="wp_vc_util"></a>wp_vc_util: forall c Q P , <br/>
+&nbsp;&nbsp;&nbsp;(forall s h, vc c Q s h) -&gt; (P ==&gt; wp c Q) -&gt; {{P}} proj_cmd c {{Q}}.<br/>
+
+<br/>
+Close <span class="keyword">Local</span> Scope vc_scope.<br/>
+</code>
+</div>
+
+<div id="footer">
+<hr/><a href="index.html">Index</a><hr/><font size="-1">This page has been generated by <a href="http://coq.inria.fr">coqdoc</a></font>
+</div>
+
+</div>
+
+</body>
+</html>

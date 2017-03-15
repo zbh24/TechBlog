@@ -1,0 +1,980 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"/>
+<link href="coqdoc.css" rel="stylesheet" type="text/css"/>
+<title>util</title>
+</head>
+
+<body>
+
+<div id="page">
+
+<div id="header">
+</div>
+
+<div id="main">
+
+<h1 class="libtitle">Library util</h1>
+
+<code>
+<span class="keyword">Require</span> <span class="keyword">Import</span> EqNat.<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> Bool.<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> ZArith.<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> List.<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> Classical.<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> Max.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="beq_dif_false"></a>beq_dif_false : forall n m, n &lt;&gt; m -&gt; beq_nat n m = false.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="beq_nat_false"></a>beq_nat_false : forall a b, beq_nat a b = false -&gt; a &lt;&gt; b.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="beq_nat_true"></a>beq_nat_true: forall x y, beq_nat x y = true -&gt; x = y.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="beq_nat_classic"></a>beq_nat_classic : forall a b,<br/>
+&nbsp;&nbsp;beq_nat a b = true \/ beq_nat a b =false.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="beq_nat_com"></a>beq_nat_com: forall n m, beq_nat n m = beq_nat m n.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="negb_false_is_true"></a>negb_false_is_true : forall x, negb x = false -&gt; x = true.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="negb_true_is_false"></a>negb_true_is_false : forall x, negb x = true -&gt; x = false.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="plus_lt_exists"></a>plus_lt_exists: forall l l' L, l' + l &lt;= L -&gt; exists n, L = n + l' + l.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Zeq_bool_classic"></a>Zeq_bool_classic : forall x y,<br/>
+&nbsp;&nbsp;Zeq_bool x y = true \/ Zeq_bool x y = false.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Zeq_bool_refl"></a>Zeq_bool_refl : forall x, Zeq_bool x x = true.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Zeq_bool_sym"></a>Zeq_bool_sym : forall x y, Zeq_bool x y = Zeq_bool y x.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Zeq_bool_true"></a>Zeq_bool_true : forall x y, Zeq_bool x y = true -&gt; x = y.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Zeq_bool_false"></a>Zeq_bool_false : forall x y, Zeq_bool x y = false &lt;-&gt; x &lt;&gt; y.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Zeq_bool_false'"></a>Zeq_bool_false' : forall x y, Zeq_bool x y = false -&gt; x &lt;&gt; y.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Zeq_bool_false''"></a>Zeq_bool_false'' : forall x y, x &lt;&gt; y -&gt; Zeq_bool x y = false.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Zgt_bool_true"></a>Zgt_bool_true : forall a b, Zgt_bool a b = true -&gt; (a &gt; b)%Z.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Zgt_bool_true'"></a>Zgt_bool_true' : forall a b, (a &gt; b)%Z -&gt; Zgt_bool a b = true.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Zgt_bool_false"></a>Zgt_bool_false: forall a b, Zgt_bool a b = false -&gt; (a &lt;= b)%Z.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Zge_bool_true"></a>Zge_bool_true : forall a b, Zge_bool a b = true -&gt; (a &gt;= b)%Z.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Zge_bool_true'"></a>Zge_bool_true' : forall a b, (a &gt;= b)%Z -&gt; Zge_bool a b = true.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Zlt_bool_true"></a>Zlt_bool_true : forall a b, Zlt_bool a b = true -&gt; (a &lt; b)%Z.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Zlt_bool_Prop"></a>Zlt_bool_Prop : forall a b, (a &lt; b)%Z -&gt; Zlt_bool a b = true.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Zlt_bool_Prop'"></a>Zlt_bool_Prop' : forall a b, (b &gt;= a)%Z -&gt; Zlt_bool b a = false.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Zle_bool_true"></a>Zle_bool_true : forall a b, Zle_bool a b = true -&gt; (a &lt;= b)%Z.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Zle_bool_true'"></a>Zle_bool_true' : forall a b, (a &lt;= b)%Z -&gt; Zle_bool a b = true.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Zle_neq_lt"></a>Zle_neq_lt : forall n m,<br/>
+&nbsp;&nbsp;(n &lt;= m)%Z -&gt; (n &lt;&gt; m)%Z -&gt; (n &lt; m)%Z.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Z_of_nat_Zpos_P_of_succ_nat"></a>Z_of_nat_Zpos_P_of_succ_nat : forall n,<br/>
+&nbsp;&nbsp;Z_of_nat (n + 1) = Zpos (P_of_succ_nat n).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="nat2pos"></a>nat2pos: forall n,<br/>
+&nbsp;&nbsp;n &gt; 0 -&gt;<br/>
+&nbsp;&nbsp;exists p, Z_of_nat n = Zpos p /\ nat_of_P p = n.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Z_of_nat_inj"></a>Z_of_nat_inj : forall x y,<br/>
+&nbsp;&nbsp;Z_of_nat x = Z_of_nat y -&gt; x = y.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Z_S"></a>Z_S : forall n,<br/>
+&nbsp;&nbsp;Z_of_nat (S n) = (Z_of_nat n + 1)%Z.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Z_of_nat_inj'"></a>Z_of_nat_inj': (forall x y, x = y -&gt; Z_of_nat x = Z_of_nat y).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Z_of_nat_le_inj'"></a>Z_of_nat_le_inj': forall x y, x &lt;= y -&gt; (Z_of_nat x &lt;= Z_of_nat y)%Z.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Z_of_nat_le_inj"></a>Z_of_nat_le_inj: forall x y, (Z_of_nat x &lt;= Z_of_nat y)%Z -&gt; x &lt;= y.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Z_of_nat_lt_inj'"></a>Z_of_nat_lt_inj': forall x y, x &lt; y -&gt; (Z_of_nat x &lt; Z_of_nat y)%Z.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Z_of_nat_lt_inj"></a>Z_of_nat_lt_inj: forall x y, (Z_of_nat x &lt; Z_of_nat y)%Z -&gt; x &lt; y.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Z_of_nat_ge_inj'"></a>Z_of_nat_ge_inj': forall x y, x &gt;= y -&gt; (Z_of_nat x &gt;= Z_of_nat y)%Z.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Z_of_nat_ge_inj"></a>Z_of_nat_ge_inj: forall x y, (Z_of_nat x &gt;= Z_of_nat y)%Z -&gt; x &gt;= y.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Z_of_nat_gt_inj'"></a>Z_of_nat_gt_inj': forall x y, x &gt; y -&gt; (Z_of_nat x &gt; Z_of_nat y)%Z.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Z_of_nat_gt_inj"></a>Z_of_nat_gt_inj: forall x y, (Z_of_nat x &gt; Z_of_nat y)%Z -&gt; x &gt; y.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="nat_of_Z"></a>nat_of_Z: forall z,<br/>
+&nbsp;&nbsp;(z &gt;= 0)%Z -&gt;<br/>
+&nbsp;&nbsp;exists n, z = Z_of_nat n.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="length_app"></a>length_app : forall (A:<span class="keyword">Set</span>) (l:list A) l', length (l++l') = plus (length l) (length l').<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="tail_length"></a>tail_length : forall (A:<span class="keyword">Set</span>) (lst:list A),<br/>
+&nbsp;&nbsp;length (tail lst) = (length lst - 1)%nat.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="tail_app"></a>tail_app : forall (A:<span class="keyword">Set</span>) (lst lst':list A),<br/>
+&nbsp;&nbsp;(0 &lt; length lst)%nat -&gt;<br/>
+&nbsp;&nbsp;tail (lst ++ lst') = tail lst ++ lst'.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="incl_nil"></a>incl_nil : forall (A:<span class="keyword">Set</span>) (h:list A), incl h nil -&gt; h=nil.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="inter"></a>inter (A:<span class="keyword">Set</span>) h1 h2 h := forall (x:A),<br/>
+&nbsp;&nbsp;In x h1 /\ In x h2 &lt;-&gt; In x h.<br/>
+<span class="keyword">Implicit</span> Arguments inter.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="inter_nil"></a>inter_nil: forall (A:<span class="keyword">Set</span>) l, @inter A l nil nil.<br/>
+<span class="keyword">Implicit</span> Arguments inter_nil.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="inter_weak"></a>inter_weak : forall (A:<span class="keyword">Set</span>) x L K M,<br/>
+&nbsp;@inter A K L M -&gt; ~ In x K -&gt; inter K (x :: L) M.<br/>
+<span class="keyword">Implicit</span> Arguments inter_weak.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="inter_sym"></a>inter_sym: forall (A:<span class="keyword">Set</span>) h h1 h2,<br/>
+&nbsp;&nbsp;@inter A h h1 h2 -&gt; inter h1 h h2.<br/>
+<span class="keyword">Implicit</span> Arguments inter_sym.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="inter_nil_subset"></a>inter_nil_subset : forall (A:<span class="keyword">Set</span>) (l:list A) l',<br/>
+&nbsp;&nbsp;inter l l' nil -&gt;<br/>
+&nbsp;&nbsp;forall l'',<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;incl l'' l -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;inter l'' l' nil.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="inter_app"></a>inter_app : forall (A:<span class="keyword">Set</span>) (l k m:list A), inter (l++k) m nil -&gt;<br/>
+&nbsp;&nbsp;inter l m nil /\ inter k m nil.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="inter_stren"></a>inter_stren : forall (A:<span class="keyword">Set</span>) (hd1:A) tl1 l2, <br/>
+&nbsp;&nbsp;inter (hd1::tl1) l2 nil -&gt; inter tl1 l2 nil.<br/>
+<span class="keyword">Implicit</span> Arguments inter_stren.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="list_split"></a>list_split : forall (A:<span class="keyword">Set</span>) (l:list A) x,<br/>
+&nbsp;&nbsp;In x l -&gt;<br/>
+&nbsp;&nbsp;exists l1, exists l2, l = l1 ++ (x::nil) ++ l2.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="list_split2"></a>list_split2 : forall (A:<span class="keyword">Set</span>) (l:list A) k,<br/>
+&nbsp;&nbsp;(k &lt;= length l)%nat -&gt;<br/>
+&nbsp;&nbsp;exists l1, exists l2, length l1 = k /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;l = l1 ++ l2.<br/>
+
+<br/>
+
+<br/>
+<span class="keyword">Inductive</span> <a name="permut"></a>permut (A:<span class="keyword">Set</span>) : (list A) -&gt; (list A) -&gt; <span class="keyword">Prop</span> :=<br/>
+&nbsp;&nbsp;<a name="permut_refl"></a>permut_refl: forall h, permut h h<br/>
+&nbsp;&nbsp;| <a name="permut_cons"></a>permut_cons: forall a l0 l1, permut l0 l1 -&gt; permut (a::l0) (a::l1)<br/>
+&nbsp;&nbsp;| <a name="permut_append"></a>permut_append: forall a l, permut (a::l) (l ++ a::nil)<br/>
+&nbsp;&nbsp;| <a name="permut_trans"></a>permut_trans: forall l0 l1 l2, permut l0 l1 -&gt; permut l1 l2 -&gt; permut l0 l2.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="permut_sym"></a>permut_sym : forall (A:<span class="keyword">Set</span>) (h1 h2 : (list A)), <br/>
+&nbsp;&nbsp;permut h1 h2 -&gt; permut h2 h1.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="permut_nil'"></a>permut_nil' : forall (A:<span class="keyword">Set</span>) (k k':(list A)), <br/>
+&nbsp;&nbsp;permut k k' -&gt; k'=nil -&gt; k=nil.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="permut_nil"></a>permut_nil : forall (A:<span class="keyword">Set</span>) (k:(list A)), <br/>
+&nbsp;&nbsp;permut k nil -&gt; k=nil.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="In_permut"></a>In_permut : forall (A:<span class="keyword">Set</span>) (h h':(list A)), permut h' h -&gt; <br/>
+&nbsp;&nbsp;forall x, In x h -&gt; In x h'.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="permut_head"></a>permut_head : forall (A:<span class="keyword">Set</span>) h (a b:A), permut (a::b::h) (b::a::h).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="rotate_is_permut"></a>rotate_is_permut : forall (A:<span class="keyword">Set</span>) k (a:A), (permut (a::k) (k++a::nil)).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="permut_inter"></a>permut_inter : forall (A:<span class="keyword">Set</span>) (k m:(list A)), permut k m -&gt; <br/>
+&nbsp;&nbsp;forall n p, inter n m p -&gt; inter n k p.<br/>
+
+<br/>
+<span class="keyword">Ltac</span> Permut n :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> goal <span class="keyword">with</span><br/>
+&nbsp;&nbsp;|  |- (permut ?X1 ?X1) =&gt; apply permut_refl<br/>
+&nbsp;&nbsp;|  |- (permut (?X1 :: ?X2) (?X1 :: ?X3)) =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> newn := eval compute <span class="keyword">in</span> (length X2) <span class="keyword">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(apply permut_cons; Permut newn)<br/>
+&nbsp;&nbsp;|  |- (permut (?X1 :: ?X2) ?X3) =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> eval compute <span class="keyword">in</span> n <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| 1 =&gt; fail<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">let</span> l0' := constr:(X2 ++ X1 :: nil) <span class="keyword">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(apply (@permut_trans _ (X1 :: X2) l0' X3);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[ apply permut_append | compute; Permut (pred n) ])<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Ltac</span> PermutProve :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> goal <span class="keyword">with</span><br/>
+&nbsp;&nbsp;|  |- (permut ?X1 ?X2) =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">match</span> eval compute <span class="keyword">in</span> (length X1 = length X2) <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| (?X1 = ?X1) =&gt; Permut X1<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="permut_inv_head"></a>permut_inv_head : forall (A:<span class="keyword">Set</span>) (L:list A) (c d:A), permut (c :: d :: L) (d :: c :: L).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="permut_app_com"></a>permut_app_com : forall (A:<span class="keyword">Set</span>) (L K:(list A)), permut (L ++ K) (K ++ L).<br/>
+
+<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="length_rev"></a>length_rev : forall (A:<span class="keyword">Set</span>) (l:list A), length (rev l) = length l.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="rev_inj"></a>rev_inj : forall (A:<span class="keyword">Set</span>) (l k:list A),<br/>
+&nbsp;&nbsp;rev l = rev k -&gt; l = k.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="list_last"></a>list_last : forall (A:<span class="keyword">Set</span>) (lst:list A), length lst &gt; O -&gt;<br/>
+&nbsp;&nbsp;exists lst', exists a, <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;lst = lst' ++ a::nil.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="nth_app"></a>nth_app : forall (A:<span class="keyword">Set</span>) n (lst:list A) (v:A),<br/>
+&nbsp;&nbsp;length lst &lt;= n -&gt; forall lst',<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;nth n (lst++lst') v = nth (n-length lst) lst' v.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="last"></a>last (A:<span class="keyword">Set</span>) (lst:list A) (def:A) := <br/>
+&nbsp;&nbsp;<span class="keyword">match</span> length lst <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;O =&gt; def<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| S n =&gt; nth n lst def<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+<span class="keyword">Implicit</span> Arguments last.<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="del_heads"></a>del_heads (A:<span class="keyword">Set</span>) (l: list A) (n: nat) {struct n} : list A :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> n <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;0 =&gt; l<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| S n' =&gt; <span class="keyword">match</span> l <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a name="nil"></a>nil =&gt; nil<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| hd::tl =&gt; del_heads A tl n'<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+<span class="keyword">Implicit</span> Arguments del_heads.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="del_heads_length"></a>del_heads_length: forall n (A:<span class="keyword">Set</span>) (l: list A), <br/>
+&nbsp;&nbsp;length (del_heads l n) = length l - n.<br/>
+<span class="keyword">Implicit</span> Arguments del_heads_length.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="del_heads_plus"></a>del_heads_plus : forall (A:<span class="keyword">Set</span>) a b (lst:list A),<br/>
+&nbsp;&nbsp;del_heads lst (a + b) = del_heads (del_heads lst a) b.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="del_heads_app'"></a>del_heads_app' : forall n (A:<span class="keyword">Set</span>) (lst lst':list A),<br/>
+&nbsp;&nbsp;length lst = n -&gt;<br/>
+&nbsp;&nbsp;forall k, k &lt;= n -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;del_heads (lst ++ lst') k = (del_heads lst k) ++ lst'.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="del_heads_app"></a>del_heads_app: forall n (A:<span class="keyword">Set</span>) (l l':list A),<br/>
+&nbsp;&nbsp;length l = n -&gt;<br/>
+&nbsp;&nbsp;del_heads (l ++ l') n = l'.<br/>
+<span class="keyword">Implicit</span> Arguments del_heads_app.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="del_heads_all"></a>del_heads_all : forall n (A:<span class="keyword">Set</span>) (lst:list A),<br/>
+&nbsp;&nbsp;length lst = n -&gt;<br/>
+&nbsp;&nbsp;del_heads lst n = nil.<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="heads"></a>heads (A: <span class="keyword">Set</span>) (l: list A) (n: nat) {struct n} : list A :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> n <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;0 =&gt; nil<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| S n' =&gt; <span class="keyword">match</span> l <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a name="nil"></a>nil =&gt; nil<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| hd::tl =&gt; hd::heads A tl n'<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+<span class="keyword">Implicit</span> Arguments heads.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="length_heads"></a>length_heads : forall n (A:<span class="keyword">Set</span>) (lst:list A) k,<br/>
+&nbsp;&nbsp;length lst = n -&gt;<br/>
+&nbsp;&nbsp;k &lt;= n -&gt;<br/>
+&nbsp;&nbsp;length (heads lst k) = k.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="heads_app"></a>heads_app : forall n (A:<span class="keyword">Set</span>) (lst1:list A),<br/>
+&nbsp;&nbsp;length lst1 = n -&gt;<br/>
+&nbsp;&nbsp;forall lst2,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;heads (lst1 ++ lst2) n = lst1.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="heads_del_heads"></a>heads_del_heads : forall (A:<span class="keyword">Set</span>) n (lst:list A),<br/>
+&nbsp;&nbsp;length lst = n -&gt;<br/>
+&nbsp;&nbsp;forall k, k &lt;= n -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;lst = heads lst k ++ del_heads lst k.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="mult_minus_distr_r"></a>mult_minus_distr_r : forall n m p, n &gt;= m -&gt; (n - m) * p = n * p - m * p.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="mult_minus_distr_l"></a>mult_minus_distr_l : forall n m p, m &gt;= p -&gt; n * (m - p) = n * m - n * p.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="max_lemma1"></a>max_lemma1: forall x1 x2 x3,<br/>
+&nbsp;&nbsp;&nbsp;x1 &gt;= x2 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;max x1 x3 &gt;= max x2 x3.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="max_lemma2"></a>max_lemma2: forall x1 x2 x3,<br/>
+&nbsp;&nbsp;&nbsp;x1 &gt; max x2 x3 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;x1 &gt; x2 /\ x1 &gt; x3.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="max_lemma3"></a>max_lemma3: forall x1 x2 x3,<br/>
+&nbsp;&nbsp;x1 &gt; x2 /\ x1 &gt; x3 -&gt;<br/>
+&nbsp;&nbsp;x1 &gt; max x2 x3.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="max_lemma4"></a>max_lemma4: forall x y,<br/>
+&nbsp;&nbsp;max x y &gt;= x.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="max_lemma5"></a>max_lemma5: forall x y z,<br/>
+&nbsp;&nbsp;z &gt;= x -&gt;<br/>
+&nbsp;&nbsp;max z y &gt;= x.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="max_lemma6"></a>max_lemma6: forall x y z,<br/>
+&nbsp;&nbsp;z &gt;= x -&gt;<br/>
+&nbsp;&nbsp;max y z &gt;= x.<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="nat_lt"></a>nat_lt (n m:nat) {struct n}: bool :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> n <span class="keyword">with</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;0 =&gt; <span class="keyword">match</span> m <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 =&gt; false<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| S m' =&gt; true<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| S n' =&gt; <span class="keyword">match</span> m <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 =&gt; false<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| S m' =&gt; nat_lt n' m'<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="nat_le"></a>nat_le (n m:nat) : bool := orb (beq_nat n m) (nat_lt n m).<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="nat_gt"></a>nat_gt (n m:nat) {struct n}: bool :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> n <span class="keyword">with</span> <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;0 =&gt; false<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| S n' =&gt; <span class="keyword">match</span> m <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 =&gt; true<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| S m' =&gt; nat_gt n' m'<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="nat_ge"></a>nat_ge (n m:nat) : bool := orb (beq_nat n m) (nat_gt n m).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="nat_lt_true"></a>nat_lt_true: forall n m, nat_lt n m = true -&gt; n &lt; m.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="nat_lt_true'"></a>nat_lt_true': forall n m, n &lt; m -&gt; nat_lt n m = true.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="nat_lt_false"></a>nat_lt_false: forall n m, nat_lt n m = false -&gt; n &gt;= m.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="nat_lt_false'"></a>nat_lt_false': forall n m, n &gt;= m -&gt; nat_lt n m = false.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="nat_lt_assym"></a>nat_lt_assym: forall n m, nat_lt n m = true -&gt; nat_lt m n= false.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="nat_lt_irrefl"></a>nat_lt_irrefl: forall n , nat_lt n n = false.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="nat_lt_trans"></a>nat_lt_trans: forall n m p, nat_lt n m = true -&gt; nat_lt m p = true -&gt; nat_lt n p = true.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="nat_lt_classic"></a>nat_lt_classic: forall n m, nat_lt n m = true \/ nat_lt n m = false.<br/>
+
+<br/>
+<span class="keyword">Ltac</span> Contrad_lt := intros; Hyp_lt_clean;<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> goal <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| id: ?a = ?b |- _ =&gt; subst a; Contrad_lt<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| id: ?a &lt; ?a |- _ =&gt; generalize (lt_irrefl a); tauto<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| id1: ?b &lt; ?a, id': ?a &lt; ?b |- _ =&gt; generalize (lt_asym a b); tauto<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| id1: ?b &lt; ?a, id': ?a &lt; ?b' |- _ =&gt; generalize (lt_trans b a b' id1 id'); clear id'; intros; Contrad_lt<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- _ =&gt; tauto<br/>
+&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;<span class="keyword">with</span> Hyp_lt_clean :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> goal <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| id: ?a = ?a |- _ =&gt; clear id; Hyp_lt_clean<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| id: ?a &lt; ?b, id': ?a &lt; ?b |- _ =&gt; clear id; Hyp_lt_clean<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| |- _ =&gt; idtac<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="nth_beyond"></a>nth_beyond : forall (A:<span class="keyword">Set</span>) (lst:list A) k dv,<br/>
+&nbsp;&nbsp;k &lt; length lst -&gt;<br/>
+&nbsp;&nbsp;forall lst',<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;nth k lst dv = nth k (lst++lst') dv.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="list_tail'"></a>list_tail' : forall (A:<span class="keyword">Set</span>) (lst:list A) def_val,<br/>
+&nbsp;&nbsp;length lst &gt; 0 -&gt;<br/>
+&nbsp;&nbsp;nth 0 lst def_val :: tail lst = lst.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="list_split'"></a>list_split' : forall (A:<span class="keyword">Set</span>) n (lst:list A) (def:A),<br/>
+&nbsp;&nbsp;length lst = n -&gt;<br/>
+&nbsp;&nbsp;n &gt; 0 -&gt;<br/>
+&nbsp;&nbsp;forall j, j &lt; n -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;exists l1, length l1 = j /\ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;exists l2,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lst = l1 ++ (nth j lst def)::nil ++ l2.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="list_split''"></a>list_split'' : forall (A:<span class="keyword">Set</span>) n (lst:list A) (def:A),<br/>
+&nbsp;&nbsp;length lst = n -&gt;<br/>
+&nbsp;&nbsp;forall j, j &lt; n -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;exists l1, length l1 = j /\ <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;exists l2,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lst = l1 ++ (nth j lst def)::nil ++ l2.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="list_last'"></a>list_last' : forall (A:<span class="keyword">Set</span>) n (lst:list A) (def:A),<br/>
+&nbsp;&nbsp;length lst = n -&gt;<br/>
+&nbsp;&nbsp;n &gt; 0 -&gt;<br/>
+&nbsp;&nbsp;exists l1, lst = l1 ++ (nth (n-1) lst def)::nil.<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="del_nth"></a>del_nth (A:<span class="keyword">Set</span>) (n:nat) (lst:list A) { struct lst } : list A :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> lst <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a name="nil"></a>nil =&gt; nil<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| hd::tl =&gt; <span class="keyword">match</span> n <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a name="O"></a>O =&gt; tl<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| S n' =&gt; hd::del_nth A n' tl<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+<span class="keyword">Implicit</span> Arguments del_nth.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="del_nth_length"></a>del_nth_length : forall (A:<span class="keyword">Set</span>) (lst:list A) (n:nat),<br/>
+&nbsp;&nbsp;n &lt; length lst -&gt;<br/>
+&nbsp;&nbsp;length (del_nth n lst) = length lst - 1.<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="del_nth_last"></a>del_nth_last (A:<span class="keyword">Set</span>) (lst:list A) : list A :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> lst <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;nil =&gt; nil<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| _ =&gt; del_nth ((length lst) - 1) lst<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+<span class="keyword">Implicit</span> Arguments del_nth_last.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="del_nth_last_length"></a>del_nth_last_length: forall (n:nat) (A:<span class="keyword">Set</span>) (lst:list A),<br/>
+&nbsp;&nbsp;length lst = n -&gt;<br/>
+&nbsp;&nbsp;length (del_nth_last lst) = (n - 1)%nat.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="del_nth_last_exact'"></a>del_nth_last_exact' : forall (A:<span class="keyword">Set</span>) (lst:list A) (a:A),<br/>
+&nbsp;&nbsp;del_nth (length lst) (lst ++ a::nil) = lst.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="del_nth_last_exact"></a>del_nth_last_exact : forall (A:<span class="keyword">Set</span>) (lst:list A) a,<br/>
+&nbsp;&nbsp;del_nth_last (lst ++ a::nil) = lst.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="del_nth_app"></a>del_nth_app : forall (A:<span class="keyword">Set</span>) k (lst1:list A),<br/>
+&nbsp;&nbsp;length lst1 = k -&gt;<br/>
+&nbsp;&nbsp;forall lst a lst2,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;lst = lst1 ++ a::lst2 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;del_nth k lst = lst1 ++ lst2.<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="update_list"></a>update_list (A:<span class="keyword">Set</span>) (l:list A) (n:nat) (v:A) {struct l} : list A :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> l <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a name="nil"></a>nil =&gt; nil<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| hd::tl =&gt; <span class="keyword">match</span> n <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a name="O"></a>O =&gt; v::tl<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| S n' =&gt; hd :: update_list _ tl n' v<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">end</span><br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+<span class="keyword">Implicit</span> Arguments update_list.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="length_update_list"></a>length_update_list : forall (A:<span class="keyword">Set</span>) n lst k (v:A),<br/>
+&nbsp;&nbsp;length lst = n -&gt;<br/>
+&nbsp;&nbsp;length (update_list lst k v) = n.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="update_list_out"></a>update_list_out : forall (A:<span class="keyword">Set</span>) n (m:A) lst,<br/>
+&nbsp;&nbsp;n &gt;= length lst -&gt;<br/>
+&nbsp;&nbsp;update_list lst n m = lst.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="nth_update_list"></a>nth_update_list : forall (A:<span class="keyword">Set</span>) n (m:A) lst def_val,<br/>
+&nbsp;&nbsp;n &lt; length lst -&gt;<br/>
+&nbsp;&nbsp;nth n (update_list lst n m) def_val = m.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="nth_update_list'"></a>nth_update_list' : forall (A:<span class="keyword">Set</span>) lst n n' (m:A) def_val,<br/>
+&nbsp;&nbsp;n &lt;&gt; n' -&gt;<br/>
+&nbsp;&nbsp;nth n (update_list lst n' m) def_val = nth n lst def_val.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="update_list_app"></a>update_list_app : forall (A:<span class="keyword">Set</span>) n lst (v:A),<br/>
+&nbsp;&nbsp;length lst &lt;= n -&gt; forall lst',<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;update_list (lst++lst') n v = lst ++ (update_list lst' (n-length lst) v).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="update_list_app'"></a>update_list_app' : forall (A:<span class="keyword">Set</span>) n lst (v:A),<br/>
+&nbsp;&nbsp;n &lt; length lst -&gt; forall lst',<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;update_list (lst++lst') n v = (update_list lst n v) ++ lst'.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="del_nth_update_list"></a>del_nth_update_list : forall (A:<span class="keyword">Set</span>) (lst:list A) k m,<br/>
+&nbsp;&nbsp;del_nth k (update_list lst k m) =<br/>
+&nbsp;&nbsp;del_nth k lst.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="minus_plus'"></a>minus_plus': forall n m p, p &lt;= n -&gt; m = n - p -&gt; n = m + p.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="minus_plus_comm"></a>minus_plus_comm : forall a b n p,<br/>
+&nbsp;&nbsp;p &lt;= a -&gt;<br/>
+&nbsp;&nbsp;a + n - p = b -&gt; a - p + n = b.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="minus_le_plus"></a>minus_le_plus : forall c a b,<br/>
+&nbsp;&nbsp;c - b &lt;= a -&gt; c &lt;= a + b.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="plus_le_minus"></a>plus_le_minus : forall c a b,<br/>
+&nbsp;&nbsp;a + c &lt;= b -&gt; a &lt;= b - c.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="plus_le_minus'"></a>plus_le_minus' : forall c a b,<br/>
+&nbsp;&nbsp;a &lt;= b + c -&gt; a - c &lt;= b.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="plus_lt_minus'"></a>plus_lt_minus' : forall c a b,<br/>
+&nbsp;&nbsp;b &gt; 0 -&gt;<br/>
+&nbsp;&nbsp;a &lt; b + c -&gt; a - c &lt; b.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="plus_lt_minus"></a>plus_lt_minus : forall c a b,<br/>
+&nbsp;&nbsp;a + c &lt; b -&gt; a &lt; b - c.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="plus_minus_assoc"></a>plus_minus_assoc : forall b a c,<br/>
+&nbsp;&nbsp;b &gt;= c -&gt;<br/>
+&nbsp;&nbsp;a + b - c = a + (b-c).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="minus_minus_comm"></a>minus_minus_comm : forall a b n p,<br/>
+&nbsp;&nbsp;p + n &lt;= a -&gt;<br/>
+&nbsp;&nbsp;a - n - p = b -&gt; a - p - n = b.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="le2lt"></a>le2lt : forall n k,<br/>
+&nbsp;&nbsp;n &lt; k -&gt; n &lt;= k - 1.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="minus_le_compat_l"></a>minus_le_compat_l : forall n a b,<br/>
+&nbsp;&nbsp;n &lt;= a -&gt;<br/>
+&nbsp;&nbsp;n &lt;= b -&gt;<br/>
+&nbsp;&nbsp;a &lt;= b -&gt; a - n &lt;= b - n.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="minus_lt_compat"></a>minus_lt_compat : forall a n m,<br/>
+&nbsp;&nbsp;m &lt; n -&gt;<br/>
+&nbsp;&nbsp;n &lt;= a -&gt;<br/>
+&nbsp;&nbsp;a - n &lt; a - m.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="minus_compat"></a>minus_compat : forall a b a' b',<br/>
+&nbsp;&nbsp;a = a' -&gt;<br/>
+&nbsp;&nbsp;b = b' -&gt; <br/>
+&nbsp;&nbsp;a - b = a' - b'.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="plus_compat"></a>plus_compat : forall a b a' b',<br/>
+&nbsp;&nbsp;a = a' -&gt;<br/>
+&nbsp;&nbsp;b = b' -&gt; <br/>
+&nbsp;&nbsp;a + b = a' + b'.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="scale_le"></a>scale_le : forall a,<br/>
+&nbsp;&nbsp;1 &lt;= a -&gt;<br/>
+&nbsp;&nbsp;forall b, <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;b &lt;= a * b.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="scale_lt"></a>scale_lt : forall a,<br/>
+&nbsp;&nbsp;1 &lt; a -&gt;<br/>
+&nbsp;&nbsp;forall b,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;1 &lt;= b -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;b &lt; a * b.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="le_neq_lt"></a>le_neq_lt : forall n m,<br/>
+&nbsp;&nbsp;n &lt;= m -&gt; n &lt;&gt; m -&gt; n &lt; m.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="my_mult_lt_compat_l"></a>my_mult_lt_compat_l: forall a b c,<br/>
+&nbsp;&nbsp;a * c &lt; b * c -&gt;<br/>
+&nbsp;&nbsp;c &gt;= 1 -&gt;<br/>
+&nbsp;&nbsp;a &lt; b.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="S_lt"></a>S_lt : forall k,<br/>
+&nbsp;&nbsp;k &gt; 0 -&gt;<br/>
+&nbsp;&nbsp;forall a b,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;a &lt; b -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;a * k &lt; b * k.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="inv_lt"></a>inv_lt : forall k a b,<br/>
+&nbsp;&nbsp;k &gt; 0 -&gt; <br/>
+&nbsp;&nbsp;b &gt; 0 -&gt;<br/>
+&nbsp;&nbsp;a * k &lt; b * k -&gt;<br/>
+&nbsp;&nbsp;a &lt; b.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="tmp"></a>tmp : forall n k a b,<br/>
+&nbsp;&nbsp;a &lt; b -&gt;<br/>
+&nbsp;&nbsp;a + n * b = k * b -&gt;<br/>
+&nbsp;&nbsp;a = 0.<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="power"></a>power (b:nat) (e:nat) {struct e} : nat :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> e <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a name="O"></a>O =&gt; 1<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| S e' =&gt; b * (power b e')<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="power_0"></a>power_0 : power 2 0 = 1.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="power_1'"></a>power_1' : power 2 1 = 2.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="power_2"></a>power_2 : power 2 2 = 4.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="power_3"></a>power_3 : power 2 3 = 8.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="power_8"></a>power_8 : power 2 8 = 256.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="power_1"></a>power_1 : forall n, 1 &lt;= power 2 n.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="power_S"></a>power_S : forall k n, power k (S n) = k * power k n.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="two_power_nat_power"></a>two_power_nat_power : forall l,<br/>
+&nbsp;&nbsp;two_power_nat l = Z_of_nat (power 2 l).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="two_power_nat_is_exp"></a>two_power_nat_is_exp : forall (n m:nat),<br/>
+&nbsp;&nbsp;(two_power_nat (n + m) = two_power_nat n * two_power_nat m)%Z.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="power_is_exp"></a>power_is_exp : forall (n m:nat),<br/>
+&nbsp;&nbsp;power 2 (n + m) = power 2 n * power 2 m.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="two_power_nat_1"></a>two_power_nat_1 : forall l:nat, (1 &lt;= two_power_nat l)%Z.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="two_power_nat_lt"></a>two_power_nat_lt : forall k l, l &lt; k -&gt;<br/>
+&nbsp;&nbsp;(two_power_nat l &lt; two_power_nat k)%Z.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="two_power_nat_le"></a>two_power_nat_le : forall k l, l &lt;= k -&gt;<br/>
+&nbsp;&nbsp;(two_power_nat l &lt;= two_power_nat k)%Z.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="power_2_gt"></a>power_2_gt : forall n m,<br/>
+&nbsp;&nbsp;n &gt; m -&gt;<br/>
+&nbsp;&nbsp;power 2 n &gt; power 2 m.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="power_2_lt"></a>power_2_lt : forall n m,<br/>
+&nbsp;&nbsp;n &lt; m -&gt;<br/>
+&nbsp;&nbsp;power 2 n &lt; power 2 m.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="power_2_ge"></a>power_2_ge : forall n m,<br/>
+&nbsp;&nbsp;n &gt;= m -&gt;<br/>
+&nbsp;&nbsp;power 2 n &gt;= power 2 m.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="power_2_le"></a>power_2_le : forall n m,<br/>
+&nbsp;&nbsp;n &lt;= m -&gt;<br/>
+&nbsp;&nbsp;power 2 n &lt;= power 2 m.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="power_plus"></a>power_plus : forall n,<br/>
+&nbsp;&nbsp;power 2 n + power 2 n = power 2 (S n).<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="beta"></a>beta (e:nat) := power 2 (e * 32).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="beta_is_exp"></a>beta_is_exp : forall n m,<br/>
+&nbsp;&nbsp;beta (n + m) = beta n * beta m.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="beta_power"></a>beta_power : forall (e:nat), beta e = power 2 (e * 32).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="beta_power1"></a>beta_power1 : beta 1 = power 2 32.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="power_64_beta"></a>power_64_beta : power 2 64 = beta 2.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="beta_1"></a>beta_1 : forall l, 1 &lt;= beta l.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="beta_gt"></a>beta_gt : forall n m,<br/>
+&nbsp;&nbsp;n &gt; m -&gt;<br/>
+&nbsp;&nbsp;beta n &gt; beta m.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="beta_lt"></a>beta_lt : forall m n,<br/>
+&nbsp;&nbsp;m &lt; n -&gt;<br/>
+&nbsp;&nbsp;beta m &lt; beta n.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="beta_ge"></a>beta_ge : forall n m,<br/>
+&nbsp;&nbsp;n &gt;= m -&gt;<br/>
+&nbsp;&nbsp;beta n &gt;= beta m.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="beta_le"></a>beta_le : forall n m,<br/>
+&nbsp;&nbsp;n &lt;= m -&gt;<br/>
+&nbsp;&nbsp;beta n &lt;= beta m.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="beta_1_2"></a>beta_1_2 : beta 1 &gt;= 2.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="beta_1_4"></a>beta_1_4 : beta 1 &gt;= 4.<br/>
+
+<br/>
+Open <span class="keyword">Local</span> Scope Z_scope.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="keyword">Lemma</span> <a name="Zminus_le_compat"></a>Zminus_le_compat : forall a b c,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;a &lt;= c -&gt; a - b &lt;= c - b.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Zplus_compat"></a>Zplus_compat : forall a b a' b',<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a = a' -&gt; b = b' -&gt; (a + b) = (a' + b').<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Zlt_neg_pos"></a>Zlt_neg_pos : forall p q,<br/>
+&nbsp;&nbsp;(Zneg p &lt; Zpos q)%Z.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="coeff_unique'"></a>coeff_unique' : forall a b k,<br/>
+&nbsp;&nbsp;0 &lt; k -&gt;<br/>
+&nbsp;&nbsp;-k &lt; a &lt; k -&gt;<br/>
+&nbsp;&nbsp;-k &lt; b &lt; k -&gt;<br/>
+&nbsp;&nbsp;a * k + b = 0 -&gt; a = 0 /\ b = 0.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="coeff_unique"></a>coeff_unique : forall a b a' b' k,<br/>
+&nbsp;&nbsp;0 &lt;= a &lt; k /\ 0 &lt;= b &lt; k /\ 0 &lt;= a' &lt; k /\ 0 &lt;= b' &lt; k -&gt;<br/>
+&nbsp;&nbsp;a * k + b = a' * k + b' -&gt; a = a' /\ b = b'.<br/>
+
+<br/>
+<span class="keyword">Fixpoint</span> <a name="Zpower"></a>Zpower (b:Z) (e:nat) {struct e} : Z :=<br/>
+&nbsp;&nbsp;<span class="keyword">match</span> e <span class="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a name="O"></a>O =&gt; 1<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| S e' =&gt; b * (Zpower b e')<br/>
+&nbsp;&nbsp;<span class="keyword">end</span>.<br/>
+
+<br/>
+<span class="keyword">Notation</span> "b ^^ e" := (Zpower b e) (at level 30).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Zpower_S"></a>Zpower_S : forall k n, k^^(S n) = k * k^^n.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Zpower_is_exp"></a>Zpower_is_exp : forall (n m: nat),<br/>
+&nbsp;&nbsp;Zpower 2 (n + m) = Zpower 2 n * Zpower 2 m.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Zpower_0"></a>Zpower_0 : forall n, 0 &lt; Zpower 2 n.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Zpower_1"></a>Zpower_1 : forall n, 1 &lt;= Zpower 2 n.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Zpower_2_le"></a>Zpower_2_le : forall n m,<br/>
+&nbsp;&nbsp;(n &lt;= m)%nat -&gt;<br/>
+&nbsp;&nbsp;Zpower 2 n &lt;= Zpower 2 m.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Zpower_2_lt"></a>Zpower_2_lt : forall n m,<br/>
+&nbsp;&nbsp;(n &lt; m)%nat -&gt;<br/>
+&nbsp;&nbsp;Zpower 2 n &lt; Zpower 2 m.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Zpower_plus"></a>Zpower_plus : forall n,<br/>
+&nbsp;&nbsp;Zpower 2 n + Zpower 2 n = Zpower 2 (S n).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Zpower_power"></a>Zpower_power : forall e,<br/>
+&nbsp;&nbsp;Zpower 2 e = Z_of_nat (power 2 e).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Zeven_2"></a>Zeven_2 : forall m,<br/>
+&nbsp;&nbsp;Zeven (2*m).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Zpower_even"></a>Zpower_even : forall m,<br/>
+&nbsp;&nbsp;Zeven (Zpower 2 (S m)).<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="Zbeta"></a>Zbeta (e:nat) := Zpower 2 (e * 32).<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Zbeta_power1"></a>Zbeta_power1 : Zbeta 1 = Zpower 2 32.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Zpower_64_Zbeta"></a>Zpower_64_Zbeta : Zpower 2 64 = Zbeta 2.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Zbeta_is_exp"></a>Zbeta_is_exp : forall n m,<br/>
+&nbsp;&nbsp;Zbeta (n + m) = Zbeta n * Zbeta m.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Zbeta_0"></a>Zbeta_0 : forall l, 0 &lt; Zbeta l.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Zbeta_1"></a>Zbeta_1 : forall l, 1 &lt;= Zbeta l.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Zbeta_lt"></a>Zbeta_lt : forall m n,<br/>
+&nbsp;&nbsp;(m &lt; n)%nat -&gt;<br/>
+&nbsp;&nbsp;Zbeta m &lt; Zbeta n.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Zbeta_le"></a>Zbeta_le : forall m n,<br/>
+&nbsp;&nbsp;(m &lt;= n)%nat -&gt;<br/>
+&nbsp;&nbsp;Zbeta m &lt;= Zbeta n.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Zpower_shift_2"></a>Zpower_shift_2 : forall n,<br/>
+&nbsp;&nbsp;4*n &lt; Zbeta 1 -&gt;<br/>
+&nbsp;&nbsp;n &lt; Zpower 2 30.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Zbeta_power"></a>Zbeta_power : forall (e:nat), Zbeta e = Zpower 2 (e * 32).<br/>
+
+<br/>
+<span class="keyword">Definition</span> <a name="eqmod"></a>eqmod (a b m:Z) := exists k:Z,<br/>
+&nbsp;&nbsp;a = b + k * m.<br/>
+
+<br/>
+<span class="keyword">Notation</span> "a == b [[ m ]]" := (eqmod a b m) (at level 80).<br/>
+
+<br/>
+<span class="keyword">Require</span> <span class="keyword">Import</span> Znumtheory.<br/>
+
+<br/>
+Open <span class="keyword">Local</span> Scope Z_scope.<br/>
+
+<br/>
+<span class="keyword">Lemma</span> <a name="Zis_gcd_eq"></a>Zis_gcd_eq : forall n m, 0 &lt;= n -&gt; <br/>
+&nbsp;&nbsp;Zis_gcd n n m -&gt; n = m \/ n = - m.<br/>
+
+<br/>
+Close <span class="keyword">Local</span> Scope Z_scope.<br/>
+</code>
+</div>
+
+<div id="footer">
+<hr/><a href="index.html">Index</a><hr/><font size="-1">This page has been generated by <a href="http://coq.inria.fr">coqdoc</a></font>
+</div>
+
+</div>
+
+</body>
+</html>

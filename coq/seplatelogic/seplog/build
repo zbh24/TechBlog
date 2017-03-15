@@ -1,0 +1,102 @@
+
+ #  Seplog is an implementation of separation logic (an extension of Hoare
+ #  logic by John C. Reynolds, Peter W. O'Hearn, and colleagues) in the
+ #  Coq proof assistant (version 8, http://coq.inria.fr) together with a
+ #  sample verification of the heap manager of the Topsy operating system
+ #  (version 2, http://www.topsy.net). More information is available at
+ #  http://web.yl.is.s.u-tokyo.ac.jp/~affeldt/seplog.
+ #
+ #  Copyright (c) 2005, 2006 Reynald Affeldt and Nicolas Marti
+ #
+ #  This program is free software; you can redistribute it and/or modify
+ #  it under the terms of the GNU General Public License as published by
+ #  the Free Software Foundation; either version 2 of the License, or
+ #  (at your option) any later version.
+ #
+ #  This program is distributed in the hope that it will be useful,
+ #  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ #  GNU General Public License for more details.
+ #
+ #  You should have received a copy of the GNU General Public License
+ #  along with this program; if not, write to the Free Software
+ #  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ #
+
+#*********************************************************************
+#                   La base
+#*********************************************************************
+
+touch .depend
+coq_makefile util.v util_tactic.v > Makefile.base
+make -f Makefile.base depend
+make -f Makefile.base
+
+#*********************************************************************
+#                   Seplog
+#*********************************************************************
+
+touch .depend
+coq_makefile heap.v heap_tactic.v bipl.v axiomatic.v contrib.v vc.v > Makefile.seplog
+make -f Makefile.seplog depend
+make -f Makefile.seplog
+
+#*********************************************************************
+#  A certified decision procedure for boolean expression (expr_b)
+#*********************************************************************
+
+touch .depend
+coq_makefile expr_b_dp.v > Makefile.omega
+make -f Makefile.omega depend
+make -f Makefile.omega
+
+#*********************************************************************
+#                   Decision procedure
+#*********************************************************************
+
+touch .depend
+coq_makefile frag.v frag_examples.v > Makefile.frag
+make -f Makefile.frag depend
+make -f Makefile.frag
+
+#*********************************************************************
+#   Decision procedure with lists and loops 
+#*********************************************************************
+
+touch .depend
+coq_makefile frag_list_entail.v frag_list_triple.v frag_list_vcg.v frag_list_examples.v reverse_list_auto.v > Makefile.frag_list
+make -f Makefile.frag_list depend
+make -f Makefile.frag_list
+
+#*********************************************************************
+#                   Examples
+#*********************************************************************
+
+touch .depend
+coq_makefile example_reverse_list.v examples.v > Makefile.example
+make -f Makefile.example depend
+make -f Makefile.example
+
+#*********************************************************************
+#                   Topsy verification (old)
+#*********************************************************************
+
+touch .depend
+coq_makefile topsy_hm_old.v topsy_hmInit_old.v topsy_hmInit_manual_old.v topsy_hmFree_old.v topsy_hmAlloc_old.v topsy_hmAlloc3_old.v hmAlloc_example_old.v > Makefile.topsy_old
+make -f Makefile.topsy_old depend
+make -f Makefile.topsy_old
+
+#*********************************************************************
+#                   Topsy verification
+#*********************************************************************
+
+touch .depend
+coq_makefile topsy_hm.v topsy_hmInit.v topsy_hmAlloc.v topsy_hmAlloc2.v topsy_hmFree.v hmAlloc_example.v > Makefile.topsy
+make -f Makefile.topsy depend
+make -f Makefile.topsy
+
+#****************************************
+#    Documentation
+#****************************************
+
+coqdoc -g *.v
