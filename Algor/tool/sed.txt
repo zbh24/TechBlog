@@ -1,0 +1,8 @@
+sed user group:
+
+1.
+sed -i 's/ \{1,\}/$/g' file
+cut -d"$" -f 4 file
+
+2.
+echo "北京市-朝阳区-土城2F-10" | sed 's/^\([^-]*-\)\{2\}//g'

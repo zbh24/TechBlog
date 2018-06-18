@@ -1,0 +1,31 @@
+1. a - b 
+sort a b b |uniq -u 
+
+2.a + b
+sort a b | uniq -u
+
+3.
+a jiao b
+sort a b | uniq -d
+
+4.
+grep "^[^f]" file
+
+4.
+egrep "^(hello|world)" file
+4.
+grep "^[^f]" file
+
+4.
+egrep "^(hello|world)" file
+4.
+grep "^[^f]" file
+
+4.
+egrep "^(hello|world)" file
+4.
+grep "^[^f]" file
+
+4.
+egrep -v "^(hello|world)" file
+
