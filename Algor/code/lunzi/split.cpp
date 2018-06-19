@@ -80,6 +80,25 @@ int split(string s,char c,vector<string>& res) {
 }
 
 
+int split(string s,char c,vector<string>& res) {
+  int i,k,len;
+  string temp;
+
+  k = i = 0;
+  len = s.length();
+  while(k < len) {
+    if (s[k] == c) {
+      temp = s.substr(i,k-i);
+      i = k+1;
+      res.push_back(temp);
+    }
+    k++;
+  }
+  temp = s.substr(i,k-i);
+  res.push_back(temp);
+  return 0;
+}
+
 int main() {
 
 }
