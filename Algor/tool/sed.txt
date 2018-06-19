@@ -6,3 +6,9 @@ cut -d"$" -f 4 file
 
 2.
 echo "北京市-朝阳区-土城2F-10" | sed 's/^\([^-]*-\)\{2\}//g'
+
+3.Address fuhe
+sed -i '/^falov/,/^func/{/^func/!d;p}' file
+
+4.multpie func
+sed -e '/zbh$/{N;s/zbh\nxye/zbh with xye\n/g}' temp
