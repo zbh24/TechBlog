@@ -10,7 +10,7 @@ class Solution {
 public:
     bool hasCycle(ListNode *head, ListNode **pos) {
       if (head == NULL)
-       return false;
+        return false;
       ListNode *first, *second;
       first = second = head;
       while (first != NULL && second != NULL) {
