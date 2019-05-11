@@ -17,16 +17,16 @@ public:
       unordered_map<string,int> h_map;
       for (int i = 0; i < words.size(); i++) {
         h_map[words[i]]++;  
-      }   
+      }
       for (auto item : h_map) {
         Node *p = new Node(item.first, item.second);
         q.push(*p);
-      }   
+      }
       vector<string> res;
       while (k-- > 0) {
         res.push_back(q.top().s);
         q.pop();
-      }   
+      }
       return res;
     }
 };
