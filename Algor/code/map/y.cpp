@@ -34,4 +34,10 @@ int main() {
     cout << "test: " << endl;
   }
 
+  zbh *asdf = new zbh(100);
+  std::map<zbh*, string> testmap4;
+  testmap4.insert(pair<zbh*, string>(&z,s));
+  for (auto &item : testmap4) {
+    cout << "test: " << endl;
+  }
 }
