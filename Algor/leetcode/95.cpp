@@ -12,7 +12,7 @@ public:
 bool flag[1000] = {false};
 vector<TreeNode*> generateTrees(int n) {
 vector<TreeNode*> tree;
-vector<std::string> > res;
+vector<std::string>  res;
 std::string cur;
 for (int i = 1;i <= n ;i++) {
     cur = std::to_string(i);
@@ -42,12 +42,26 @@ return tree;
 
 void buildTree(vector<std::string > &res, vector<TreeNode*> &tree) {
 for(string &item : res) {
-  TreeNode *root = new TreeNode(std::stoi(s[0])); 
+  TreeNode *root = new TreeNode(item[0] - '0'); 
     for (int i = 1; i < item.length(); i++) {
-      TreeNode *node = new TreeNode(std::stoi(item[i])); 
-    InsertNode(root, node);
+      TreeNode *node = new TreeNode(item[i] - '0'); 
+      InsertNode(root, node);
     }
     tree.push_back(root);
+}
+    vector<TreeNode*>::iterator it;
+std::string res_str;
+map<std::string, vector<TreeNode*>::iterator> map_v;
+for (it = tree.begin(); it != tree.end();) {
+    visitTree(*it, res_str);     
+    if (map_v.find(res_str) != map_v.end()) {
+    it = tree.erase(it);	
+    } else {
+    map_v[res_str] = it;
+    it++;
+    }
+    res_str.clear();
+}
 }
 
   void InsertNode(TreeNode *root, TreeNode *node) {
@@ -64,28 +78,15 @@ for(string &item : res) {
       else
 	InsertNode(root->left, node);
     }
-  }
 
-vector<TreeNode*>::iterator it;
-std::string res_str;
-map<std::string, vector<TreeNode*>::iterator> map_v;
-for (it = tree.begin(); it != tree.end();) {
-    visitTree(*it, res_str);     
-    if (map_v.find(res_str) != map_v.end()) {
-    it = tree.erase(it);	
-    } else {
-    map_v[res_str] = it;
-    it++;
-    }
-    res_str.clear();
-}
+
 }
 
 void visitTree(TreeNode *tree, std::string &res) {
   if (tree) {
    res += std::to_string(tree->val);
-   visitTree(tree->left);
-   visitTree(tree->right);
+   visitTree(tree->left, res);
+   visitTree(tree->right, res);
+}
 }
 };
-
