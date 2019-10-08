@@ -4,15 +4,21 @@
 
 using namespace std;
 
-using persion = struct persion {
+typedef struct  persion {
   int x;
   persion(int p) {
     x = p;
   }
+  // also work
+  //bool operator < (const persion &p1) const {
+  //  return p1.x < x;
+  //}
+
   friend bool operator < (const persion &p1, const persion &p2) {
     return p1.x < p2.x;
   }
-};
+
+} persion;
 
 struct Cmp {
   bool operator () (persion p1, persion p2)  {
