@@ -9,8 +9,8 @@ using persion = struct persion {
   persion(int p) {
     x = p;
   }
-  bool operator < (const persion &p) {
-    return x < p.x;
+  friend bool operator < (const persion &p1, const persion &p2) {
+    return p1.x < p2.x;
   }
 };
 
@@ -33,5 +33,6 @@ int main() {
   sort(vec.begin(), vec.end(), [](persion &p1, persion &p2) { return p1.x < p2.x;});
   sort(vec.begin(), vec.end(), Cmp());
   sort(vec.begin(), vec.end(), cmp);
+  sort(vec.begin(), vec.end());
   return 0;
 }
