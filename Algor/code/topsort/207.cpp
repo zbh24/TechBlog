@@ -13,9 +13,9 @@ using namespace std;
     return false;
   }
 
-  bool findNode(int degree[], int len, int &node) {
+bool findNode(int degree[], bool visited[], int len, int &node) {
     for (int i = 0; i < len; i++) {
-      if (degree[i] == 0) {
+      if (degree[i] == 0 && visited[i] == false) {
 	node = i;
 	return true;
       }
@@ -36,7 +36,7 @@ using namespace std;
       bool flag = true;
       while (haveNoVisited(visited, numCourses)) {
 	int v;
-        if (findNode(degree, numCourses, v)) {
+        if (findNode(degree, visited, numCourses, v)) {
 	  visited[v] = true;
 	  for (auto node : edges[v]) {
             degree[node]--;
