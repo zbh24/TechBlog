@@ -18,8 +18,7 @@
 (defun copy-this-line ()
   (interactive)
   (save-excursion
-    (let (pt)
-    (kill-ring-save (line-beginning-position) (line-end-position)))))
+    (kill-ring-save (line-beginning-position) (line-end-position))))
 
 (global-set-key "\M-w"
 (lambda ()
