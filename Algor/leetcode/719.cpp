@@ -2,7 +2,8 @@ class Solution {
 public:
     int smallestDistancePair(vector<int>& nums, int k) {
        sort(nums.begin(),nums.end());
-       int left= 0;
+       nns
+	 t left= 0;
        int right= nums[nums.size()-1] - nums[0];
        while(left < right){
            int mid = (left + right) / 2;
@@ -19,6 +20,6 @@ public:
                right = mid;
            }
        }
-       return left;}
+      return left;}
 };
 

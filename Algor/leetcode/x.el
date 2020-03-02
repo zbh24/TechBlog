@@ -60,3 +60,12 @@
   (interactive)
   (split-window-vertically)
   (eshell))
+;;==配置auto-complete。内容较多单独放一个目录。==============
+(add-to-list 'load-path "~/.emacs.d/plugins/auto-complete")
+;;cl-lib.el在v24中才出现，v23是没有的，要单独下载。
+(require 'auto-complete)
+(require 'auto-complete-config)
+
+
+;; 开启全局设定(包含哪些模式在ac-modes里查看)
+;;(global-auto-complete-mode t)

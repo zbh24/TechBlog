@@ -21,6 +21,7 @@ int main() {
   for (auto &item : testmap1) {
     cout << "test: " << item.first << endl;
   }
+
   zbh z(12);
   std::map<zbh,string> testmap2;
   testmap2.insert(pair<zbh,string>(z,s));
