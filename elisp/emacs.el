@@ -30,3 +30,15 @@
      (kill-ring-save (line-beginning-position)
      (line-end-position))
      (message "copied line")))))
+
+(defun kill-this-word ()
+  (interactive)
+    (message "kill this word")
+    (let (pt)
+    (skip-chars-backward "-_A-Za-z0-9")
+    (setq pt (point))
+    (skip-chars-forward "-_A-Za-z0-9")
+    (set-mark pt)
+    (kill-region (region-beginning) (region-end))))
+
+(global-set-key (kbd "M-]") 'kill-this-word)
