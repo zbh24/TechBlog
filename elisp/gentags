@@ -1,0 +1,4 @@
+ctags -R
+find . -name "*.h" -o -name "*.def" -O -name "*.cpp" > cscope.files
+cscope -bkq -i cscope.files
+cat cscope.files | xargs etags -a
