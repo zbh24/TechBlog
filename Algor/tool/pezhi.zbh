@@ -1,0 +1,363 @@
+chajian
+1)xscope
+2)mult-cursor
+3)ace-jum-mode
+4)yassipt
+5)helm
+6)evil-mode
+7)projectile
+8)helm-immu
+9)flyspell
+10)flymake or flycheck
+11)orgmode
+12)visual-regexp
+13)avy,ivy
+14)expand-region
+15)smex
+16)window move
+17)expand-region
+18)hipple-expand
+
+mingling
+1)ansi-term
+2)keyboard macro
+3)
+
+#!/bin/bash
+git clean  -fd
+ctags -R
+find . -name "*.h" -o -name "*.def" -o -name "*.c" -o -name "*.cc" -o -name "*.cpp" > cscope.files
+cscope -bkq -i cscope.files
+cat cscope.files | xargs etags -a
+
+https://leetcode.com/problems/course-schedule/
+https://leetcode.com/problems/last-stone-weight-ii/
+https://leetcode.com/problems/longest-common-subsequence/
+https://leetcode.com/problems/broken-calculator/
+https://leetcode.com/problems/number-of-burgers-with-no-waste-of-ingredients/
+https://leetcode.com/problems/kth-largest-element-in-an-array/
+https://leetcode.com/problems/k-closest-points-to-origin/
+https://leetcode.com/problems/number-of-operations-to-make-network-connected/
+https://leetcode.com/problems/number-of-islands/
+https://leetcode.com/problems/minimize-malware-spread-ii/
+
+(global-linum-mode 1)
+(setq tags-file-name "TAGS")
+(require 'package)
+;;(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/"))
+;;(setq package-archives '(("gnu"   . "https://elpa.emacs-china.org/gnu");;"http://mirrors.tuna.tsinghua.edu.cn/elpa/gnu/")
+;;                       ("melpa" .  "https://elpa.emacs-china.org/melpa")));;"http://mirrors.tuna.tsinghua.edu.cn/elpa/melpa/")))
+
+(setq package-archives '(("gnu"   . "http://elpa.emacs-china.org/gnu/")
+                         ("melpa" . "http://elpa.emacs-china.org/melpa/")))
+
+(package-initialize) ;; You might already have this line
+
+(package-initialize)
+(require 'cc-mode)
+(load-file "/usr/share/emacs/site-lisp/xcscope.el")
+(require 'xcscope)
+(defun list-funcs (arg) "List functions in buffer." (interactive "p") (message "functions") (list-matching-lines "^[A-Za-z_*]+[ ]?[A-Za-z0-9_: *]+[\(]"))
+(global-set-key (kbd "M-s") 'forward-whitespace)
+(global-set-key (kbd "M-g") 'list-funcs)
+
+;;enable copy current line
+(global-set-key "\M-w"
+(lambda ()
+  (interactive)
+  (if mark-active
+      (kill-ring-save (region-beginning)
+      (region-end))
+    (progn
+     (kill-ring-save (line-beginning-position)
+     (line-end-position))
+     (message "copied line")))))
+
+;; enable kill region or whole line
+(global-set-key "\C-w"
+(lambda ()
+  (interactive)
+  (if mark-active
+      (kill-region (region-beginning)
+   (region-end))
+    (progn
+     (kill-region (line-beginning-position)
+  (line-end-position))
+     (message "killed line")))))
+
+;;enable evil-mode
+(add-to-list 'load-path "~/.emacs.d/evil/evil-master")
+(require 'evil)
+(evil-mode 1)
+
+;;enable ace-jump
+(add-to-list 'load-path "~/.emacs.d/ace-jump")
+(require 'ace-jump-mode)
+(define-key global-map (kbd "C-c SPC") 'ace-jump-mode)
+
+;;enable yasnippet
+(add-to-list 'load-path "~/.emacs.d/yasnippet")
+(require 'yasnippet)
+(yas-global-mode 1)
+
+;;enable auto-complete
+(add-to-list 'load-path "~/.emacs.d/auto-complete")
+(require 'auto-complete)
+(auto-complete-mode 1)
+
+;;enable org-pomodoro
+(add-to-list 'load-path "~/.emacs.d/org-pomodoro")
+;;(require 'org-pomodoro)
+
+;;enable mult-cursors
+(add-to-list 'load-path "~/.emacs.d/multiple-cursors")
+(require 'multiple-cursors)
+(global-set-key (kbd "C-S-c C-S-c") 'mc/edit-lines)
+(global-set-key (kbd "C->") 'mc/mark-next-like-this)
+(global-set-key (kbd "C-<") 'mc/mark-previous-like-this)
+(global-set-key (kbd "C-c C-<") 'mc/mark-all-like-this)
+
+;;config helm
+(add-to-list 'load-path "/usr/local/share/emacs/site-lisp/helm"); facultative when installed with make install
+(require 'helm-config)
+;;enable helm
+(helm-mode 1)
+
+(global-set-key (kbd "M-x") 'helm-M-x)
+(global-set-key (kbd "C-x r b") #'helm-filtered-bookmarks)
+(global-set-key (kbd "C-x C-f") #'helm-find-files)
+
+;;enable helm-project
+;;(projectile-mode +1)
+(projectile-mode 1)
+(define-key projectile-mode-map (kbd "s-p") 'projectile-command-map)
+(define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
+
+;;enable helm-descbinds
+(add-to-list 'load-path "~/.emacs.d/helm-descbinds");
+(require 'helm-descbinds)
+(helm-descbinds-mode 1)
+
+;;enable company-mode
+(add-to-list 'load-path "~/.emacs.d/company-mode")
+(require 'company)
+;;(add-hook 'after-init-hook 'global-company-mode)
+;;(add-hook 'c-mode-hook 'company-mode)
+;;(add-hook 'c++-mode-hook 'company-mode)
+;;(define-key c-mode-map  [(tab)] 'company-complete)
+;;(define-key c++-mode-map  [(tab)] 'company-complete)
+;;
+
+(add-to-list 'load-path "~/.emacs.d/swiper-master")
+(require 'ivy)
+
+;;enable time
+(display-time-mode 1)
+(setq display-time-24hr-format t)
+;;(setq display-time-day-and-date t)
+;;enable shadow tool and bar
+(tool-bar-mode 0)
+(menu-bar-mode 0)
+(set-scroll-bar-mode nil)
+
+;;enable solarized-theme
+(add-to-list 'load-path "~/.emacs.d/solarized")
+(add-to-list 'custom-theme-load-path "~/.emacs.d/themes")
+(load-theme 'solarized-dark t)
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(company-backends
+   (quote
+    (company-clang company-semantic company-eclim company-semantic company-abbrev company-clang company-xcode company-cmake company-capf company-files
+		   (company-dabbrev-code company-gtags company-etags company-keywords)
+		   company-oddmuse company-dabbrev)))
+ '(custom-safe-themes
+   (quote
+    ("0598c6a29e13e7112cfbc2f523e31927ab7dce56ebb2016b567e1eff6dc1fd4f" "7a18da6a0e7ae7a60c0dc0ee5418fa0b7b54c726a7c6eb3cc900b846912da60e" default)))
+ '(global-company-mode t)
+ '(helm-descbinds-mode t)
+ '(ivy-mode nil))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(flyspell-incorrect ((t (:underline (:color "#98fb98" :style wave))))))
+
+;;new revert buffer
+(defun nrevert-buffer ()
+  ;; revert-buffer without confirm
+  (interactive)
+  (revert-buffer nil t)
+  )
+
+;;set the chinese support
+;;(set-language-environment 'Chinese-gbk)
+;;(setq locale-coding-system 'utf-8)
+;;(set-keyboard-coding-system 'utf-8)
+;;(set-selection-coding-system 'utf-8)
+;;(set-buffer-file-coding-system 'utf-8)
+;;(set-default buffer-file-coding-system 'utf8)
+;;(set-default-coding-systems 'utf-8)
+;;(set-clipboard-coding-system 'utf-8)
+;;(set-terminal-coding-system 'utf-8)
+;;(modify-coding-system-alist 'process "*" 'utf-8)
+;;(setq default-process-coding-system '(utf-8 . utf-8))
+;;(setq-default pathname-coding-system 'utf-8)
+;;(set-file-name-coding-system 'utf-8)
+;;(defun change-shell-mode-coding ()
+;;  (progn
+;;    (set-terminal-coding-system 'chinese-gbk)
+;;    (set-keyboard-coding-system 'chinese-gbk)
+;;    (set-selection-coding-system 'chinese-gbk)
+;;    (set-buffer-file-coding-system 'chinese-gbk)
+;;    (set-file-name-coding-system 'chinese-gbk)
+;;    (modify-coding-system-alist 'process "*" 'chinese-gbk)
+;;    (set-buffer-process-coding-system 'chinese-gbk 'chinese-gbk)
+;;    (set-file-name-coding-system 'chinese-gbk)))
+;;(add-hook 'shell-mode-hook 'change-shell-mode-coding)
+;;(autoload 'ansi-color-for-comint-mode-on "ansi-color" nil t)
+;;(add-hook 'shell-mode-hook 'ansi-color-for-comint-mode-on)
+
+(setq shell-file-name "/bin/bash")
+;;set a keyboard macro
+(fset 'change-loc
+      [?\C-x ?1 ?\C-x ?4 ?b return])
+(fset 'change-new-loc
+   [?\C-x ?o ?\C-x ?0 ?\C-x ?4 ?b return])
+(global-set-key (kbd "C-S-q") 'change-new-loc)
+(fset 'copy-region
+   "\373\C-@\375\367")
+(global-set-key (kbd "C-S-w") 'copy-region)
+(fset 'copy-from-current
+   "\C-@\C-e\367")
+(global-set-key (kbd "C-S-j") 'copy-from-current)
+
+(setq ispell-program-name "/usr/bin/aspell")
+(set-default-font "-PfEd-DejaVu Sans Mono-normal-normal-normal-*-14-*-*-*-m-0-iso10646-1")
+;;nyan-cat
+(add-to-list 'load-path "~/.emacs.d/nyan-mode")
+(require 'nyan-mode)
+;;(setq default-mode-line-format
+;;      (list ""
+;;            'mode-line-modified
+;;            "<"
+;;            "zhangbihong"
+;;            "> "
+;;            "%10b"
+;;            '(:eval (when nyan-mode (list (nyan-create))))
+;;            " "
+;;            'default-directory
+;;            " "
+;;            "%[("
+;;            'mode-name
+;;            'minor-mode-list
+;;            "%n"
+;;            'mode-line-process
+;;            ")%]--"
+;;            "Line %l--"
+;;            '(-3 . "%P")
+;;            "-%-"))
+(nyan-mode t)
+(nyan-start-animation)
+
+(setq hippie-expand-try-functions-list
+      '(try-expand-dabbrev
+  try-expand-dabbrev-visible
+  try-expand-dabbrev-all-buffers
+      try-expand-dabbrev-from-kill
+        try-complete-file-name-partially
+    try-complete-file-name
+      try-expand-all-abbrevs
+      try-expand-list
+     try-expand-line
+     try-complete-lisp-symbol-partially
+  try-complete-lisp-symbol))
+
+(toggle-truncate-lines 1)
+
+(defun prog-mode-header-line ()
+  "Setup the 'header-line-format' on for buffers."
+  (interactive)
+  (setq header-line-format
+        (list " " (make-string 122 ?-) "|")))
+
+(defun connect-remote ()
+  (interactive)
+  (dired "/ssh:z00425132@10.243.8.178:/home/z00425132/maple2.1/"))
+
+(defun connect-remote-2.2 ()
+  (interactive)
+  (dired "/ssh:zhangbihong@10.243.8.178:/home/zhangbihong/maple2.2/"))
+
+(defun connect-remote-3.0 ()
+  (interactive)
+  (dired "/ssh:z00425132@10.243.8.178:/home/z00425132/maple3.0/"))
+
+;;enable copy current line
+;;(global-set-key "\M-p"
+;;(lambda ()
+;;  (interactive)
+;;    (progn
+;;      (kill-ring-save (region-beginning)
+;;      (forward-word))
+;;      (message "copied line")))
+
+(defun copy-current-word ()
+  (interactive)
+  (message "copy this word")
+  (save-excursion
+   (let (pt)
+     (skip-chars-backward "-_A-Za-z0-9")
+     (setq pt (point))
+     (skip-chars-forward "-_A-Za-z0-9")
+     (set-mark pt)
+     (kill-ring-save (region-beginning) (region-end)))))
+(global-set-key (kbd "M-[") 'copy-current-word)
+
+(defun copy-to-line-end ()
+  (interactive)
+  (message "copy from this word to the end")
+  (save-excursion
+  (let (pt)
+     (skip-chars-backward "-_A-Za-z0-9")
+     (setq pt (point))
+     (kill-ring-save pt (line-end-position)))))
+(global-set-key (kbd "M-]") 'copy-to-line-end)
+
+(defun remove-current-to-start ()
+  (interactive)
+  (message "remove the current to the start")
+  (save-excursion
+   (let (pt)
+     (skip-chars-forward "-_A-Za-z0-9")
+     (setq pt (point))
+     (kill-region (line-beginning-position) pt))))
+(global-set-key (kbd "M-n") 'remove-current-to-start)
+
+(defun format-c-before-save()
+  (if (or (string-equal major-mode "c-mode")
+          (string-equal major-mode "c++-mode")
+          (string-equal major-mode "sh-mode")
+          (string-equal major-mode "java-mode")
+          (string-equal major-mode "emacs-lisp-mode"))
+      (delete-trailing-whitespace)
+    )
+)
+(add-hook 'before-save-hook 'format-c-before-save)
+
+(defun copy-the-whole ()
+  (interactive)
+  (message "remove the current to the start")
+  (save-excursion
+    (let (pt)
+      (beginning-of-buffer)
+      (setq pt (point))
+      (end-of-buffer)
+      (set-mark pt)
+      (untabify (region-beginning) (region-end)))))
+
+(add-hook 'before-save-hook 'copy-the-whole)
