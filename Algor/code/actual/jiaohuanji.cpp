@@ -21,7 +21,7 @@ struct T {
   }
 };
 
-void dfs(const vector<vector<int>>& grid, int row, int col, int fakeRow, int fakeCol, vector<vector<int>> &visited, map<T, set<int>>& infect, int loc) {
+void dfs(const vector<vector<int>>& grid, int row, int col, int fakeRow, int fakeCol, vector<vector<int>> &visited, map<T, set<int>>& infect, int loc, bool equal = false) {
   if (row < 0 || row >= grid.size() || col < 0 || col >= grid[0].size()) {
     return;
   }
@@ -32,11 +32,11 @@ void dfs(const vector<vector<int>>& grid, int row, int col, int fakeRow, int fak
     return;
   }
   infect[T(row,col)].insert(loc);
-  if (row == fakeRow && col == fakeCol) {
+  if (row == fakeRow && col == fakeCol && !equal) {
     return;
   }
   visited[row][col] = 1;
-  dfs(grid, row + 1, col, fakeRow, fakeCol, visited,  infect, loc);
+  dfs(grid, row + 1, col, fakeRow, fakeCol, visited, infect, loc);
   dfs(grid, row - 1, col, fakeRow, fakeCol, visited, infect, loc);
   dfs(grid, row, col + 1, fakeRow, fakeCol, visited, infect, loc);
   dfs(grid, row, col - 1, fakeRow, fakeCol, visited, infect, loc);
@@ -48,6 +48,10 @@ int ConnectivityTest(const vector<vector<int>>& grid, int row, int col)
   int colN = grid[0].size();
   vector<vector<int>> visited(rowN, vector<int>(colN, 0));
   map<T ,set<int> > infect;
+  if (row == 0 && col == 0) {
+    dfs(grid, 0, 0, row, col, visited, infect, 0, true); 
+    return infect.size() - 1;
+  }
   dfs(grid, 0, 0, row, col, visited, infect, 0);
   vector<vector<int>> visited1(rowN, vector<int>(colN, 0));
   dfs(grid, row, col, 0, 0, visited1, infect, 1);
