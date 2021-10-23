@@ -7,7 +7,7 @@
 #include <set>
 #include <vector>
 #include <algorithm>
- 
+
 using namespace std;
 
 vector<string> split(string s,char c) {
@@ -26,7 +26,9 @@ vector<string> split(string s,char c) {
       temp = s.substr(i,k-i);
       k++;
       i = k;
-      res.push_back(temp);
+      if (temp.length() > 0) {
+        res.push_back(temp);
+      }
     }
   }
   temp = s.substr(i,k-i);
@@ -41,7 +43,7 @@ vector<string> split1(string s,char c) {
   int len;
   string temp;
   vector<string> res;
-  
+
   k = i = 0;
   len = s.length();
   while(k < len) {
@@ -49,10 +51,12 @@ vector<string> split1(string s,char c) {
       k++;
     } else {
       temp = s.substr(i,k-i);
-      k++;	
+      k++;
       i = k;
-      res.push_back(temp);
-    } 
+      if (temp.length() > 0) {
+        res.push_back(temp);
+      }
+    }
   }
   temp = s.substr(i,k-i);
   res.push_back(temp);
@@ -61,7 +65,7 @@ vector<string> split1(string s,char c) {
 
 
 int main() {
-  string s = "flower/water//hello";
+  string s = "flower/world/////water//////hello";
   //cout<<s.substr(0,0) <<" "<<s.substr(0,0)<<endl;
   vector<string> res = split(s,'/');
 

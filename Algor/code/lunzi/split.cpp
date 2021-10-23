@@ -8,7 +8,7 @@
 #include <vector>
 #include <algorithm>
 #include <sstream>
- 
+
 using namespace std;
 
 #define maxvalue 1000000
@@ -71,7 +71,9 @@ int split(string s,char c,vector<string>& res) {
       temp = s.substr(i,k-i);
       k++;
       i = k;
-      res.push_back(temp);
+      if (temp.length() > 0) {
+        res.push_back(temp);
+      }
     }
   }
   temp = s.substr(i,k-i);
